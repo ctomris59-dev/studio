@@ -92,3 +92,60 @@ table.data td strong{color:#1b2237}
   .class-meter{width:46px}
   .status-pill{display:none}
 }
+
+
+/* Studio demo / overview, community and tables legibility — 2026-10-02 */
+/* Keep existing card dimensions and headings; make working information legible. */
+/* Dashboard counters */
+.stat-card-head{font-size:14px;line-height:1.35;gap:8px}
+.stat-card-head>span:first-child{min-width:0}
+.stat-card small{font-size:12.5px;line-height:1.45;margin-top:6px;color:#626d7e}
+
+/* Our community */
+.activity-row{gap:14px;min-height:66px}
+.activity-row b{font-size:15px;line-height:1.28;font-weight:700;letter-spacing:-.015em}
+.activity-row small{font-size:12.5px;line-height:1.4;margin-top:5px;color:#626d7e}
+.activity-row>span:last-child{font-size:12px;line-height:1.4;color:#4b5466;white-space:nowrap}
+.activity-avatar{min-width:36px;font-size:11px}
+
+/* Citrus explanation card */
+.demo-help-card p{font-size:15px;line-height:1.65;color:#4d5546}
+.demo-help-card .demo-secondary{font-size:14px;font-weight:700;padding:13px 17px;gap:9px}
+
+/* Schedule and Members tables: headers, content and action controls */
+.table-title small{font-size:13px;line-height:1.5;color:#697382}
+table.data th{font-size:11.5px;line-height:1.4;letter-spacing:.04em}
+table.data td{font-size:14px;line-height:1.45}
+table.data td strong{font-size:15px;line-height:1.35;font-weight:700}
+table.data td small{font-size:12.5px;line-height:1.4;margin-top:5px;color:#677486}
+.book-controls{flex-wrap:wrap;row-gap:7px}
+.book-controls select{font-size:13px;max-width:165px;min-height:36px;padding:8px 11px}
+.table-action{font-size:12.5px;line-height:1.25;padding:9px 12px;min-height:35px}
+.table-empty{font-size:14px}
+
+/* Narrow screens: scale down slightly without returning to tiny type. */
+@media(max-width:800px){
+  .stat-card-head{font-size:13px}
+  .stat-card small{font-size:12px}
+  .table-title small{font-size:12px}
+  table.data th{font-size:11px}
+  table.data td{font-size:13.5px}
+  table.data td strong{font-size:14.5px}
+  table.data td small{font-size:12px}
+  .book-controls select{font-size:12px}
+}
+@media(max-width:520px){
+  .stat-card-head{font-size:12.5px}
+  .stat-card small{font-size:11.5px}
+  .activity-row{gap:10px;min-height:62px}
+  .activity-row b{font-size:13.5px}
+  .activity-row small{font-size:11.5px}
+  .activity-row>span:last-child{font-size:11px}
+  .activity-avatar{min-width:32px;font-size:10px}
+  .demo-help-card p{font-size:13.5px}
+  .demo-help-card .demo-secondary{font-size:13px;padding:12px 15px}
+  table.data td{font-size:13px}
+  table.data td strong{font-size:14px}
+  table.data td small{font-size:11.5px}
+  .table-action{font-size:12px}
+}
