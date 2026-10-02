@@ -68,4 +68,17 @@ assert.equal(completion.data.tasks.filter(t=>t.completed&&t.outcome==="No answer
 assert.equal(completion.data.tasks.filter(t=>!t.completed&&t.reason==="Call").length,1);
 assert.equal(completion.data.tasks.find(t=>!t.completed&&t.reason==="Call").due,crm.day(8));
 assert(!workflow.completeTask(completion.data,task.data.tasks[0].id,"Contacted").ok);
+const resched=workflow.addTask(sample,{personKind:"lead",personId:sample.leads[0].id,reason:"Call again",category:"Call",priority:"Normal",due:crm.day(1),dueTime:"",assignee:"Owner",repeat:"None",notes:""});
+assert(resched.ok);
+const reDone=workflow.completeTask(resched.data,resched.data.tasks[0].id,"Reschedule");
+assert(reDone.ok);
+assert(reDone.data.tasks.some(t=>!t.completed&&t.reason==="Call again"));
+
+const convertFollow=workflow.addTask(sample,{personKind:"lead",personId:sample.leads[1].id,reason:"Convert trial",category:"Trial",priority:"High",due:crm.day(),dueTime:"",assignee:"Owner",repeat:"None",notes:""});
+assert(convertFollow.ok);
+const converted=workflow.completeTask(convertFollow.data,convertFollow.data.tasks[0].id,"Converted");
+assert(converted.ok,converted.message);
+assert(converted.data.members.some(m=>m.sourceLeadId===sample.leads[1].id&&m.paymentStatus==="Pending"));
+assert(converted.data.leads.find(l=>l.id===sample.leads[1].id).stage==="Won");
+
 console.log("Extended CRM flows: contact validation, pending credits, conversion, recurrence, conflict, follow-up outcomes passed.");

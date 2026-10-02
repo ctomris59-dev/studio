@@ -84,3 +84,5 @@ The four Add forms preserve fast entry and disclose further fields on demand:
 **Excel v2** includes all new fields as appended worksheet columns and still accepts correctly formatted v1 exports. Use **Settings → Excel** to download the updated template. Bookings, class credits, leads, member links, tasks and reporting remain cross-referenced.
 
 **Data minimization:** We do not request medical information, date of birth, gender, physical addresses, emergency contacts or payment card data. These are browser-only demo capabilities; there is no real account, payment or email delivery system.
+
+Memberships can be paused and resumed from the Members table, with Undo. Linked lead notes and source interaction history are viewable on the member row. Follow-up outcomes marked Converted create a pending member, while Reschedule creates the next call task.

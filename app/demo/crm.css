@@ -368,3 +368,8 @@
 .crm-weekday-picker button{min-width:40px;min-height:44px}
 .crm-modal-form input:not([type="checkbox"]),.crm-modal-form select,.crm-modal-form textarea{font-size:16px}
 }
+
+.crm-member-history{margin-top:7px;max-width:280px;border-top:1px solid #e8e6df;padding-top:6px}
+.crm-member-history summary{font-size:12px;color:#334bdd;cursor:pointer;font-weight:700}
+.crm-member-history p{font-size:12px;line-height:1.5;color:#596579;margin-top:6px;overflow-wrap:anywhere}
+.crm-member-history p b{display:inline;font-size:12px}

@@ -159,6 +159,13 @@ export default function Demo() {
     if(!result.ok){say(result.message);return;}
     setData(result.data,"Confirmed "+m.name+"'s package");say(result.message);
   }
+  function toggleMemberStatus(m:Member){
+    const next=m.status==="Paused"?"Active":"Paused";
+    if(!window.confirm((next==="Paused"?"Pause":"Resume")+" membership for "+m.name+"? This can be undone."))return;
+    setData(p=>({...p,members:p.members.map(x=>x.id===m.id?{...x,status:next}:x),
+      activities:[{id:uid("a"),personKind:"member",personId:m.id,text:"Membership status changed to "+next,date:day()},...p.activities]}),next+" membership");
+    say(m.name+" membership "+(next==="Paused"?"paused":"resumed")+".");
+  }
   function addNote(lead:Lead){
     const text=safeText(note,500);if(!text)return;
     setData(p=>({...p,leads:p.leads.map(l=>l.id===lead.id?{...l,notes:((l.notes?l.notes+"\n":"")+text).slice(-1600)}:l),activities:[{id:uid("a"),personKind:"lead",personId:lead.id,text:"Note: "+text,date:day()},...p.activities]}));
@@ -329,7 +336,11 @@ export default function Demo() {
       <SectionTitle title="Your community" caption="Credits, visit history and personal follow-ups." extra={<div className="crm-inline-actions"><ActionButton variant="outline" onClick={()=>setTab("settings")}><FileSpreadsheet size={16}/> Excel</ActionButton><ActionButton onClick={()=>setModal("member")}><Plus size={16}/> Add member</ActionButton></div>}/>
       <div className="crm-scroll"><table className="crm-table">
         <thead><tr><th>MEMBER</th><th>CLASS PACK</th><th>CLASS CREDITS</th><th>LAST VISIT</th><th>ACTIONS</th></tr></thead>
-        <tbody>{data.members.map(m=><tr key={m.id}><td><b>{m.name}</b><small>{m.email||m.phone||"No contact"}</small></td><td><span>{m.plan}</span><small>{m.paymentStatus==="Pending"?"Pending confirmation":m.consent?"Email permitted":"Package confirmed"}</small>{m.expiryDate&&<small>Expires {compactDate(m.expiryDate)}</small>}</td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.paymentStatus!=="Pending"&&m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions">{m.paymentStatus==="Pending"&&<ActionButton onClick={()=>approvePackage(m)}>Confirm pack</ActionButton>}<ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Mark attended</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>openCredits(m)}>Adjust credits</ActionButton>}</div></td></tr>)}</tbody>
+        <tbody>{data.members.map(m=><tr key={m.id}><td><b>{m.name}</b><small>{m.email||m.phone||"No contact"}</small>
+  {m.sourceLeadId&&<details className="crm-member-history"><summary>Linked lead history</summary>
+    {data.leads.find(l=>l.id===m.sourceLeadId)?.notes&&<p>{data.leads.find(l=>l.id===m.sourceLeadId)?.notes}</p>}
+    {data.activities.filter(a=>a.personKind==="lead"&&a.personId===m.sourceLeadId).slice(0,5).map(a=><p key={a.id}><b>{compactDate(a.date)}</b> — {a.text}</p>)}
+  </details>}</td><td><span>{m.plan}</span><small>{m.paymentStatus==="Pending"?"Pending confirmation":m.consent?"Email permitted":"Package confirmed"}</small>{m.expiryDate&&<small>Expires {compactDate(m.expiryDate)}</small>}</td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.paymentStatus!=="Pending"&&m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions">{m.paymentStatus==="Pending"&&<ActionButton onClick={()=>approvePackage(m)}>Confirm pack</ActionButton>}<ActionButton variant="outline" onClick={()=>toggleMemberStatus(m)}>{m.status==="Paused"?"Resume":"Pause"}</ActionButton><ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Mark attended</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>openCredits(m)}>Adjust credits</ActionButton>}</div></td></tr>)}</tbody>
       </table></div>
       <div className="crm-table-foot">Packages marked Pending have zero active credits. Confirming a package is a manual demo acknowledgment; no payments are collected or verified. Linked leads retain their history.</div>
     </section>;
