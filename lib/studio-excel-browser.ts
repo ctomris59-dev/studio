@@ -100,7 +100,7 @@ export async function previewExcelImport(file:File):Promise<ValidationOutcome>{
   if(file.size>8*1024*1024)throw new Error("Excel file too large (maximum 8 MB).");
   const ExcelJS=await import("exceljs");
   const wb=new ExcelJS.Workbook();
-  await wb.xlsx.load(new Uint8Array(await file.arrayBuffer()) as unknown as Buffer);
+  await wb.xlsx.load(new Uint8Array(await file.arrayBuffer()) as unknown as Parameters<typeof wb.xlsx.load>[0]);
   const tables={} as ExcelTables;
   for(const name of SHEETS){
     const sheet=wb.getWorksheet(name);
