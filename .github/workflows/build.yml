@@ -19,5 +19,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Run CRM regression checks
         run: npm run test:crm
+      - name: Test Excel import/export and validation
+        run: npm run test:excel
       - name: Compile production build
         run: npm run build

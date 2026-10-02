@@ -210,3 +210,27 @@
 @media(max-width:1250px){.crm-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-two-col{grid-template-columns:1fr}.crm-client-layout{grid-template-columns:1fr}}
 @media(max-width:900px){.crm-shell{display:block}.crm-aside{display:none}.crm-mobile-nav{display:flex;overflow-x:auto;white-space:nowrap;background:#1b2237;gap:4px;padding:10px 13px}.crm-mobile-nav button{color:#e6eaff;min-width:max-content;border:0;background:transparent;padding:10px 11px;font-size:12px;font-weight:700}.crm-mobile-nav button.active{background:#e7f982;color:#1b2237}.crm-topbar{padding:0 18px}.crm-content{padding:24px 16px 66px}.crm-settings-grid{grid-template-columns:1fr}.crm-settings-grid .crm-wide{grid-column:span 1}}
 @media(max-width:610px){.crm-notice{font-size:12px}.crm-page-head{align-items:flex-start;flex-direction:column}.crm-page-head h1{font-size:42px}.crm-stat-grid{gap:10px}.crm-stat-grid .stat-card{padding:14px 13px;min-height:141px}.crm-stat-grid .stat-card strong{font-size:30px}.crm-stat-grid .stat-card-head{font-size:12px}.crm-section-title{padding:19px 16px;flex-direction:column;align-items:flex-start}.crm-section-title h2{font-size:28px}.crm-op-row{padding:12px 15px;align-items:flex-start}.crm-op-row .crm-button{font-size:11px}.crm-class-list-row{padding:12px;gap:9px}.crm-time{min-width:53px;padding:9px 5px;font-size:11px}.crm-class-caption b{font-size:13px}.crm-class-caption small{font-size:11px}.crm-fill{width:65px}.crm-fill b{font-size:10px}.crm-class-list-row .crm-tag{display:none}.crm-toolbar{align-items:flex-start;flex-wrap:wrap}.crm-search{width:100%}.crm-toolbar-actions{margin-left:auto}.crm-table{min-width:650px}.crm-schedule-table{min-width:850px}.crm-report-bottom{grid-template-columns:repeat(2,1fr)}.crm-report-bottom>div{border-bottom:1px solid #eee}.crm-chart-list{padding:12px}.crm-bar-row{grid-template-columns:minmax(100px,1fr) minmax(70px,1fr) 25px;gap:7px}.crm-client-class{grid-template-columns:1fr auto;gap:7px}.crm-client-date{grid-column:span 2}.crm-client-class>div:last-child{grid-column:2;grid-row:2}.crm-follow-row{align-items:flex-start;flex-direction:column}.crm-follow-buttons{justify-content:flex-start}.crm-readiness{grid-template-columns:1fr}.crm-crumb{font-size:12px}.crm-topbar>span{font-size:11px}.crm-owner-avatar{display:none}.crm-modal-head{padding:17px}.crm-modal-form{padding:18px}.crm-modal{box-shadow:6px 6px 0 #334bdd}}
+
+/* Workbook exchange: all Excel data stays client-side in this prototype. */
+.crm-excel-panel{align-self:start}
+.crm-excel-content{padding:20px 23px 22px}
+.crm-excel-content>p{font-size:13px;line-height:1.65;color:#626c7c;margin:12px 0 18px}
+.crm-excel-status{display:flex;align-items:center;gap:12px;background:#f0f1ff;border-left:4px solid #334bdd;padding:13px 15px}
+.crm-excel-status svg{color:#334bdd;flex-shrink:0}
+.crm-excel-status b,.crm-excel-status span{display:block}
+.crm-excel-status b{font-size:15px;color:#1b2237;font-weight:700}
+.crm-excel-status span{font-size:12px;color:#687086;line-height:1.5;margin-top:3px}
+.crm-excel-actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.crm-excel-loading{padding:13px 0;font-size:13px;color:#334bdd;font-weight:700}
+.crm-excel-preview{margin-top:20px;padding:18px;border:1px solid #a8b8f1;background:#fafbff}
+.crm-excel-preview.is-invalid{border-color:#e4a694;background:#fff7f3}
+.crm-excel-preview>b{font-size:15px;color:#1b2237;overflow-wrap:anywhere;display:block}
+.crm-excel-counts{display:flex;flex-wrap:wrap;gap:7px;margin:15px 0}
+.crm-excel-counts span{display:inline-flex;gap:6px;padding:7px 9px;background:#fff;border:1px solid #daddf0;font-size:12px;color:#53607b}
+.crm-excel-counts strong{color:#334bdd}
+.crm-excel-preview p{font-size:13px;line-height:1.6;color:#626c7c}
+.crm-excel-preview ul{padding:0 0 0 19px;max-height:200px;overflow:auto;font-size:12px;line-height:1.6;color:#994a37}
+.crm-excel-preview>.crm-button.quiet{display:flex;margin:12px 0 0}
+.crm-excel-warning{display:flex;align-items:flex-start;gap:10px;border-top:1px solid #e5e3dc;margin-top:22px;padding-top:15px;color:#717b89;font-size:12px;line-height:1.6}
+.crm-excel-warning svg{flex-shrink:0;color:#334bdd}
+@media(max-width:610px){.crm-excel-content{padding:16px}.crm-excel-actions{align-items:stretch;flex-direction:column}.crm-excel-actions .crm-button{width:100%}}

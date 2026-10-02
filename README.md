@@ -49,3 +49,17 @@ Brand name and `$129` pricing on the landing page are exploratory, **not** a pay
 ## Design language
 
 Cobalt `#334BDD`, dark ink `#1B2237`, paper `#F4F0E7`, citrus `#E7F982`, coral `#FF8360`. Display font Barlow Condensed, body Source Sans 3, utility IBM Plex Mono.
+
+## Structured Excel import/export (browser-only)
+
+Open **Settings → Excel import / export**. Three actions are available:
+
+1. **Download template:** formatted `.xlsx` workbook with exact column names and dropdown options.
+2. **Export Excel:** download the current demo's leads, members, classes, bookings, follow-up tasks, activity history and dismissed opportunities.
+3. **Import Excel:** upload a completed `.xlsx`, inspect counts and any row-specific validation failures, and explicitly confirm replacement of current browser sample data.
+
+Workbook sheets: `Guide`, `Leads`, `Members`, `Classes`, `Bookings`, `FollowUps`, `Activity`, `Dismissed`. Keep the headers intact. Dates must use YYYY-MM-DD and class times HH:MM. `Bookings` references stable IDs in `Members` and `Classes`.
+
+**Safety:** 8 MB file limit, 5,000 data rows per sheet, required columns, stage/date/email checks, duplicate-ID/email checks, capacity/waitlist checks and cross-sheet reference validation. Invalid workbooks are rejected without changing data. Even valid ones require explicit overwrite confirmation. Existing data should be exported first as a backup. Only `.xlsx` is accepted (not `.xls` or `.csv`).
+
+**Demo restriction:** Files are read entirely in the browser; never enter real customer personal data here. No production DB, privacy controls or secured account storage have been implemented.

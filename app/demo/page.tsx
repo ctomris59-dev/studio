@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity as ActivityIcon, ArrowLeft, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check, CheckCheck,
   ChevronDown, ClipboardList, Clock3, CreditCard, Download, FileText, HeartHandshake, LayoutDashboard,
-  Mail, Plus, RotateCcw, Search, Send, Settings2, ShieldCheck, Sparkles, Target, UserPlus, Users, X
+  Mail, Plus, RotateCcw, Search, Send, Settings2, ShieldCheck, Sparkles, Target, UserPlus, Users, X, FileSpreadsheet, Upload
 } from "lucide-react";
 import {
   bookMember, cancelBooking, compactDate, convertPercent, creditsFor, dateLabel, day, daysSince, downloadCsv,
@@ -13,6 +13,7 @@ import {
   report, sortedSessions, studioNameByFocus, uid,
   type Lead, type LeadStage, type Member, type Opportunity, type StudioData, type StudioFocus, type Task, type View
 } from "../../lib/studio-crm";
+import type { ValidationOutcome } from "../../lib/studio-excel";
 import "./crm.css";
 
 type Modal = "lead"|"member"|"class"|"task"|null;
@@ -68,6 +69,10 @@ export default function Demo() {
   const [portalMember,setPortalMember]=useState("m1");
   const [draft,setDraft]=useState<Draft>(null);
   const [taskFilter,setTaskFilter]=useState<"Open"|"All"|"Done">("Open");
+  const [excelBusy,setExcelBusy]=useState(false);
+  const [excelPreview,setExcelPreview]=useState<ValidationOutcome|null>(null);
+  const [excelFileName,setExcelFileName]=useState("");
+  const excelInput=useRef<HTMLInputElement>(null);
 
   useEffect(()=>{
     try {const raw=localStorage.getItem(storageKey);if(raw){const parsed:unknown=JSON.parse(raw);if(isStudioData(parsed))setData(parsed);}}
@@ -173,6 +178,39 @@ export default function Demo() {
     say("Leads exported to CSV (sample data).");
   }
 
+  async function exportExcel(template=false){
+    setExcelBusy(true);setExcelPreview(null);
+    try{
+      const {downloadExcelWorkbook}=await import("../../lib/studio-excel-browser");
+      await downloadExcelWorkbook(data,template);
+      say(template?"Structured Excel template downloaded.":"Excel workbook downloaded with all CRM records.");
+    }catch(e){say("Excel export failed: "+(e instanceof Error?e.message:"Unknown error."));}
+    finally{setExcelBusy(false);}
+  }
+  async function importExcelFile(file:File|undefined){
+    if(!file)return;
+    setExcelBusy(true);setExcelPreview(null);setExcelFileName(file.name);
+    try{
+      const {previewExcelImport}=await import("../../lib/studio-excel-browser");
+      const preview=await previewExcelImport(file);
+      setExcelPreview(preview);
+      say(preview.valid?"Excel format validated. Review the row counts before replacing this demo.":preview.errors.length+" Excel validation error(s). No data was changed.");
+    }catch(e){setExcelPreview(null);say("Excel import failed: "+(e instanceof Error?e.message:"Invalid workbook."));}
+    finally{setExcelBusy(false);if(excelInput.current)excelInput.current.value="";}
+  }
+  function applyExcelImport(){
+    const preview=excelPreview;
+    if(!preview?.valid||!preview.data)return;
+    const counts=preview.counts;
+    if(!window.confirm("Replace ALL current browser demo data with the validated Excel workbook?\n\n"+
+      counts.leads+" leads, "+counts.members+" members, "+counts.classes+" classes, "+
+      counts.bookings+" bookings, "+counts.tasks+" tasks.\n\n"+
+      "This replaces your sample workspace. Download a backup first if needed."))return;
+    setData(preview.data);setSelectedLead("");setPortalMember(preview.data.members[0]?.id||"");
+    setBookingChoice({});setExcelPreview(null);setTab("overview");
+    say("Excel import completed. All linked demo records have been replaced.");
+  }
+
   function renderOverview(){
     return <>
       <div className="crm-stat-grid">
@@ -209,7 +247,7 @@ export default function Demo() {
   function renderLeads(){
     const lead=data.leads.find(l=>l.id===selectedLead);
     return <>
-      <div className="crm-toolbar"><label className="crm-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find leads, stages, sources…" aria-label="Search leads"/></label><div className="crm-toolbar-actions"><ActionButton variant="outline" onClick={exportData}><Download size={16}/> CSV</ActionButton><ActionButton onClick={()=>setModal("lead")}><Plus size={17}/> Add lead</ActionButton></div></div>
+      <div className="crm-toolbar"><label className="crm-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find leads, stages, sources…" aria-label="Search leads"/></label><div className="crm-toolbar-actions"><ActionButton variant="outline" onClick={()=>setTab("settings")}><FileSpreadsheet size={16}/> Excel</ActionButton><ActionButton variant="outline" onClick={exportData}><Download size={16}/> CSV</ActionButton><ActionButton onClick={()=>setModal("lead")}><Plus size={17}/> Add lead</ActionButton></div></div>
       <div className="crm-two-col lead-split"><section className="crm-panel">
         <SectionTitle title="The lead pipeline" caption="Select a name to see notes, activity and next steps."/>
         <div className="crm-scroll">
@@ -232,7 +270,7 @@ export default function Demo() {
 
   function renderMembers(){
     return <section className="crm-panel">
-      <SectionTitle title="Your community" caption="Credits, visit history and personal follow-ups." extra={<ActionButton onClick={()=>setModal("member")}><Plus size={16}/> Add member</ActionButton>}/>
+      <SectionTitle title="Your community" caption="Credits, visit history and personal follow-ups." extra={<div className="crm-inline-actions"><ActionButton variant="outline" onClick={()=>setTab("settings")}><FileSpreadsheet size={16}/> Excel</ActionButton><ActionButton onClick={()=>setModal("member")}><Plus size={16}/> Add member</ActionButton></div>}/>
       <div className="crm-scroll"><table className="crm-table">
         <thead><tr><th>MEMBER</th><th>CLASS PACK</th><th>CLASS CREDITS</th><th>LAST VISIT</th><th>ACTIONS</th></tr></thead>
         <tbody>{data.members.map(m=><tr key={m.id}><td><b>{m.name}</b><small>{m.email}</small></td><td><span>{m.plan}</span><small>{m.consent?"Email permitted":"Email not opted in"}</small></td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions"><ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Mark attended</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>addPack(m)}>+5 credits</ActionButton>}</div></td></tr>)}</tbody>
@@ -306,17 +344,44 @@ export default function Demo() {
   }
 
   function renderSettings(){
-    return <div className="crm-settings-grid"><section className="crm-panel"><SectionTitle title="Studio type" caption="Each preset comes with suitable example class names."/>
-      <div className="crm-field"><label htmlFor="demo-focus">Studio type</label><select id="demo-focus" value={data.studioFocus} onChange={e=>resetFocus(e.target.value as StudioFocus)}>{focuses.map(f=><option key={f}>{f}</option>)}</select></div>
-      <p className="crm-muted">Switching presets resets only this browser's demo data, after confirmation.</p>
-      {data.studioFocus==="Gym"&&<Notice>Gym mode currently demonstrates group classes and membership tracking, not door access or gym hardware.</Notice>}
-    </section><section className="crm-panel"><SectionTitle title="Data and exports" caption="Your sample records are stored only in this browser."/>
-      <div className="crm-settings-actions"><ActionButton variant="outline" onClick={exportData}><Download size={15}/> Export leads CSV</ActionButton>
-      <ActionButton variant="outline" onClick={()=>downloadCsv("reformdesk-members.csv",[["Name","Email","Plan","Credits","Last visit"],...data.members.map(m=>[m.name,m.email,m.plan,m.credits??"Unlimited",m.lastVisit||""])] )}><Download size={15}/> Export members CSV</ActionButton>
-      <ActionButton variant="outline" onClick={reset}><RotateCcw size={15}/> Reset demo data</ActionButton></div>
-    </section><section className="crm-panel crm-wide"><SectionTitle title="Production requirements" caption="The browser prototype is not a secure hosted CRM."/>
-      <div className="crm-readiness"><div><b>Built for demonstration</b><p>Leads, client journey, member notes, opportunities, bookings, follow-up tasks, drafts and reports.</p></div><div><b>Before real customers</b><p>Provision Postgres, tenant accounts and access policies, client authentication, transactional bookings, server audit logs, backups, GDPR controls and email delivery.</p></div></div>
-    </section></div>;
+    return <div className="crm-settings-grid">
+      <section className="crm-panel"><SectionTitle title="Studio type" caption="Each preset comes with suitable example class names."/>
+        <div className="crm-field"><label htmlFor="demo-focus">Studio type</label><select id="demo-focus" value={data.studioFocus} onChange={e=>resetFocus(e.target.value as StudioFocus)}>{focuses.map(f=><option key={f}>{f}</option>)}</select></div>
+        <p className="crm-muted">Switching presets resets only this browser's demo data, after confirmation.</p>
+        {data.studioFocus==="Gym"&&<Notice>Gym mode currently demonstrates group classes and membership tracking, not door access or gym hardware.</Notice>}
+      </section>
+      <section className="crm-panel crm-excel-panel"><SectionTitle title="Excel import / export" caption="A structured .xlsx workbook, formatted for this CRM."/>
+        <div className="crm-excel-content">
+          <div className="crm-excel-status"><FileSpreadsheet size={25}/><div><b>ReformDesk Excel v1</b><span>8 worksheets · Exact column headers · Linked bookings and tasks</span></div></div>
+          <p>Download a blank template, complete its sheets and import it. Or export the current studio into an Excel workbook. Everything stays in this browser demo.</p>
+          <div className="crm-excel-actions">
+            <ActionButton variant="outline" disabled={excelBusy} onClick={()=>{void exportExcel(true);}}><Download size={15}/> Download template</ActionButton>
+            <ActionButton variant="outline" disabled={excelBusy} onClick={()=>{void exportExcel(false);}}><FileSpreadsheet size={15}/> Export Excel</ActionButton>
+            <ActionButton disabled={excelBusy} onClick={()=>excelInput.current?.click()}><Upload size={15}/> Import Excel</ActionButton>
+            <input ref={excelInput} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="Select Excel workbook" onChange={e=>{void importExcelFile(e.target.files?.[0]);}}/>
+          </div>
+          {excelBusy&&<div className="crm-excel-loading">Working with your workbook…</div>}
+          {excelPreview&&<div className={"crm-excel-preview"+(excelPreview.valid?" is-valid":" is-invalid")}>
+            <b>{excelPreview.valid?"Workbook validated":"Workbook has errors"} · {excelFileName}</b>
+            <div className="crm-excel-counts">{Object.entries(excelPreview.counts).map(([k,v])=><span key={k}><strong>{v}</strong> {k}</span>)}</div>
+            {!excelPreview.valid?<div><p>Import blocked. Fix the following cells in the template, then re-upload:</p><ul>{excelPreview.errors.slice(0,12).map((msg,i)=><li key={i}>{msg}</li>)}</ul>{excelPreview.errors.length>12&&<small>And {excelPreview.errors.length-12} more errors.</small>}</div>
+              :<div><p><strong>Preview only — no changes yet.</strong> Confirming replaces the entire browser demo, including bookings, activities and follow-up tasks.</p><ActionButton onClick={applyExcelImport}><Check size={15}/> Confirm import &amp; replace demo</ActionButton></div>}
+            <ActionButton variant="quiet" onClick={()=>{setExcelPreview(null);setExcelFileName("");}}>Close preview</ActionButton>
+          </div>}
+          <div className="crm-excel-warning"><ShieldCheck size={18}/><span>Do not upload real client details yet. This prototype has no secure hosted accounts or database. Files are processed in your browser, not uploaded to our server.</span></div>
+        </div>
+      </section>
+      <section className="crm-panel"><SectionTitle title="Data and CSV exports" caption="Quick exports and demo reset."/>
+        <div className="crm-settings-actions">
+          <ActionButton variant="outline" onClick={exportData}><Download size={15}/> Export leads CSV</ActionButton>
+          <ActionButton variant="outline" onClick={()=>downloadCsv("reformdesk-members.csv",[["Name","Email","Plan","Credits","Last visit"],...data.members.map(m=>[m.name,m.email,m.plan,m.credits??"Unlimited",m.lastVisit||""])] )}><Download size={15}/> Export members CSV</ActionButton>
+          <ActionButton variant="outline" onClick={reset}><RotateCcw size={15}/> Reset demo data</ActionButton>
+        </div>
+      </section>
+      <section className="crm-panel crm-wide"><SectionTitle title="Production requirements" caption="The browser prototype is not a secure hosted CRM."/>
+        <div className="crm-readiness"><div><b>Built for demonstration</b><p>Leads, client journey, bookings, follow-up tasks, Excel workbook round trips and reports.</p></div><div><b>Before real customers</b><p>Provision a secure database, account access policies, transactional bookings, backups, GDPR controls and verified email delivery.</p></div></div>
+      </section>
+    </div>;
   }
 
   function renderModalForm(){

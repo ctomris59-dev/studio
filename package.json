@@ -6,13 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:crm": "node scripts/test-crm.cjs"
+    "test:crm": "node scripts/test-crm.cjs",
+    "test:excel": "node scripts/test-excel.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "next": "^15.5.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "exceljs": "^4.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
