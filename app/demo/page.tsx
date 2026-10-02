@@ -12,6 +12,21 @@ type Modal = "class" | "member" | null;
 const sampleNames = ["Amelia Hart","Sophia Chen","Mia Oliver","Isabella Reed","Olivia Patel","Grace Taylor","Ella Brooks","Noah Mitchell","Lily James","Ava Williams","Chloe Adams","Charlotte Davis"];
 const planOptions = ["5 Class Pack","10 Class Pack","Unlimited Monthly"];
 const classOptions = ["Reformer Foundations","Morning Flow","Sculpt & Strength","Stretch & Reset","Evening Reformer","Dynamic Pilates"];
+type StudioFocus = "Pilates" | "Yoga" | "Boutique fitness" | "Gym";
+const studioFocusOptions: StudioFocus[] = ["Pilates","Yoga","Boutique fitness","Gym"];
+const studioLabels: Record<StudioFocus,string> = {
+  Pilates: "Willow Pilates Studio",
+  Yoga: "Willow Yoga Studio",
+  "Boutique fitness": "Willow Fitness Studio",
+  Gym: "Willow Gym",
+};
+const focusClassNames: Record<StudioFocus,string[]> = {
+  Pilates: ["Reformer Foundations","Morning Flow","Sculpt & Strength","Stretch & Reset","Evening Reformer","Dynamic Pilates"],
+  Yoga: ["Morning Vinyasa","Hatha Foundations","Power Yoga","Yin & Restore","Evening Flow","Breath & Balance"],
+  "Boutique fitness": ["HIIT Express","Strength Circuit","Functional Training","Core & Conditioning","Evening Burn","Mobility Flow"],
+  Gym: ["Group Strength","Functional Circuit","Morning Conditioning","Core Training","Evening Fitness","Mobility & Stretch"],
+};
+
 
 function isoFor(offset: number) {
   const d = new Date();
@@ -21,18 +36,18 @@ function isoFor(offset: number) {
 function niceDate(iso: string) {
   return new Date(iso+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
 }
-function buildSamples(): { members: Member[]; sessions: Session[] } {
+function buildSamples(focus: StudioFocus = "Pilates"): { members: Member[]; sessions: Session[] } {
   const members: Member[] = sampleNames.map((name,i)=>({id:"m"+(i+1),name,email:name.toLowerCase().replace(" ",".")+"@example.com",plan:i%4===0?"Unlimited Monthly":i%3===0?"5 Class Pack":"10 Class Pack",credits:i%4===0?null:(i%3===0?5:10)-Math.floor(i/4),joined:isoFor(-35+i)}));
   const templates = [
-    ["Reformer Foundations","Sophie","07:30",8,0,6],
-    ["Morning Flow","Olivia","09:00",8,0,8],
-    ["Sculpt & Strength","Ava","12:30",8,0,5],
-    ["Evening Reformer","Sophie","17:30",8,0,7],
-    ["Stretch & Reset","Ava","08:30",6,1,4],
-    ["Reformer Foundations","Olivia","10:00",8,1,6],
-    ["Evening Reformer","Sophie","18:00",8,1,3],
-    ["Morning Flow","Sophie","08:00",8,2,6],
-    ["Sculpt & Strength","Olivia","17:30",8,2,4]
+    [focusClassNames[focus][0],"Sophie","07:30",8,0,6],
+    [focusClassNames[focus][1],"Olivia","09:00",8,0,8],
+    [focusClassNames[focus][2],"Ava","12:30",8,0,5],
+    [focusClassNames[focus][4],"Sophie","17:30",8,0,7],
+    [focusClassNames[focus][3],"Ava","08:30",6,1,4],
+    [focusClassNames[focus][0],"Olivia","10:00",8,1,6],
+    [focusClassNames[focus][4],"Sophie","18:00",8,1,3],
+    [focusClassNames[focus][1],"Sophie","08:00",8,2,6],
+    [focusClassNames[focus][2],"Olivia","17:30",8,2,4]
   ] as const;
   const sessions:Session[]=templates.map((a,i)=>({id:"s"+(i+1),title:a[0],coach:a[1],time:a[2],capacity:a[3],date:isoFor(a[4]),booked:members.slice(0,a[5]).map(m=>m.id),waitlist:i===1?["m9","m10"]:[]}));
   return {members,sessions};
@@ -48,6 +63,7 @@ function downloadCsv(filename:string,rows:string[][]) {
 }
 export default function DemoPage() {
   const [tab,setTab]=useState<Tab>("overview");
+  const [studioFocus,setStudioFocus]=useState<StudioFocus>("Pilates");
   const [members,setMembers]=useState<Member[]>([]);
   const [sessions,setSessions]=useState<Session[]>([]);
   const [ready,setReady]=useState(false);
@@ -59,12 +75,12 @@ export default function DemoPage() {
   useEffect(()=>{
     try {
       const stored=window.localStorage.getItem("reformdesk-demo-v1");
-      if(stored){const data=JSON.parse(stored);if(Array.isArray(data.members)&&Array.isArray(data.sessions)){setMembers(data.members);setSessions(data.sessions);}else{const start=buildSamples();setMembers(start.members);setSessions(start.sessions);}}
+      if(stored){const data=JSON.parse(stored);if(Array.isArray(data.members)&&Array.isArray(data.sessions)){setMembers(data.members);setSessions(data.sessions);if(studioFocusOptions.includes(data.studioFocus))setStudioFocus(data.studioFocus);}else{const start=buildSamples();setMembers(start.members);setSessions(start.sessions);}}
       else{const start=buildSamples();setMembers(start.members);setSessions(start.sessions);}
     }catch{const start=buildSamples();setMembers(start.members);setSessions(start.sessions);}
     setReady(true);
   },[]);
-  useEffect(()=>{if(ready){try{window.localStorage.setItem("reformdesk-demo-v1",JSON.stringify({members,sessions}));}catch{}}},[members,sessions,ready]);
+  useEffect(()=>{if(ready){try{window.localStorage.setItem("reformdesk-demo-v1",JSON.stringify({members,sessions,studioFocus}));}catch{}}},[members,sessions,studioFocus,ready]);
   const byId=useMemo(()=>new Map(members.map(m=>[m.id,m])),[members]);
   const bookedCount=sessions.reduce((acc,s)=>acc+s.booked.length,0);
   const seats=sessions.reduce((acc,s)=>acc+s.capacity,0);
@@ -123,7 +139,7 @@ export default function DemoPage() {
     setMembers(items=>[...items,{id:"m-"+Date.now().toString(36),name,email,plan:memberForm.plan,credits,joined:isoFor(0)}]);
     setMemberForm({name:"",email:"",plan:"10 Class Pack"});setModal(null);setTab("members");message(name+" added to your demo.");
   }
-  function reset(){const samples=buildSamples();setSessions(samples.sessions);setMembers(samples.members);setChosen({});message("Demo data reset to original sample.");}
+  function reset(){const samples=buildSamples(studioFocus);setSessions(samples.sessions);setMembers(samples.members);setChosen({});message("Demo data reset to original sample.");}
   function exportMembers(){downloadCsv("reformdesk-members-demo.csv",[["Name","Email","Plan","Credits","Joined"],...members.map(m=>[m.name,m.email,m.plan,m.credits===null?"Unlimited":String(m.credits),m.joined])]);message("Sample member CSV exported.");}
   function exportClasses(){downloadCsv("reformdesk-classes-demo.csv",[["Date","Time","Class","Instructor","Capacity","Bookings","Waitlist"],...sorted.map(s=>[s.date,s.time,s.title,s.coach,String(s.capacity),String(s.booked.length),String(s.waitlist.length)])]);message("Sample schedule CSV exported.");}
   const navigation:[Tab,typeof LayoutDashboard][]=[["overview",LayoutDashboard],["schedule",CalendarDays],["members",Users],["settings",Settings2]];
@@ -146,16 +162,16 @@ export default function DemoPage() {
     return <div className="table-panel"><div className="table-title"><div><h2>Studio members</h2><small>Sample member profiles. No real personal information.</small></div><button className="demo-secondary" onClick={exportMembers}><FileDown size={14}/> Export CSV</button></div><div className="table-wrap"><table className="data"><thead><tr><th>MEMBER</th><th>CLASS PACK</th><th>REMAINING CREDITS</th><th>JOINED</th></tr></thead><tbody>{members.map(m=><tr key={m.id}><td><strong>{m.name}</strong><small>{m.email}</small></td><td>{m.plan}</td><td><strong>{m.credits===null?"Unlimited":m.credits}</strong></td><td>{niceDate(m.joined)}</td></tr>)}</tbody></table></div></div>;
   }
   function showSettings(){
-    return <div><div className="setting-card"><h3>Demo workspace</h3><p>Everything you change is saved in this browser only. Reset whenever you want a fresh studio preview. This is not a hosted customer account.</p><div className="setting-actions"><button className="demo-secondary" onClick={reset}><RotateCcw size={15}/> Reset sample data</button><button className="demo-secondary" onClick={exportMembers}><ArrowDownToLine size={15}/> Export members</button><button className="demo-secondary" onClick={exportClasses}><ArrowDownToLine size={15}/> Export classes</button></div></div><div className="setting-card"><h3>Before the real launch</h3><p>A production release requires secure sign-in, a database for each studio, server-validated bookings, payment billing, email notifications, backups and privacy controls. These are intentionally not part of this demo.</p><div className="setting-actions"><Link className="demo-secondary" href="/"><ArrowLeft size={15}/> Visit the website</Link></div></div></div>;
+    return <div><div className="setting-card"><h3>Studio type</h3><p>Try this demo with Pilates, yoga, boutique fitness or a gym group-class schedule. Changing the type resets sample data in this browser.</p><div className="field" style={{maxWidth:300}}><label htmlFor="studio-focus">Studio focus</label><select id="studio-focus" value={studioFocus} onChange={e=>{const focus=e.target.value as StudioFocus;setStudioFocus(focus);const samples=buildSamples(focus);setSessions(samples.sessions);setMembers(samples.members);setChosen({});setClassForm(f=>({...f,title:focusClassNames[focus][0]}));message("Switched to "+focus+" demo with fresh sample data.");}}>{studioFocusOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div>{studioFocus==="Gym"&&<p style={{marginTop:14}}>Gym mode previews memberships and group classes only. Door access, billing, and gym hardware integrations are not implemented.</p>}</div><div className="setting-card"><h3>Demo workspace</h3><p>Everything you change is saved in this browser only. Reset whenever you want a fresh studio preview. This is not a hosted customer account.</p><div className="setting-actions"><button className="demo-secondary" onClick={reset}><RotateCcw size={15}/> Reset sample data</button><button className="demo-secondary" onClick={exportMembers}><ArrowDownToLine size={15}/> Export members</button><button className="demo-secondary" onClick={exportClasses}><ArrowDownToLine size={15}/> Export classes</button></div></div><div className="setting-card"><h3>Before the real launch</h3><p>A production release requires secure sign-in, a database for each studio, server-validated bookings, payment billing, email notifications, backups and privacy controls. These are intentionally not part of this demo.</p><div className="setting-actions"><Link className="demo-secondary" href="/"><ArrowLeft size={15}/> Visit the website</Link></div></div></div>;
   }
   return <div className="demo-shell">
     <aside className="demo-aside"><Logo/><h4>YOUR WORKSPACE</h4><nav className="side-links" aria-label="Demo navigation">{navigation.map(([id,Icon])=><button key={id} className={"side-button"+(tab===id?" active":"")} onClick={()=>setTab(id)}><Icon size={18}/>{names[id]}</button>)}</nav><div className="side-bottom"><div className="demo-profile"><span className="profile-circle">AR</span><span><strong>Alex Rivera</strong><small>Studio owner · Demo</small></span></div><Link style={{display:"block",fontSize:11,margin:"22px 0 0 4px",color:"#b0cfb4"}} href="/">← Back to website</Link></div></aside>
-    <div className="demo-main"><header className="demo-topbar"><div><span className="demo-breadcrumb">ReformDesk /</span><strong>{names[tab]}</strong></div><div><span style={{fontSize:11,color:"#8ba293"}}>Willow Pilates Studio</span><span className="demo-icon-circle"><Leaf size={17}/></span></div></header><div className="demo-mobile-nav">{navigation.map(([id])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{names[id]}</button>)}<Link style={{color:"#d5ead5",padding:"10px"}} href="/">Website</Link></div>
+    <div className="demo-main"><header className="demo-topbar"><div><span className="demo-breadcrumb">ReformDesk /</span><strong>{names[tab]}</strong></div><div><span style={{fontSize:11,color:"#8ba293"}}>{studioLabels[studioFocus]}</span><span className="demo-icon-circle"><Leaf size={17}/></span></div></header><div className="demo-mobile-nav">{navigation.map(([id])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{names[id]}</button>)}<Link style={{color:"#d5ead5",padding:"10px"}} href="/">Website</Link></div>
     <main className="demo-content"><div className="demo-alert"><span><ShieldCheck size={18}/> <span><b>Interactive sample workspace.</b> No payments, real customer accounts or online bookings are enabled.</span></span><Link href="/">About ReformDesk</Link></div>
     {toast&&<div className="demo-toast"><span>{toast}</span><button onClick={()=>setToast("")} aria-label="Dismiss notification"><X size={16}/></button></div>}
-    <div className="demo-pagehead"><div><div className="kicker">WILLOW PILATES STUDIO · DEMO</div><h1>{tab==="overview"?"Good morning, Alex.":tab==="schedule"?"Your schedule.":tab==="members"?"Your community.":"Studio settings."}</h1><p>{tab==="overview"?"Here's how your studio is moving today.":tab==="schedule"?"A beautiful rhythm for every class.":tab==="members"?"People are what make your studio special.":"Keep things simple and in your control."}</p></div>{tab==="overview"||tab==="schedule"?<button className="demo-primary" onClick={()=>{setClassForm({...classForm,date:isoFor(1)});setModal("class");}}><Plus size={16}/> Add a class</button>:tab==="members"?<button className="demo-primary" onClick={()=>setModal("member")}><Plus size={16}/> Add a member</button>:null}</div>
+    <div className="demo-pagehead"><div><div className="kicker">{studioLabels[studioFocus].toUpperCase()} · DEMO</div><h1>{tab==="overview"?"Good morning, Alex.":tab==="schedule"?"Your schedule.":tab==="members"?"Your community.":"Studio settings."}</h1><p>{tab==="overview"?"Here's how your studio is moving today.":tab==="schedule"?"A beautiful rhythm for every class.":tab==="members"?"People are what make your studio special.":"Keep things simple and in your control."}</p></div>{tab==="overview"||tab==="schedule"?<button className="demo-primary" onClick={()=>{setClassForm({...classForm,date:isoFor(1)});setModal("class");}}><Plus size={16}/> Add a class</button>:tab==="members"?<button className="demo-primary" onClick={()=>setModal("member")}><Plus size={16}/> Add a member</button>:null}</div>
     {!ready?<div className="table-empty">Preparing your sample studio…</div>:tab==="overview"?showOverview():tab==="schedule"?showSchedule():tab==="members"?showMembers():showSettings()}
     </main></div>
-    {modal&&<div className="modal-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><div className="modal" role="dialog" aria-modal="true" aria-label={modal==="class"?"Add a new class":"Add a new member"}><div className="modal-title"><h2>{modal==="class"?"Add a new class":"Meet a new member"}</h2><button type="button" aria-label="Close" onClick={()=>setModal(null)}><X size={18}/></button></div><p>{modal==="class"?"Create a sample class in the schedule.":"Add a sample person to your studio community."}</p>{modal==="class"?<form className="modal-form" onSubmit={addClass}><div className="field full"><label htmlFor="class-title">Class name</label><select id="class-title" value={classForm.title} onChange={e=>setClassForm({...classForm,title:e.target.value})}>{classOptions.map(x=><option key={x}>{x}</option>)}</select></div><div className="field"><label htmlFor="class-coach">Instructor</label><input id="class-coach" required minLength={2} maxLength={40} value={classForm.coach} onChange={e=>setClassForm({...classForm,coach:e.target.value})}/></div><div className="field"><label htmlFor="class-size">Reformer capacity</label><input id="class-size" type="number" min="1" max="30" required value={classForm.capacity} onChange={e=>setClassForm({...classForm,capacity:e.target.value})}/></div><div className="field"><label htmlFor="class-date">Date</label><input id="class-date" type="date" required value={classForm.date} onChange={e=>setClassForm({...classForm,date:e.target.value})}/></div><div className="field"><label htmlFor="class-time">Time</label><input id="class-time" type="time" required value={classForm.time} onChange={e=>setClassForm({...classForm,time:e.target.value})}/></div><div className="form-actions"><button type="button" className="demo-secondary" onClick={()=>setModal(null)}>Cancel</button><button type="submit" className="demo-primary"><Plus size={16}/> Add class</button></div></form>:<form className="modal-form" onSubmit={addMember}><div className="field full"><label htmlFor="member-name">Full name</label><input id="member-name" required minLength={2} maxLength={80} placeholder="Taylor Morgan" value={memberForm.name} onChange={e=>setMemberForm({...memberForm,name:e.target.value})}/></div><div className="field full"><label htmlFor="member-email">Email address (sample data only)</label><input id="member-email" type="email" required placeholder="taylor@example.com" value={memberForm.email} onChange={e=>setMemberForm({...memberForm,email:e.target.value})}/></div><div className="field full"><label htmlFor="member-plan">Class package</label><select id="member-plan" value={memberForm.plan} onChange={e=>setMemberForm({...memberForm,plan:e.target.value})}>{planOptions.map(x=><option key={x}>{x}</option>)}</select></div><div className="form-actions"><button type="button" className="demo-secondary" onClick={()=>setModal(null)}>Cancel</button><button type="submit" className="demo-primary"><Plus size={16}/> Add member</button></div></form>}</div></div>}
+    {modal&&<div className="modal-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><div className="modal" role="dialog" aria-modal="true" aria-label={modal==="class"?"Add a new class":"Add a new member"}><div className="modal-title"><h2>{modal==="class"?"Add a new class":"Meet a new member"}</h2><button type="button" aria-label="Close" onClick={()=>setModal(null)}><X size={18}/></button></div><p>{modal==="class"?"Create a sample class in the schedule.":"Add a sample person to your studio community."}</p>{modal==="class"?<form className="modal-form" onSubmit={addClass}><div className="field full"><label htmlFor="class-title">Class name</label><select id="class-title" value={classForm.title} onChange={e=>setClassForm({...classForm,title:e.target.value})}>{focusClassNames[studioFocus].map(x=><option key={x}>{x}</option>)}</select></div><div className="field"><label htmlFor="class-coach">Instructor</label><input id="class-coach" required minLength={2} maxLength={40} value={classForm.coach} onChange={e=>setClassForm({...classForm,coach:e.target.value})}/></div><div className="field"><label htmlFor="class-size">Reformer capacity</label><input id="class-size" type="number" min="1" max="30" required value={classForm.capacity} onChange={e=>setClassForm({...classForm,capacity:e.target.value})}/></div><div className="field"><label htmlFor="class-date">Date</label><input id="class-date" type="date" required value={classForm.date} onChange={e=>setClassForm({...classForm,date:e.target.value})}/></div><div className="field"><label htmlFor="class-time">Time</label><input id="class-time" type="time" required value={classForm.time} onChange={e=>setClassForm({...classForm,time:e.target.value})}/></div><div className="form-actions"><button type="button" className="demo-secondary" onClick={()=>setModal(null)}>Cancel</button><button type="submit" className="demo-primary"><Plus size={16}/> Add class</button></div></form>:<form className="modal-form" onSubmit={addMember}><div className="field full"><label htmlFor="member-name">Full name</label><input id="member-name" required minLength={2} maxLength={80} placeholder="Taylor Morgan" value={memberForm.name} onChange={e=>setMemberForm({...memberForm,name:e.target.value})}/></div><div className="field full"><label htmlFor="member-email">Email address (sample data only)</label><input id="member-email" type="email" required placeholder="taylor@example.com" value={memberForm.email} onChange={e=>setMemberForm({...memberForm,email:e.target.value})}/></div><div className="field full"><label htmlFor="member-plan">Class package</label><select id="member-plan" value={memberForm.plan} onChange={e=>setMemberForm({...memberForm,plan:e.target.value})}>{planOptions.map(x=><option key={x}>{x}</option>)}</select></div><div className="form-actions"><button type="button" className="demo-secondary" onClick={()=>setModal(null)}>Cancel</button><button type="submit" className="demo-primary"><Plus size={16}/> Add member</button></div></form>}</div></div>}
   </div>;
 }
