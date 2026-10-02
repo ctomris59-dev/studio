@@ -134,16 +134,24 @@ export function completeTask(data:StudioData,taskId:string,outcome:NonNullable<T
   const t=data.tasks.find(t=>t.id===taskId);
   if(!t||t.completed)return error(data,"Task is already completed or missing.");
   if(!TASK_OUTCOMES.includes(outcome))return error(data,"Select a valid result.");
+  if(outcome==="Converted"&&t.personKind==="member")return error(data,"A member cannot be converted again.");
+  let base=data;
+  if(outcome==="Converted"&&t.personKind==="lead"&&!data.members.some(m=>m.sourceLeadId===t.personId)){
+    const converted=convertLead(data,t.personId);
+    if(!converted.ok)return converted;
+    base=converted.data;
+  }
   const repeat=t.repeat||"None";
   let next:Task|undefined;
-  if(repeat!=="None"){
+  if(repeat!=="None"||outcome==="Reschedule"){
     const d=new Date(t.due+"T12:00:00Z");
+    if(repeat==="None")d.setUTCDate(d.getUTCDate()+1);
     if(repeat==="Weekly")d.setUTCDate(d.getUTCDate()+7);
     if(repeat==="Monthly") { const current=d.getUTCDate();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+1);const max=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();d.setUTCDate(Math.min(current,max)); }
     next={...t,id:uid("t"),due:d.toISOString().slice(0,10),created:day(),completed:false,outcome:undefined,completedAt:undefined};
   }
-  return good({...data,
-    tasks:[...data.tasks.map(x=>x.id===t.id?{...x,completed:true,outcome,completedAt:day()}:x),...(next?[next]:[])],
-    activities:[{id:uid("a"),personKind:t.personKind,personId:t.personId,text:"Follow-up completed ("+outcome+"): "+t.reason,date:day()},...data.activities]
-  },next?"Task completed; the next "+repeat.toLowerCase()+" task was created.":"Task completed: "+outcome+".");
+  return good({...base,
+    tasks:[...base.tasks.map(x=>x.id===t.id?{...x,completed:true,outcome,completedAt:day()}:x),...(next?[next]:[])],
+    activities:[{id:uid("a"),personKind:t.personKind,personId:t.personId,text:"Follow-up completed ("+outcome+"): "+t.reason,date:day()},...base.activities]
+  },next?"Task completed; another follow-up was scheduled.":"Task completed: "+outcome+".");
 }
