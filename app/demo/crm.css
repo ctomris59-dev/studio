@@ -234,3 +234,61 @@
 .crm-excel-warning{display:flex;align-items:flex-start;gap:10px;border-top:1px solid #e5e3dc;margin-top:22px;padding-top:15px;color:#717b89;font-size:12px;line-height:1.6}
 .crm-excel-warning svg{flex-shrink:0;color:#334bdd}
 @media(max-width:610px){.crm-excel-content{padding:16px}.crm-excel-actions{align-items:stretch;flex-direction:column}.crm-excel-actions .crm-button{width:100%}}
+
+
+/* Accessibility pass: readable booking details across desktop, tablet and mobile. */
+/* Client booking: primary information >= 18px and secondary information >= 14px. */
+.crm-client-class{
+  grid-template-columns:minmax(112px,128px) minmax(0,1fr) auto;
+  gap:16px;
+  padding:19px 22px;
+}
+.crm-client-date{display:flex;flex-direction:column;gap:4px;min-width:0}
+.crm-client-date strong{font-size:21px;line-height:1.12;font-weight:700;letter-spacing:-.015em}
+.crm-client-date span{font-size:15px;line-height:1.4;color:#536076}
+.crm-client-class b{font-size:19px;line-height:1.22;font-weight:700;letter-spacing:-.01em;overflow-wrap:break-word}
+.crm-client-class small{font-size:15px;line-height:1.4;color:#566477;margin-top:6px}
+.crm-client-class .crm-button{font-size:14px;min-height:44px;padding:11px 15px;touch-action:manipulation}
+.crm-my-booking{padding:17px 22px}
+.crm-my-booking b{font-size:19px;line-height:1.27;font-weight:700}
+.crm-my-booking small{font-size:15px;line-height:1.45;color:#536076;margin-top:6px}
+.crm-my-booking span{font-size:13px;line-height:1.25;font-weight:600;padding:7px 10px;margin-top:9px}
+/* Overview schedule: avoid reverting to tiny operational text. */
+.crm-time{font-size:19px;line-height:1.2;min-width:78px;padding:11px 10px}
+.crm-class-caption b{font-size:18px;line-height:1.25}
+.crm-class-caption small{font-size:14px;line-height:1.4;margin-top:5px}
+.crm-fill b{font-size:13px;line-height:1.35}
+.crm-class-list-row .crm-tag{font-size:12px;padding:7px 10px}
+@media(max-width:1024px){
+  .crm-client-class{grid-template-columns:minmax(100px,116px) minmax(0,1fr) auto;gap:13px;padding:16px 18px}
+  .crm-client-date strong{font-size:20px}
+  .crm-client-date span{font-size:14px}
+  .crm-client-class b{font-size:18px}
+  .crm-client-class small{font-size:14px}
+  .crm-client-class .crm-button{font-size:14px;min-height:44px}
+}
+@media(max-width:610px){
+  /* Mobile: time and day together above class details; action remains easy to tap. */
+  .crm-client-class{grid-template-columns:minmax(0,1fr) auto;gap:11px;padding:16px}
+  .crm-client-date{grid-column:1 / -1;flex-direction:row;align-items:baseline;gap:12px}
+  .crm-client-date strong{font-size:20px}
+  .crm-client-date span{font-size:14px}
+  .crm-client-class b{font-size:18px;line-height:1.24}
+  .crm-client-class small{font-size:14px}
+  .crm-client-class>div:last-child{grid-column:2;grid-row:2;justify-self:end}
+  .crm-client-class .crm-button{font-size:14px;min-height:44px;padding:10px 12px}
+  .crm-my-booking{padding:16px}
+  .crm-my-booking b{font-size:18px}
+  .crm-my-booking small{font-size:14px}
+  .crm-my-booking span{font-size:13px;padding:7px 10px}
+  .crm-time{font-size:18px;min-width:70px;padding:10px 7px}
+  .crm-class-caption b{font-size:17px}
+  .crm-class-caption small{font-size:14px}
+  .crm-fill b{font-size:12px}
+}
+/* When even two-column mobile content is too tight, let the action follow the details. */
+@media(max-width:385px){
+  .crm-client-class{grid-template-columns:minmax(0,1fr)}
+  .crm-client-date{grid-column:1}
+  .crm-client-class>div:last-child{grid-column:1;grid-row:auto;justify-self:start}
+}
