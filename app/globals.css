@@ -149,3 +149,22 @@ table.data td small{font-size:12.5px;line-height:1.4;margin-top:5px;color:#67748
   table.data td small{font-size:11.5px}
   .table-action{font-size:12px}
 }
+
+
+/* Compact Schedule rows: keep Book and Cancel adjacent on desktop. */
+table.schedule-data td{padding:11px 15px}
+table.schedule-data th{padding:13px 15px}
+table.schedule-data td small{margin-top:3px}
+table.schedule-data .book-controls{flex-wrap:nowrap;gap:7px;align-items:center}
+table.schedule-data .book-controls select{flex:0 1 145px;min-width:110px;max-width:145px;min-height:33px;padding:6px 9px}
+table.schedule-data .table-action{min-height:33px;padding:7px 10px;font-size:12px;white-space:nowrap}
+table.schedule-data .book-controls + small{margin-top:4px}
+table.schedule-data .status-pill{display:inline-block}
+@media(max-width:1000px){
+  table.schedule-data{min-width:850px}
+}
+@media(max-width:520px){
+  table.schedule-data td{padding:10px 12px}
+  table.schedule-data th{padding:12px}
+  table.schedule-data .table-action{font-size:11.5px;padding:6px 8px}
+}
