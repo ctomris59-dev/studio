@@ -87,9 +87,9 @@ export async function downloadExcelWorkbook(data:StudioData,template=false):Prom
     if(name==="Guide"){
       sheet.getColumn(2).alignment={vertical:"middle",wrapText:true};
       for(let i=2;i<=Math.max(2,rows.length);i++)sheet.getRow(i).height=30;
-      sheet.tabColor={argb:"FF"+palettes.blue};
+      sheet.properties.tabColor={argb:"FF"+palettes.blue};
     }else if(name==="Leads"||name==="Members"){
-      sheet.tabColor={argb:"FF"+palettes.citrus};
+      sheet.properties.tabColor={argb:"FF"+palettes.citrus};
     }
   }
   const out=await wb.xlsx.writeBuffer();
