@@ -1,87 +1,142 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CalendarDays, Check, ChevronDown, CircleCheck, Clock3, CreditCard, Heart, LayoutDashboard, Menu, MoveUpRight, Play, ShieldCheck, Sparkles, Users, WandSparkles, Waves, Zap } from "lucide-react";
+import {
+  ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3,
+  CreditCard, MoveRight, Plus, ShieldCheck, Users, Waves
+} from "lucide-react";
+import "./editorial.css";
 
-const benefits = [
-  { number: "01", icon: CalendarDays, title: "A schedule that just flows.", text: "Create recurring classes, set reformer capacity, and see every booking in a single glance.", detail: "Fewer tabs. More clarity." },
-  { number: "02", icon: CreditCard, title: "Class packs, minus the maths.", text: "Keep track of 5-class, 10-class and unlimited plans, without another spreadsheet.", detail: "Every credit accounted for." },
-  { number: "03", icon: Users, title: "Your people, all in one place.", text: "Know your members, their packages and upcoming sessions—without the admin overload.", detail: "A little more personal." },
+const timetable = [
+  { time: "07:30", title: "Morning Flow", coach: "Sophie M.", spots: "6 / 8", state: "OPEN", value: 75 },
+  { time: "09:00", title: "Reformer Foundations", coach: "Olivia K.", spots: "8 / 8", state: "FULL", value: 100 },
+  { time: "12:30", title: "Midday Sculpt", coach: "Ava R.", spots: "5 / 8", state: "OPEN", value: 63 },
+  { time: "17:30", title: "Evening Reset", coach: "Sophie M.", spots: "7 / 8", state: "OPEN", value: 88 },
 ];
 
-const weekDays = ["MON", "TUE", "WED", "THU", "FRI"];
-const schedule = [
-  {time:"07:30",name:"Morning Reset",with:"Sophie",capacity:"6 / 8",width:"75%",type:"green"},
-  {time:"09:00",name:"Reformer Foundations",with:"Olivia",capacity:"8 / 8",width:"100%",type:"terra"},
-  {time:"12:30",name:"Midday Flow",with:"Ava",capacity:"5 / 8",width:"62%",type:"green"},
-  {time:"17:30",name:"Evening Sculpt",with:"Sophie",capacity:"7 / 8",width:"87%",type:"green"},
+const services = [
+  { n: "01", title: "Keep your classes in line.", category: "SCHEDULING", description: "Set your week, manage instructors and see how many places are left. A schedule that makes sense the first time you look at it.", icon: CalendarDays },
+  { n: "02", title: "Know your people.", category: "MEMBERS", description: "Member profiles, class-pack credits and bookings stay in one place. Less searching, more personal attention.", icon: Users },
+  { n: "03", title: "Make room for everyone.", category: "WAITLISTS & PACKS", description: "Keep track of your waitlist, cancellations and class-pack balances without piecing together another spreadsheet.", icon: CreditCard },
 ];
 
-function Logo({ light = false }: { light?: boolean }) {
-  return <Link href="/" className={light ? "brand brand-light" : "brand"} aria-label="ReformDesk home"><span className="brand-symbol"><span/><span/><span/></span><span>reform<span className="brand-bold">desk</span><b>.</b></span></Link>;
+function Identity({ inverse = false }: { inverse?: boolean }) {
+  return (
+    <Link href="/" className={"ed-identity" + (inverse ? " ed-identity-inverse" : "")} aria-label="ReformDesk home">
+      <span className="ed-identity-icon" aria-hidden="true"><i/><i/><i/></span>
+      <span>reform<span className="ed-identity-strong">desk</span><span className="ed-identity-dot">.</span></span>
+    </Link>
+  );
 }
 
-export default function Home() {
+function MiniSchedule({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="site">
-      <header className="site-header">
-        <div className="container nav-wrap">
-          <Logo />
-          <nav className="nav-links" aria-label="Main navigation">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How it works</a>
-            <a href="#pricing">Pricing</a>
-          </nav>
-          <div className="nav-actions"><Link className="nav-signin" href="/demo">Live demo <ArrowUpRight size={15}/></Link><Link className="btn btn-dark btn-sm" href="/demo">Explore the demo <ArrowRight size={16}/></Link></div>
+    <div className={"ed-schedule" + (compact ? " ed-schedule-compact" : "")}>
+      <div className="ed-sch-head">
+        <div className="ed-sch-identity"><span className="ed-sch-icon"><Waves size={17} strokeWidth={1.6}/></span><div><strong>Willow Studio</strong><small>THE SPACE IS YOURS</small></div></div>
+        <span className="ed-sch-week">THIS WEEK <span>↗</span></span>
+      </div>
+      <div className="ed-sch-greeting"><span>Studio overview / <b>Wednesday</b></span><strong>Today is looking good.</strong></div>
+      <div className="ed-sch-metrics"><div><small>CLASSES</small><strong>08</strong></div><div><small>BOOKINGS</small><strong>42</strong></div><div><small>CAPACITY</small><strong>84<span>%</span></strong></div></div>
+      <div className="ed-sch-tablehead"><strong>TODAY&apos;S SCHEDULE</strong><span>4 of 8 classes <ArrowUpRight size={12}/></span></div>
+      <div className="ed-sch-rows">{timetable.map((c) =>
+        <div className="ed-sch-row" key={c.time}>
+          <span className="ed-sch-time">{c.time}</span>
+          <span className="ed-sch-class"><b>{c.title}</b><small>with {c.coach}</small></span>
+          <span className="ed-sch-cap"><b>{c.spots}</b><i><i style={{width:c.value+"%"}}/></i></span>
+          <span className={"ed-sch-status" + (c.state==="FULL" ? " is-full" : "")}>{c.state}</span>
+        </div>)}</div>
+      <div className="ed-sch-foot"><span><i/> Your studio, in sync.</span><span>VIEW SCHEDULE <ArrowRight size={12}/></span></div>
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <div className="editorial">
+      <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>DESIGNED FOR INDEPENDENT STUDIOS <span className="ed-star">✳</span> 2026</span></div></div>
+      <header className="ed-header">
+        <div className="ed-container ed-nav">
+          <Identity/>
+          <nav aria-label="Main navigation"><a href="#features">The essentials</a><a href="#studio">Inside the studio</a><a href="#pricing">Pricing</a></nav>
+          <Link className="ed-nav-cta" href="/demo">OPEN THE DEMO <ArrowUpRight size={16}/></Link>
         </div>
       </header>
+
       <main>
-        <section className="hero">
-          <div className="container hero-layout">
-            <div className="hero-copy">
-              <div className="eyebrow"><span className="eyebrow-dot"/> FOR THE STUDIOS THAT MOVE US</div>
-              <h1>Less admin.<br/><em>More movement.</em></h1>
-              <p className="hero-lede">Your movement studio deserves a little breathing room. Meet the refreshingly simple space for classes, clients, and everything in between.</p>
-              <div className="hero-actions"><Link className="btn btn-dark btn-lg" href="/demo">Explore interactive demo <ArrowUpRight size={18}/></Link><a className="text-cta" href="#how-it-works"><span className="play-circle"><Play size={13} fill="currentColor"/></span> See how it works</a></div>
-              <div className="hero-foot"><div className="mini-avatars"><span>AM</span><span>SL</span><span>KC</span></div><p><strong>Built for independent studios</strong><br/>Made for the way you actually work.</p></div>
+        <section className="ed-hero" aria-labelledby="main-heading">
+          <div className="ed-container ed-hero-grid">
+            <div className="ed-hero-copy">
+              <div className="ed-index"><span className="ed-index-line"/> INDEPENDENT STUDIOS / BETTER DAYS</div>
+              <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
+              <div className="ed-hero-under">
+                <p>Your Pilates, yoga or boutique fitness studio deserves more of your time. Not more tabs, spreadsheets and back-office noise.</p>
+                <Link className="ed-primary-cta" href="/demo"><span>EXPLORE THE DEMO</span><ArrowUpRight size={20}/></Link>
+              </div>
+              <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
-            <div className="hero-visual" aria-label="Preview of Pilates studio dashboard">
-              <div className="hero-art">
-                <div className="art-sun"></div><div className="art-arch"></div>
-                <div className="art-floor"></div>
-                <div className="pilates-rig"><div className="rig-rope rope-left"></div><div className="rig-rope rope-right"></div><div className="rig-bed"></div><div className="rig-leg leg-1"></div><div className="rig-leg leg-2"></div><div className="rig-pillow"></div><div className="rig-rail"></div></div>
-                <div className="art-label">A little space to breathe.</div>
-              </div>
-              <div className="preview-card">
-                <div className="preview-head"><span className="preview-mark"><Waves size={17}/></span><div><strong>Good morning, Alex <span>✳</span></strong><small>Here&apos;s your studio today</small></div><span className="preview-more">•••</span></div>
-                <div className="preview-stats"><div><small>TODAY&apos;S CLASSES</small><b>08</b></div><div><small>BOOKINGS</small><b>42</b></div><div><small>CAPACITY</small><b>84%</b></div></div>
-                <div className="preview-row-title"><strong>Today&apos;s schedule</strong><span>View all <ArrowRight size={13}/></span></div>
-                {schedule.slice(0,3).map((item)=> <div className="preview-row" key={item.time}><span className="preview-time">{item.time}</span><span className="preview-class"><b>{item.name}</b><small>with {item.with}</small></span><span className="preview-seats">{item.capacity}</span><span className={"preview-indicator "+item.type}></span></div>)}
-              </div>
-              <div className="floating-note"><span><CircleCheck size={18}/></span><div><b>All caught up!</b><small>You&apos;re right on track today.</small></div></div>
+            <div className="ed-hero-canvas">
+              <div className="ed-canvas-meta"><span>FIG. 01</span><span>YOUR STUDIO, IN FRAME</span></div>
+              <div className="ed-hero-disc" aria-hidden="true"><span>KEEP<br/>THINGS<br/>MOVING.</span><i>↗</i></div>
+              <div className="ed-hero-card"><MiniSchedule/></div>
+              <div className="ed-hero-sticker"><span className="ed-sticker-cross">✳</span><span>MORE ROOM<br/>TO DO YOUR<br/>THING.</span></div>
+              <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
             </div>
           </div>
-          <div className="hero-bottom"><span>INTENTIONALLY SIMPLE</span><span className="hero-bottom-flower">✳</span><span>BUILT FOR REAL STUDIO LIFE</span></div>
+          <div className="ed-hero-end ed-container"><span>THE STUDIO DESK, REIMAGINED.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
         </section>
-        <section className="intro-band"><div className="container"><div className="center-eyebrow">A BETTER WAY TO RUN YOUR STUDIO</div><h2>Beautifully simple software.<br/><em>More room for what matters.</em></h2><p>Because you started a movement studio to teach, connect, and inspire—not spend your evenings in spreadsheets.</p></div></section>
-        <section className="features section-pad" id="features"><div className="container">
-          <div className="section-heading"><div><span className="section-kicker">EVERYTHING YOU NEED. NOTHING YOU DON&apos;T.</span><h2>Run your studio.<br/><em>Not the other way around.</em></h2></div><p>Less bouncing between tools. More time making your studio the place everyone loves to be.</p></div>
-          <div className="feature-grid">
-            {benefits.map((b)=>{const Icon=b.icon;return <div className="feature-card" key={b.number}><div className="feature-top"><span>{b.number} / 03</span><span className="feature-icon"><Icon size={23} strokeWidth={1.7}/></span></div><h3>{b.title}</h3><p>{b.text}</p><div className="feature-bottom"><span><Check size={15}/>{b.detail}</span><ArrowUpRight size={20}/></div></div>})}
+
+        <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b>✳</b><span>YOGA</span><b>✳</b><span>BARRE</span><b>✳</b><span>BOUTIQUE FITNESS</span><b>✳</b><span>GROUP CLASSES</span><b>✳</b></div></section>
+
+        <section className="ed-manifesto" id="features">
+          <div className="ed-container ed-manifesto-grid">
+            <div className="ed-overline">01 / WHAT WE BELIEVE</div>
+            <div><h2>You didn&apos;t open a studio<br/>to <em>manage software.</em></h2><p>Classes to plan. People to look after. A dozen things happening at once. The tools behind your studio should make the day feel lighter—not louder.</p></div>
+            <div className="ed-manifesto-seal" aria-hidden="true"><span>KEEP IT HUMAN</span><strong>✳</strong><small>KEEP IT MOVING</small></div>
           </div>
-        </div></section>
-        <section className="product-section" id="how-it-works"><div className="container product-layout">
-          <div className="product-copy"><span className="section-kicker">ONE CALM PLACE FOR IT ALL</span><h2>A clear view<br/>of <em>every day.</em></h2><p>Your studio&apos;s entire day, beautifully laid out. See who&apos;s coming, what&apos;s full, and where there&apos;s room to grow.</p><div className="product-points"><div><span><CalendarDays size={19}/></span><div><strong>Classes at a glance</strong><p>Daily schedules with live availability.</p></div></div><div><span><WandSparkles size={19}/></span><div><strong>Waitlists that make sense</strong><p>Keep an eye on the next person in line.</p></div></div><div><span><Heart size={19}/></span><div><strong>Know your community</strong><p>Member profiles and class credits together.</p></div></div></div><Link className="btn btn-dark btn-lg" href="/demo">Try the working demo <ArrowRight size={17}/></Link></div>
-          <div className="calendar-frame">
-            <div className="calendar-head"><div><small>YOUR STUDIO</small><h3>Weekly schedule</h3></div><div className="calendar-nav"><span>‹</span><strong>This week</strong><span>›</span></div></div>
-            <div className="calendar-days">{weekDays.map((d,i)=><div className={i===2?"cal-day selected":"cal-day"} key={d}><small>{d}</small><b>{12+i}</b></div>)}</div>
-            <div className="calendar-list"><div className="cal-list-head"><strong>Wednesday, 14 October</strong><span>4 classes</span></div>{schedule.map((s)=><div className="cal-row" key={s.time}><div className="cal-time">{s.time}</div><div className="cal-left"><b>{s.name}</b><small>{s.with} • Reformer</small></div><div className="cal-bar"><div style={{width:s.width}}/></div><div className="cal-count">{s.capacity}</div><span className={s.type==="terra"?"cal-status full":"cal-status"}>{s.type==="terra"?"Full":"Open"}</span></div>)}</div>
-            <div className="calendar-footer"><span><span className="green-circle"/> 27 bookings today</span><span>See all classes <ArrowRight size={13}/></span></div>
+        </section>
+
+        <section className="ed-features" aria-labelledby="essentials-title">
+          <div className="ed-container">
+            <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Everything you need to get through a busy studio day. Nothing to get in your way.</p></div>
+            <div className="ed-feature-list">{services.map((item)=><div className="ed-feature-row" key={item.n}>
+              <span className="ed-feature-num">{item.n} / 03</span>
+              <div className="ed-feature-title"><span>{item.category}</span><h3>{item.title}</h3></div>
+              <p>{item.description}</p>
+              <span className="ed-feature-arrow" aria-hidden="true"><ArrowUpRight size={22}/></span>
+            </div>)}</div>
           </div>
-        </div></section>
-        <section className="story-section"><div className="container story-layout"><div className="story-orbit"><div className="orbit-ring one"></div><div className="orbit-ring two"></div><div className="orbit-middle"><Waves size={66} strokeWidth={1}/></div><span className="orbit-floating orbit-one">✳</span><span className="orbit-floating orbit-two">+</span></div><div className="story-copy"><span className="section-kicker">MADE FOR THE LITTLE DETAILS</span><h2>You bring the energy.<br/><em>We&apos;ll bring the ease.</em></h2><p>From your first class to your last evening stretch, ReformDesk keeps the small stuff feeling small.</p><div className="story-checks"><span><Check size={17}/> No complicated setup</span><span><Check size={17}/> No bloated toolkits</span><span><Check size={17}/> No per-booking platform fees from us*</span></div><small>* Payment processing fees from your chosen providers may still apply if you use them outside ReformDesk.</small></div></div></section>
-        <section className="pricing-section section-pad" id="pricing"><div className="container"><div className="pricing-title"><span className="section-kicker">STRAIGHTFORWARD BY DESIGN</span><h2>One studio. One price.<br/><em>No guessing games.</em></h2><p>Simple, transparent pricing is our goal. We&apos;re inviting studios to shape the first release.</p></div><div className="pricing-card"><div className="price-left"><span className="price-badge"><Sparkles size={13}/> EARLY ACCESS CONCEPT</span><h3>Studio Essential</h3><p>For independent Pilates, yoga and boutique fitness studios that want their time back.</p><div className="price-display"><span>$</span><strong>129</strong><span>/ month</span></div><small>Illustrative pricing — not yet available to purchase.</small><Link className="btn btn-light btn-lg" href="/demo">Explore the demo <ArrowUpRight size={18}/></Link></div><div className="price-right"><strong>Designed to include</strong>{["Classes & instructor scheduling","Class capacity & booking tracking","Member profiles & class packs","Waitlist and cancellation flows","Mobile-friendly studio dashboard","Easy setup without IT support"].map(x=><div key={x}><Check size={18}/><span>{x}</span></div>)}<div className="price-note"><ShieldCheck size={20}/><p>Live payments, customer accounts and production storage are not enabled in this demonstration.</p></div></div></div></div></section>
-        <section className="final-cta"><div className="container cta-inner"><div><span className="section-kicker">YOUR STUDIO, A LITTLE LIGHTER</span><h2>Make space for <em>more.</em></h2><p>Discover what a simpler studio day could feel like.</p></div><Link className="btn btn-light btn-lg" href="/demo">See the interactive demo <ArrowUpRight size={18}/></Link></div></section>
+        </section>
+
+        <section className="ed-window" id="studio">
+          <div className="ed-container ed-window-grid">
+            <div className="ed-window-copy">
+              <span className="ed-overline">03 / A LOOK INSIDE</span>
+              <h2>One place.<br/><em>Every moving</em><br/>part.</h2>
+              <p>Classes, members and class-pack credits in one clear view. The admin side of studio life, without making it your whole life.</p>
+              <div className="ed-window-list"><span><Check size={17}/> Simple class scheduling</span><span><Check size={17}/> Member and package tracking</span><span><Check size={17}/> Waitlists and capacity</span></div>
+              <Link className="ed-text-link" href="/demo">STEP INSIDE THE DEMO <ArrowUpRight size={18}/></Link>
+              <div className="ed-window-edition">THE STUDIO EDIT <span>VOL. 01</span></div>
+            </div>
+            <div className="ed-window-showcase">
+              <div className="ed-window-label"><span>THE DESK / LIVE DEMO</span><span>01 — 04</span></div>
+              <div className="ed-window-schedule"><MiniSchedule compact/></div>
+              <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong>✳</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="ed-pricing" id="pricing">
+          <div className="ed-container">
+            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. A single-studio pricing idea, shaped with independent businesses in mind.</p></div>
+            <div className="ed-price-grid">
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>129<small> / MONTH</small></div><p>Illustrative pricing for one studio. Not yet available for purchase.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Studio schedules and instructors","Capacity and class bookings","Member profiles and class packs","Waitlists and cancellation flows","Mobile-friendly studio dashboard","Straightforward self-serve setup"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Interactive demo only. Real accounts, live payments and production storage are not enabled yet.</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less desk.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/demo" className="ed-last-link"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="footer"><div className="container footer-top"><div><Logo light/><p>A calmer way to run your movement studio.<br/>Made for the people behind the practice.</p></div><div className="footer-links"><a href="#features">Features</a><a href="#pricing">Pricing</a><Link href="/demo">Live demo</Link></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} ReformDesk. Concept preview.</span><span>Made with care, for the studios that move us. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">The essentials</a><a href="#pricing">Pricing</a><Link href="/demo">Live demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 REFORMDESK · EARLY CONCEPT</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
