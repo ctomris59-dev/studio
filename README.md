@@ -1,6 +1,6 @@
-# ReformDesk — Pilates Studio SaaS (early demo)
+# ReformDesk — Independent Studio SaaS (early demo)
 
-A responsive, English-first boutique reformer Pilates management concept built with Next.js App Router and TypeScript.
+An English-first management concept for Pilates, yoga, boutique fitness and gym group-class studios, built with Next.js App Router and TypeScript.
 
 ## Quick start
 
@@ -24,3 +24,11 @@ This is an **interactive prototype**, not a production-ready multi-tenant SaaS. 
 Before selling access, implement authentication, server-side tenant isolation, a durable database, transactional bookings, security controls, error monitoring, backups and payment/billing integration. No domain, server, or payment provider is purchased or connected yet.
 
 **Brand name and the $129 pricing are provisional.** Conduct trademark, pricing and market validation before commercialization.
+
+## Visual identity
+
+- Color palette: cobalt `#334BDD`, ink `#1B2237`, paper `#F4F0E7`, citrus `#E7F982`, and coral `#FF8360`.
+- Display typography: **Barlow Condensed** (athletic editorial headings, including italic emphasis).
+- Body typography: **Source Sans 3** (accessible and readable UI copy).
+- Utility labels: **IBM Plex Mono** (small functional metadata only).
+- Preserve the editorial studio identity; avoid generic SaaS gradient/card/serif templates.
