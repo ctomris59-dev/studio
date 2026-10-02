@@ -58,8 +58,8 @@ export default function Demo() {
   const [modal,setModal]=useState<Modal>(null);
   const [notification,setNotification]=useState("");
   const [query,setQuery]=useState("");
-  const [leadForm,setLeadForm]=useState({name:"",email:"",source:"Website",consent:true});
-  const [memberForm,setMemberForm]=useState({name:"",email:"",plan:"10 Class Pack",consent:true});
+  const [leadForm,setLeadForm]=useState({name:"",email:"",source:"Website",consent:false});
+  const [memberForm,setMemberForm]=useState({name:"",email:"",plan:"10 Class Pack",consent:false});
   const [classForm,setClassForm]=useState({title:focusClasses.Pilates[0],coach:"Sophie",date:day(1),time:"09:00",capacity:"8"});
   const [taskForm,setTaskForm]=useState({personKind:"lead" as "lead"|"member",personId:"l1",reason:"Follow up",due:day(1)});
   const [selectedLead,setSelectedLead]=useState("");
@@ -89,7 +89,7 @@ export default function Demo() {
     if([...data.leads,...data.members].some(x=>x.email===email)){say("This email is already in the demo CRM.");return;}
     const l:Lead={id:uid("l"),name,email,stage:"New",source:leadForm.source,created:day(),nextContact:day(1),consent:leadForm.consent,notes:""};
     setData(p=>({...p,leads:[l,...p.leads],activities:[{id:uid("a"),personKind:"lead",personId:l.id,text:"Lead added via "+l.source,date:day()},...p.activities]}));
-    setLeadForm({name:"",email:"",source:"Website",consent:true});setModal(null);setTab("leads");setSelectedLead(l.id);say("New lead added.");
+    setLeadForm({name:"",email:"",source:"Website",consent:false});setModal(null);setTab("leads");setSelectedLead(l.id);say("New lead added.");
   }
   function createMember(e:React.FormEvent<HTMLFormElement>){
     e.preventDefault();const name=safeText(memberForm.name,80),email=safeText(memberForm.email,160).toLowerCase();
@@ -97,7 +97,7 @@ export default function Demo() {
     if(data.members.some(m=>m.email===email)){say("This member already exists.");return;}
     const m:Member={id:uid("m"),name,email,plan:memberForm.plan,credits:creditsFor(memberForm.plan),joined:day(),lastVisit:null,consent:memberForm.consent,status:"Active",notes:""};
     setData(p=>({...p,members:[m,...p.members],activities:[{id:uid("a"),personKind:"member",personId:m.id,text:"Member joined the studio",date:day()},...p.activities]}));
-    setMemberForm({name:"",email:"",plan:"10 Class Pack",consent:true});setModal(null);setTab("members");say("New member added.");
+    setMemberForm({name:"",email:"",plan:"10 Class Pack",consent:false});setModal(null);setTab("members");say("New member added.");
   }
   function createClass(e:React.FormEvent<HTMLFormElement>){
     e.preventDefault();const cap=Number(classForm.capacity);

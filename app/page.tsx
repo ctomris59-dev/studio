@@ -13,9 +13,9 @@ const timetable = [
 ];
 
 const services = [
-  { n: "01", title: "Keep your classes in line.", category: "SCHEDULING", description: "Set your week, manage instructors and see how many places are left. A schedule that makes sense the first time you look at it.", icon: CalendarDays },
-  { n: "02", title: "Know your people.", category: "MEMBERS", description: "Member profiles, class-pack credits and bookings stay in one place. Less searching, more personal attention.", icon: Users },
-  { n: "03", title: "Make room for everyone.", category: "WAITLISTS & PACKS", description: "Keep track of your waitlist, cancellations and class-pack balances without piecing together another spreadsheet.", icon: CreditCard },
+  { n: "01", title: "Turn interest into members.", category: "LEADS / CRM", description: "Capture enquiries, track trial classes and keep each prospective member moving through the journey.", icon: CalendarDays },
+  { n: "02", title: "Know who to reach out to.", category: "MEMBER RETENTION", description: "Spot lapsed members, low class-pack balances and missed follow-ups before they disappear into spreadsheets.", icon: Users },
+  { n: "03", title: "Give every day direction.", category: "BOOKINGS / INSIGHTS", description: "Manage bookings, class credits, follow-up tasks and useful studio performance signals from one place.", icon: CreditCard },
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
@@ -68,7 +68,7 @@ export default function HomePage() {
               <div className="ed-index"><span className="ed-index-line"/> INDEPENDENT STUDIOS / BETTER DAYS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
-                <p>Your Pilates, yoga or boutique fitness studio deserves more of your time. Not more tabs, spreadsheets and back-office noise.</p>
+                <p>Meet the studio CRM concept that connects enquiries, memberships, class bookings and the next right follow-up—without another spreadsheet.</p>
                 <Link className="ed-primary-cta" href="/demo"><span>EXPLORE THE DEMO</span><ArrowUpRight size={20}/></Link>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
@@ -96,7 +96,7 @@ export default function HomePage() {
 
         <section className="ed-features" aria-labelledby="essentials-title">
           <div className="ed-container">
-            <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Everything you need to get through a busy studio day. Nothing to get in your way.</p></div>
+            <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Built to help you notice who is ready to join, who may need a check-in and which classes have room to grow.</p></div>
             <div className="ed-feature-list">{services.map((item)=><div className="ed-feature-row" key={item.n}>
               <span className="ed-feature-num">{item.n} / 03</span>
               <div className="ed-feature-title"><span>{item.category}</span><h3>{item.title}</h3></div>
@@ -111,8 +111,8 @@ export default function HomePage() {
             <div className="ed-window-copy">
               <span className="ed-overline">03 / A LOOK INSIDE</span>
               <h2>One place.<br/><em>Every moving</em><br/>part.</h2>
-              <p>Classes, members and class-pack credits in one clear view. The admin side of studio life, without making it your whole life.</p>
-              <div className="ed-window-list"><span><Check size={17}/> Simple class scheduling</span><span><Check size={17}/> Member and package tracking</span><span><Check size={17}/> Waitlists and capacity</span></div>
+              <p>From a new enquiry to their next class, follow the customer journey in one clear workspace. The everyday admin gets a little easier to act on.</p>
+              <div className="ed-window-list"><span><Check size={17}/> Lead-to-member CRM pipeline</span><span><Check size={17}/> Retention and renewal prompts</span><span><Check size={17}/> Member bookings and studio insights</span></div>
               <Link className="ed-text-link" href="/demo">STEP INSIDE THE DEMO <ArrowUpRight size={18}/></Link>
               <div className="ed-window-edition">THE STUDIO EDIT <span>VOL. 01</span></div>
             </div>
@@ -129,7 +129,7 @@ export default function HomePage() {
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. A single-studio pricing idea, shaped with independent businesses in mind.</p></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>129<small> / MONTH</small></div><p>Illustrative pricing for one studio. Not yet available for purchase.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Studio schedules and instructors","Capacity and class bookings","Member profiles and class packs","Waitlists and cancellation flows","Mobile-friendly studio dashboard","Straightforward self-serve setup"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Interactive demo only. Real accounts, live payments and production storage are not enabled yet.</div></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Client booking demo with class credits","Email drafts with consent checks","Studio occupancy and conversion insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Interactive browser demo only. Real client logins, hosted CRM storage, outbound emails and payments are not enabled.</div></div>
             </div>
           </div>
         </section>
