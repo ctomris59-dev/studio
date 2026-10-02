@@ -1,10 +1,10 @@
 export type StudioFocus = "Pilates" | "Yoga" | "Boutique fitness" | "Gym";
 export type LeadStage = "New" | "Contacted" | "Trial booked" | "Trial attended" | "Won" | "Lost";
 export type View = "overview" | "leads" | "members" | "schedule" | "followups" | "reports" | "client" | "settings";
-export type Member = { id:string; name:string; email:string; plan:string; credits:number|null; joined:string; lastVisit:string|null; consent:boolean; status:"Active"|"Paused"; notes:string };
-export type Lead = { id:string; name:string; email:string; stage:LeadStage; source:string; created:string; nextContact:string; consent:boolean; notes:string; trialAttended?:string };
-export type Session = { id:string; title:string; coach:string; date:string; time:string; capacity:number; booked:string[]; waitlist:string[] };
-export type Task = { id:string; personKind:"lead"|"member"; personId:string; reason:string; due:string; completed:boolean; created:string };
+export type Member = { id:string; name:string; email:string; plan:string; credits:number|null; joined:string; lastVisit:string|null; consent:boolean; status:"Active"|"Paused"; notes:string; phone?:string; startDate?:string; expiryDate?:string; paymentStatus?:"Pending"|"Paid"; sourceLeadId?:string; initialCredits?:number; };
+export type Lead = { id:string; name:string; email:string; stage:LeadStage; source:string; created:string; nextContact:string; consent:boolean; notes:string; trialAttended?:string; phone?:string; preferredService?:string; preferredChannel?:"Email"|"Phone"|"Either"; interestPlan?:string; };
+export type Session = { id:string; title:string; coach:string; date:string; time:string; capacity:number; booked:string[]; waitlist:string[]; durationMinutes?:number; room?:string; seriesId?:string; bookingCutoffHours?:number; cancelCutoffHours?:number; description?:string; };
+export type Task = { id:string; personKind:"lead"|"member"; personId:string; reason:string; due:string; completed:boolean; created:string; category?:"Call"|"Email"|"Renewal"|"Trial"|"General"; priority?:"Low"|"Normal"|"High"; dueTime?:string; assignee?:string; repeat?:"None"|"Weekly"|"Monthly"; notes?:string; outcome?:"Contacted"|"No answer"|"Reschedule"|"Converted"|"Completed"; completedAt?:string; };
 export type Activity = { id:string; personKind:"lead"|"member"; personId:string; text:string; date:string };
 export type StudioData = { version:3; studioFocus:StudioFocus; studioName:string; leads:Lead[]; members:Member[]; sessions:Session[]; tasks:Task[]; activities:Activity[]; closedOpportunities:string[] };
 export type Opportunity = { id:string; personKind:"lead"|"member"; personId:string; personName:string; label:string; detail:string; category:"Lead"|"Renewal"|"Re-engage"|"Trial"; priority:number; due:string };
@@ -38,6 +38,7 @@ export function makeSeed(focus:StudioFocus="Pilates"):StudioData {
   const memberNames=["Amelia Hart","Sophia Chen","Mia Oliver","Isabella Reed","Olivia Patel","Grace Taylor","Ella Brooks","Noah Mitchell","Lily James","Ava Williams","Chloe Adams","Charlotte Davis"];
   const members=memberNames.map((name,i):Member=>({
     id:"m"+(i+1),name,email:name.toLowerCase().replace(/\s+/g,".")+"@example.com",
+    paymentStatus:"Paid",startDate:day(-90+i*4),expiryDate:day(100-i*2),initialCredits:i%4===0?0:i%3===0?5:10,
     plan:i%4===0?"Unlimited Monthly":i%3===0?"5 Class Pack":"10 Class Pack",
     credits:i%4===0?null:Math.max(0,(i%3===0?5:10)-Math.floor(i/2)),
     joined:day(-90+i*4),lastVisit:[-18,-3,-7,-24,-2,-5,-16,-1,-11,-4,-26,-3][i]===null?null:day([-18,-3,-7,-24,-2,-5,-16,-1,-11,-4,-26,-3][i]),
@@ -84,6 +85,10 @@ export function bookMember(data:StudioData,sessionId:string,memberId:string):{da
   const s=data.sessions.find(s=>s.id===sessionId);const m=data.members.find(m=>m.id===memberId);
   if(!s||!m)return {data,message:"Choose a valid class and member.",success:false};
   if(s.booked.includes(memberId)||s.waitlist.includes(memberId))return {data,message:"Already booked or waitlisted.",success:false};
+  if(m.status==="Paused")return {data,message:"This membership is paused.",success:false};
+  if(m.paymentStatus==="Pending")return {data,message:"This package is pending confirmation.",success:false};
+  if(m.expiryDate&&m.expiryDate<s.date)return {data,message:"The membership expires before this class.",success:false};
+  if(s.bookingCutoffHours!==undefined&&s.bookingCutoffHours>0&&new Date(s.date+"T"+s.time+":00").getTime()-Date.now()<s.bookingCutoffHours*3600000)return {data,message:"Booking cutoff has passed.",success:false};
   if(m.credits!==null&&m.credits<1)return {data,message:"This member has no remaining credits.",success:false};
   const full=s.booked.length>=s.capacity;
   return {data:{
@@ -99,12 +104,13 @@ export function cancelBooking(data:StudioData,sessionId:string,memberId:string):
   const wasBooked=session.booked.includes(memberId);
   const wasWaitlisted=session.waitlist.includes(memberId);
   if(!wasBooked&&!wasWaitlisted)return {data,message:"Booking not found.",success:false};
+  if(session.cancelCutoffHours!==undefined&&session.cancelCutoffHours>0&&new Date(session.date+"T"+session.time+":00").getTime()-Date.now()<session.cancelCutoffHours*3600000)return {data,message:"Cancellation cutoff has passed.",success:false};
   if(wasWaitlisted)return {data:{...data,sessions:data.sessions.map(s=>s.id===sessionId?{...s,waitlist:s.waitlist.filter(id=>id!==memberId)}:s)},message:"Removed from waitlist.",success:true};
   const queue=[...session.waitlist];let promoted:Member|undefined;
   while(queue.length) {
     const id=queue.shift()!;
     const candidate=data.members.find(m=>m.id===id);
-    if(candidate&&(candidate.credits===null||candidate.credits>0)) {promoted=candidate;break;}
+    if(candidate&&candidate.status==="Active"&&candidate.paymentStatus!=="Pending"&&(!candidate.expiryDate||candidate.expiryDate>=session.date)&&(candidate.credits===null||candidate.credits>0)) {promoted=candidate;break;}
   }
   return {data:{
     ...data,
@@ -122,7 +128,8 @@ export function opportunities(data:StudioData):Opportunity[] {
   }
   for(const m of data.members){
     if(m.status!=="Active")continue;
-    if(m.credits!==null&&m.credits<=2)result.push({id:"renew:"+m.id,personKind:"member",personId:m.id,personName:m.name,category:"Renewal",label:"Class pack running low",detail:m.credits+" credits remaining",priority:1,due:day()});
+    if(m.paymentStatus!=="Pending"&&m.credits!==null&&m.credits<=2)result.push({id:"renew:"+m.id,personKind:"member",personId:m.id,personName:m.name,category:"Renewal",label:"Class pack running low",detail:m.credits+" credits remaining",priority:1,due:day()});
+    if(m.expiryDate&&m.expiryDate>=day()&&m.expiryDate<=day(14))result.push({id:"expiry:"+m.id,personKind:"member",personId:m.id,personName:m.name,category:"Renewal",label:"Membership expiry approaching",detail:"Expires "+compactDate(m.expiryDate),priority:1,due:m.expiryDate});
     if(m.lastVisit&&daysSince(m.lastVisit)>=14)result.push({id:"winback:"+m.id,personKind:"member",personId:m.id,personName:m.name,category:"Re-engage",label:"Member may need a check-in",detail:"Last visit "+daysSince(m.lastVisit)+" days ago",priority:2,due:day()});
   }
   return result.filter(o=>!data.closedOpportunities.includes(o.id)).sort((a,b)=>a.priority-b.priority||a.due.localeCompare(b.due));
@@ -133,8 +140,11 @@ export function report(data:StudioData) {
   const won=data.leads.filter(l=>l.stage==="Won").length;
   const seats=data.sessions.reduce((x,s)=>x+s.capacity,0),booked=data.sessions.reduce((x,s)=>x+s.booked.length,0);
   const atRisk=data.members.filter(m=>m.status==="Active"&&m.lastVisit&&daysSince(m.lastVisit)>=14).length;
-  const renewals=data.members.filter(m=>m.status==="Active"&&m.credits!==null&&m.credits<=2).length;
-  return {active,trials,won,seats,booked,atRisk,renewals,occupancy:convertPercent(booked,seats),conversion:convertPercent(won,trials),completedTasks:data.tasks.filter(t=>t.completed).length,openTasks:data.tasks.filter(t=>!t.completed).length,leads:data.leads.length};
+  const renewals=data.members.filter(m=>m.status==="Active"&&m.paymentStatus!=="Pending"&&m.credits!==null&&m.credits<=2).length;
+  const pending=data.members.filter(m=>m.paymentStatus==="Pending").length;
+  const expiring=data.members.filter(m=>m.expiryDate&&m.expiryDate>=day()&&m.expiryDate<=day(14)).length;
+  const outcomes=Object.fromEntries(["Contacted","No answer","Reschedule","Converted","Completed"].map(k=>[k,data.tasks.filter(t=>t.outcome===k).length]));
+  return {active,trials,won,seats,booked,atRisk,renewals,pending,expiring,outcomes,occupancy:convertPercent(booked,seats),conversion:convertPercent(won,trials),completedTasks:data.tasks.filter(t=>t.completed).length,openTasks:data.tasks.filter(t=>!t.completed).length,leads:data.leads.length};
 }
 export function draftFor(name:string,kind:string,studioName:string) {
   const first=name.split(" ")[0];

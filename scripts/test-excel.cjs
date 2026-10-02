@@ -21,8 +21,13 @@ assert.equal(result.data.leads.length,original.leads.length);
 assert.equal(result.data.members.length,original.members.length);
 assert.equal(result.data.sessions.length,original.sessions.length);
 assert.equal(result.counts.bookings,original.sessions.reduce((n,s)=>n+s.booked.length+s.waitlist.length,0));
-assert.deepEqual(result.data.sessions,original.sessions);
-assert.deepEqual(result.data.tasks,original.tasks);
+const sessionCore=s=>({id:s.id,title:s.title,coach:s.coach,date:s.date,time:s.time,capacity:s.capacity,booked:s.booked,waitlist:s.waitlist});
+const taskCore=t=>({id:t.id,personKind:t.personKind,personId:t.personId,reason:t.reason,due:t.due,completed:t.completed,created:t.created});
+assert.deepEqual(result.data.sessions.map(sessionCore),original.sessions.map(sessionCore));
+assert.deepEqual(result.data.tasks.map(taskCore),original.tasks.map(taskCore));
+assert.equal(result.data.sessions[0].durationMinutes,50);
+assert.equal(result.data.sessions[0].room,"Main studio");
+assert.equal(result.data.members[0].paymentStatus,"Paid");
 assert.deepEqual(result.data.activities,original.activities);
 assert.deepEqual(result.data.closedOpportunities,original.closedOpportunities);
 assert.equal(format.SHEETS.length,8);
@@ -40,6 +45,27 @@ const wrongVersion=clone(rows);wrongVersion.Guide[1][1]="Unknown format";assert(
 const empty=format.toExcelTables(original,true);assert(!format.fromExcelTables(empty).valid);
 const oneLead=clone(empty);oneLead.Leads.push(rows.Leads[1]);assert(format.fromExcelTables(oneLead).valid);
 const priorError=clone(rows);priorError.Bookings[1][2]="Paid";assert(!format.fromExcelTables(priorError).valid);
+const old=clone(rows);
+old.Guide[1][1]="ReformDesk Excel v1";
+for(const name of ["Leads","Members","Classes","FollowUps"]){
+ const minimum={Leads:10,Members:10,Classes:6,FollowUps:7}[name];
+ old[name]=old[name].map(row=>row.slice(0,minimum));
+}
+assert(format.fromExcelTables(old).valid,"Legacy v1 data must remain importable");
+const withPhone=clone(rows);withPhone.Leads[1][2]="";withPhone.Leads[1][10]="+441234567890";
+assert(format.fromExcelTables(withPhone).valid,"Phone-only leads must import");
+const badPhone=clone(withPhone);badPhone.Leads[1][10]="abc";
+assert(!format.fromExcelTables(badPhone).valid);
+const badPayment=clone(rows);badPayment.Members[1][13]="Pending";badPayment.Members[1][4]="4";assert(!format.fromExcelTables(badPayment).valid);
+const enriched=clone(rows);enriched.Classes[1][6]="75";enriched.Classes[1][7]="Room D";enriched.Classes[1][9]="3";
+enriched.Members[1][12]=studio.day(60);enriched.Leads[1][11]="Pilates";
+enriched.FollowUps[1][7]="Call";enriched.FollowUps[1][8]="High";
+const enrichedResult=format.fromExcelTables(enriched);
+assert(enrichedResult.valid,JSON.stringify(enrichedResult.errors));
+assert.equal(enrichedResult.data.sessions[0].durationMinutes,75);
+assert.equal(enrichedResult.data.sessions[0].room,"Room D");
+assert.equal(enrichedResult.data.leads[0].preferredService,"Pilates");
+
 
 async function main(){
   const wb=new ExcelJS.Workbook();
@@ -66,7 +92,7 @@ async function main(){
   }
   const roundTrip=format.fromExcelTables(restored);
   assert(roundTrip.valid,JSON.stringify(roundTrip.errors));
-  assert.deepEqual(roundTrip.data.sessions,original.sessions);
-  console.log("Excel workbook: export/import round-trip + 12 validation cases passed.");
+  assert.deepEqual(roundTrip.data.sessions.map(sessionCore),original.sessions.map(sessionCore));
+  console.log("Excel: v2 workbook round-trip, legacy v1 import and expanded validation cases passed.");
 }
 main().catch(err=>{console.error(err);process.exitCode=1;});

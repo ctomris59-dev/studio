@@ -23,5 +23,7 @@ jobs:
         run: npm run test:excel
       - name: Test credit corrections and Undo/Redo
         run: npm run test:history
+      - name: Test extended CRM forms, repeat classes and task outcomes
+        run: npm run test:workflows
       - name: Compile production build
         run: npm run build

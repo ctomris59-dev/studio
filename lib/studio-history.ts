@@ -58,6 +58,7 @@ export function adjustMemberCredits(
   const member=data.members.find(m=>m.id===memberId);
   if(!member)return {success:false,data,message:"Member not found."};
   if(member.credits===null)return {success:false,data,message:"Unlimited members do not use credit balances."};
+  if(member.paymentStatus==="Pending")return {success:false,data,message:"Confirm the package before manually adjusting class credits."};
   if(!Number.isSafeInteger(change)||change===0||Math.abs(change)>1000)return {success:false,data,message:"Enter a whole number of 1 to 1,000 credits."};
   if(!reason.trim()||reason.trim().length>200)return {success:false,data,message:"An adjustment reason (up to 200 characters) is required."};
   const target=member.credits+change;

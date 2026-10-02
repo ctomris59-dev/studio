@@ -335,3 +335,36 @@
   .crm-credit-summary{grid-template-columns:1fr;gap:5px}
   .crm-credit-result strong{font-size:16px}
 }
+
+/* Quick Add + Advanced Options: operationally legible, progressive disclosure. */
+.crm-advanced-toggle{border:1px dashed #9aa6da;background:#f0f1ff;color:#334bdd;min-height:43px;padding:10px 13px;font:700 14px "Source Sans 3",sans-serif;text-align:left;cursor:pointer}
+.crm-advanced-toggle:hover{background:#e7f982;border-color:#1b2237;color:#1b2237}
+.crm-advanced-toggle:focus-visible,.crm-weekday-picker button:focus-visible,.crm-task-outcome-label select:focus-visible{outline:3px solid #ff8360;outline-offset:2px}
+.crm-advanced-fields{padding:18px;background:#f5f3ee;border-left:3px solid #334bdd;display:flex;flex-direction:column;gap:15px}
+.crm-advanced-fields>label,.crm-advanced-fields .crm-form-pair>label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:700;color:#455265}
+.crm-advanced-fields label.crm-check-row{flex-direction:row;align-items:center;gap:10px}
+.crm-modal-form>label{font-size:13px}
+.crm-modal-form input:not([type="checkbox"]),.crm-modal-form select,.crm-modal-form textarea{font-size:15px;min-height:43px}
+.crm-modal-form input[type="checkbox"]{min-width:18px;min-height:18px}
+.crm-modal-note{font-size:14px;line-height:1.55}
+.crm-modal-label{font-size:13px;font-weight:700;color:#455265}
+.crm-weekday-picker{display:flex;gap:5px;flex-wrap:wrap}
+.crm-weekday-picker button{border:1px solid #bfc6d7;min-width:42px;min-height:43px;background:#fffefa;color:#2d3b54;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer}
+.crm-weekday-picker button.active{background:#334bdd;color:#fff;border-color:#334bdd}
+.crm-weekday-picker button:hover{border-color:#334bdd}
+.crm-task-row>div>small{display:block;font-size:12px;color:#334bdd;margin-top:4px;font-weight:700}
+.crm-task-outcome-label{font-size:11px;color:#505c71;font-weight:600;display:flex;flex-direction:column;gap:4px;margin:0 8px;max-width:120px}
+.crm-task-outcome-label select{background:#fffefa;border:1px solid #c9d0db;border-radius:2px;padding:7px 4px;min-height:38px;max-width:120px;font-size:13px}
+.crm-insights-addendum{padding:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;border-top:1px solid #e6e5df}
+.crm-insights-addendum>div{display:flex;flex-direction:column;gap:5px;padding:13px;background:#f3f1eb}
+.crm-insights-addendum b{font-size:13px}
+.crm-insights-addendum strong{font-size:19px;color:#334bdd}
+.crm-insights-addendum span,.crm-insights-addendum small{font-size:12px;color:#657184;line-height:1.4}
+@media(max-width:610px){
+.crm-advanced-fields{padding:14px}
+.crm-insights-addendum{grid-template-columns:1fr}
+.crm-task-outcome-label{max-width:100px}
+.crm-task-outcome-label select{max-width:100px}
+.crm-weekday-picker button{min-width:40px;min-height:44px}
+.crm-modal-form input:not([type="checkbox"]),.crm-modal-form select,.crm-modal-form textarea{font-size:16px}
+}

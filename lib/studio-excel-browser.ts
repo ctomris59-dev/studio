@@ -6,17 +6,17 @@ import type {StudioData} from "./studio-crm";
 const MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const palettes={ink:"1B2237",blue:"334BDD",cream:"F4F0E7",citrus:"E7F982",white:"FFFFFF",gray:"68738A"};
 const widths:Record<SheetName,number[]>={
-  Guide:[29,94],Leads:[18,27,35,20,19,23,28,19,44,30],
-  Members:[20,29,37,23,15,24,28,19,17,45],
-  Classes:[20,30,24,25,21,15],Bookings:[22,22,27],
-  FollowUps:[20,27,20,44,24,23,26],
+  Guide:[29,94],Leads:[18,27,35,20,19,23,28,19,44,30,22,23,21,23],
+  Members:[20,29,37,23,15,24,28,19,17,45,22,25,25,22,24,20],
+  Classes:[20,30,24,25,21,15,20,22,22,23,23,38],Bookings:[22,22,27],
+  FollowUps:[20,27,20,44,24,23,26,20,16,19,24,18,34,20,22],
   Activity:[20,27,20,54,26],Dismissed:[32]
 };
 const selection:Partial<Record<SheetName,{col:number;items:string[]}[]>>={
-  Leads:[{col:4,items:["New","Contacted","Trial booked","Trial attended","Won","Lost"]},{col:8,items:["Yes","No"]}],
-  Members:[{col:4,items:["5 Class Pack","10 Class Pack","Unlimited Monthly"]},{col:8,items:["Yes","No"]},{col:9,items:["Active","Paused"]}],
+  Leads:[{col:4,items:["New","Contacted","Trial booked","Trial attended","Won","Lost"]},{col:8,items:["Yes","No"]},{col:13,items:["Either","Email","Phone"]}],
+  Members:[{col:4,items:["5 Class Pack","10 Class Pack","Unlimited Monthly"]},{col:8,items:["Yes","No"]},{col:9,items:["Active","Paused"]},{col:14,items:["Pending","Paid"]}],
   Bookings:[{col:3,items:["Booked","Waitlisted"]}],
-  FollowUps:[{col:2,items:["lead","member"]},{col:6,items:["Yes","No"]}],
+  FollowUps:[{col:2,items:["lead","member"]},{col:6,items:["Yes","No"]},{col:8,items:["Call","Email","Renewal","Trial","General"]},{col:9,items:["Low","Normal","High"]},{col:12,items:["None","Weekly","Monthly"]},{col:14,items:["Contacted","No answer","Reschedule","Converted","Completed"]}],
   Activity:[{col:2,items:["lead","member"]}]
 };
 function cellValue(value:unknown):string{

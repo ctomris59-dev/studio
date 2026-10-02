@@ -71,3 +71,16 @@ Open **Members → Adjust credits** for a member with a class-credit balance. Se
 The **Undo / Redo** controls above the dashboard allow reversal of the last 15 changes made in the current browser session, including class-pack corrections, membership/CRM edits, attendance, task updates, bookings, cancellations, demo resets and Excel imports. The action confirmation message also offers **Undo**. A new action clears the redo history. Reloading the browser clears this in-memory Undo / Redo history, although the demo records themselves are still stored in browser localStorage.
 
 This is a **browser-only prototype**: undo rolls back a local data snapshot and its sample activity entries. A real multi-user application must use server-side authorization, idempotent reversing ledger entries, audit logging and transactional booking updates; the demo snapshot mechanism is not a substitute for that production architecture.
+
+## CRM v0.4 — lean forms with advanced options
+
+The four Add forms preserve fast entry and disclose further fields on demand:
+
+- **Leads:** name and email or telephone, source, then optional stage, service interest, contact preference, next-contact date, pack interest and minimal conversation notes. Adds a follow-up task automatically. Consent is opt-in, off by default.
+- **Members:** name, email or telephone, class pack and separately tracked manual package-confirmation status. Pending packages start with **zero active credits**; **Confirm pack** manually activates chosen credits, without processing a payment. Optional start/expiry dates, initial credit amount, pause status, brief notes and linked lead. Converting a lead creates a **Pending** member and keeps the source lead ID, notes and activity record; no automatic award.
+- **Classes:** instructor, time, date, duration and capacity; optionally room, booking/cancellation deadlines and weekly recurrence with weekdays and an end date. A series produces individual class rows sharing a Series ID, with atomic rejection of coach or room time conflicts. Limit: 180-day window and 100 sessions per batch.
+- **Follow-ups:** task category, due date, result on completion; optional priority, time, responsible person, notes and weekly/monthly recurrence. Completion is logged, and repeating tasks create their next occurrence.
+
+**Excel v2** includes all new fields as appended worksheet columns and still accepts correctly formatted v1 exports. Use **Settings → Excel** to download the updated template. Bookings, class credits, leads, member links, tasks and reporting remain cross-referenced.
+
+**Data minimization:** We do not request medical information, date of birth, gender, physical addresses, emergency contacts or payment card data. These are browser-only demo capabilities; there is no real account, payment or email delivery system.
