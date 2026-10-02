@@ -63,7 +63,7 @@ export function confirmPackage(data:StudioData,memberId:string):Result {
   if(m.paymentStatus!=="Pending")return error(data,"Package is not pending.");
   const credits=m.plan==="Unlimited Monthly"?null:Math.min(1000,m.initialCredits??creditsFor(m.plan)??0);
   return good({...data,members:data.members.map(x=>x.id===memberId?{...x,paymentStatus:"Paid",credits}:x),
-    activities:[{id:uid("a"),personKind:"member",personId,text:"Manager manually confirmed package; no payment processed",date:day()},...data.activities]
+    activities:[{id:uid("a"),personKind:"member",personId:memberId,text:"Manager manually confirmed package; no payment processed",date:day()},...data.activities]
   },"Package manually confirmed, credits activated. No payment was collected.");
 }
 export function convertLead(data:StudioData,leadId:string,plan?:string):Result {
