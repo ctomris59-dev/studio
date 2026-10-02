@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   Activity as ActivityIcon, ArrowLeft, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check, CheckCheck,
   ChevronDown, ClipboardList, Clock3, CreditCard, Download, FileText, HeartHandshake, LayoutDashboard,
@@ -14,9 +14,10 @@ import {
   type Lead, type LeadStage, type Member, type Opportunity, type StudioData, type StudioFocus, type Task, type View
 } from "../../lib/studio-crm";
 import type { ValidationOutcome } from "../../lib/studio-excel";
+import {adjustMemberCredits,initialHistory,studioHistoryReducer} from "../../lib/studio-history";
 import "./crm.css";
 
-type Modal = "lead"|"member"|"class"|"task"|null;
+type Modal = "lead"|"member"|"class"|"task"|"credits"|null;
 type Draft = {personName:string;email:string;subject:string;body:string;consent:boolean;category:string}|null;
 const storageKey="reformdesk-crm-v3";
 const navItems:{id:View;name:string;icon:typeof LayoutDashboard}[]=[
@@ -53,7 +54,23 @@ function SectionTitle({title,caption,extra}:{title:string;caption?:string;extra?
 function Empty({text}:{text:string}){return <div className="crm-empty">{text}</div>;}
 
 export default function Demo() {
-  const [data,setData]=useState<StudioData>(()=>makeSeed());
+  const [history,dispatchHistory]=useReducer(studioHistoryReducer,undefined,()=>initialHistory(makeSeed()));
+  const data=history.present;
+  function setData(change:React.SetStateAction<StudioData>,label="Studio update"){
+    dispatchHistory({type:"apply",change:typeof change==="function"?change:()=>change,label});
+  }
+  function undoLast(){
+    const latest=history.past[history.past.length-1];
+    if(!latest)return;
+    dispatchHistory({type:"undo"});
+    say("Undone: "+latest.label+".");
+  }
+  function redoLast(){
+    const latest=history.future[history.future.length-1];
+    if(!latest)return;
+    dispatchHistory({type:"redo"});
+    say("Restored: "+latest.label+".");
+  }
   const [ready,setReady]=useState(false);
   const [tab,setTab]=useState<View>("overview");
   const [modal,setModal]=useState<Modal>(null);
@@ -61,6 +78,7 @@ export default function Demo() {
   const [query,setQuery]=useState("");
   const [leadForm,setLeadForm]=useState({name:"",email:"",source:"Website",consent:false});
   const [memberForm,setMemberForm]=useState({name:"",email:"",plan:"10 Class Pack",consent:false});
+  const [creditForm,setCreditForm]=useState({memberId:"",direction:"add" as "add"|"remove",amount:"5",reason:"Balance correction"});
   const [classForm,setClassForm]=useState({title:focusClasses.Pilates[0],coach:"Sophie",date:day(1),time:"09:00",capacity:"8"});
   const [taskForm,setTaskForm]=useState({personKind:"lead" as "lead"|"member",personId:"l1",reason:"Follow up",due:day(1)});
   const [selectedLead,setSelectedLead]=useState("");
@@ -75,7 +93,7 @@ export default function Demo() {
   const excelInput=useRef<HTMLInputElement>(null);
 
   useEffect(()=>{
-    try {const raw=localStorage.getItem(storageKey);if(raw){const parsed:unknown=JSON.parse(raw);if(isStudioData(parsed))setData(parsed);}}
+    try {const raw=localStorage.getItem(storageKey);if(raw){const parsed:unknown=JSON.parse(raw);if(isStudioData(parsed))dispatchHistory({type:"load",data:parsed});}}
     catch { /* Demo keeps its sample state if browser storage is unavailable. */ }
     setReady(true);
   },[]);
@@ -134,22 +152,38 @@ export default function Demo() {
     setNote("");say("Note saved to the demo CRM.");
   }
   function trackAttendance(m:Member){
-    setData(p=>({...p,members:p.members.map(x=>x.id===m.id?{...x,lastVisit:day()}:x),activities:[{id:uid("a"),personKind:"member",personId:m.id,text:"Attendance marked manually",date:day()},...p.activities]}));
+    setData(p=>({...p,members:p.members.map(x=>x.id===m.id?{...x,lastVisit:day()}:x),activities:[{id:uid("a"),personKind:"member",personId:m.id,text:"Attendance marked manually",date:day()},...p.activities]}),"Marked "+m.name+" attended");
     say(m.name+" marked as attended today.");
   }
-  function addPack(m:Member){
-    if(m.credits===null){say("Unlimited member does not need extra credits.");return;}
-    setData(p=>({...p,members:p.members.map(x=>x.id===m.id&&x.credits!==null?{...x,credits:x.credits+5}:x),activities:[{id:uid("a"),personKind:"member",personId:m.id,text:"Manager manually added 5 class credits; no payment collected",date:day()},...p.activities]}));
-    say("Five sample credits added manually; no payment processed.");
+  function openCredits(m:Member){
+    if(m.credits===null){say("Unlimited memberships do not have a class credit balance.");return;}
+    setCreditForm({memberId:m.id,direction:"add",amount:"5",reason:"Balance correction"});
+    setModal("credits");
+  }
+  function submitCredits(e:React.FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    const m=data.members.find(x=>x.id===creditForm.memberId);
+    if(!m)return;
+    const amount=Number(creditForm.amount);
+    const delta=creditForm.direction==="add"?amount:-amount;
+    const reason=safeText(creditForm.reason,200);
+    if(!Number.isSafeInteger(amount)||amount<1||amount>1000){say("Use 1–1,000 whole credits.");return;}
+    if(creditForm.direction==="remove" && m.credits!==null && amount>m.credits){say("Cannot remove more credits than the member has.");return;}
+    if(creditForm.direction==="remove" && !window.confirm("Remove "+amount+" credits from "+m.name+"? You can undo this afterwards."))return;
+    const result=adjustMemberCredits(data,m.id,delta,reason,uid("a"),day());
+    if(!result.success){say(result.message);return;}
+    setData(result.data,(delta>0?"Added ":"Removed ")+amount+" credits "+(delta>0?"to ":"from ")+m.name);
+    setModal(null);
+    say(result.message);
   }
   function performBook(sessionId:string,memberId:string){
     const result=bookMember(data,sessionId,memberId);
-    if(result.success)setData(result.data);
+    if(result.success)setData(result.data,"Booked or waitlisted a member");
     say(result.message);
   }
   function performCancel(sessionId:string,memberId:string){
     const result=cancelBooking(data,sessionId,memberId);
-    if(result.success)setData(result.data);
+    if(result.success)setData(result.data,"Cancelled booking or waitlist spot");
     say(result.message);
   }
   function prepareMessage(kind:"lead"|"member",id:string,category:string){
@@ -162,17 +196,17 @@ export default function Demo() {
     setData(p=>({...p,tasks:[{id:uid("t"),personKind:item.personKind,personId:item.personId,reason:item.label,due:day(),completed:false,created:day()},...p.tasks]}));
     say("Added to follow-up tasks.");
   }
-  function dismissOpportunity(id:string){setData(p=>({...p,closedOpportunities:[...p.closedOpportunities,id]}));say("Suggestion dismissed in this demo.");}
+  function dismissOpportunity(id:string){setData(p=>({...p,closedOpportunities:[...p.closedOpportunities,id]}),"Dismissed a CRM suggestion");say("Suggestion dismissed in this demo.");}
   function taskDone(t:Task){
     setData(p=>({...p,tasks:p.tasks.map(x=>x.id===t.id?{...x,completed:!x.completed}:x),activities:!t.completed?[{id:uid("a"),personKind:t.personKind,personId:t.personId,text:"Follow-up marked complete: "+t.reason,date:day()},...p.activities]:p.activities}));
     say(t.completed?"Follow-up reopened.":"Follow-up marked complete.");
   }
   function resetFocus(focus:StudioFocus){
     if(!window.confirm("Switching studio type resets this browser's demo CRM data. Continue?"))return;
-    setData(makeSeed(focus));setSelectedLead("");setPortalMember("m1");setClassForm(f=>({...f,title:focusClasses[focus][0]}));say("Loaded fresh "+focus+" demo data.");
+    setData(makeSeed(focus),"Switched demo studio type");setSelectedLead("");setPortalMember("m1");setClassForm(f=>({...f,title:focusClasses[focus][0]}));say("Loaded fresh "+focus+" demo data.");
   }
   function reset(){if(!window.confirm("Reset the browser demo and lose its current sample changes?"))return;resetDirect();}
-  function resetDirect(){setData(makeSeed(data.studioFocus));setSelectedLead("");setPortalMember("m1");setTab("overview");say("Demo workspace reset.");}
+  function resetDirect(){setData(makeSeed(data.studioFocus),"Reset demo workspace");setSelectedLead("");setPortalMember("m1");setTab("overview");say("Demo workspace reset.");}
   function exportData(){
     downloadCsv("reformdesk-crm-leads.csv",[["Name","Email","Stage","Source","Next contact","Consent"],...data.leads.map(l=>[l.name,l.email,l.stage,l.source,l.nextContact,l.consent?"Yes":"No"])]);
     say("Leads exported to CSV (sample data).");
@@ -206,7 +240,7 @@ export default function Demo() {
       counts.leads+" leads, "+counts.members+" members, "+counts.classes+" classes, "+
       counts.bookings+" bookings, "+counts.tasks+" tasks.\n\n"+
       "This replaces your sample workspace. Download a backup first if needed."))return;
-    setData(preview.data);setSelectedLead("");setPortalMember(preview.data.members[0]?.id||"");
+    setData(preview.data,"Imported Excel workbook");setSelectedLead("");setPortalMember(preview.data.members[0]?.id||"");
     setBookingChoice({});setExcelPreview(null);setTab("overview");
     say("Excel import completed. All linked demo records have been replaced.");
   }
@@ -273,7 +307,7 @@ export default function Demo() {
       <SectionTitle title="Your community" caption="Credits, visit history and personal follow-ups." extra={<div className="crm-inline-actions"><ActionButton variant="outline" onClick={()=>setTab("settings")}><FileSpreadsheet size={16}/> Excel</ActionButton><ActionButton onClick={()=>setModal("member")}><Plus size={16}/> Add member</ActionButton></div>}/>
       <div className="crm-scroll"><table className="crm-table">
         <thead><tr><th>MEMBER</th><th>CLASS PACK</th><th>CLASS CREDITS</th><th>LAST VISIT</th><th>ACTIONS</th></tr></thead>
-        <tbody>{data.members.map(m=><tr key={m.id}><td><b>{m.name}</b><small>{m.email}</small></td><td><span>{m.plan}</span><small>{m.consent?"Email permitted":"Email not opted in"}</small></td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions"><ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Mark attended</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>addPack(m)}>+5 credits</ActionButton>}</div></td></tr>)}</tbody>
+        <tbody>{data.members.map(m=><tr key={m.id}><td><b>{m.name}</b><small>{m.email}</small></td><td><span>{m.plan}</span><small>{m.consent?"Email permitted":"Email not opted in"}</small></td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions"><ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Mark attended</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>openCredits(m)}>Adjust credits</ActionButton>}</div></td></tr>)}</tbody>
       </table></div>
       <div className="crm-table-foot">Credit adjustments are manual demo records. No payments are collected or verified.</div>
     </section>;
@@ -385,10 +419,19 @@ export default function Demo() {
   }
 
   function renderModalForm(){
-    return <div className="crm-modal-shade" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><div className="crm-modal" role="dialog" aria-modal="true" aria-label="CRM form"><div className="crm-modal-head"><h2>{modal==="lead"?"Add a lead":modal==="member"?"Add a member":modal==="class"?"Create a class":"New follow-up task"}</h2><button onClick={()=>setModal(null)} aria-label="Close"><X size={20}/></button></div>
+    return <div className="crm-modal-shade" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null)}}><div className="crm-modal" role="dialog" aria-modal="true" aria-label="CRM form"><div className="crm-modal-head"><h2>{modal==="lead"?"Add a lead":modal==="member"?"Add a member":modal==="class"?"Create a class":modal==="credits"?"Adjust class credits":"New follow-up task"}</h2><button onClick={()=>setModal(null)} aria-label="Close"><X size={20}/></button></div>
       {modal==="lead"&&<form onSubmit={createLead} className="crm-modal-form"><label>Full name<input autoFocus required maxLength={80} value={leadForm.name} onChange={e=>setLeadForm({...leadForm,name:e.target.value})} placeholder="Taylor Morgan"/></label><label>Email<input type="email" required value={leadForm.email} onChange={e=>setLeadForm({...leadForm,email:e.target.value})} placeholder="taylor@example.com"/></label><label>Lead source<select value={leadForm.source} onChange={e=>setLeadForm({...leadForm,source:e.target.value})}>{["Website","Instagram","Referral","Walk-in","Other"].map(s=><option key={s}>{s}</option>)}</select></label><label className="crm-check-row"><input type="checkbox" checked={leadForm.consent} onChange={e=>setLeadForm({...leadForm,consent:e.target.checked})}/> Consent recorded for follow-up emails (demo only)</label><button className="crm-button solid" type="submit">Add lead</button></form>}
       {modal==="member"&&<form onSubmit={createMember} className="crm-modal-form"><label>Full name<input autoFocus required maxLength={80} value={memberForm.name} onChange={e=>setMemberForm({...memberForm,name:e.target.value})} placeholder="Taylor Morgan"/></label><label>Email<input type="email" required value={memberForm.email} onChange={e=>setMemberForm({...memberForm,email:e.target.value})}/></label><label>Class pack<select value={memberForm.plan} onChange={e=>setMemberForm({...memberForm,plan:e.target.value})}>{planOptions.map(s=><option key={s}>{s}</option>)}</select></label><label className="crm-check-row"><input type="checkbox" checked={memberForm.consent} onChange={e=>setMemberForm({...memberForm,consent:e.target.checked})}/> Consent recorded for follow-up emails (demo only)</label><button className="crm-button solid" type="submit">Add member</button></form>}
       {modal==="class"&&<form onSubmit={createClass} className="crm-modal-form"><label>Class name<select value={classForm.title} onChange={e=>setClassForm({...classForm,title:e.target.value})}>{focusClasses[data.studioFocus].map(s=><option key={s}>{s}</option>)}</select></label><label>Instructor<input required value={classForm.coach} maxLength={60} onChange={e=>setClassForm({...classForm,coach:e.target.value})}/></label><div className="crm-form-pair"><label>Date<input type="date" required value={classForm.date} onChange={e=>setClassForm({...classForm,date:e.target.value})}/></label><label>Time<input type="time" required value={classForm.time} onChange={e=>setClassForm({...classForm,time:e.target.value})}/></label></div><label>Capacity<input type="number" required min={1} max={30} value={classForm.capacity} onChange={e=>setClassForm({...classForm,capacity:e.target.value})}/></label><button className="crm-button solid" type="submit">Create class</button></form>}
+      {modal==="credits"&&(()=>{const m=data.members.find(x=>x.id===creditForm.memberId);const value=m?.credits??0;const amount=Number(creditForm.amount);const signed=creditForm.direction==="add"?amount:-amount;const valid=Number.isSafeInteger(amount)&&amount>=1&&amount<=1000&&m?.credits!==null&&value+signed>=0&&value+signed<=1000000&&creditForm.reason.trim().length>0;return <form onSubmit={submitCredits} className="crm-modal-form">
+        <div className="crm-credit-summary"><span>MEMBER</span><strong>{m?.name||"Member not found"}</strong><span>CURRENT BALANCE</span><strong>{m?.credits===null?"Unlimited":value+" credits"}</strong></div>
+        <label>Adjustment type<select value={creditForm.direction} onChange={e=>setCreditForm({...creditForm,direction:e.target.value as "add"|"remove"})}><option value="add">Add credits (+)</option><option value="remove">Remove credits (−)</option></select></label>
+        <label>Number of credits<input type="number" min="1" max="1000" step="1" required value={creditForm.amount} onChange={e=>setCreditForm({...creditForm,amount:e.target.value})}/></label>
+        <label>Reason for adjustment<input maxLength={200} required value={creditForm.reason} onChange={e=>setCreditForm({...creditForm,reason:e.target.value})} placeholder="Correction to class pack balance"/></label>
+        <div className={"crm-credit-result"+(!valid?" invalid":"")}><span>NEW BALANCE</span><strong>{valid?(value+signed)+" credits":"Check amount / remaining balance"}</strong></div>
+        <p className="crm-modal-note">A record of the adjustment is added to the demo activity log. You can undo your last change afterward. No payment is processed.</p>
+        <button disabled={!valid} className="crm-button solid" type="submit">{creditForm.direction==="add"?"Confirm credit addition":"Confirm credit removal"}</button>
+      </form>})()}
       {modal==="task"&&<form onSubmit={createTask} className="crm-modal-form"><label>Person type<select value={taskForm.personKind} onChange={e=>{const kind=e.target.value as "lead"|"member";setTaskForm({...taskForm,personKind:kind,personId:kind==="lead"?data.leads[0]?.id||"":data.members[0]?.id||""});}}><option value="lead">Lead</option><option value="member">Member</option></select></label><label>Person<select value={taskForm.personId} onChange={e=>setTaskForm({...taskForm,personId:e.target.value})}>{(taskForm.personKind==="lead"?data.leads:data.members).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label><label>Reason<input required maxLength={240} value={taskForm.reason} onChange={e=>setTaskForm({...taskForm,reason:e.target.value})}/></label><label>Due date<input type="date" required value={taskForm.due} onChange={e=>setTaskForm({...taskForm,due:e.target.value})}/></label><button className="crm-button solid" type="submit">Create follow-up</button></form>}
     </div></div>;
   }
@@ -402,7 +445,8 @@ export default function Demo() {
     <div className="demo-mobile-nav crm-mobile-nav">{navItems.map(({id,name})=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{name}</button>)}</div>
     <main className="demo-content crm-content">
       <Notice><b>Interactive CRM prototype.</b> Browser-only sample data; no real accounts, payment processing or outbound emails. Please do not enter real personal details.</Notice>
-      {notification&&<div className="crm-toast"><span>{notification}</span><button aria-label="Dismiss message" onClick={()=>setNotification("")}><X size={16}/></button></div>}
+      {notification&&<div className="crm-toast" role="status"><span>{notification}</span><div className="crm-toast-actions">{history.past.length>0&&<button type="button" className="crm-toast-undo" onClick={undoLast}><RotateCcw size={15}/> Undo</button>}<button type="button" aria-label="Dismiss message" onClick={()=>setNotification("")}><X size={16}/></button></div></div>}
+      <div className="crm-history-bar" aria-label="Undo and redo demo changes"><span>{history.past.length?("Last change: "+history.past[history.past.length-1].label):"Changes can be reversed in this browser session."}</span><div><button type="button" onClick={undoLast} disabled={!history.past.length} title="Undo last change"><RotateCcw size={15}/> Undo</button><button type="button" onClick={redoLast} disabled={!history.future.length} title="Redo last undone change"><ArrowRight size={15}/> Redo</button></div></div>
       <div className="crm-page-head"><div><span className="crm-page-eyebrow">{title.eyebrow}</span><h1>{title.title}</h1><p>{title.description}</p></div>{tab==="overview"&&<ActionButton onClick={()=>setModal("lead")}><Plus size={16}/> New lead</ActionButton>}</div>
       {ready?(tab==="overview"?renderOverview():tab==="leads"?renderLeads():tab==="members"?renderMembers():tab==="schedule"?renderSchedule():tab==="followups"?renderFollowups():tab==="reports"?renderReports():tab==="client"?renderClient():renderSettings()):<div className="crm-empty">Preparing your sample studio…</div>}
     </main></div>

@@ -63,3 +63,11 @@ Workbook sheets: `Guide`, `Leads`, `Members`, `Classes`, `Bookings`, `FollowUps`
 **Safety:** 8 MB file limit, 5,000 data rows per sheet, required columns, stage/date/email checks, duplicate-ID/email checks, capacity/waitlist checks and cross-sheet reference validation. Invalid workbooks are rejected without changing data. Even valid ones require explicit overwrite confirmation. Existing data should be exported first as a backup. Only `.xlsx` is accepted (not `.xls` or `.csv`).
 
 **Demo restriction:** Files are read entirely in the browser; never enter real customer personal data here. No production DB, privacy controls or secured account storage have been implemented.
+
+## Safe credit adjustments and Undo / Redo
+
+Open **Members → Adjust credits** for a member with a class-credit balance. Select **Add** or **Remove**, enter an integer credit amount (1–1,000), record a reason and confirm. The modal previews the new balance. Removing credits requires a second confirmation, and balances can never become negative. Unlimited plans cannot be adjusted with credits.
+
+The **Undo / Redo** controls above the dashboard allow reversal of the last 15 changes made in the current browser session, including class-pack corrections, membership/CRM edits, attendance, task updates, bookings, cancellations, demo resets and Excel imports. The action confirmation message also offers **Undo**. A new action clears the redo history. Reloading the browser clears this in-memory Undo / Redo history, although the demo records themselves are still stored in browser localStorage.
+
+This is a **browser-only prototype**: undo rolls back a local data snapshot and its sample activity entries. A real multi-user application must use server-side authorization, idempotent reversing ledger entries, audit logging and transactional booking updates; the demo snapshot mechanism is not a substitute for that production architecture.

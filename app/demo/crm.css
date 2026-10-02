@@ -292,3 +292,46 @@
   .crm-client-date{grid-column:1}
   .crm-client-class>div:last-child{grid-column:1;grid-row:auto;justify-self:start}
 }
+
+
+/* Undoable CRM operations and credit adjustment dialog */
+.crm-history-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:-11px 0 26px;padding:11px 14px;
+  background:#fffefa;border:1px solid #deded9;border-left:3px solid #334bdd;
+}
+.crm-history-bar>span{font-size:12px;line-height:1.4;color:#5c6675;overflow-wrap:anywhere}
+.crm-history-bar>div{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.crm-history-bar button{
+  display:inline-flex;align-items:center;gap:6px;justify-content:center;
+  background:#fffefa;color:#334bdd;border:1px solid #c6ccef;border-radius:3px;
+  padding:9px 11px;min-height:38px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;
+}
+.crm-history-bar button:hover:not(:disabled){background:#e7f982;border-color:#a9bc61;color:#1b2237}
+.crm-history-bar button:disabled{opacity:.4;cursor:not-allowed}
+.crm-history-bar button:focus-visible,.crm-toast-actions button:focus-visible{outline:3px solid #ff8360;outline-offset:2px}
+.crm-toast-actions{display:flex;align-items:center;gap:9px}
+.crm-toast-actions button{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:1px solid #d9dfff;border-radius:3px;background:transparent;color:#fff;
+  padding:7px 9px;min-height:33px;cursor:pointer;
+}
+.crm-toast-actions button.crm-toast-undo{font-size:13px;font-weight:700;background:#e7f982;border-color:#e7f982;color:#1b2237;padding:8px 12px}
+.crm-toast-actions button.crm-toast-undo:hover{background:#fff;color:#334bdd}
+.crm-credit-summary{display:grid;grid-template-columns:145px 1fr;gap:10px;align-items:center;background:#f3f1e9;padding:15px;border-left:3px solid #334bdd}
+.crm-credit-summary span{font:500 11px "IBM Plex Mono",monospace;color:#697183}
+.crm-credit-summary strong{font-size:16px;color:#1b2237;overflow-wrap:anywhere}
+.crm-credit-result{display:flex;align-items:center;justify-content:space-between;gap:15px;background:#e7f982;border:1px solid #ceda87;padding:15px;color:#1b2237}
+.crm-credit-result span{font:600 11px "IBM Plex Mono",monospace}
+.crm-credit-result strong{font-size:17px}
+.crm-credit-result.invalid{background:#fff2e8;border-color:#ecc6ad}
+.crm-credit-result.invalid strong{font-size:13px;color:#9b5834}
+.crm-modal-note{font-size:12.5px;color:#667080;line-height:1.6;margin:0}
+@media(max-width:610px){
+  .crm-history-bar{align-items:flex-start;flex-direction:column;gap:10px;padding:12px;margin:-10px 0 23px}
+  .crm-history-bar>span{font-size:12px}
+  .crm-history-bar>div{width:100%}
+  .crm-history-bar button{flex:1;font-size:13px;min-height:44px}
+  .crm-credit-summary{grid-template-columns:1fr;gap:5px}
+  .crm-credit-result strong{font-size:16px}
+}

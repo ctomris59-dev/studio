@@ -21,5 +21,7 @@ jobs:
         run: npm run test:crm
       - name: Test Excel import/export and validation
         run: npm run test:excel
+      - name: Test credit corrections and Undo/Redo
+        run: npm run test:history
       - name: Compile production build
         run: npm run build
