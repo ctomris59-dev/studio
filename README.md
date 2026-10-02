@@ -1,34 +1,51 @@
-# ReformDesk — Independent Studio SaaS (early demo)
+# ReformDesk — Studio CRM & Growth demo
 
-An English-first management concept for Pilates, yoga, boutique fitness and gym group-class studios, built with Next.js App Router and TypeScript.
+English-first SaaS prototype for boutique Pilates, yoga and fitness studios.
 
-## Quick start
+## Live prototype
 
-- Node.js 20+ recommended
-- Run `npm install`
-- Run `npm run dev` and visit http://localhost:3000
-- Run `npm run build` to check the production build
+- Marketing: `/`
+- Studio CRM (interactive sample): `/demo`
+- Source: `ctomris59-dev/studio`
 
-## What works in this preview
+## Development
 
-- Marketing landing page, features and example pricing (not live checkout)
-- Interactive demo at `/demo`
-- Manage sample classes, book and cancel members, waitlists and class pack credits
-- Add sample members and export sample data as CSV
-- Demo-only browser persistence using localStorage
+Node.js 22 recommended.
 
-## Important limitations
+```bash
+npm install
+npm run test:crm
+npm run build
+npm run dev
+```
 
-This is an **interactive prototype**, not a production-ready multi-tenant SaaS. No real account authentication, backend database, payment collection or email notifications are enabled. All demo information lives in the visitor's browser. Do not enter real client personal data.
+## Six interactive CRM workflows
 
-Before selling access, implement authentication, server-side tenant isolation, a durable database, transactional bookings, security controls, error monitoring, backups and payment/billing integration. No domain, server, or payment provider is purchased or connected yet.
+1. **Customer records:** sample leads and members, searchable stages, status changes, notes, contact history and downloadable CSVs.
+2. **Customer journey:** progress leads from New → Contacted → Trial → Won/Lost; winning converts to a member with sample class credits.
+3. **Today's opportunities:** deterministic alerts for delayed lead replies, trial attendees, low credits and lapsed members; create tasks or dismiss them.
+4. **Self-serve booking simulation:** Client booking view selects a fake member and supports book / waitlist / cancellation while updating credits.
+5. **Follow-up workflow:** create/complete tasks, review email templates and copy a draft or open your mail app *only after explicit demo opt-in*. **No email is automatically sent.**
+6. **Studio reports:** lead conversion, occupancy, churn-risk signals and completed tasks calculated from live sample data. No fictitious revenue claims.
 
-**Brand name and the $129 pricing are provisional.** Conduct trademark, pricing and market validation before commercialization.
+### Current data handling
 
-## Visual identity
+- State is saved to the **current browser's localStorage**, under `reformdesk-crm-v3`. It is not shared across devices or customers.
+- All preloaded names/emails are fictional `example.com` data.
+- **Not a real hosted CRM database.** No secure member logins, studio accounts, backend persistence, payment collection, email delivery, transactional reservations or privacy controls yet.
+- Do **not** enter real customer personal information.
+- `db/schema.sql` is a proposed PostgreSQL migration **not applied** to any database.
 
-- Color palette: cobalt `#334BDD`, ink `#1B2237`, paper `#F4F0E7`, citrus `#E7F982`, and coral `#FF8360`.
-- Display typography: **Barlow Condensed** (athletic editorial headings, including italic emphasis).
-- Body typography: **Source Sans 3** (accessible and readable UI copy).
-- Utility labels: **IBM Plex Mono** (small functional metadata only).
-- Preserve the editorial studio identity; avoid generic SaaS gradient/card/serif templates.
+### Production launch requirements
+
+To move beyond a sample prototype, select and connect a managed Postgres provider and an authentication provider; implement server-side tenant and role enforcement, force Row Level Security (where supported), atomic booking and credit ledger operations, audit logs, backups, deletion/export requests, GDPR lawful basis and consent tracking, verified email sender with unsubscribe support, monitoring, and billing.
+
+**User action needed to provision external services:** Render requires the user to select and explicitly confirm a workspace before a Postgres instance can be created. Deployment secrets also need to be configured in Vercel by an authorized user. Do not embed database credentials in the GitHub repository.
+
+## Pricing and branding
+
+Brand name and `$129` pricing on the landing page are exploratory, **not** a payment offer. Trial clients and performance metrics are simulated. Prioritize customer interviews before enabling paid plans.
+
+## Design language
+
+Cobalt `#334BDD`, dark ink `#1B2237`, paper `#F4F0E7`, citrus `#E7F982`, coral `#FF8360`. Display font Barlow Condensed, body Source Sans 3, utility IBM Plex Mono.
