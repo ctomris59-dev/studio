@@ -66,12 +66,13 @@ export function confirmPackage(data:StudioData,memberId:string):Result {
     activities:[{id:uid("a"),personKind:"member",personId,text:"Manager manually confirmed package; no payment processed",date:day()},...data.activities]
   },"Package manually confirmed, credits activated. No payment was collected.");
 }
-export function convertLead(data:StudioData,leadId:string,plan="10 Class Pack"):Result {
+export function convertLead(data:StudioData,leadId:string,plan?:string):Result {
   const lead=data.leads.find(l=>l.id===leadId);
   if(!lead)return error(data,"Lead not found.");
   if(data.members.some(m=>m.sourceLeadId===leadId||sameContact(m,lead)))return error(data,"This lead already has a matching member.");
-  const newMember=addMember(data,{name:lead.name,email:lead.email,phone:lead.phone||"",plan,startDate:day(),expiryDate:"",
-    credits:creditsFor(plan)||0,paymentStatus:"Pending",status:"Active",notes:lead.notes||"",consent:lead.consent,sourceLeadId:lead.id});
+  const linkedPlan=plan||lead.interestPlan||"10 Class Pack";
+  const newMember=addMember(data,{name:lead.name,email:lead.email,phone:lead.phone||"",plan:linkedPlan,startDate:day(),expiryDate:"",
+    credits:creditsFor(linkedPlan)||0,paymentStatus:"Pending",status:"Active",notes:lead.notes||"",consent:lead.consent,sourceLeadId:lead.id});
   if(!newMember.ok)return newMember;
   return good({...newMember.data,activities:[{id:uid("a"),personKind:"lead",personId:leadId,text:"Converted to pending member; history preserved via lead link",date:day()},...newMember.data.activities]},
     "Lead linked to a pending member; their notes and history are retained. No credits awarded.");
