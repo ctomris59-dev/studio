@@ -34,7 +34,7 @@ export async function POST(request:NextRequest){
    await client.query("UPDATE auth_challenges SET consumed_at=now() WHERE id=$1",[id]);
    return {ok:true};
   });
-  return "error" in result?errorResponse(result.status,result.error):
+  return "error" in result?errorResponse(result.status as number,result.error as string):
    successResponse({ok:true,notice:"Your member account is ready. Sign in to manage your bookings."});
  }catch(e){
   if((e as {code?:string}).code==="23505")return errorResponse(409,"Account or membership already exists.");
