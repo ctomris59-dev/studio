@@ -11,7 +11,7 @@ type MemberRow={
  credits:number|null;plan:string|null;package_status:"Pending"|"Paid"|null;member_status:string|null;
  expiry_date:string|null;
 };
-type BookingRow={id:string;session_id:string;member_id:string;member_name:string;status:"booked"|"waitlisted";queue_number:number|null};
+type BookingRow={id:string;session_id:string;member_id:string;member_name:string;status:"booked"|"waitlisted";queue_number:number|null;attended_at:string|null};
 type TaskRow={id:string;title:string;person_name:string;due_at:string;category:string;priority:string};
 type Signal={
  id:string;kind:string;priority:"high"|"medium"|"low";title:string;reason:string;
@@ -125,6 +125,13 @@ export function StudioOperations({role}:{role:string}){
     response.booking.promoted?"Cancelled, refunded credit and promoted next eligible waitlisted member.":
     "Booking cancelled. Class credit returned when it was originally deducted.";
   });
+ }
+ function markAttendance(booking:BookingRow){
+  if(booking.attended_at){
+   const reason=window.prompt("Why are you correcting this check-in? At least five characters are required.");
+   if(!reason)return;
+   void perform(async()=>{await api("/api/studio/bookings/"+booking.id+"/attendance","DELETE",{reason});return "Check-in corrected and audited."});
+  }else void perform(async()=>{await api("/api/studio/bookings/"+booking.id+"/attendance","POST");return "Class attendance recorded and member last visit updated."});
  }
  function confirm(member:MemberRow){
   if(!owner)return;
@@ -245,8 +252,9 @@ export function StudioOperations({role}:{role:string}){
       <label>Member<select required value={selectedMember} onChange={e=>setSelectedMember(e.target.value)}><option value="">Select a member</option>{members.map(m=><option value={m.id} key={m.id}>{m.full_name} · {m.package_status||"Pending"} · {m.credits===null?"Unlimited":m.credits+" credits"}</option>)}</select></label>
       <button type="submit" className="rd-primary" disabled={busy||!selectedMember}>Book / join waitlist</button>
     </form>
-    <div className="rd-booking-list">{bookings.length?bookings.map(b=><div key={b.id}><span><b>{b.member_name}</b><small>{b.status}{b.status==="waitlisted"?" · #"+b.queue_number:""}</small></span>
-     <button type="button" disabled={busy} onClick={()=>cancel(b)}>Cancel</button></div>):<p className="rd-empty">No active bookings or waitlist members in this class.</p>}</div>
+    <div className="rd-booking-list">{bookings.length?bookings.map(b=><div key={b.id}><span><b>{b.member_name}</b><small>{b.attended_at?"Checked in · ":""}{b.status}{b.status==="waitlisted"?" · #"+b.queue_number:""}</small></span>
+     <div className="rd-booking-actions">{b.status==="booked"&&<button type="button" disabled={busy} onClick={()=>markAttendance(b)}>{b.attended_at?"Correct check-in":"Check in"}</button>}
+     <button type="button" disabled={busy||Boolean(b.attended_at)} onClick={()=>cancel(b)}>Cancel</button></div></div>):<p className="rd-empty">No active bookings or waitlist members in this class.</p>}</div>
    </div>}
   </section>
   {owner&&<section className="rd-ops-section"><h3>Member packages and credits</h3><p className="rd-tiny">Package confirmation is a manual admin acknowledgement, NOT a verified payment.</p>

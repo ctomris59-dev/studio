@@ -219,6 +219,20 @@ async function main(){
   assert.deepEqual(race.map(x=>x.data.booking.status).sort(),["booked","waitlisted"]);
   const concurrentStatus=await call("/api/studio/classes",{cookie:a.cookie});
   assert.equal(concurrentStatus.data.classes.find(x=>x.id===secondClass.data.class.id).booked_count,1);
+  const beforeCheck=await call("/api/studio/bookings?sessionId="+secondClass.data.class.id,{cookie:a.cookie});
+  const checkedBooking=beforeCheck.data.bookings.find(b=>b.status==="booked");
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).status,409,"Early check-in must fail.");
+  await admin.query("UPDATE class_sessions SET starts_at=now()-interval '30 minutes' WHERE id=$1 AND studio_id=$2",[secondClass.data.class.id,studioA]);
+  const checkin=await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie});
+  assert.equal(checkin.status,200,JSON.stringify(checkin.data));
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).data.attendance.alreadyApplied,true);
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id,{method:"DELETE",cookie:a.cookie})).status,409);
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:b.cookie,body:{reason:"Wrong attendance entry"}})).status,404);
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:a.cookie,body:{reason:"bad"}})).status,400);
+  const corrected=await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:a.cookie,body:{reason:"Incorrect check in"}});
+  assert.equal(corrected.status,200,JSON.stringify(corrected.data));
+  const audit=await admin.query("SELECT action FROM activity_log WHERE studio_id=$1 AND details->>'bookingId'=$2",[studioA,checkedBooking.id]);
+  assert(audit.rows.some(x=>x.action==="attendance.checked_in")&&audit.rows.some(x=>x.action==="attendance.corrected"));
   // Underfilled classes and overdue leads create transparent opportunity signals.
   const thirdClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
    ...classInput,title:"Underfilled",room:"Room C",instructor:"Coach C",startsAt:future(1,12),capacity:5

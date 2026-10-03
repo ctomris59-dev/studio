@@ -76,3 +76,5 @@
 .rd-weekdays{display:flex;gap:5px;flex-wrap:wrap}.rd-weekdays button{min-width:43px;min-height:43px;background:#fff;color:#334bdd;border:1px solid #c7cce0;font-weight:700;cursor:pointer}
 .rd-weekdays button.selected{background:#334bdd;color:white}.rd-toggle{flex-direction:row!important;align-items:center}.rd-toggle input{width:20px;height:20px}
 .rd-weekdays button:focus-visible,.rd-onboard>button:focus-visible{outline:3px solid #ff8360;outline-offset:2px}
+
+.rd-booking-actions{display:flex;flex-wrap:wrap;gap:8px}.rd-booking-actions button{min-height:44px}
