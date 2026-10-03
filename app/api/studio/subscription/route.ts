@@ -19,6 +19,19 @@ export async function POST(request:NextRequest){
  if(!key||!store||!variant||!process.env.LEMON_WEBHOOK_SECRET)return errorResponse(503,"Secure checkout is not configured.");
  // Live pricing and card details belong to Lemon Squeezy, never our database.
  try{
+  // Fail closed on stale Lemon Squeezy variants: published price must match our $49/$468 offer.
+  // Lemon's variant.price is kept for backward compatibility in its API.
+  const verify=await fetch("https://api.lemonsqueezy.com/v1/variants/"+encodeURIComponent(variant!),{
+   headers:{Accept:"application/vnd.api+json",Authorization:"Bearer "+key},cache:"no-store",signal:AbortSignal.timeout(8000)
+  });
+  if(!verify.ok)return errorResponse(503,"StudioTasker plan price could not be verified.");
+  const config=await verify.json() as {data?:{attributes?:{price?:number;is_subscription?:boolean;interval?:string;interval_count?:number}}};
+  const advertised=plan==="annual"?46800:4900;
+  if(config.data?.attributes?.price!==advertised||
+   config.data?.attributes?.is_subscription!==true||
+   config.data?.attributes?.interval!==(plan==="annual"?"year":"month")||
+   config.data?.attributes?.interval_count!==1)
+   return errorResponse(503,"Checkout variant price does not match the advertised $49/month or $468/year. Update provider pricing first.");
   const result=await authenticated(request,["owner"],async(_client,auth)=>{
    const body={data:{type:"checkouts",attributes:{
     checkout_data:{email:auth.email,custom:{studio_id:auth.studioId}},
