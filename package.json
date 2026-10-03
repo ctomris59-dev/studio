@@ -17,6 +17,7 @@
     "db:setup:local": "node db/setup-local.cjs",
     "test:api": "node scripts/test-api.cjs",
     "test:backup": "node scripts/test-backup.cjs",
+    "test:release": "node scripts/test-release.cjs",
     "test:timezone": "node scripts/test-timezone.cjs",
     "test:ui": "node scripts/test-ui.cjs",
     "jobs:mail": "node scripts/process-mail.cjs",

@@ -61,6 +61,8 @@ jobs:
         run: npm run test:ui
       - name: Test IANA timezone and DST handling
         run: npm run test:timezone
+      - name: Test commercial registration release gate
+        run: npm run test:release
       - name: Compile production build
         run: npm run build
       - name: Test live HTTP auth and tenant access
