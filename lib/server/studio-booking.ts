@@ -2,6 +2,8 @@ import "server-only";
 import type {PoolClient} from "pg";
 import type {Authenticated} from "./auth";
 import {queueMessage} from "./challenges";
+import {randomUUID} from "node:crypto";
+import {localDateTimeToUTC,validStudioTimezone} from "../studio-timezone";
 
 export class StudioOperationError extends Error{
  constructor(public readonly status:number,message:string){super(message);this.name="StudioOperationError";}
@@ -34,7 +36,7 @@ export function parseClass(body:Record<string,unknown>):ClassInput{
   bookingCutoffHours:bookingCutoffHours as number,cancelCutoffHours:cancelCutoffHours as number};
 }
 
-export async function createClass(client:PoolClient,auth:Authenticated,input:ClassInput){
+export async function createClass(client:PoolClient,auth:Authenticated,input:ClassInput,seriesId?:string){
  // Transaction-scoped advisory lock prevents concurrent class creation for the same studio.
  // The app role has no direct client SQL interface and all class mutations go through this path.
  await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1::text,0))",[auth.studioId]);
@@ -48,18 +50,46 @@ export async function createClass(client:PoolClient,auth:Authenticated,input:Cla
  if(conflicts.rowCount)fail(409,"This instructor or room already has an overlapping class.");
  const result=await client.query(`
  INSERT INTO class_sessions
-  (studio_id,title,instructor,room,starts_at,duration_minutes,capacity,booking_cutoff_hours,cancel_cutoff_hours)
- VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
- RETURNING id,title,instructor,room,starts_at,duration_minutes,capacity,booking_cutoff_hours,cancel_cutoff_hours`,
+  (studio_id,title,instructor,room,starts_at,duration_minutes,capacity,booking_cutoff_hours,cancel_cutoff_hours,series_id)
+ VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+ RETURNING id,title,instructor,room,starts_at,duration_minutes,capacity,booking_cutoff_hours,cancel_cutoff_hours,series_id`,
  [auth.studioId,input.title,input.instructor,input.room,from.toISOString(),input.durationMinutes,
-  input.capacity,input.bookingCutoffHours,input.cancelCutoffHours]);
+  input.capacity,input.bookingCutoffHours,input.cancelCutoffHours,seriesId||null]);
  return result.rows[0];
+}
+
+export async function createRecurringClasses(client:PoolClient,auth:Authenticated,body:Record<string,unknown>){
+ const startDate=body.startDate,endDate=body.endDate,time=body.time,weekdays=body.weekdays;
+ if(typeof startDate!=="string"||typeof endDate!=="string"||typeof time!=="string"||
+ !/^\d{4}-\d{2}-\d{2}$/.test(startDate)||!/^\d{4}-\d{2}-\d{2}$/.test(endDate)||
+ !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)||!Array.isArray(weekdays)||!weekdays.length||
+ weekdays.length>7||!weekdays.every(x=>Number.isInteger(x)&&x>=0&&x<=6)||
+ new Set(weekdays).size!==weekdays.length)fail(400,"Choose valid dates, class time and weekdays.");
+ const first=Date.parse(startDate+"T00:00:00Z"),last=Date.parse(endDate+"T00:00:00Z");
+ if(!Number.isFinite(first)||!Number.isFinite(last)||new Date(first).toISOString().slice(0,10)!==startDate||
+ new Date(last).toISOString().slice(0,10)!==endDate||last<first||last-first>84*86400000)
+ fail(400,"Class series must cover a valid period of at most 12 weeks.");
+ const zones=await client.query<{timezone:string}>("SELECT timezone FROM studios WHERE id=$1",[auth.studioId]);
+ const timezone=zones.rows[0]?.timezone;
+ if(!validStudioTimezone(timezone))fail(400,"Configure a valid studio timezone before scheduling.");
+ const seriesId=randomUUID(),classes=[];
+ // Inside authenticated() transaction: failures roll back all series occurrences.
+ for(let stamp=first;stamp<=last;stamp+=86400000){
+  if(!weekdays.includes(new Date(stamp).getUTCDay()))continue;
+  if(classes.length>=52)fail(400,"Maximum 52 classes per recurring series.");
+  const day=new Date(stamp).toISOString().slice(0,10);
+  const startsAt=localDateTimeToUTC(day,time,timezone);
+  const input=parseClass({...body,startsAt});
+  classes.push(await createClass(client,auth,input,seriesId));
+ }
+ if(!classes.length)fail(400,"No classes match the selected range and weekdays.");
+ return {seriesId,timezone,classes};
 }
 
 export async function listClasses(client:PoolClient,studioId:string){
  const records=await client.query(`
  SELECT c.id,c.title,c.instructor,c.room,c.starts_at,c.duration_minutes,c.capacity,
-   c.booking_cutoff_hours,c.cancel_cutoff_hours,
+   c.booking_cutoff_hours,c.cancel_cutoff_hours,c.series_id,
    COUNT(b.id) FILTER(WHERE b.status='booked')::int AS booked_count,
    COUNT(b.id) FILTER(WHERE b.status='waitlisted')::int AS waitlist_count
  FROM class_sessions c

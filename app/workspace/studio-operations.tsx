@@ -1,5 +1,6 @@
 "use client";
 import {useCallback,useEffect,useState,type FormEvent} from "react";
+import {localDateTimeToUTC} from "../../lib/studio-timezone";
 
 type ClassRow={
  id:string;title:string;instructor:string;room:string;starts_at:string;
@@ -43,7 +44,9 @@ export function StudioOperations({role}:{role:string}){
  const [selectedMember,setSelectedMember]=useState("");
  const [busy,setBusy]=useState(false);
  const [message,setMessage]=useState("");
- const [schedule,setSchedule]=useState({title:"Reformer Foundations",instructor:"Sophie",room:"Main studio",startsAt:"",durationMinutes:50,capacity:8});
+ const [schedule,setSchedule]=useState({title:"Studio Class",instructor:"Instructor",room:"Main studio",startsAt:"",durationMinutes:50,capacity:8});
+ const [studioZone,setStudioZone]=useState("UTC");
+ const [repeat,setRepeat]=useState({enabled:false,until:"",weekdays:[1,3,5] as number[]});
  const [adjust,setAdjust]=useState({memberId:"",delta:5,reason:"Credit balance correction"});
  const [selectedPlan,setSelectedPlan]=useState<Record<string,string>>({});
  const [taskOutcomes,setTaskOutcomes]=useState<Record<string,string>>({});
@@ -56,6 +59,7 @@ export function StudioOperations({role}:{role:string}){
    api<{tasks:TaskRow[]}>("/api/studio/tasks")
   ]);
   setClasses(c.classes);setMembers(m.members);setActions(a.items);setTasks(t.tasks);
+  void api<{studio:{timezone:string}}>("/api/studio/settings").then(s=>setStudioZone(s.studio.timezone)).catch(()=>setMessage("Check your studio timezone in settings."));
   void api<{subscription:{status:string;plan:string;enabled:boolean;periodEnd:string|null};checkoutConfigured:boolean}>("/api/studio/subscription").then(setBilling).catch(()=>setBilling(null));
   setSelectedClass(old=>old||c.classes[0]?.id||"");
   setSelectedMember(old=>old||m.members[0]?.id||"");
@@ -84,14 +88,20 @@ export function StudioOperations({role}:{role:string}){
  function createSession(e:FormEvent<HTMLFormElement>){
   e.preventDefault();
   if(!schedule.startsAt){setMessage("Choose a class start time.");return;}
-  const date=new Date(schedule.startsAt);
-  if(!Number.isFinite(date.getTime())){setMessage("Invalid start date.");return;}
+  let isoStart:string;
+  try{isoStart=localDateTimeToUTC(schedule.startsAt.slice(0,10),schedule.startsAt.slice(11,16),studioZone)}
+  catch(e){setMessage(e instanceof Error?e.message:"Invalid studio time.");return}
   void perform(async()=>{
-   await api("/api/studio/classes","POST",{
-    title:schedule.title,instructor:schedule.instructor,room:schedule.room,
-    startsAt:date.toISOString(),durationMinutes:schedule.durationMinutes,capacity:schedule.capacity
-   });
-   return "Class created with instructor/room conflict protection.";
+   const detail={title:schedule.title,instructor:schedule.instructor,room:schedule.room,startsAt:isoStart,durationMinutes:schedule.durationMinutes,capacity:schedule.capacity};
+   if(repeat.enabled){
+    if(!repeat.until)throw Error("Select the last day of the series.");
+    const result=await api<{classes:ClassRow[]}>("/api/studio/classes/series","POST",{
+     ...detail,startDate:schedule.startsAt.slice(0,10),endDate:repeat.until,time:schedule.startsAt.slice(11,16),weekdays:repeat.weekdays
+    });
+    return result.classes.length+" recurring classes created with transaction-safe conflict checks.";
+   }
+   await api("/api/studio/classes","POST",detail);
+   return "Class created in "+studioZone+" with conflict protection.";
   });
  }
  function book(e:FormEvent<HTMLFormElement>){
@@ -213,10 +223,17 @@ export function StudioOperations({role}:{role:string}){
      <label>Class name<input minLength={2} maxLength={100} required value={schedule.title} onChange={e=>setSchedule({...schedule,title:e.target.value})}/></label>
      <label>Instructor<input minLength={2} maxLength={80} required value={schedule.instructor} onChange={e=>setSchedule({...schedule,instructor:e.target.value})}/></label>
      <label>Room<input minLength={2} maxLength={80} required value={schedule.room} onChange={e=>setSchedule({...schedule,room:e.target.value})}/></label>
-     <label>Class starts (your local timezone)<input type="datetime-local" required value={schedule.startsAt} onChange={e=>setSchedule({...schedule,startsAt:e.target.value})}/></label>
+     <label>Class starts in {studioZone} (studio timezone)<input type="datetime-local" required value={schedule.startsAt} onChange={e=>setSchedule({...schedule,startsAt:e.target.value})}/></label>
      <div className="rd-ops-pair"><label>Duration (minutes)<input type="number" min="15" max="240" required value={schedule.durationMinutes} onChange={e=>setSchedule({...schedule,durationMinutes:Number(e.target.value)})}/></label>
      <label>Capacity<input type="number" min="1" max="100" required value={schedule.capacity} onChange={e=>setSchedule({...schedule,capacity:Number(e.target.value)})}/></label></div>
-     <button type="submit" className="rd-primary" disabled={busy}>Create class</button>
+     <label className="rd-toggle"><input type="checkbox" checked={repeat.enabled} onChange={e=>setRepeat({...repeat,enabled:e.target.checked})}/> Repeat weekly</label>
+     {repeat.enabled&&<div className="rd-repeat-config">
+      <strong>Repeat on</strong>
+      <div className="rd-weekdays">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day,index)=><button type="button" aria-pressed={repeat.weekdays.includes(index)} className={repeat.weekdays.includes(index)?"selected":""} key={day} onClick={()=>setRepeat(r=>({...r,weekdays:r.weekdays.includes(index)?r.weekdays.filter(x=>x!==index):[...r.weekdays,index]}))}>{day}</button>)}</div>
+      <label>Repeat until (maximum 12 weeks)<input type="date" min={schedule.startsAt.slice(0,10)} required value={repeat.until} onChange={e=>setRepeat({...repeat,until:e.target.value})}/></label>
+      <p className="rd-tiny">All occurrences are checked together; if any conflicts, none are created. Daylight-saving transition times that are ambiguous or nonexistent are rejected.</p>
+     </div>}
+     <button type="submit" className="rd-primary" disabled={busy}>{repeat.enabled?"Create weekly series":"Create class"}</button>
     </form></details>}
    <div className="rd-class-list">{classes.length?classes.slice(0,40).map(c=><button className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} key={c.id} type="button" onClick={()=>setSelectedClass(c.id)}>
     <strong>{classLabel(c)}</strong><small>{c.instructor} · {c.room} · {c.duration_minutes} min</small>

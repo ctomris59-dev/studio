@@ -113,6 +113,11 @@ async function main(){
    assert.equal(result.status,201,JSON.stringify(result.data));
    return result.data.record.id;
   }
+  const config=await call("/api/studio/settings",{cookie:a.cookie});
+  assert.equal(config.status,200);assert.equal(config.data.studio.timezone,"UTC");
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:b.cookie,body:{name:"Bluebird Studio",focus:"Yoga",timezone:"Europe/London"}})).status,200);
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Not/A_Zone"}})).status,400);
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:coachLogin.cookie,body:{name:"Forbidden",focus:"Yoga",timezone:"UTC"}})).status,403);
   const member1=await createMember(a,"Member One");
   const member2=await createMember(a,"Member Two");
   const member3=await createMember(a,"Member Pending");
@@ -157,6 +162,19 @@ async function main(){
   assert.equal(conflict.status,409,JSON.stringify(conflict.data));
   const coachClassWrite=await call("/api/studio/classes",{method:"POST",cookie:coachLogin.cookie,body:classInput});
   assert.equal(coachClassWrite.status,403);
+  const repeatDate=new Date(Date.now()+6*86400000).toISOString().slice(0,10);
+  const repeatUntil=new Date(Date.now()+12*86400000).toISOString().slice(0,10);
+  const allDays=[0,1,2,3,4,5,6];
+  const weekly=await call("/api/studio/classes/series",{method:"POST",cookie:a.cookie,body:{title:"Morning Class",instructor:"Coach Series",room:"Studio S",durationMinutes:50,capacity:6,startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}});
+  assert.equal(weekly.status,201,JSON.stringify(weekly.data));
+  assert.equal(weekly.data.classes.length,7);
+  assert(weekly.data.classes.every(c=>c.series_id===weekly.data.seriesId));
+  const recurringConflict=await call("/api/studio/classes/series",{method:"POST",cookie:a.cookie,body:{title:"Collision",instructor:"Coach Series",room:"Studio T",durationMinutes:50,capacity:6,startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}});
+  assert.equal(recurringConflict.status,409,JSON.stringify(recurringConflict.data));
+  const noPartial=await admin.query("SELECT count(*)::int AS n FROM class_sessions WHERE studio_id=$1 AND title=$2",[studioA,"Collision"]);
+  assert.equal(noPartial.rows[0].n,0,"Recurring conflict must roll back entire batch");
+  assert.equal((await call("/api/studio/classes/series",{method:"POST",cookie:coachLogin.cookie,body:{title:"Forbidden",startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}})).status,403);
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Europe/Paris"}})).status,409,"Prevent timezone reconfiguration after booked sessions.");
   const aClasses=await call("/api/studio/classes",{cookie:a.cookie});
   assert(aClasses.data.classes.some(c=>c.id===classId));
   assert(!aClasses.data.classes.some(c=>c.id===crossClass.data.class.id));

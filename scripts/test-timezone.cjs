@@ -1,0 +1,13 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),ts=require("typescript");
+const source=fs.readFileSync("lib/studio-timezone.ts","utf8");
+const module={exports:{}};
+new Function("module","exports",ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(module,module.exports);
+const {localDateTimeToUTC,validStudioTimezone}=module.exports;
+assert(validStudioTimezone("Europe/London"));assert(validStudioTimezone("America/New_York"));
+assert(!validStudioTimezone("Fake/City"));assert(!validStudioTimezone("../../etc/passwd"));
+assert.equal(localDateTimeToUTC("2026-07-15","09:00","Europe/London"),"2026-07-15T08:00:00.000Z");
+assert.equal(localDateTimeToUTC("2026-01-15","09:00","Europe/London"),"2026-01-15T09:00:00.000Z");
+assert.throws(()=>localDateTimeToUTC("2026-03-29","01:30","Europe/London"),/Nonexistent/);
+assert.throws(()=>localDateTimeToUTC("2026-10-25","01:30","Europe/London"),/Ambiguous/);
+assert.throws(()=>localDateTimeToUTC("2026-02-30","09:00","UTC"),/Invalid/);
+console.log("Timezone and DST regression checks passed.");
