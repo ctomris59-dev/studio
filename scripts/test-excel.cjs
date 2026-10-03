@@ -15,6 +15,7 @@ const format=transpile("lib/studio-excel.ts",path=>path==="./studio-crm"?studio:
 const clone=x=>JSON.parse(JSON.stringify(x));
 const original=studio.makeSeed("Pilates");
 const rows=format.toExcelTables(original);
+assert.equal(format.EXCEL_FORMAT,"StudioTasker Excel v2");
 const result=format.fromExcelTables(rows);
 assert(result.valid,JSON.stringify(result.errors));
 assert.equal(result.data.leads.length,original.leads.length);
@@ -52,6 +53,8 @@ for(const name of ["Leads","Members","Classes","FollowUps"]){
  old[name]=old[name].map(row=>row.slice(0,minimum));
 }
 assert(format.fromExcelTables(old).valid,"Legacy v1 data must remain importable");
+const oldV2=clone(rows);oldV2.Guide[1][1]="ReformDesk Excel v2";
+assert(format.fromExcelTables(oldV2).valid,"Legacy ReformDesk v2 data must remain importable");
 const withPhone=clone(rows);withPhone.Leads[1][2]="";withPhone.Leads[1][10]="+441234567890";
 assert(format.fromExcelTables(withPhone).valid,"Phone-only leads must import");
 const badPhone=clone(withPhone);badPhone.Leads[1][10]="abc";

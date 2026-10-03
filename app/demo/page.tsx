@@ -17,6 +17,7 @@ import type { ValidationOutcome } from "../../lib/studio-excel";
 import {adjustMemberCredits,initialHistory,studioHistoryReducer} from "../../lib/studio-history";
 import {addLead,addMember,addClasses,addTask,completeTask,confirmPackage,convertLead,validEmail,cleanPhone,TASK_OUTCOMES,TASK_CATEGORIES,TASK_PRIORITIES,TASK_REPEAT,CONTACT_CHANNELS,DAYS,type LeadInput,type MemberInput,type ClassInput,type TaskInput} from "../../lib/studio-workflows";
 import "./crm.css";
+import { StudioTaskerMark } from "../../components/studio-tasker-mark";
 
 type Modal = "lead"|"member"|"class"|"task"|"credits"|null;
 type Draft = {personName:string;email:string;subject:string;body:string;consent:boolean;category:string}|null;
@@ -233,7 +234,7 @@ export default function Demo() {
   function reset(){if(!window.confirm("Reset the browser demo and lose its current sample changes?"))return;resetDirect();}
   function resetDirect(){setData(makeSeed(data.studioFocus),"Reset demo workspace");setSelectedLead("");setPortalMember("m1");setTab("overview");say("Demo workspace reset.");}
   function exportData(){
-    downloadCsv("reformdesk-crm-leads.csv",[["Name","Email","Stage","Source","Next contact","Consent"],...data.leads.map(l=>[l.name,l.email,l.stage,l.source,l.nextContact,l.consent?"Yes":"No"])]);
+    downloadCsv("studiotasker-crm-leads.csv",[["Name","Email","Stage","Source","Next contact","Consent"],...data.leads.map(l=>[l.name,l.email,l.stage,l.source,l.nextContact,l.consent?"Yes":"No"])]);
     say("Leads exported to CSV (sample data).");
   }
 
@@ -419,7 +420,7 @@ export default function Demo() {
       </section>
       <section className="crm-panel crm-excel-panel"><SectionTitle title="Excel import / export" caption="A structured .xlsx workbook, formatted for this CRM."/>
         <div className="crm-excel-content">
-          <div className="crm-excel-status"><FileSpreadsheet size={25}/><div><b>ReformDesk Excel v1</b><span>8 worksheets · Exact column headers · Linked bookings and tasks</span></div></div>
+          <div className="crm-excel-status"><FileSpreadsheet size={25}/><div><b>StudioTasker Excel v1</b><span>8 worksheets · Exact column headers · Linked bookings and tasks</span></div></div>
           <p>Download a blank template, complete its sheets and import it. Or export the current studio into an Excel workbook. Everything stays in this browser demo.</p>
           <div className="crm-excel-actions">
             <ActionButton variant="outline" disabled={excelBusy} onClick={()=>{void exportExcel(true);}}><Download size={15}/> Download template</ActionButton>
@@ -441,7 +442,7 @@ export default function Demo() {
       <section className="crm-panel"><SectionTitle title="Data and CSV exports" caption="Quick exports and demo reset."/>
         <div className="crm-settings-actions">
           <ActionButton variant="outline" onClick={exportData}><Download size={15}/> Export leads CSV</ActionButton>
-          <ActionButton variant="outline" onClick={()=>downloadCsv("reformdesk-members.csv",[["Name","Email","Plan","Credits","Last visit"],...data.members.map(m=>[m.name,m.email,m.plan,m.credits??"Unlimited",m.lastVisit||""])] )}><Download size={15}/> Export members CSV</ActionButton>
+          <ActionButton variant="outline" onClick={()=>downloadCsv("studiotasker-members.csv",[["Name","Email","Plan","Credits","Last visit"],...data.members.map(m=>[m.name,m.email,m.plan,m.credits??"Unlimited",m.lastVisit||""])] )}><Download size={15}/> Export members CSV</ActionButton>
           <ActionButton variant="outline" onClick={reset}><RotateCcw size={15}/> Reset demo data</ActionButton>
         </div>
       </section>
@@ -533,10 +534,10 @@ export default function Demo() {
 
   const title=pageNames[tab];
   return <div className="demo-shell crm-shell">
-    <aside className="demo-aside crm-aside"><Link className="crm-logo" href="/"><span className="crm-logo-mark">✳</span>reform<b>desk</b><span className="crm-logo-dot">.</span></Link><div className="crm-side-label">STUDIO WORKSPACE <span>v0.3</span></div><nav className="crm-nav" aria-label="Studio navigation">{navItems.map(({id,name,icon:Icon})=><button type="button" key={id} className={tab===id?"active":""} onClick={()=>{setTab(id);setNotification("");}}><Icon size={19}/><span>{name}</span>{id==="followups"&&insights.openTasks>0&&<em>{insights.openTasks}</em>}</button>)}</nav>
+    <aside className="demo-aside crm-aside"><Link className="crm-logo" href="/"><StudioTaskerMark className="crm-logo-mark"/>studio<b>tasker</b><span className="crm-logo-dot">.</span></Link><div className="crm-side-label">STUDIO WORKSPACE <span>v0.3</span></div><nav className="crm-nav" aria-label="Studio navigation">{navItems.map(({id,name,icon:Icon})=><button type="button" key={id} className={tab===id?"active":""} onClick={()=>{setTab(id);setNotification("");}}><Icon size={19}/><span>{name}</span>{id==="followups"&&insights.openTasks>0&&<em>{insights.openTasks}</em>}</button>)}</nav>
       <div className="crm-aside-bottom"><span className="crm-sample-badge"><span/> SAMPLE DATA ONLY</span><div className="crm-sidebar-profile"><span>WR</span><div><b>Willow Studio</b><small>Owner · Demo</small></div></div><Link href="/">← Back to website</Link></div>
     </aside>
-    <div className="demo-main crm-main"><header className="demo-topbar crm-topbar"><div className="crm-crumb"><b>ReformDesk</b><span>/</span>{navItems.find(n=>n.id===tab)?.name}</div><span>{data.studioName} <span className="crm-owner-avatar">WR</span></span></header>
+    <div className="demo-main crm-main"><header className="demo-topbar crm-topbar"><div className="crm-crumb"><b>StudioTasker</b><span>/</span>{navItems.find(n=>n.id===tab)?.name}</div><span>{data.studioName} <span className="crm-owner-avatar">WR</span></span></header>
     <div className="demo-mobile-nav crm-mobile-nav">{navItems.map(({id,name})=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{name}</button>)}</div>
     <main className="demo-content crm-content">
       <Notice><b>Interactive CRM prototype.</b> Browser-only sample data; no real accounts, payment processing or outbound emails. Please do not enter real personal details.</Notice>

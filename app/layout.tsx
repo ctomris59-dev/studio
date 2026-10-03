@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ReformDesk — A calmer way to run your studio",
-  description: "A beautifully simple home for Pilates, yoga and boutique fitness studios. Classes, memberships, clients and waitlists in one clear place.",
+  title: "StudioTasker — A calmer way to run your studio",
+  description: "All-in-one studio management for Pilates, yoga, barre and boutique fitness. Organize scheduling, bookings, members, follow-ups and payments from one place.",
   robots: { index: false, follow: false },
 };
 

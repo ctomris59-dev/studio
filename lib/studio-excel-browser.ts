@@ -43,8 +43,8 @@ function saveBlob(blob:Blob,name:string){
 export async function downloadExcelWorkbook(data:StudioData,template=false):Promise<void>{
   const ExcelJS=await import("exceljs");
   const wb=new ExcelJS.Workbook();
-  wb.creator="ReformDesk";wb.title=template?"ReformDesk CRM Import Template":"ReformDesk CRM Export";
-  wb.subject="Studio CRM structured records";wb.company="ReformDesk";
+  wb.creator="StudioTasker";wb.title=template?"StudioTasker CRM Import Template":"StudioTasker CRM Export";
+  wb.subject="Studio CRM structured records";wb.company="StudioTasker";
   const tables=toExcelTables(data,template);
   for(const name of SHEETS){
     const sheet=wb.addWorksheet(name);
@@ -93,10 +93,10 @@ export async function downloadExcelWorkbook(data:StudioData,template=false):Prom
     }
   }
   const out=await wb.xlsx.writeBuffer();
-  saveBlob(new Blob([new Uint8Array(out as unknown as ArrayBuffer)],{type:MIME}),template?"ReformDesk_Excel_Import_Template.xlsx":"ReformDesk_CRM_Export.xlsx");
+  saveBlob(new Blob([new Uint8Array(out as unknown as ArrayBuffer)],{type:MIME}),template?"StudioTasker_Excel_Import_Template.xlsx":"StudioTasker_CRM_Export.xlsx");
 }
 export async function previewExcelImport(file:File):Promise<ValidationOutcome>{
-  if(!/\.xlsx$/i.test(file.name))throw new Error("Only .xlsx files are supported. Download and use the ReformDesk Excel template.");
+  if(!/\.xlsx$/i.test(file.name))throw new Error("Only .xlsx files are supported. Download and use the StudioTasker Excel template.");
   if(file.size>8*1024*1024)throw new Error("Excel file too large (maximum 8 MB).");
   const ExcelJS=await import("exceljs");
   const wb=new ExcelJS.Workbook();

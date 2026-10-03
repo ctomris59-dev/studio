@@ -62,3 +62,7 @@
 .rd-contact-edit textarea{min-height:70px;padding:12px;border:1px solid #bfc6d4;color:#1b2237;font-size:16px}
 .rd-privacy-actions{margin:22px 0;padding:18px;background:#edf0ff;border-left:3px solid #334bdd}
 .rd-contact-actions button:focus-visible,.rd-privacy-actions button:focus-visible{outline:3px solid #ff8360;outline-offset:2px}
+
+/* Shared StudioTasker identity */
+.rd-workspace-header .rd-wordmark{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.rd-logo-mark{width:31px;height:31px;flex:0 0 31px}

@@ -1,10 +1,10 @@
-/* ReformDesk / Studio CRM — cobalt, ink, citrus. Production-look demo only. */
+/* StudioTasker / Studio CRM — cobalt, ink, citrus. Production-look demo only. */
 .crm-shell{font-family:"Source Sans 3",Arial,sans-serif;color:#1b2237;background:#f4f0e7}
 .crm-aside{padding:28px 16px 22px;background:#1b2237;border-right:1px solid #11172b}
-.crm-logo{font-size:24px;display:flex;align-items:center;color:#fff;letter-spacing:-1.05px;gap:0;font-family:"Source Sans 3",Arial,sans-serif;font-weight:600;margin:0 8px 34px}
+.crm-logo{font-size:22px;display:flex;align-items:center;color:#fff;letter-spacing:-1.05px;gap:0;font-family:"Source Sans 3",Arial,sans-serif;font-weight:600;margin:0 8px 34px}
 .crm-logo b{font-weight:700}
 .crm-logo-dot{color:#e7f982}
-.crm-logo-mark{width:33px;height:33px;display:grid;place-items:center;background:#e7f982;color:#334bdd;margin-right:10px;transform:rotate(-8deg);font-size:25px;font-weight:400}
+.crm-logo-mark{width:33px;height:33px;flex:0 0 33px;margin-right:10px;transform:rotate(-8deg)}
 .crm-side-label{display:flex;justify-content:space-between;align-items:center;font:500 10px "IBM Plex Mono",monospace;color:#98a4bf;letter-spacing:.065em;margin:0 14px 13px}
 .crm-side-label span{color:#c9d0f8;font-size:9px}
 .crm-nav{display:flex;flex-direction:column;gap:4px}

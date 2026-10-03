@@ -103,7 +103,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    if(!response.ok){const body=await response.json();throw new Error(body.error||"Export failed")}
    const blob=await response.blob();const url=URL.createObjectURL(blob);
    const link=document.createElement("a");link.href=url;
-   link.download="reformdesk-export-"+new Date().toISOString().slice(0,10)+".json";
+   link.download="studiotasker-export-"+new Date().toISOString().slice(0,10)+".json";
    document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
    setNote("Studio export downloaded. Keep this file private and encrypted.");
   }catch(e){setNote(e instanceof Error?e.message:"Export failed")}

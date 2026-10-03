@@ -1,5 +1,5 @@
 
-/* REFORMDESK / STUDIO EDIT, VOL. 01
+/* STUDIOTASKER / STUDIO EDIT, VOL. 01
    Editorial typography, utility-paper, cobalt ink, citrus highlight.
    Intentionally no gradients, glossy 3D objects, testimonial avatars or template cards. */
 
@@ -19,10 +19,7 @@
 .ed-identity{display:flex;align-items:center;gap:12px;font-size:25px;font-weight:600;line-height:1;letter-spacing:-1.2px;color:var(--ed-ink)}
 .ed-identity-strong{font-weight:700}
 .ed-identity-dot{color:var(--ed-orange)}
-.ed-identity-icon{background:var(--ed-blue);width:33px;height:33px;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:8px;transform:rotate(-7deg)}
-.ed-identity-icon i{display:block;width:4px;background:var(--ed-lime);height:11px}
-.ed-identity-icon i:nth-child(2){height:18px}
-.ed-identity-icon i:nth-child(3){height:14px}
+.ed-identity-icon{width:35px;height:35px;flex:0 0 35px;transform:rotate(-7deg)}
 .ed-nav nav{display:flex;gap:38px;align-items:center}
 .ed-nav nav a{font-size:12px;font-weight:600;transition:color .2s}
 .ed-nav nav a:hover{color:var(--ed-blue)}
@@ -135,8 +132,7 @@
 .ed-footer{background:var(--ed-ink);color:#fff;padding:74px 0 25px}
 .ed-footer-main{display:flex;justify-content:space-between;align-items:start;gap:30px}
 .ed-identity-inverse{color:#fff}
-.ed-footer .ed-identity-icon{background:var(--ed-lime)}
-.ed-footer .ed-identity-icon i{background:var(--ed-blue)}
+.ed-footer .ed-identity-icon{filter:brightness(1.13)}
 .ed-footer-main p{font-size:12px;color:#9da9bd;margin-top:16px}
 .ed-footer-nav{display:flex;gap:30px;font-size:12px}
 .ed-footer-nav a:hover{color:var(--ed-lime)}

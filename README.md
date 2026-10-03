@@ -1,6 +1,8 @@
-# ReformDesk — Studio CRM & Growth demo
+# StudioTasker — All-in-One Studio Management
 
-English-first SaaS prototype for boutique Pilates, yoga and fitness studios.
+English-first SaaS prototype for Pilates, yoga, barre and boutique fitness studio operations, including scheduling, member CRM, class bookings and follow-up tasks.
+
+StudioTasker is the public-facing product name. Internal development database credentials, schema identifiers and the existing browser demo localStorage key remain unchanged to preserve compatibility. New Excel v2 exports use the StudioTasker brand, while ReformDesk Excel v1/v2 imports stay supported.
 
 ## Live prototype
 

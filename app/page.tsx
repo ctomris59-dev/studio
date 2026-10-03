@@ -4,6 +4,7 @@ import {
   CreditCard, MoveRight, Plus, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
+import { StudioTaskerMark } from "../components/studio-tasker-mark";
 
 const timetable = [
   { time: "07:30", title: "Morning Flow", coach: "Sophie M.", spots: "6 / 8", state: "OPEN", value: 75 },
@@ -20,9 +21,9 @@ const services = [
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
   return (
-    <Link href="/" className={"ed-identity" + (inverse ? " ed-identity-inverse" : "")} aria-label="ReformDesk home">
-      <span className="ed-identity-icon" aria-hidden="true"><i/><i/><i/></span>
-      <span>reform<span className="ed-identity-strong">desk</span><span className="ed-identity-dot">.</span></span>
+    <Link href="/" className={"ed-identity" + (inverse ? " ed-identity-inverse" : "")} aria-label="StudioTasker home">
+      <StudioTaskerMark className="ed-identity-icon"/>
+      <span>studio<span className="ed-identity-strong">tasker</span><span className="ed-identity-dot">.</span></span>
     </Link>
   );
 }
@@ -68,7 +69,7 @@ export default function HomePage() {
               <div className="ed-index"><span className="ed-index-line"/> INDEPENDENT STUDIOS / BETTER DAYS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
-                <p>Meet the studio CRM concept that connects enquiries, memberships, class bookings and the next right follow-up—without another spreadsheet.</p>
+                <p>Meet StudioTasker: an all-in-one studio management workspace for class scheduling, member CRM, bookings and follow-ups—without another spreadsheet.</p>
                 <Link className="ed-primary-cta" href="/demo"><span>EXPLORE THE DEMO</span><ArrowUpRight size={20}/></Link>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
@@ -81,7 +82,7 @@ export default function HomePage() {
               <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
             </div>
           </div>
-          <div className="ed-hero-end ed-container"><span>THE STUDIO DESK, REIMAGINED.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
+          <div className="ed-hero-end ed-container"><span>ONE PLACE FOR YOUR ENTIRE STUDIO.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
         </section>
 
         <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b>✳</b><span>YOGA</span><b>✳</b><span>BARRE</span><b>✳</b><span>BOUTIQUE FITNESS</span><b>✳</b><span>GROUP CLASSES</span><b>✳</b></div></section>
@@ -134,9 +135,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less desk.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/demo" className="ed-last-link"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
+        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/demo" className="ed-last-link"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">The essentials</a><a href="#pricing">Pricing</a><Link href="/demo">Live demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 REFORMDESK · EARLY CONCEPT</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">The essentials</a><a href="#pricing">Pricing</a><Link href="/demo">Live demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · EARLY CONCEPT</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }

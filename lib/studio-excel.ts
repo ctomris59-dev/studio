@@ -3,7 +3,7 @@ import {
   type Activity,type Lead,type Member,type Session,type StudioData,type StudioFocus,type Task
 } from "./studio-crm";
 
-export const EXCEL_FORMAT="ReformDesk Excel v2";
+export const EXCEL_FORMAT="StudioTasker Excel v2";
 export const SHEETS=["Guide","Leads","Members","Classes","Bookings","FollowUps","Activity","Dismissed"] as const;
 export type SheetName=(typeof SHEETS)[number];
 export type ExcelTables=Record<SheetName,string[][]>;
@@ -44,7 +44,7 @@ export function toExcelTables(data:StudioData,template=false):ExcelTables {
       ["Relations","Bookings: use Class ID + Member ID from Classes and Members sheets."],
       ["Dates","Dates must be YYYY-MM-DD; class times HH:MM (24-hour)."],
       ["Consent","Yes only with documented permission; blank means No. Email OR phone required."],
-      ["Compatibility","Existing ReformDesk Excel v1 files remain importable."],
+      ["Compatibility","Existing ReformDesk Excel v1/v2 files remain importable."],
       ["Payment","Pending packages have zero usable credits until manually confirmed."],
       ["Repeat","Recurring sessions export as individual Classes rows with the same Series ID."],
       ["Security","Browser demo only. Do not import real clients before secure accounts launch."],
@@ -91,7 +91,7 @@ function rows(t:ExcelTables,name:SheetName,errors:string[]):string[][]{
   const minColumns:{[K in SheetName]:number}={Guide:2,Leads:10,Members:10,Classes:6,Bookings:3,FollowUps:7,Activity:5,Dismissed:1};
   const last=actual.reduce((end,v,i)=>norm(v)?i+1:end,0);
   if(last<minColumns[name]||last>expected.length||actual.slice(0,last).some((x,i)=>norm(x)!==expected[i])) {
-    issue(errors,name,1,"Column headers do not match the ReformDesk template; download a fresh template.");
+    issue(errors,name,1,"Column headers do not match the StudioTasker template; download a fresh template.");
     return [];
   }
   return table.slice(1).filter(row=>row.some(x=>norm(x)!=="")).map(row=>[...row,...Array(Math.max(0,expected.length-row.length)).fill("")]);
@@ -101,7 +101,7 @@ export function fromExcelTables(tables:ExcelTables):ValidationOutcome {
   for(const name of SHEETS)if(!tables[name])issue(errors,name,1,"Required sheet missing.");
   const guide=rows(tables,"Guide",errors);
   const kv=new Map(guide.map(r=>[norm(r[0]),norm(r[1])]));
-  if(![EXCEL_FORMAT,"ReformDesk Excel v1"].includes(kv.get("Format")||""))issue(errors,"Guide",2,"Unsupported format version.");
+  if(![EXCEL_FORMAT,"ReformDesk Excel v1","ReformDesk Excel v2"].includes(kv.get("Format")||""))issue(errors,"Guide",2,"Unsupported format version.");
   const focus=kv.get("Studio Type") as StudioFocus;
   if(!focuses.includes(focus))issue(errors,"Guide",3,"Studio Type must be Pilates, Yoga, Boutique fitness, or Gym.");
   const studioName=norm(kv.get("Studio Name")||"");

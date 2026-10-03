@@ -182,7 +182,7 @@ export function StudioOperations({role}:{role:string}){
  }
  return <div className="rd-ops" aria-label="Live studio operations">
   {owner&&<section className="rd-ops-section">
-   <div className="rd-ops-section-title"><div><h3>ReformDesk subscription</h3>
+   <div className="rd-ops-section-title"><div><h3>StudioTasker subscription</h3>
     <p>Monthly or annual access managed by the payment provider. This workspace does not collect card details.</p></div></div>
    <p><strong>{billing?.subscription.plan||"No plan"} · {billing?.subscription.status||"Inactive"}</strong>
     {billing?.subscription.periodEnd&&" · Through "+new Date(billing.subscription.periodEnd).toLocaleDateString()}</p>
