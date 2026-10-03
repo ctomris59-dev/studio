@@ -94,6 +94,8 @@ export default function Demo() {
   const [portalMember,setPortalMember]=useState("m1");
   const [draft,setDraft]=useState<Draft>(null);
   const [taskFilter,setTaskFilter]=useState<"Open"|"All"|"Done">("Open");
+  const [priorityFilter,setPriorityFilter]=useState<"All"|"High"|"Normal"|"Low">("All");
+  const [scheduleView,setScheduleView]=useState<"week"|"list">("week");
   const [excelBusy,setExcelBusy]=useState(false);
   const [excelPreview,setExcelPreview]=useState<ValidationOutcome|null>(null);
   const [excelFileName,setExcelFileName]=useState("");
@@ -341,31 +343,50 @@ export default function Demo() {
   {m.sourceLeadId&&<details className="crm-member-history"><summary>Linked lead history</summary>
     {data.leads.find(l=>l.id===m.sourceLeadId)?.notes&&<p>{data.leads.find(l=>l.id===m.sourceLeadId)?.notes}</p>}
     {data.activities.filter(a=>a.personKind==="lead"&&a.personId===m.sourceLeadId).slice(0,5).map(a=><p key={a.id}><b>{compactDate(a.date)}</b> — {a.text}</p>)}
-  </details>}</td><td><span>{m.plan}</span><small>{m.paymentStatus==="Pending"?"Pending confirmation":m.consent?"Email permitted":"Package confirmed"}</small>{m.expiryDate&&<small>Expires {compactDate(m.expiryDate)}</small>}</td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.paymentStatus!=="Pending"&&m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions">{m.paymentStatus==="Pending"&&<ActionButton onClick={()=>approvePackage(m)}>Confirm pack</ActionButton>}<ActionButton variant="outline" onClick={()=>toggleMemberStatus(m)}>{m.status==="Paused"?"Resume":"Pause"}</ActionButton><ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Mark attended</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>openCredits(m)}>Adjust credits</ActionButton>}</div></td></tr>)}</tbody>
+  </details>}
+  <details className="crm-member-history"><summary>Class &amp; booking history</summary>
+   {ordered.filter(s=>s.booked.includes(m.id)||s.waitlist.includes(m.id)).slice(0,10).map(s=><p key={s.id}><b>{compactDate(s.date)}</b> · {s.title} · {s.booked.includes(m.id)?"Booked":"Waitlisted"}</p>)}
+   {!ordered.some(s=>s.booked.includes(m.id)||s.waitlist.includes(m.id))&&<p>No class reservations in this sample.</p>}
+  </details></td><td><span>{m.plan}</span><small>{m.paymentStatus==="Pending"?"Pending confirmation":m.consent?"Email permitted":"Package confirmed"}</small>{m.expiryDate&&<small>Expires {compactDate(m.expiryDate)}</small>}</td><td><b>{m.credits===null?"Unlimited":m.credits}</b>{m.paymentStatus!=="Pending"&&m.credits!==null&&m.credits<=2&&<small className="crm-warn">Renewal suggested</small>}</td><td>{m.lastVisit?compactDate(m.lastVisit):"No visit yet"}{m.lastVisit&&daysSince(m.lastVisit)>=14&&<small className="crm-warn">Inactive {daysSince(m.lastVisit)} days</small>}</td><td><div className="crm-inline-actions">{m.paymentStatus==="Pending"&&<ActionButton onClick={()=>approvePackage(m)}>Confirm pack</ActionButton>}<ActionButton variant="outline" onClick={()=>toggleMemberStatus(m)}>{m.status==="Paused"?"Resume":"Pause"}</ActionButton><ActionButton variant="outline" onClick={()=>trackAttendance(m)}>Log visit (demo)</ActionButton><ActionButton variant="outline" onClick={()=>prepareMessage("member",m.id,m.credits!==null&&m.credits<=2?"Renewal":"Re-engage")}>Email draft</ActionButton>{m.credits!==null&&<ActionButton variant="quiet" onClick={()=>openCredits(m)}>Adjust credits</ActionButton>}</div></td></tr>)}</tbody>
       </table></div>
-      <div className="crm-table-foot">Packages marked Pending have zero active credits. Confirming a package is a manual demo acknowledgment; no payments are collected or verified. Linked leads retain their history.</div>
+      <div className="crm-table-foot">Packages marked Pending have zero active credits. Payment confirmation and last-visit logging are simulated and not verified against a specific class attendance record. Linked leads retain their history.</div>
     </section>;
   }
 
   function renderSchedule(){
     return <section className="crm-panel">
       <SectionTitle title="Your class schedule" caption="Book, cancel and automatically promote eligible waitlisted members." extra={<ActionButton onClick={()=>{setClassForm(x=>({...x,date:day(1),title:focusClasses[data.studioFocus][0],repeat:false}));setModal("class");}}><Plus size={16}/> New class</ActionButton>}/>
-      <div className="crm-scroll"><table className="crm-table crm-schedule-table">
+      <div className="crm-schedule-view-switch" role="group" aria-label="Choose schedule display">
+       <button type="button" className={scheduleView==="week"?"active":""} aria-pressed={scheduleView==="week"} onClick={()=>setScheduleView("week")}>Week calendar</button>
+       <button type="button" className={scheduleView==="list"?"active":""} aria-pressed={scheduleView==="list"} onClick={()=>setScheduleView("list")}>Booking list</button>
+      </div>
+      {scheduleView==="week"?<div className="crm-week-view" aria-label="This week's sample class calendar">
+       {Array.from({length:7},(_,i)=>day(i-((new Date().getDay()+6)%7))).map(date=><section className="crm-week-day" key={date}>
+        <div className="crm-week-day-header"><strong>{compactDate(date)}</strong><small>{ordered.filter(s=>s.date===date).length} classes</small></div>
+        {ordered.filter(s=>s.date===date).map(s=><div className="crm-week-session" key={s.id}>
+         <span>{s.time}</span><b>{s.title}</b><small>{s.coach} · {s.booked.length}/{s.capacity} booked</small>
+         <div className="crm-week-meter"><span style={{width:convertPercent(s.booked.length,s.capacity)+"%"}}/></div>
+         <button type="button" onClick={()=>setScheduleView("list")}>Manage bookings <ArrowRight size={12}/></button>
+        </div>)}
+        {!ordered.some(s=>s.date===date)&&<p className="crm-week-empty">No classes</p>}
+       </section>)}
+       </div>:<div className="crm-scroll"><table className="crm-table crm-schedule-table">
         <thead><tr><th>CLASS / INSTRUCTOR</th><th>DATE</th><th>SPOTS</th><th>BOOK A MEMBER</th><th>WAITLIST</th></tr></thead>
         <tbody>{ordered.map(s=><tr key={s.id}><td><b>{s.title}</b><small>{s.coach} · {s.time} · {s.durationMinutes||50} min · {s.room||"Main studio"}</small></td><td>{compactDate(s.date)}</td><td><b>{s.booked.length} / {s.capacity}</b><small>{s.capacity-s.booked.length} available</small></td><td><div className="crm-book-actions"><select aria-label={"Choose member for "+s.title} value={bookingChoice[s.id]||data.members[0]?.id||""} onChange={e=>setBookingChoice(p=>({...p,[s.id]:e.target.value}))}>{data.members.map(m=><option value={m.id} key={m.id}>{m.name}</option>)}</select><ActionButton variant="outline" disabled={data.members.length===0} onClick={()=>performBook(s.id,bookingChoice[s.id]||data.members[0].id)}>{s.booked.length>=s.capacity?"Waitlist":"Book"}</ActionButton>{s.booked.length>0&&<ActionButton variant="outline" onClick={()=>performCancel(s.id,s.booked[s.booked.length-1])}>Cancel last</ActionButton>}</div><small>{s.booked.slice(-3).map(id=>data.members.find(m=>m.id===id)?.name.split(" ")[0]).filter(Boolean).join(", ")||"No bookings yet"}</small></td><td>{s.waitlist.length?<><b>{s.waitlist.length} waiting</b><small>{s.waitlist.map(id=>data.members.find(m=>m.id===id)?.name.split(" ")[0]).join(", ")}</small><ActionButton variant="quiet" onClick={()=>performCancel(s.id,s.waitlist[0])}>Remove next</ActionButton></>:<StatusTag value="Open"/>}</td></tr>)}</tbody>
-      </table></div>
+      </table></div>}
       <div className="crm-table-foot">This is a shared-browser demonstration. For a live SaaS, every booking and credit update must be validated transactionally on the server.</div>
     </section>;
   }
 
   function renderFollowups(){
-    const shown=data.tasks.filter(t=>taskFilter==="All"||t.completed===(taskFilter==="Done"));
+    const shown=data.tasks.filter(t=>(taskFilter==="All"||t.completed===(taskFilter==="Done"))&&(priorityFilter==="All"||(t.priority||"Normal")===priorityFilter));
     return <div className="crm-two-col"><section className="crm-panel">
       <SectionTitle title="Suggested follow-ups" caption="Rules-based alerts from class packs, lead stages and attendance."/>
       {suggestions.length? suggestions.map(o=><div className="crm-follow-row" key={o.id}><div><StatusTag value={o.category}/><h3>{o.personName}</h3><p>{o.label}</p><small>{o.detail}</small></div><div className="crm-follow-buttons"><ActionButton onClick={()=>prepareMessage(o.personKind,o.personId,o.category)}><Mail size={15}/> Draft</ActionButton><ActionButton variant="outline" onClick={()=>addOpportunityTask(o)}>Create task</ActionButton><ActionButton variant="quiet" onClick={()=>dismissOpportunity(o.id)}>Dismiss</ActionButton></div></div>):<Empty text="No suggestions at the moment."/>}
     </section><section className="crm-panel">
       <SectionTitle title="Follow-up tasks" caption="Mark work complete as you make contact." extra={<ActionButton variant="outline" onClick={()=>{setTaskForm({...taskForm,personKind:"lead",personId:data.leads[0]?.id||"",reason:"Follow up",due:day(1)});setModal("task");}}><Plus size={15}/> New task</ActionButton>}/>
-      <div className="crm-filter-pills">{(["Open","Done","All"] as const).map(x=><button className={taskFilter===x?"active":""} key={x} onClick={()=>setTaskFilter(x)}>{x}</button>)}</div>
+      <div className="crm-filter-pills">{(["Open","Done","All"] as const).map(x=><button className={taskFilter===x?"active":""} key={x} onClick={()=>setTaskFilter(x)}>{x}</button>)}
+       <label className="crm-priority-filter">Priority <select aria-label="Filter follow-ups by priority" value={priorityFilter} onChange={e=>setPriorityFilter(e.target.value as typeof priorityFilter)}>{(["All","High","Normal","Low"] as const).map(x=><option key={x}>{x}</option>)}</select></label></div>
       {shown.length?shown.sort((a,b)=>a.due.localeCompare(b.due)).map(t=>{const p=person(data,t.personKind,t.personId);return <div className="crm-task-row" key={t.id}><button className={"crm-task-check"+(t.completed?" done":"")} aria-label={t.completed?"Reopen task":"Complete task"} onClick={()=>taskDone(t)}>{t.completed?<Check size={16}/>:null}</button><div><b>{t.reason}</b><span>{p?.name||"Unknown person"} · {t.category||"General"} · Due {compactDate(t.due)}{t.dueTime?" "+t.dueTime:""} · {t.priority||"Normal"} priority</span>{t.completed&&t.outcome&&<small>Result: {t.outcome}</small>}</div>{!t.completed&&<label className="crm-task-outcome-label">Result<select aria-label={"Completion result for "+(p?.name||"person")} value={taskOutcomes[t.id]||"Contacted"} onChange={e=>setTaskOutcomes(v=>({...v,[t.id]:e.target.value as NonNullable<Task["outcome"]>}))}>{TASK_OUTCOMES.map(v=><option key={v}>{v}</option>)}</select></label>}<button aria-label={"Draft message for "+(p?.name||"person")} className="crm-row-action" onClick={()=>prepareMessage(t.personKind,t.personId,"General")}><Mail size={17}/></button></div>}):<Empty text="No tasks in this view."/>}
     </section></div>;
   }
