@@ -133,9 +133,9 @@ export default function HomePage() {
 
         <section className="ed-pricing" id="pricing">
           <div className="ed-container">
-            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. A single-studio pricing idea, shaped with independent businesses in mind.</p></div>
+            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. One studio, one proposed price: $49/month. Member class-pack purchases are separate.</p></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>129<small> / MONTH</small></div><p>Illustrative, non-binding pricing for one studio. Subscription checkout is not live.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>49<small> / MONTH</small></div><p>Proposed $49/month per studio · $39/month on annual billing ($468/year). No live StudioTasker checkout yet. Member pack charges go to each studio, not StudioTasker.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Client booking demo with class credits","Email drafts with consent checks","Studio occupancy and conversion insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo only. No real accounts, outbound emails or payments. A separate secure workspace is still in development.</div></div>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function HomePage() {
               <details><summary>What kinds of studios is StudioTasker for?</summary><p>Designed for independent Pilates, yoga, barre, boutique fitness and other class-based studios. The demo has example studio presets and does not yet support every business model.</p></details>
               <details><summary>Can I use it for real customer bookings today?</summary><p>Not yet. The public demo stores sample information in your browser. The database-backed workspace is a separate development system, not an active commercial service.</p></details>
               <details><summary>Does it collect payments or send member messages?</summary><p>No customer payments or automatic emails are processed by the public demo. Commercial billing and verified notification delivery must be configured before launch.</p></details>
-              <details><summary>Is the displayed price final?</summary><p>No. The $129/month example is indicative, not an offer. Packages and final pricing will be established after product validation.</p></details>
+              <details><summary>Is the displayed price final?</summary><p>The proposed StudioTasker subscription is $49/month per studio, or $39/month when billed annually ($468/year). This is a launch target, not a live purchase offer. A studio\u2019s class packs are priced and sold separately by that studio.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
             </div>
           </div>
