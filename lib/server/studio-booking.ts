@@ -24,9 +24,13 @@ export function parseClass(body:Record<string,unknown>):ClassInput{
  !validInteger(durationMinutes,15,240)||!validInteger(capacity,1,100)||
  !validInteger(bookingCutoffHours,0,168)||!validInteger(cancelCutoffHours,0,168))
  fail(400,"Provide a valid class title, instructor, room, timezone-aware start, duration, capacity and cutoff rules.");
- if(Date.parse(startsAt)<Date.now()+60_000)fail(400,"The class must start at least one minute from now.");
- return {title:title.trim(),instructor:instructor.trim(),room:room.trim(),startsAt,
-  durationMinutes,capacity,bookingCutoffHours,cancelCutoffHours};
+ // The guards above validate unknown JSON. Use explicit narrowed primitives here:
+ const safeStart=startsAt as string;
+ if(Date.parse(safeStart)<Date.now()+60_000)fail(400,"The class must start at least one minute from now.");
+ return {title:(title as string).trim(),instructor:(instructor as string).trim(),
+  room:(room as string).trim(),startsAt:safeStart,
+  durationMinutes:durationMinutes as number,capacity:capacity as number,
+  bookingCutoffHours:bookingCutoffHours as number,cancelCutoffHours:cancelCutoffHours as number};
 }
 
 export async function createClass(client:PoolClient,auth:Authenticated,input:ClassInput){
