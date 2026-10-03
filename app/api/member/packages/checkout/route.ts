@@ -19,10 +19,13 @@ export async function POST(request:NextRequest){
    if(!pack.rowCount)throw new StudioOperationError(404,"Package not available.");
    const account=await client.query<{stripe_account_id:string}>("SELECT stripe_account_id FROM studio_payment_accounts WHERE studio_id=$1",[auth.studioId]);
    if(!account.rowCount)throw new StudioOperationError(409,"Studio payment account is not connected.");
-   const person=await client.query<{email:string;expiry_date:string|null;credits:number|null}>(`
-    SELECT email,expiry_date::text,credits FROM people WHERE studio_id=$1 AND id=$2 FOR UPDATE`,[auth.studioId,memberId]);
+   const person=await client.query<{email:string;expiry_date:string|null;credits:number|null;local_today:string}>(`
+    SELECT p.email,p.expiry_date::text,p.credits,
+     (now() AT TIME ZONE st.timezone)::date::text AS local_today
+    FROM people p JOIN studios st ON st.id=p.studio_id
+    WHERE p.studio_id=$1 AND p.id=$2 FOR UPDATE OF p`,[auth.studioId,memberId]);
    if(!person.rowCount||!person.rows[0].email)throw new StudioOperationError(409,"Member email is required for secure checkout.");
-   if(person.rows[0].credits===null&&person.rows[0].expiry_date&&person.rows[0].expiry_date>=new Date().toISOString().slice(0,10))
+   if(person.rows[0].credits===null&&person.rows[0].expiry_date&&person.rows[0].expiry_date>=person.rows[0].local_today)
     throw new StudioOperationError(409,"Existing unlimited membership requires staff review.");
    const charge=await stripeCall("/v1/accounts/"+account.rows[0].stripe_account_id);
    if(charge.charges_enabled!==true)throw new StudioOperationError(409,"The studio must complete Stripe payment onboarding.");

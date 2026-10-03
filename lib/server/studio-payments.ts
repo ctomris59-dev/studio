@@ -102,17 +102,20 @@ export async function settleStudioPurchase(event:StripeEvent){
     SELECT credits,expiry_date::text,member_status FROM people
     WHERE studio_id=$1 AND id=$2 AND kind='member' FOR UPDATE`,[studioId,p.member_id]);
    if(!person.rowCount)throw new Error("Member missing.");
-   if(person.rows[0].credits===null&&person.rows[0].expiry_date&&person.rows[0].expiry_date>=new Date().toISOString().slice(0,10))
+   const local=await client.query<{local_day:string}>(
+    "SELECT (now() AT TIME ZONE timezone)::date::text AS local_day FROM studios WHERE id=$1",[studioId]);
+   const localToday=local.rows[0]?.local_day;
+   if(person.rows[0].credits===null&&person.rows[0].expiry_date&&person.rows[0].expiry_date>=localToday)
     throw new Error("Existing unlimited access requires staff review.");
    // Renew from later of current expiry or today, regardless of remaining credits.
    const row=await client.query<{expiry_date:string}>(`
     UPDATE people SET credits=coalesce(credits,0)+$3,initial_credits=coalesce(initial_credits,0)+$3,
      plan=$4,package_status='Paid',member_status='Active',
-     start_date=coalesce(start_date,current_date),
-     expiry_date=greatest(coalesce(expiry_date,current_date),current_date)+($5::integer),
+     start_date=coalesce(start_date,$6::date),
+     expiry_date=greatest(coalesce(expiry_date,$6::date),$6::date)+($5::integer),
      updated_at=now()
     WHERE studio_id=$1 AND id=$2 RETURNING expiry_date::text`,
-    [studioId,p.member_id,pkg.rows[0].credits,pkg.rows[0].name,pkg.rows[0].valid_days]);
+    [studioId,p.member_id,pkg.rows[0].credits,pkg.rows[0].name,pkg.rows[0].valid_days,localToday]);
    await client.query("INSERT INTO credit_ledger(studio_id,member_id,delta,reason,purchase_id) VALUES($1,$2,$3,'stripe_package_purchase',$4)",
     [studioId,p.member_id,pkg.rows[0].credits,p.id]);
    await client.query("UPDATE member_purchases SET status='paid',stripe_session_id=$3,stripe_payment_intent_id=$4,fulfilled_at=now() WHERE studio_id=$1 AND id=$2",

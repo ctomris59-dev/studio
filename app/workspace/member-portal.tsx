@@ -43,8 +43,11 @@ export function MemberPortal(){
  const format=(start:string)=>new Date(start).toLocaleString("en-GB",{
   timeZone:timezone,weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"
  });
+ const todayParts=new Intl.DateTimeFormat("en-GB",{timeZone:timezone,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+ const y=(todayParts.find(p=>p.type==="year")?.value||"0000"),mo=(todayParts.find(p=>p.type==="month")?.value||"00"),d=(todayParts.find(p=>p.type==="day")?.value||"00");
+ const localToday=y+"-"+mo+"-"+d;
  const hasValidPass=me?.package_status==="Paid"&&me?.member_status==="Active"&&
-  (me?.credits===null||(me?.credits??0)>0)&&(!me?.expiry_date||me.expiry_date>=new Date().toLocaleDateString("en-CA",{timeZone:timezone}));
+  (me?.credits===null||(me?.credits??0)>0)&&(!me?.expiry_date||me.expiry_date>=localToday);
  function buy(pack:Pack){
   if(!checkoutAvailable){setMessage("Payments are not enabled by your studio yet. Contact the studio to buy a package.");return;}
   void mutate(async()=>{
