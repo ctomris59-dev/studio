@@ -24,7 +24,8 @@ export async function POST(request:NextRequest){
  const body=await jsonObject(request);
  if(!body)return errorResponse(400,"Invalid request.");
  const name=stringField(body,"name",80),kind=stringField(body,"kind",12);
- const email=stringField(body,"email",160),phone=stringField(body,"phone",30);
+ const email=body.email===undefined?"":stringField(body,"email",160);
+ const phone=body.phone===undefined?"":stringField(body,"phone",30);
  if(!name||name.length<2||!["lead","member"].includes(kind||"")||email===null||phone===null||
     (!email&&!phone)||email&& !emailIsValid(normalizeEmail(email))||
     phone&&!/^\+?[0-9]{7,15}$/.test(phone.replace(/[\s().-]/g,"")))
