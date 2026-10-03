@@ -13,7 +13,8 @@
     "test:auth": "node scripts/test-auth.cjs",
     "test:db": "node scripts/test-db.cjs",
     "db:migrate": "node db/migrate.cjs",
-    "db:setup:local": "node db/setup-local.cjs"
+    "db:setup:local": "node db/setup-local.cjs",
+    "test:api": "node scripts/test-api.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

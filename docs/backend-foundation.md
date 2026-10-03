@@ -11,7 +11,7 @@
 - First protected CRM endpoint `/api/studio/people`: read/create a minimal lead/member for owner, manager or receptionist roles.
 - `/workspace` secure development UI, disabled when `DATABASE_URL` absent.
 - SQL schema placeholders for subscriptions, webhook idempotency, bookings, credits, activities and follow-ups. Their **transactional server APIs are not built yet**.
-- CI with PostgreSQL 16 service, schema migrations, cryptographic tests and independent tenant/RLS tests.
+- CI with PostgreSQL 16 service, schema migrations, cryptographic tests, independent tenant/RLS tests and live Next.js HTTP authentication/authorization tests.
 
 ## Local-only development (no hosting purchase)
 1. Install Docker Desktop and Node.js 22.
