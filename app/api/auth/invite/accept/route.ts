@@ -19,6 +19,8 @@ export async function POST(request:NextRequest){
     FOR UPDATE`,[tokenDigest(token)]);
    if(!challenge.rowCount)return {error:"Invitation expired or already used.",status:400};
    const {id,studio_id,member_id,email}=challenge.rows[0];
+   // The one-time database challenge has authenticated this studio scope.
+   await client.query("SELECT set_config('app.studio_id',$1,true)",[studio_id]);
    const user=await client.query<{id:string}>("SELECT id FROM app_users WHERE email=$1 LIMIT 1",[email]);
    if(user.rowCount)return {error:"An account already exists with this address. Contact the studio owner.",status:409};
    const member=await client.query<{id:string}>(`
@@ -29,7 +31,6 @@ export async function POST(request:NextRequest){
     INSERT INTO app_users(email,password_hash,email_verified_at)
     VALUES($1,$2,now()) RETURNING id`,[email,secure]);
    await client.query("INSERT INTO studio_users(studio_id,user_id,role) VALUES($1,$2,'member')",[studio_id,created.rows[0].id]);
-   await client.query("SELECT set_config('app.studio_id',$1,true)",[studio_id]);
    await client.query("INSERT INTO member_identities(studio_id,person_id,user_id) VALUES($1,$2,$3)",[studio_id,member_id,created.rows[0].id]);
    await client.query("UPDATE auth_challenges SET consumed_at=now() WHERE id=$1",[id]);
    return {ok:true};
