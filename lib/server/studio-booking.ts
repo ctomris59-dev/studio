@@ -201,11 +201,12 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
  SELECT session_id FROM bookings WHERE studio_id=$1 AND id=$2`,[auth.studioId,bookingId]);
  if(!find.rowCount)fail(404,"Booking not found in this studio.");
  const session=await lockClass(client,auth.studioId,find.rows[0].session_id);
- const record=await client.query<{id:string;member_id:string;status:string}>(`
- SELECT id,member_id,status FROM bookings WHERE studio_id=$1 AND id=$2 FOR UPDATE`,[auth.studioId,bookingId]);
+ const record=await client.query<{id:string;member_id:string;status:string;attended_at:Date|null}>(`
+ SELECT id,member_id,status,attended_at FROM bookings WHERE studio_id=$1 AND id=$2 FOR UPDATE`,[auth.studioId,bookingId]);
  if(!record.rowCount)fail(404,"Booking not found.");
  const booking=record.rows[0];
  if(booking.status==="cancelled")return {id:booking.id,status:"cancelled",alreadyCancelled:true,promoted:null};
+ if(booking.attended_at)fail(409,"Checked-in bookings cannot be cancelled. Correct attendance first.");
  if(cutoffPassed(session.starts_at,session.cancel_cutoff_hours))fail(409,"Cancellation deadline has passed.");
  await client.query(`
  UPDATE bookings SET status='cancelled',cancelled_at=now()
@@ -256,11 +257,39 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
 export async function listBookings(client:PoolClient,studioId:string,sessionId:string){
  if(!validUUID(sessionId))fail(400,"Invalid class identifier.");
  const result=await client.query(`
- SELECT b.id,b.session_id,b.member_id,b.status,b.queue_number,b.booked_at,
+ SELECT b.id,b.session_id,b.member_id,b.status,b.queue_number,b.booked_at,b.attended_at,
  p.full_name AS member_name
  FROM bookings b JOIN people p ON p.id=b.member_id AND p.studio_id=b.studio_id
  WHERE b.studio_id=$1 AND b.session_id=$2 AND b.status IN('booked','waitlisted')
  ORDER BY CASE WHEN b.status='booked' THEN 0 ELSE 1 END,
           b.queue_number ASC NULLS LAST,b.booked_at ASC,b.id ASC LIMIT 300`,[studioId,sessionId]);
  return result.rows;
+}
+
+export async function setClassAttendance(client:PoolClient,auth:Authenticated,bookingId:string,present:boolean,reason?:string){
+ if(!validUUID(bookingId))fail(400,"Invalid booking identifier.");
+ if(!present&&!validText(reason,200,5))fail(400,"Provide a reason for an attendance correction.");
+ const found=await client.query<{id:string;member_id:string;starts_at:Date;status:string;attended_at:Date|null}>(`
+ SELECT b.id,b.member_id,c.starts_at,b.status,b.attended_at
+ FROM bookings b JOIN class_sessions c ON c.id=b.session_id AND c.studio_id=b.studio_id
+ WHERE b.studio_id=$1 AND b.id=$2 FOR UPDATE OF b`,[auth.studioId,bookingId]);
+ if(!found.rowCount)fail(404,"Booking not found in this studio.");
+ const booking=found.rows[0];
+ if(booking.status!=="booked")fail(409,"Only confirmed bookings can be checked in.");
+ const when=new Date(booking.starts_at).getTime();
+ if(Date.now()<when-60*60000||Date.now()>when+30*86400000)
+  fail(409,"Attendance can only be recorded from one hour before class until 30 days afterward.");
+ if(Boolean(booking.attended_at)===present)return {id:bookingId,present,alreadyApplied:true};
+ await client.query("UPDATE bookings SET attended_at=$3 WHERE studio_id=$1 AND id=$2",
+  [auth.studioId,bookingId,present?new Date().toISOString():null]);
+ await client.query(`
+ UPDATE people p SET last_visit=(
+  SELECT MAX((c.starts_at AT TIME ZONE st.timezone)::date)
+  FROM bookings b JOIN class_sessions c ON c.id=b.session_id AND c.studio_id=b.studio_id
+  JOIN studios st ON st.id=b.studio_id
+  WHERE b.studio_id=$1 AND b.member_id=$2 AND b.attended_at IS NOT NULL
+ ) WHERE p.studio_id=$1 AND p.id=$2`,[auth.studioId,booking.member_id]);
+ await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,$4,$5::jsonb)",
+ [auth.studioId,booking.member_id,auth.userId,present?"attendance.checked_in":"attendance.corrected",JSON.stringify({bookingId,reason:present?"":reason})]);
+ return {id:bookingId,present,alreadyApplied:false};
 }
