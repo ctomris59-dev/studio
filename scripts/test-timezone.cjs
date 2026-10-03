@@ -1,7 +1,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),ts=require("typescript");
 const source=fs.readFileSync("lib/studio-timezone.ts","utf8");
 const compiled={exports:{}};
-new Function("module","exports",ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(compiled,compiled.exports);
+new Function("module","exports",ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(compiled,compiled.exports);
 const {localDateTimeToUTC,validStudioTimezone}=compiled.exports;
 assert(validStudioTimezone("Europe/London"));assert(validStudioTimezone("America/New_York"));
 assert(!validStudioTimezone("Fake/City"));assert(!validStudioTimezone("../../etc/passwd"));
