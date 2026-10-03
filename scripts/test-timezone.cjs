@@ -1,8 +1,8 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),ts=require("typescript");
 const source=fs.readFileSync("lib/studio-timezone.ts","utf8");
-const module={exports:{}};
-new Function("module","exports",ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(module,module.exports);
-const {localDateTimeToUTC,validStudioTimezone}=module.exports;
+const compiled={exports:{}};
+new Function("module","exports",ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(compiled,compiled.exports);
+const {localDateTimeToUTC,validStudioTimezone}=compiled.exports;
 assert(validStudioTimezone("Europe/London"));assert(validStudioTimezone("America/New_York"));
 assert(!validStudioTimezone("Fake/City"));assert(!validStudioTimezone("../../etc/passwd"));
 assert.equal(localDateTimeToUTC("2026-07-15","09:00","Europe/London"),"2026-07-15T08:00:00.000Z");
