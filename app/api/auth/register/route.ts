@@ -4,10 +4,12 @@ import {jsonObject,stringField,errorResponse,successResponse,backendError,sameOr
 import {emailIsValid,normalizeEmail,validatePassword,passwordHash} from "@/lib/auth-crypto";
 import {newChallenge,queueMessage,publicMailOrigin} from "@/lib/server/challenges";
 import {validStudioTimezone} from "@/lib/studio-timezone";
+import {commercialRegistrationReady} from "@/lib/server/release-config";
 export const runtime="nodejs";
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  if(process.env.AUTH_ALLOW_REGISTRATION!=="true")return errorResponse(403,"New registration is disabled.");
+ if(!commercialRegistrationReady())return errorResponse(503,"Public registration requires configured email, billing and backups.");
  if(!dbIsReady())return errorResponse(503,"Workspace backend is not configured.");
  const body=await jsonObject(request);if(!body)return errorResponse(400,"Invalid request.");
  const email=stringField(body,"email",160),password=stringField(body,"password",128);
