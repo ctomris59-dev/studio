@@ -16,13 +16,14 @@ async function api<T>(path:string,method="GET",payload?:Record<string,unknown>):
 export function MemberPortal(){
  const [me,setMe]=useState<MemberProfile|null>(null),[bookings,setBookings]=useState<Reservation[]>([]);
  const [classes,setClasses]=useState<Session[]>([]);
+ const [timezone,setTimezone]=useState("UTC");
  const [message,setMessage]=useState(""),[busy,setBusy]=useState(false);
  const load=useCallback(async()=>{
   const [m,c]=await Promise.all([
-   api<{member:MemberProfile;bookings:Reservation[]}>("/api/member/me"),
+   api<{member:MemberProfile;bookings:Reservation[];timezone:string}>("/api/member/me"),
    api<{classes:Session[]}>("/api/member/classes")
   ]);
-  setMe(m.member);setBookings(m.bookings);setClasses(c.classes);
+  setMe(m.member);setBookings(m.bookings);setClasses(c.classes);setTimezone(m.timezone||"UTC");
  },[]);
  useEffect(()=>{void load().catch(e=>setMessage(e instanceof Error?e.message:"Unable to load member profile."))},[load]);
  async function mutate(run:()=>Promise<string>){
@@ -31,11 +32,12 @@ export function MemberPortal(){
   catch(e){setMessage(e instanceof Error?e.message:"Request failed")}
   finally{setBusy(false)}
  }
- const format=(start:string)=>new Date(start).toLocaleString(undefined,{
-  weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"
+ const format=(start:string)=>new Date(start).toLocaleString("en-GB",{
+  timeZone:timezone,weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"
  });
  return <section className="rd-ops" aria-label="My class bookings">
   {message&&<p role="status" className="rd-feedback">{message}</p>}
+  <p className="rd-tiny">All class times are displayed in the studio timezone: <strong>{timezone}</strong>.</p>
   <div className="rd-ops-section"><h2>My class pack</h2>
    <p><strong>{me?.full_name||"Your membership"}</strong></p>
    <p>{me?.plan||"No package"} · {me?.package_status||"Pending approval"}

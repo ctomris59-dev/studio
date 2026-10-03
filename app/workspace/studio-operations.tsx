@@ -30,8 +30,8 @@ async function api<T>(path:string,method="GET",body?:unknown):Promise<T>{
  if(!response.ok)throw new Error(typeof data.error==="string"?data.error:"Operation failed ("+response.status+").");
  return data as T;
 }
-function classLabel(c:ClassRow){
- return c.title+" · "+new Date(c.starts_at).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+function classLabel(c:ClassRow,timezone:string){
+ return c.title+" · "+new Date(c.starts_at).toLocaleString("en-GB",{timeZone:timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 export function StudioOperations({role}:{role:string}){
  const owner=["owner","manager"].includes(role);
@@ -243,12 +243,12 @@ export function StudioOperations({role}:{role:string}){
      <button type="submit" className="rd-primary" disabled={busy}>{repeat.enabled?"Create weekly series":"Create class"}</button>
     </form></details>}
    <div className="rd-class-list">{classes.length?classes.slice(0,40).map(c=><button className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} key={c.id} type="button" onClick={()=>setSelectedClass(c.id)}>
-    <strong>{classLabel(c)}</strong><small>{c.instructor} · {c.room} · {c.duration_minutes} min</small>
+    <strong>{classLabel(c,studioZone)}</strong><small>{c.instructor} · {c.room} · {c.duration_minutes} min</small>
     <span>{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting</span>
    </button>):<p className="rd-empty">No upcoming classes. Create your first class above.</p>}</div>
    {classes.length>0&&<div className="rd-ops-subsection"><h4>Book or waitlist a member</h4>
     <form className="rd-form" onSubmit={book}>
-      <label>Class<select required value={selectedClass} onChange={e=>setSelectedClass(e.target.value)}>{classes.map(c=><option key={c.id} value={c.id}>{classLabel(c)}</option>)}</select></label>
+      <label>Class<select required value={selectedClass} onChange={e=>setSelectedClass(e.target.value)}>{classes.map(c=><option key={c.id} value={c.id}>{classLabel(c,studioZone)}</option>)}</select></label>
       <label>Member<select required value={selectedMember} onChange={e=>setSelectedMember(e.target.value)}><option value="">Select a member</option>{members.map(m=><option value={m.id} key={m.id}>{m.full_name} · {m.package_status||"Pending"} · {m.credits===null?"Unlimited":m.credits+" credits"}</option>)}</select></label>
       <button type="submit" className="rd-primary" disabled={busy||!selectedMember}>Book / join waitlist</button>
     </form>

@@ -16,7 +16,8 @@ export async function GET(request:NextRequest){
     FROM bookings b JOIN class_sessions c ON c.id=b.session_id AND c.studio_id=b.studio_id
     WHERE b.studio_id=$1 AND b.member_id=$2 AND b.status IN('booked','waitlisted')
     ORDER BY c.starts_at ASC,b.id LIMIT 100`,[auth.studioId,id]);
-   return {member:member.rows[0],bookings:bookings.rows};
+   const studio=await client.query<{timezone:string}>("SELECT timezone FROM studios WHERE id=$1",[auth.studioId]);
+   return {member:member.rows[0],bookings:bookings.rows,timezone:studio.rows[0]?.timezone||"UTC"};
   });
   if(!res.access.ok)return errorResponse(res.access.status,res.access.message);
   return successResponse(res.value);
