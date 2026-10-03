@@ -15,6 +15,7 @@ type BookingRow={id:string;session_id:string;member_id:string;member_name:string
 type TaskRow={id:string;title:string;person_name:string;due_at:string;category:string;priority:string};
 type StudioPack={id:string;name:string;description:string;currency:string;price_cents:number;credits:number;valid_days:number;active:boolean};
 type ConnectStatus={connected:boolean;configured:boolean;chargesEnabled:boolean;country?:string;detailsSubmitted?:boolean};
+type PaymentOrder={id:string;status:string;amount_cents:number;currency:string;created_at:string;member_name:string;package_name:string};
 type Signal={
  id:string;kind:string;priority:"high"|"medium"|"low";title:string;reason:string;
  suggestedAction:string;personId?:string;sessionId?:string;
@@ -49,6 +50,7 @@ export function StudioOperations({role}:{role:string}){
  const [schedule,setSchedule]=useState({title:"Studio Class",instructor:"Instructor",room:"Main studio",startsAt:"",durationMinutes:50,capacity:8});
  const [studioZone,setStudioZone]=useState("UTC");
  const [packs,setPacks]=useState<StudioPack[]>([]);
+ const [orders,setOrders]=useState<PaymentOrder[]>([]);
  const [connect,setConnect]=useState<ConnectStatus|null>(null);
  const [country,setCountry]=useState("US");
  const [packForm,setPackForm]=useState({name:"10 Class Pack",description:"",credits:10,validDays:60,price:"99",currency:"usd"});
@@ -67,6 +69,7 @@ export function StudioOperations({role}:{role:string}){
   setClasses(c.classes);setMembers(m.members);setActions(a.items);setTasks(t.tasks);
   if(owner){
    void api<{packages:StudioPack[]}>("/api/studio/packages").then(x=>setPacks(x.packages)).catch(()=>{});
+   void api<{orders:PaymentOrder[]}>("/api/studio/payments/orders").then(x=>setOrders(x.orders)).catch(()=>{});
    void api<ConnectStatus>("/api/studio/payments/connect").then(setConnect).catch(()=>setConnect(null));
   }
   void api<{studio:{timezone:string}}>("/api/studio/settings").then(s=>setStudioZone(s.studio.timezone)).catch(()=>setMessage("Check your studio timezone in settings."));
@@ -178,6 +181,15 @@ export function StudioOperations({role}:{role:string}){
    return result.notice;
   });
  }
+ function openPaymentDashboard(){
+  void perform(async()=>{
+   const result=await api<{dashboardUrl:string}>("/api/studio/payments/dashboard","POST");
+   if(!/^https:\/\/connect\.stripe\.com\//.test(result.dashboardUrl)&&!result.dashboardUrl.startsWith("http://127.0.0.1:"))
+    throw Error("Unexpected payment dashboard location.");
+   window.location.assign(result.dashboardUrl);
+   return "Opening Stripe Express dashboard.";
+  });
+ }
  function addPack(e:FormEvent<HTMLFormElement>){
   e.preventDefault();
   const priceCents=Math.round(Number(packForm.price)*100);
@@ -244,10 +256,19 @@ export function StudioOperations({role}:{role:string}){
    <div className="rd-commerce-status"><strong>Stripe Connect:</strong> {connect?.chargesEnabled?"Ready to accept live member payments":connect?.connected?"Onboarding incomplete — finish setup to accept payments":"Not connected"}
     {!connect?.configured&&<p>Online payments are disabled until secure platform credentials and webhook processing are configured.</p>}</div>
    {connect?.configured&&<div className="rd-connect-row">
+    {connect.connected&&<button type="button" disabled={busy} onClick={openPaymentDashboard}>View Stripe payment dashboard ↗</button>}
     {!connect.chargesEnabled&&<><label>Registered country<select value={country} onChange={e=>setCountry(e.target.value)}>
      {["US","GB","CA","AU","DE","FR","IT","ES","IE","NL","BE","AT","PT","FI","SE","NO","DK","PL","CH"].map(x=><option key={x} value={x}>{x}</option>)}</select></label>
      <button type="button" disabled={busy} onClick={connectStripe}>{connect.connected?"Complete Stripe onboarding":"Connect studio's Stripe account"}</button></>}
    </div>}
+   <details className="rd-ops-details"><summary>Member payment history / refunds</summary>
+    <div className="rd-member-purchases">
+     {orders.length?orders.map(order=><div key={order.id} className={"rd-commerce-order"+(["refunded","disputed"].includes(order.status)?" review":"")}>
+      <strong>{order.member_name} · {order.package_name}</strong>
+      <span>{(order.amount_cents/100).toFixed(2)} {order.currency.toUpperCase()} · {order.status==="paid"?"Paid & activated":order.status==="pending"?"Checkout pending":order.status==="refunded"?"REFUND — review member credits":"DISPUTE — review member credits"} · {new Date(order.created_at).toLocaleDateString("en-GB")}</span>
+     </div>):<p className="rd-tiny">No member package checkout transactions yet.</p>}
+    </div>
+   </details>
    <details className="rd-ops-details"><summary>Create a class package</summary><form className="rd-form" onSubmit={addPack}>
     <label>Package name<input required minLength={2} maxLength={70} value={packForm.name} onChange={e=>setPackForm({...packForm,name:e.target.value})}/></label>
     <label>Description (optional)<input maxLength={240} value={packForm.description} onChange={e=>setPackForm({...packForm,description:e.target.value})}/></label>

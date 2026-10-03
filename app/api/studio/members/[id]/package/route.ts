@@ -19,6 +19,10 @@ export async function POST(request:NextRequest,context:{params:Promise<{id:strin
     [auth.studioId,id]);
    if(!m.rowCount||m.rows[0].kind!=="member")throw new StudioOperationError(404,"Member not found.");
    if(m.rows[0].package_status!=="Pending")throw new StudioOperationError(409,"Package is not awaiting confirmation.");
+   // Prevent staff from overriding an in-flight card checkout with manually granted credits.
+   const awaiting=await client.query(`SELECT 1 FROM member_purchases WHERE studio_id=$1 AND member_id=$2
+    AND status='pending' AND created_at>now()-interval '24 hours' LIMIT 1`,[auth.studioId,id]);
+   if(awaiting.rowCount)throw new StudioOperationError(409,"A recent online checkout is pending. Reconcile it before recording an offline package.");
    const finalCredits=plan==="Unlimited Monthly"?null:credits;
    const updated=await client.query(`
      UPDATE people SET package_status='Paid',plan=$3,credits=$4,initial_credits=$5,updated_at=now()
