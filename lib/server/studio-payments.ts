@@ -130,10 +130,18 @@ export async function settleStudioPurchase(event:StripeEvent){
    if(!matches.rowCount)return {processed:false,reason:"intent_mismatch"};
    await client.query("UPDATE member_purchases SET status=$3,revoked_at=now() WHERE studio_id=$1 AND id=$2",
     [studioId,p.id,event.type==="charge.refunded"?"refunded":"disputed"]);
-   await client.query("UPDATE people SET member_status='Paused',package_status='Pending',updated_at=now() WHERE studio_id=$1 AND id=$2",
-    [studioId,p.member_id]);
+   // Remove unspent refunded credits immediately; do not leave them usable on a later renewal.
+   // If credits were already used, zero is the safe floor and a human must reconcile.
+   const pack=await client.query<{credits:number}>("SELECT credits FROM studio_packages WHERE studio_id=$1 AND id=$2",[studioId,p.package_id]);
+   const member=await client.query<{credits:number|null}>("SELECT credits FROM people WHERE studio_id=$1 AND id=$2 FOR UPDATE",[studioId,p.member_id]);
+   const available=member.rows[0]?.credits;
+   const toReverse=typeof available==="number"?Math.min(available,pack.rows[0]?.credits||0):0;
+   await client.query("UPDATE people SET credits=CASE WHEN credits IS NULL THEN NULL ELSE greatest(0,credits-$3::int) END,member_status='Paused',package_status='Pending',updated_at=now() WHERE studio_id=$1 AND id=$2",
+    [studioId,p.member_id,toReverse]);
+   if(toReverse>0)await client.query("INSERT INTO credit_ledger(studio_id,member_id,delta,reason) VALUES($1,$2,$3,'stripe_payment_reversal')",
+    [studioId,p.member_id,-toReverse]);
    await client.query("INSERT INTO activity_log(studio_id,person_id,action,details) VALUES($1,$2,'package.payment_review_required',$3::jsonb)",
-    [studioId,p.member_id,JSON.stringify({purchaseId:p.id,reason:event.type})]);
+    [studioId,p.member_id,JSON.stringify({purchaseId:p.id,reason:event.type,creditsReversed:toReverse,manualReview:true})]);
    return {processed:true,reason:"review_required"};
   }
   return {processed:false,reason:"ignored"};
