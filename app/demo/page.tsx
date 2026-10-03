@@ -420,7 +420,7 @@ export default function Demo() {
       </section>
       <section className="crm-panel crm-excel-panel"><SectionTitle title="Excel import / export" caption="A structured .xlsx workbook, formatted for this CRM."/>
         <div className="crm-excel-content">
-          <div className="crm-excel-status"><FileSpreadsheet size={25}/><div><b>StudioTasker Excel v1</b><span>8 worksheets · Exact column headers · Linked bookings and tasks</span></div></div>
+          <div className="crm-excel-status"><FileSpreadsheet size={25}/><div><b>StudioTasker Excel v2</b><span>8 worksheets · Exact column headers · Linked bookings and tasks</span></div></div>
           <p>Download a blank template, complete its sheets and import it. Or export the current studio into an Excel workbook. Everything stays in this browser demo.</p>
           <div className="crm-excel-actions">
             <ActionButton variant="outline" disabled={excelBusy} onClick={()=>{void exportExcel(true);}}><Download size={15}/> Download template</ActionButton>
