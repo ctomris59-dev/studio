@@ -34,7 +34,7 @@ npm run dev
 - All preloaded names/emails are fictional `example.com` data.
 - **Not a real hosted CRM database.** No secure member logins, studio accounts, backend persistence, payment collection, email delivery, transactional reservations or privacy controls yet.
 - Do **not** enter real customer personal information.
-- `db/schema.sql` is a proposed PostgreSQL migration **not applied** to any database.
+- `db/schema.sql` is a historical proposal; the authoritative new-installation migrations are in `db/migrations/` (not applied to any hosted database).
 
 ### Production launch requirements
 
@@ -86,3 +86,7 @@ The four Add forms preserve fast entry and disclose further fields on demand:
 **Data minimization:** We do not request medical information, date of birth, gender, physical addresses, emergency contacts or payment card data. These are browser-only demo capabilities; there is no real account, payment or email delivery system.
 
 Memberships can be paused and resumed from the Members table, with Undo. Linked lead notes and source interaction history are viewable on the member row. Follow-up outcomes marked Converted create a pending member, while Reschedule creates the next call task.
+
+## Secure backend foundation (new)
+
+The first portable PostgreSQL/authentication increment is documented in [docs/backend-foundation.md](docs/backend-foundation.md). The production backend is still incomplete; do not enable registration or enter real customer data on Vercel.

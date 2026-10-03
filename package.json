@@ -9,19 +9,25 @@
     "test:crm": "node scripts/test-crm.cjs",
     "test:excel": "node scripts/test-excel.cjs",
     "test:history": "node scripts/test-history.cjs",
-    "test:workflows": "node scripts/test-workflows.cjs"
+    "test:workflows": "node scripts/test-workflows.cjs",
+    "test:auth": "node scripts/test-auth.cjs",
+    "test:db": "node scripts/test-db.cjs",
+    "db:migrate": "node db/migrate.cjs",
+    "db:setup:local": "node db/setup-local.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "next": "^15.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "@types/pg": "^8.11.11"
   }
 }
