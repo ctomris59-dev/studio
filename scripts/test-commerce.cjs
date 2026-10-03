@@ -10,6 +10,7 @@ async function main(){
   const data=new URLSearchParams(Buffer.concat(chunks).toString()),url=req.url||"";
   let result={},status=200;
   if(url==="/v1/accounts"&&req.method==="POST")result={id:"acct_MOCKSTUDIO1"};
+  else if(url==="/v1/accounts/acct_MOCKSTUDIO1/login_links")result={url:"https://connect.stripe.com/express/mock"};
   else if(url==="/v1/accounts/acct_MOCKSTUDIO1")result={id:"acct_MOCKSTUDIO1",charges_enabled:true,details_submitted:true};
   else if(url==="/v1/account_links")result={url:"https://connect.stripe.com/setup/mock"};
   else if(url==="/v1/checkout/sessions"){
@@ -74,6 +75,8 @@ async function main(){
   assert(connect.data.onboardingUrl.startsWith("https://connect.stripe.com/"));
   const paymentReady=await api("/api/studio/payments/connect",{cookie:ownerCookie});
   assert.equal(paymentReady.data.chargesEnabled,true);
+  const dashboard=await api("/api/studio/payments/dashboard",{method:"POST",cookie:ownerCookie});
+  assert.equal(dashboard.status,200,JSON.stringify(dashboard.data));
   const pack=await api("/api/studio/packages",{method:"POST",cookie:ownerCookie,
    body:{name:"Ten Visits",description:"Valid 60 days",priceCents:9900,currency:"gbp",credits:10,validDays:60}});
   assert.equal(pack.status,201,JSON.stringify(pack.data));const packId=pack.data.package.id;
@@ -104,6 +107,8 @@ async function main(){
   assert(first.data.checkoutUrl.startsWith("https://checkout.stripe.com/"));
   assert.equal(stripeOrders.get("pi_MOCK1").amount,9900);
   assert.equal(stripeOrders.get("pi_MOCK1").account,"acct_MOCKSTUDIO1");
+  const manual=await api("/api/studio/members/"+memberId+"/package",{method:"POST",cookie:ownerCookie,body:{plan:"10 Class Pack",credits:10}});
+  assert.equal(manual.status,409,"Pending Stripe checkout cannot be manually confirmed.");
   const beforePayment=await api("/api/member/me",{cookie:memberCookie});
   assert.equal(beforePayment.data.member.credits,0,"Checkout creation must not grant credits");
   const event=(n,purchaseId,id2="evt_MOCK"+n)=>({id:id2,type:"checkout.session.completed",account:"acct_MOCKSTUDIO1",livemode:false,
@@ -122,6 +127,10 @@ async function main(){
   const profile=await api("/api/member/me",{cookie:memberCookie});
   assert.equal(profile.data.member.credits,10);
   assert.equal(profile.data.member.package_status,"Paid");
+  const emailNotice=await admin.query("SELECT template FROM mail_outbox WHERE recipient_email=$1 AND template='package_payment_confirmed'",[memberEmail]);
+  assert.equal(emailNotice.rowCount,1);
+  const orders=await api("/api/studio/payments/orders",{cookie:ownerCookie});
+  assert.equal(orders.status,200);assert(orders.data.orders.some(o=>o.status==="paid"));
   const reservation=await api("/api/member/bookings",{method:"POST",cookie:memberCookie,body:{sessionId:classId}});
   assert.equal(reservation.status,201,JSON.stringify(reservation.data));
   assert.equal((await api("/api/member/me",{cookie:memberCookie})).data.member.credits,9);
@@ -146,6 +155,13 @@ async function main(){
   const blocked=await api("/api/member/me",{cookie:memberCookie});
   assert.equal(blocked.data.member.member_status,"Paused");
   assert.equal(blocked.data.member.credits,9,"Unused refunded credits removed");
+  const reviewOrders=await api("/api/studio/payments/orders",{cookie:ownerCookie});
+  assert(reviewOrders.data.orders.some(o=>o.status==="refunded"));
+  const refundNotice=await admin.query("SELECT template FROM mail_outbox WHERE recipient_email=$1 AND template='package_payment_review'",[memberEmail]);
+  assert.equal(refundNotice.rowCount,1);
+  const exportData=await api("/api/studio/export",{cookie:ownerCookie});
+  assert(exportData.data.studioPackages.some(p=>p.id===packId));
+  assert(exportData.data.memberPurchases.some(p=>p.id===second.data.purchaseId));
   const newClass=await api("/api/studio/classes",{method:"POST",cookie:ownerCookie,
    body:{title:"Next Flow",instructor:"Instructor D",room:"Studio B",startsAt:new Date(Date.now()+5*86400000).toISOString(),durationMinutes:50,capacity:8}});
   assert.equal(newClass.status,201);

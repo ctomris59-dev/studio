@@ -24,3 +24,6 @@ One-time email links use `/workspace#verify=...`, `#reset=...`, or `#invite=...`
 
 ## Commercial registration safety gate (2026-10-03)
 Public registration now fails closed unless a real PostgreSQL database, SMTP sending account, commercial Lemon Squeezy billing/webhook settings, backup configuration and HTTPS origin are present with `BILLING_ENFORCEMENT=required`. Local HTTP loopback integration tests have an explicit local-only exemption. Run `npm run launch:verify` before a launch; it checks environment presence, not service connectivity or legal compliance. This does **not** constitute production approval. Do not enable public registration until the pending third-party security review, GDPR documentation, retention/erasure workflow, email deliverability and real restore drill have been completed.
+
+## Member commerce
+The secure member purchase → reserve → check-in → renew code and public five-step simulation at `/experience` are implemented. **SaaS $49/month (or $468 annually)** is separate from studio-priced class packs. Stripe Connect onboarding, live webhook delivery, production data/privacy controls and real payment/backup verification remain required before opening accounts. See `docs/member-commerce.md`.

@@ -8,7 +8,7 @@ export function commercialRegistrationReady():boolean{
  if(testLoopback)return true;
  const required=["DATABASE_URL","SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD",
   "LEMON_API_KEY","LEMON_STORE_ID","LEMON_MONTHLY_VARIANT_ID","LEMON_ANNUAL_VARIANT_ID",
-  "LEMON_WEBHOOK_SECRET","BACKUP_DATABASE_URL","BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR"];
+  "LEMON_WEBHOOK_SECRET","BACKUP_DATABASE_URL","BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR","STRIPE_SECRET_KEY","STRIPE_CONNECT_WEBHOOK_SECRET"];
  return origin.startsWith("https://")&&
-  process.env.BILLING_ENFORCEMENT==="required"&&required.every(k=>Boolean(process.env[k]));
+  process.env.BILLING_ENFORCEMENT==="required"&&process.env.STRIPE_STUDIO_PAYMENTS_ENABLED==="true"&&required.every(k=>Boolean(process.env[k]));
 }

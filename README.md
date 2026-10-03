@@ -106,3 +106,6 @@ The server-backed `/workspace` now includes opt-in email verification, password 
 Maintenance tools and their limits: `npm run jobs:mail`, `npm run jobs:renewals`, `npm run backup:create`, `npm run backup:verify -- /path/file.rdbk`, `npm run backup:restore -- /path/file.rdbk`. Encrypted backups must be stored off-server with a separately held secret.
 
 **Not production-ready**: payment provider account, hosted PostgreSQL, verified email delivery, account hardening, true full CRM parity, legally compliant erasure/retention, independent security audit, accessibility field review and actual VPS load testing remain to be completed. No paid services were provisioned.
+
+## Member commerce preview
+Studio owners can publish class packs and connect eligible Stripe Express merchant accounts. Members can buy using hosted Stripe Checkout, book classes, see check-ins and renew packages. Only signed, price-matched webhook events activate credits; payment refunds flag memberships and reverse unspent credits. These are secure workspace development features requiring a production database and provider credentials; the public `/experience` is an interactive simulation with no real charges. The proposed StudioTasker SaaS subscription is **$49/month per studio ($468/year)**, separate from studio-set class pack prices. See `docs/member-commerce.md`.

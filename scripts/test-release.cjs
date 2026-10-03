@@ -7,7 +7,7 @@ const gate=compiled.exports.commercialRegistrationReady;
 const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT",
  "DATABASE_URL","SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD","LEMON_API_KEY","LEMON_STORE_ID",
  "LEMON_MONTHLY_VARIANT_ID","LEMON_ANNUAL_VARIANT_ID","LEMON_WEBHOOK_SECRET","BACKUP_DATABASE_URL",
- "BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR"];
+ "BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR","STRIPE_SECRET_KEY","STRIPE_CONNECT_WEBHOOK_SECRET","STRIPE_STUDIO_PAYMENTS_ENABLED"];
 const old=Object.fromEntries(names.map(k=>[k,process.env[k]]));
 try{
  for(const k of names)delete process.env[k];
@@ -23,6 +23,7 @@ try{
  process.env.PUBLIC_APP_ORIGIN="https://studio.example.com";
  for(const key of names.filter(k=>!["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT"].includes(k)))process.env[key]="test-placeholder";
  process.env.BILLING_ENFORCEMENT="required";
+ process.env.STRIPE_STUDIO_PAYMENTS_ENABLED="true";
  assert.equal(gate(),true,"Fully set commercial configuration may proceed to manual launch checks");
  delete process.env.SMTP_PASSWORD;
  assert.equal(gate(),false,"Missing mail credentials must block signup");
