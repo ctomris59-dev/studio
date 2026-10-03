@@ -98,3 +98,6 @@
 .rd-commerce-order{display:flex;flex-direction:column;gap:5px;padding:12px 0;border-bottom:1px solid #dfe3eb}
 .rd-commerce-order.review{border-left:4px solid #d85835;padding-left:12px;background:#fff0e8}
 .rd-commerce-order strong{font-size:13px}.rd-commerce-order span{font-size:12px;color:#566079;line-height:1.5}
+
+/* Member flow is intentionally ordered class → package → reservation → check-in → renewal. */
+.rd-member-overview{order:1}.rd-member-classes{order:2}.rd-member-shop{order:3;scroll-margin-top:30px}.rd-member-reservations{order:4}.rd-member-visits{order:5}

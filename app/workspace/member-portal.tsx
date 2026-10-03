@@ -33,7 +33,14 @@ export function MemberPortal(){
   setMe(m.member);setBookings(m.bookings);setClasses(c.classes);setTimezone(m.timezone||"UTC");
   setPackages(p.packages);setPurchases(p.purchases);setCheckoutAvailable(p.checkoutAvailable);setVisits(m.visits||[]);
  },[]);
- useEffect(()=>{void load().catch(e=>setMessage(e instanceof Error?e.message:"Unable to load member profile."))},[load]);
+ useEffect(()=>{
+  const stored=window.sessionStorage.getItem("studiotasker:selected-class");
+  if(stored)setSelectedClass(stored);
+  const result=new URLSearchParams(window.location.search).get("studioCheckout");
+  if(result==="return")setMessage("Returned from payment checkout. Credits appear only after your studio's verified payment confirmation. Refresh if still pending.");
+  if(result==="cancel")setMessage("Checkout was cancelled. No payment has been confirmed.");
+  void load().catch(e=>setMessage(e instanceof Error?e.message:"Unable to load member profile."));
+ },[load]);
  async function mutate(run:()=>Promise<string>){
   if(busy)return;setBusy(true);setMessage("");
   try{const result=await run();await load();setMessage(result)}
@@ -63,14 +70,14 @@ export function MemberPortal(){
   </div>
   {message&&<p role="status" className="rd-feedback">{message}</p>}
   <p className="rd-tiny">All class times are displayed in the studio timezone: <strong>{timezone}</strong>.</p>
-  <div className="rd-ops-section"><h2>My class pack</h2>
+  <div className="rd-ops-section rd-member-overview"><h2>My class pack</h2>
    <p><strong>{me?.full_name||"Your membership"}</strong></p>
    <p>{me?.plan||"No package"} · {me?.package_status||"Pending approval"}
    {" · "}{me?.credits===null?"Unlimited access":(me?.credits??0)+" credits remaining"}</p>
    {me?.expiry_date&&<p>Valid through: {me.expiry_date}</p>}
    <p className="rd-tiny">{hasValidPass?"Your pass is ready to use. Book a class below.":"Choose a package below, complete secure checkout, then return to reserve a class."} Buying or renewing a pack is separate from the studio's StudioTasker software subscription.</p>
   </div>
-  <div className="rd-ops-section"><div className="rd-ops-section-title"><div><h3>Buy or renew a class pack</h3><p>Sold by your studio. Credit is added only after verified payment.</p></div></div>
+  <div className="rd-ops-section rd-member-shop" id="member-pack-shop"><div className="rd-ops-section-title"><div><h3>Buy or renew a class pack</h3><p>Sold by your studio. Credit is added only after verified payment.</p></div></div>
    {!checkoutAvailable&&<p className="rd-feedback">Online checkout is not enabled for this studio. Prices below are illustrative studio listings until payment setup is complete.</p>}
    <div className="rd-packages-grid">{packages.length?packages.map(pack=><article className="rd-package-card" key={pack.id}>
     <small>{pack.credits} classes · {pack.valid_days} days validity</small><h4>{pack.name}</h4>{pack.description&&<p>{pack.description}</p>}
@@ -81,7 +88,7 @@ export function MemberPortal(){
     {purchases.map(order=><p key={order.id}><b>{order.name}</b> · {order.status==="paid"?"Payment verified":order.status==="pending"?"Awaiting payment":order.status==="refunded"?"Refunded — studio review required":"Payment disputed — studio review required"} · {new Date(order.created_at).toLocaleDateString()}</p>)}
     </div></details>}
   </div>
-  <div className="rd-ops-section"><h3>My reservations</h3>
+  <div className="rd-ops-section rd-member-reservations"><h3>My reservations</h3>
    {bookings.length?bookings.map(b=><article key={b.id} className="rd-action-item">
     <div><strong>{b.title}</strong><p>{format(b.starts_at)} · {b.status==="waitlisted"?"Waitlist #"+b.queue_number:"Confirmed"}</p></div>
     <button type="button" disabled={busy} onClick={()=>{
@@ -93,22 +100,30 @@ export function MemberPortal(){
     }}>Cancel</button>
    </article>):<p className="rd-empty">No upcoming bookings.</p>}
   </div>
-  <div className="rd-ops-section"><h3>Class attendance history</h3>
+  <div className="rd-ops-section rd-member-visits"><h3>Class attendance history</h3>
    {visits.length?visits.map(v=><p key={v.id} className="rd-member-visit"><strong>{v.title}</strong><span>{format(v.starts_at)} · Attended</span></p>):<p className="rd-empty">Once your studio checks you in, attended classes appear here.</p>}
   </div>
-  <div className="rd-ops-section"><h3>Available classes</h3>
-   <p className="rd-tiny">Choose a class first. If you need credits, buy a pack above and return here after payment confirmation.</p>
+  <div className="rd-ops-section rd-member-classes"><h3>1 · Choose a class</h3>
+   <p className="rd-tiny">Choose a class first. If you need credits, we will guide you to your studio’s available class packs. Your choice stays selected when you return from checkout.</p>
    <div className="rd-class-list">
     {classes.length?classes.filter(c=>new Date(c.starts_at).getTime()>Date.now()).map(c=><article key={c.id} className={"rd-class-choice"+(selectedClass===c.id?" selected":"")}>
      <strong>{c.title} · {format(c.starts_at)}</strong>
      <small>{c.room} · {c.duration_minutes} minutes</small>
      <span>{c.booked_count}/{c.capacity} confirmed · {c.waitlist_count} on waitlist</span>
-     <button type="button" disabled={busy||!hasValidPass}
-      className="rd-primary" onClick={()=>{setSelectedClass(c.id);void mutate(async()=>{
+     <button type="button" disabled={busy}
+      className="rd-primary" onClick={()=>{
+       setSelectedClass(c.id);
+       window.sessionStorage.setItem("studiotasker:selected-class",c.id);
+       if(!hasValidPass){
+        setMessage(c.title+" selected. Choose your class pack below to continue.");
+        document.getElementById("member-pack-shop")?.scrollIntoView({behavior:"smooth",block:"start"});
+        return;
+       }
+       void mutate(async()=>{
        const response=await api<{booking:{status:string;alreadyExists:boolean}}>("/api/member/bookings","POST",{sessionId:c.id});
        return response.booking.alreadyExists?"You already have a booking in this class.":
         response.booking.status==="waitlisted"?"Added to the class waitlist.":"Your class reservation is confirmed.";
-      })}}>{!hasValidPass?"Buy pass first":"Book class"}</button>
+      })}}>{!hasValidPass?"Select & choose pack":"Book class"}</button>
     </article>):<p className="rd-empty">No upcoming classes available.</p>}
    </div>
   </div>
