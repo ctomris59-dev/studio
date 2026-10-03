@@ -234,3 +234,5 @@
 .ed-member-commerce-note{color:#5e6772;font:500 11px/1.6 "IBM Plex Mono",monospace;margin-top:20px}
 @media(max-width:880px){.ed-member-commerce-heading{grid-template-columns:1fr}.ed-member-commerce-heading>p{margin-top:25px}.ed-member-commerce-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.ed-member-commerce-steps article{border-bottom:1px solid #d5d6d3}.ed-member-commerce-steps article+article{border-left:0}.ed-member-commerce-steps article:nth-child(even){border-left:1px solid #d5d6d3}}
 @media(max-width:460px){.ed-member-commerce{padding:70px 0}.ed-member-commerce-steps{grid-template-columns:1fr}.ed-member-commerce-steps article:nth-child(even){border-left:0}.ed-member-commerce-steps article h3{margin-top:14px}.ed-member-commerce-steps article{padding:17px}}
+
+.ed-member-commerce-actions{display:flex;margin-top:27px}

@@ -129,7 +129,7 @@ export default function HomePage() {
                 {n:"05",name:"Renew",desc:"Add credits and extend membership validity when it's time."}
               ].map(item=><article key={item.n}><span>{item.n}</span><h3>{item.name}</h3><p>{item.desc}</p></article>)}
             </div>
-            <p className="ed-member-commerce-note">Payment integration is currently in development. The public demo uses fictional data and does not charge cards.</p>
+            <div className="ed-member-commerce-actions"><Link className="ed-primary-cta" href="/experience"><span>TRY THE FIVE-STEP DEMO</span><ArrowUpRight size={20}/></Link></div><p className="ed-member-commerce-note">Payment integration is currently in development. The walkthrough uses fictional data and does not charge cards.</p>
           </div>
         </section>
         <section className="ed-window" id="studio">
