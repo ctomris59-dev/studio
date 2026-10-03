@@ -78,3 +78,19 @@
 .rd-weekdays button:focus-visible,.rd-onboard>button:focus-visible{outline:3px solid #ff8360;outline-offset:2px}
 
 .rd-booking-actions{display:flex;flex-wrap:wrap;gap:8px}.rd-booking-actions button{min-height:44px}
+
+/* StudioTasker member commerce / five-step customer journey */
+.rd-member-journey{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.rd-member-journey span{background:#e7f982;border:1px solid #17203c;padding:12px 9px;font-weight:700;font-size:12px;line-height:1.4;min-height:51px}
+.rd-packages-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:13px}
+.rd-package-card{border:1px solid #d8dce8;background:white;padding:18px;display:flex;flex-direction:column;gap:11px}
+.rd-package-card h4{font:700 24px "Barlow Condensed",sans-serif;margin:0}.rd-package-card>small{font-size:12px;color:#58637a}.rd-package-card>p{color:#59677a;font-size:13px;line-height:1.4}
+.rd-package-card>strong{font-size:26px;color:#334bdd;margin-top:auto}.rd-package-card button{width:100%}
+.rd-member-visit{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid #e2e5eb;padding:10px 0}
+.rd-member-visit span,.rd-member-purchases{font-size:13px;color:#586477;line-height:1.65}
+.rd-member-purchases{padding:12px 16px}.rd-member-purchases p{margin:9px 0}
+.rd-commerce-status{padding:13px;background:#eef0fc;font-size:14px;line-height:1.6}
+.rd-connect-row{display:flex;flex-wrap:wrap;align-items:end;gap:13px}.rd-connect-row label{font-size:13px;display:flex;flex-direction:column;gap:4px}
+.rd-connect-row select{min-height:44px;padding:8px}.rd-connect-row button{min-height:44px;padding:10px 15px;background:#334bdd;color:white;border:0;font-weight:700;cursor:pointer}
+@media(max-width:750px){.rd-member-journey{grid-template-columns:repeat(2,minmax(0,1fr))}.rd-package-card{padding:15px}}
+@media(max-width:420px){.rd-packages-grid{grid-template-columns:minmax(0,1fr)}}

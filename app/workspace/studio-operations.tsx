@@ -13,6 +13,8 @@ type MemberRow={
 };
 type BookingRow={id:string;session_id:string;member_id:string;member_name:string;status:"booked"|"waitlisted";queue_number:number|null;attended_at:string|null};
 type TaskRow={id:string;title:string;person_name:string;due_at:string;category:string;priority:string};
+type StudioPack={id:string;name:string;description:string;currency:string;price_cents:number;credits:number;valid_days:number;active:boolean};
+type ConnectStatus={connected:boolean;configured:boolean;chargesEnabled:boolean;country?:string;detailsSubmitted?:boolean};
 type Signal={
  id:string;kind:string;priority:"high"|"medium"|"low";title:string;reason:string;
  suggestedAction:string;personId?:string;sessionId?:string;
@@ -46,6 +48,10 @@ export function StudioOperations({role}:{role:string}){
  const [message,setMessage]=useState("");
  const [schedule,setSchedule]=useState({title:"Studio Class",instructor:"Instructor",room:"Main studio",startsAt:"",durationMinutes:50,capacity:8});
  const [studioZone,setStudioZone]=useState("UTC");
+ const [packs,setPacks]=useState<StudioPack[]>([]);
+ const [connect,setConnect]=useState<ConnectStatus|null>(null);
+ const [country,setCountry]=useState("US");
+ const [packForm,setPackForm]=useState({name:"10 Class Pack",description:"",credits:10,validDays:60,price:"99",currency:"usd"});
  const [repeat,setRepeat]=useState({enabled:false,until:"",weekdays:[1,3,5] as number[]});
  const [adjust,setAdjust]=useState({memberId:"",delta:5,reason:"Credit balance correction"});
  const [selectedPlan,setSelectedPlan]=useState<Record<string,string>>({});
@@ -59,6 +65,10 @@ export function StudioOperations({role}:{role:string}){
    api<{tasks:TaskRow[]}>("/api/studio/tasks")
   ]);
   setClasses(c.classes);setMembers(m.members);setActions(a.items);setTasks(t.tasks);
+  if(owner){
+   void api<{packages:StudioPack[]}>("/api/studio/packages").then(x=>setPacks(x.packages)).catch(()=>{});
+   void api<ConnectStatus>("/api/studio/payments/connect").then(setConnect).catch(()=>setConnect(null));
+  }
   void api<{studio:{timezone:string}}>("/api/studio/settings").then(s=>setStudioZone(s.studio.timezone)).catch(()=>setMessage("Check your studio timezone in settings."));
   void api<{subscription:{status:string;plan:string;enabled:boolean;periodEnd:string|null};checkoutConfigured:boolean}>("/api/studio/subscription").then(setBilling).catch(()=>setBilling(null));
   setSelectedClass(old=>old||c.classes[0]?.id||"");
@@ -168,6 +178,26 @@ export function StudioOperations({role}:{role:string}){
    return result.notice;
   });
  }
+ function addPack(e:FormEvent<HTMLFormElement>){
+  e.preventDefault();
+  const priceCents=Math.round(Number(packForm.price)*100);
+  if(!Number.isSafeInteger(priceCents)){setMessage("Invalid price.");return;}
+  void perform(async()=>{await api("/api/studio/packages","POST",{...packForm,priceCents});
+   return "Studio class package published. Members can see it in their account.";});
+ }
+ function togglePack(p:StudioPack){
+  void perform(async()=>{await api("/api/studio/packages/"+p.id,"PATCH",{active:!p.active});
+   return p.active?"Package hidden from new sales. Existing orders remain unchanged.":"Package available again.";});
+ }
+ function connectStripe(){
+  void perform(async()=>{
+   const r=await api<{onboardingUrl:string}>("/api/studio/payments/connect","POST",{country});
+   if(!/^https:\/\/connect\.stripe\.com\//.test(r.onboardingUrl)&&!r.onboardingUrl.startsWith("http://127.0.0.1:"))
+    throw Error("Unexpected account onboarding location.");
+   window.location.assign(r.onboardingUrl);
+   return "Opening Stripe secure account onboarding.";
+  });
+ }
  function startCheckout(plan:"monthly"|"annual"){
   if(!billing?.checkoutConfigured){setMessage("Checkout is not configured. No payment was started.");return;}
   void perform(async()=>{
@@ -207,6 +237,30 @@ export function StudioOperations({role}:{role:string}){
     <button type="button" disabled={busy} onClick={()=>startCheckout("monthly")}>Choose monthly</button>
     <button type="button" disabled={busy} onClick={()=>startCheckout("annual")}>Choose annual</button>
    </div>:<p className="rd-tiny">Payment provider credentials are intentionally absent. Checkout is disabled; no charges can be made.</p>}
+  </section>}
+  {owner&&<section className="rd-ops-section" aria-labelledby="studio-packs-title">
+   <div className="rd-ops-section-title"><div><h3 id="studio-packs-title">Member packages &amp; payments</h3>
+    <p>Sell your own class packs. StudioTasker's $49/month SaaS fee is separate; class-pack revenue belongs to your studio.</p></div></div>
+   <div className="rd-commerce-status"><strong>Stripe Connect:</strong> {connect?.chargesEnabled?"Ready to accept live member payments":connect?.connected?"Onboarding incomplete — finish setup to accept payments":"Not connected"}
+    {!connect?.configured&&<p>Online payments are disabled until secure platform credentials and webhook processing are configured.</p>}</div>
+   {connect?.configured&&<div className="rd-connect-row">
+    {!connect.chargesEnabled&&<><label>Registered country<select value={country} onChange={e=>setCountry(e.target.value)}>
+     {["US","GB","CA","AU","DE","FR","IT","ES","IE","NL","BE","AT","PT","FI","SE","NO","DK","PL","CH"].map(x=><option key={x} value={x}>{x}</option>)}</select></label>
+     <button type="button" disabled={busy} onClick={connectStripe}>{connect.connected?"Complete Stripe onboarding":"Connect studio's Stripe account"}</button></>}
+   </div>}
+   <details className="rd-ops-details"><summary>Create a class package</summary><form className="rd-form" onSubmit={addPack}>
+    <label>Package name<input required minLength={2} maxLength={70} value={packForm.name} onChange={e=>setPackForm({...packForm,name:e.target.value})}/></label>
+    <label>Description (optional)<input maxLength={240} value={packForm.description} onChange={e=>setPackForm({...packForm,description:e.target.value})}/></label>
+    <div className="rd-ops-pair"><label>Price<input type="number" min="1" max="10000" step="0.01" required value={packForm.price} onChange={e=>setPackForm({...packForm,price:e.target.value})}/></label>
+     <label>Currency<select value={packForm.currency} onChange={e=>setPackForm({...packForm,currency:e.target.value})}>{["usd","eur","gbp","cad","aud"].map(x=><option key={x} value={x}>{x.toUpperCase()}</option>)}</select></label></div>
+    <div className="rd-ops-pair"><label>Classes included<input type="number" min="1" max="100" required value={packForm.credits} onChange={e=>setPackForm({...packForm,credits:Number(e.target.value)})}/></label>
+     <label>Validity (days)<input type="number" min="7" max="365" required value={packForm.validDays} onChange={e=>setPackForm({...packForm,validDays:Number(e.target.value)})}/></label></div>
+    <button className="rd-primary" type="submit" disabled={busy}>Publish package</button>
+   </form></details>
+   <div className="rd-pack-list">{packs.length?packs.map(p=><div key={p.id}><div><strong>{p.name} · {(p.price_cents/100).toFixed(2)} {p.currency.toUpperCase()}</strong>
+    <small>{p.credits} classes · {p.valid_days} days · {p.active?"Listed":"Hidden"}</small></div>
+    <button type="button" disabled={busy} onClick={()=>togglePack(p)}>{p.active?"Hide":"Republish"}</button>
+   </div>):<p className="rd-empty">No paid packages yet. Create one before inviting members to purchase.</p>}</div>
   </section>}
   <div className="rd-ops-heading"><div><p className="rd-eyebrow">DATABASE-BACKED OPERATIONS</p><h2>Studio daily operations</h2><p>All records below are scoped to your authenticated studio. Sample /demo data is separate.</p></div>
    <button type="button" disabled={busy} onClick={()=>void perform(async()=>"Latest workspace records loaded.")}>Refresh</button></div>
