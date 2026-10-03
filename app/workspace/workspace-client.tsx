@@ -15,21 +15,29 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [people,setPeople]=useState<Person[]>([]);
  const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState("");
  const [busy,setBusy]=useState(false),[note,setNote]=useState("");
- const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates"});
+ const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates",timezone:"UTC"});
  const [person,setPerson]=useState({kind:"lead",name:"",email:"",phone:""});
  const [editing,setEditing]=useState<string|null>(null);
  const [editForm,setEditForm]=useState({name:"",notes:"",stage:"New"});
+ const [settings,setSettings]=useState({name:"",focus:"Pilates",timezone:"UTC"});
+ const [settingsOpen,setSettingsOpen]=useState(false);
  async function load(){
   const res=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
   if(!res.ok){setUser(null);setStudio(null);setPeople([]);return;}
   const body=await res.json();
   setUser(body.user);setStudio(body.studio);
   if(["owner","manager","receptionist"].includes(body.user.role)){
+   const response=await fetch("/api/studio/settings",{credentials:"same-origin",cache:"no-store"});
+   if(response.ok){const config=await response.json();setSettings(config.studio)}
+  }
+  if(["owner","manager","receptionist"].includes(body.user.role)){
    const list=await fetch("/api/studio/people",{credentials:"same-origin",cache:"no-store"});
    if(list.ok){const data=await list.json();setPeople(data.records||[])}
   }else setPeople([]);
  }
  useEffect(()=>{
+  const detected=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if(detected)setForm(prev=>({...prev,timezone:detected}));
   const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));
   if(window.location.hash)window.history.replaceState(null,"",window.location.pathname);
   for(const name of ["verify","reset","invite"] as const){
@@ -127,6 +135,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      <label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{["Pilates","Yoga","Boutique fitness","Gym"].map(f=><option key={f}>{f}</option>)}</select></label></>}
     {["login","register","forgot"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
     {["login","register","reset","invite"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
+    {mode==="register"&&<label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label>}
     {mode==="register"&&<p className="rd-tiny">You must verify your email before signing in. Email delivery and billing must be configured before public registration.</p>}
     <button className="rd-primary" disabled={busy} type="submit">{busy?"Please wait…":{
      login:"Sign in",register:"Create and verify studio",verify:"Verify email",invite:"Accept member invitation",
@@ -137,6 +146,18 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   </>:<>
    <div className="rd-account-head"><div><h2>{studio?.name}</h2><p>Signed in as {user.email} · {user.role}</p></div><button type="button" onClick={()=>void logout()}>Sign out</button></div>
    {["owner","manager","receptionist"].includes(user.role)?<>
+    <div className="rd-onboard" aria-label="Studio setup checklist">
+     <strong>Set up your studio in four steps</strong>
+     <p>1. Confirm timezone · 2. Add a member · 3. Create your first class · 4. Invite members and test bookings.</p>
+     <button type="button" onClick={()=>setSettingsOpen(o=>!o)} aria-expanded={settingsOpen}>Edit studio settings</button>
+     {settingsOpen&&<form className="rd-form rd-settings-form" onSubmit={async event=>{event.preventDefault();setBusy(true);try{const response=await fetch("/api/studio/settings",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(settings)});const data=await response.json();if(!response.ok)throw Error(data.error||"Save failed");setStudio(v=>v?{...v,name:data.studio.name}:v);setNote("Studio settings saved.");setSettingsOpen(false)}catch(e){setNote(e instanceof Error?e.message:"Save failed")}finally{setBusy(false)}}}>
+      <label>Studio name<input required minLength={2} maxLength={100} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label>
+      <label>Studio type<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}>{["Pilates","Yoga","Boutique fitness","Gym"].map(x=><option key={x}>{x}</option>)}</select></label>
+      <label>IANA timezone<input required maxLength={80} value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})} placeholder="Europe/London"/></label>
+      <p className="rd-tiny">Set your actual studio timezone before scheduling. Changing it after classes exist requires a controlled migration.</p>
+      <button className="rd-primary" type="submit" disabled={busy}>Save studio settings</button>
+     </form>}
+    </div>
     <h3>Studio contacts</h3><p className="rd-tiny">Server-backed records; every entry belongs to your verified studio. Real customer data must not be used yet.</p>
     <div className="rd-contact-list">{people.length?people.map(p=><div key={p.id}>
      <b>{p.full_name}</b><small>{p.kind} · {p.email||p.phone}</small>
