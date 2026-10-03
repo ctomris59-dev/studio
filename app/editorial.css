@@ -183,3 +183,37 @@
 @media(max-width:760px){.ed-container{width:calc(100% - 38px)}.ed-topline>.ed-container{font-size:8px}.ed-topline>.ed-container>span:last-child{display:none}.ed-nav{height:72px}.ed-nav nav{display:none}.ed-nav-cta{padding:11px;gap:10px;font-size:9px}.ed-identity{font-size:21px}.ed-hero-grid{grid-template-columns:1fr;min-height:0}.ed-hero-copy{min-height:560px;padding:53px 0 39px}.ed-hero h1{margin:44px 0 43px;font-size:clamp(80px,14vw,124px)}.ed-hero-sideword{display:none}.ed-hero-under{flex-direction:row;align-items:end}.ed-hero-under p{max-width:280px;font-size:13px}.ed-hero-canvas{min-height:585px;border-left:0;border-right:0}.ed-hero-disc{top:65px;left:5%}.ed-hero-card{top:158px;left:11%;right:4%;transform:rotate(-3deg)}.ed-hero-sticker{right:5%;bottom:30px}.ed-hero-end{height:59px;font-size:9px}.ed-tape-track{width:max-content;gap:24px;font-size:14px;min-height:59px}.ed-manifesto{padding:75px 0 85px}.ed-manifesto-grid{grid-template-columns:1fr;gap:30px}.ed-manifesto h2{font-size:clamp(42px,8.6vw,67px)}.ed-manifesto p{font-size:14px}.ed-features{padding:79px 0 90px}.ed-features-top{align-items:start;flex-direction:column;gap:18px;margin-bottom:45px}.ed-features-top h2{font-size:56px}.ed-feature-row{grid-template-columns:55px 1fr 38px;gap:9px;padding:25px 0}.ed-feature-title h3{font-size:29px}.ed-feature-row>p{grid-column:2;max-width:100%;font-size:12px;line-height:1.7}.ed-feature-arrow{grid-column:3;grid-row:1;align-self:center;width:34px;height:34px}.ed-window-grid{grid-template-columns:1fr}.ed-window-copy{padding:76px 0 60px}.ed-window h2{font-size:clamp(60px,9.5vw,90px);margin-top:35px}.ed-window-showcase{min-height:670px;padding:65px 15px 65px;border:0;border-top:1px solid #a5b5fd77}.ed-window-label{top:18px;left:15px;right:15px}.ed-window-schedule{max-width:560px;margin:5px auto}.ed-window-ticket{right:10px;bottom:14px}.ed-pricing{padding:78px 0 90px}.ed-pricing-title h2{font-size:59px}.ed-price-grid{grid-template-columns:1fr}.ed-price-dark{min-height:420px;padding:29px}.ed-price-light{padding:32px}.ed-last{padding:73px 0}.ed-last-grid{grid-template-columns:1fr}.ed-last h2{font-size:clamp(82px,14vw,130px)}.ed-last-asterisk{right:0;top:-30px;font-size:65px}.ed-footer{padding-top:54px}.ed-footer-main{flex-direction:column}.ed-footer-bottom{gap:15px;flex-wrap:wrap;margin-top:62px}}
 @media(max-width:460px){.ed-hero-copy{min-height:555px}.ed-hero h1{font-size:clamp(75px,16.5vw,94px)}.ed-hero-under{flex-direction:column;align-items:flex-start;gap:20px}.ed-hero-under p{max-width:340px}.ed-hero-canvas{min-height:480px}.ed-hero-disc{width:120px;height:120px;top:43px}.ed-hero-disc span{font-size:21px}.ed-hero-card{left:5%;right:2%;top:138px}.ed-hero-sticker{min-width:130px;min-height:80px;bottom:7px}.ed-canvas-meta{left:12px;right:12px}.ed-canvas-bottom{left:15px;right:15px;bottom:14px}.ed-sch-identity strong{font-size:11px}.ed-sch-row{padding:8px 9px}.ed-sch-greeting>strong{font-size:17px}.ed-sch-metrics strong{font-size:25px}.ed-sch-class b{font-size:9px}.ed-sch-foot{font-size:8px}.ed-sch-week{font-size:8px}.ed-manifesto h2{font-size:42px}.ed-features-top h2,.ed-pricing-title h2{font-size:46px}.ed-window h2{font-size:62px}.ed-window-showcase{min-height:550px;padding:40px 5px}.ed-window-ticket{bottom:9px;right:0}.ed-price-number{font-size:100px}.ed-price-number small{font-size:10px;margin-left:16px}.ed-last h2{font-size:78px}.ed-footer-nav{flex-wrap:wrap;gap:17px}}
 @media(prefers-reduced-motion:reduce){.editorial *{scroll-behavior:auto;transition:none!important}}
+
+/* StudioTasker brand-first marketing experience: cobalt, editorial typography, honest product preview. */
+.ed-identity{font-size:30px;gap:13px;letter-spacing:-1.5px}
+.ed-identity-icon{width:40px;height:40px;flex-basis:40px}
+.ed-hero{background:var(--ed-blue)}
+.ed-hero-copy{color:var(--ed-white)}
+.ed-hero h1{font-size:clamp(75px,8.5vw,146px);color:var(--ed-white);margin:34px 0 45px}
+.ed-hero h1>span,.ed-hero h1 em{color:var(--ed-lime)}
+.ed-hero-under p{color:#eef1ff;font-size:15px;max-width:330px}
+.ed-index,.ed-hero-end{color:#ecf1ff}
+.ed-index-line{background:var(--ed-lime)}
+.ed-hero-end{border-top-color:#ffffff5c}
+.ed-hero-end a:hover{color:var(--ed-lime)}
+.ed-hero-sideword{color:#c6d0ff}
+.ed-hero-brand{display:flex;align-items:center;gap:13px;max-width:100%;margin-bottom:23px}
+.ed-hero-brand-icon{background:var(--ed-paper);padding:5px;width:58px;height:58px;display:grid;place-items:center;box-shadow:5px 5px 0 #131b30}
+.ed-hero-brand-icon svg{width:48px;height:48px}
+.ed-hero-brand strong{display:block;font-size:36px;letter-spacing:-1.4px;line-height:1.05;color:white}
+.ed-hero-brand small{display:block;font:500 10px "IBM Plex Mono",monospace;letter-spacing:.1em;color:var(--ed-lime);margin-top:7px}
+.ed-canvas-meta span:last-child{color:#e7f982}
+.ed-faq{background:var(--ed-white);border-top:1px solid var(--ed-ink);padding:104px 0 112px}
+.ed-faq-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:70px}
+.ed-faq h2{font-size:clamp(49px,5.6vw,80px);line-height:1.04;margin-top:24px}
+.ed-faq h2 em{color:var(--ed-blue)}
+.ed-faq-grid>div:first-child>p{font-size:15px;color:#5e6269;max-width:390px;line-height:1.8;margin-top:25px}
+.ed-faq-list{border-top:2px solid var(--ed-ink)}
+.ed-faq-list details{border-bottom:1px solid #c9c8c5;padding:23px 0}
+.ed-faq-list summary{font-weight:700;font-size:18px;line-height:1.3;cursor:pointer;display:list-item}
+.ed-faq-list summary:focus-visible{outline:3px solid var(--ed-orange);outline-offset:5px}
+.ed-faq-list details p{color:#555c69;font-size:14px;line-height:1.8;padding:17px 0 3px;max-width:570px}
+@media(max-width:1260px){.ed-hero h1{font-size:clamp(74px,8.0vw,120px)}}
+@media(max-width:1000px){.ed-hero h1{font-size:clamp(70px,8vw,105px)}.ed-hero-brand strong{font-size:30px}}
+@media(max-width:760px){.ed-identity{font-size:23px}.ed-identity-icon{width:35px;height:35px;flex-basis:35px}.ed-hero h1{font-size:clamp(72px,12vw,100px);margin:34px 0}.ed-hero-copy{min-height:610px}.ed-hero-brand strong{font-size:30px}.ed-faq{padding:75px 0}.ed-faq-grid{grid-template-columns:1fr;gap:35px}}
+@media(max-width:460px){.ed-hero h1{font-size:clamp(67px,15vw,90px)}.ed-hero-copy{min-height:625px}.ed-hero-brand-icon{width:48px;height:48px}.ed-hero-brand-icon svg{width:39px;height:39px}.ed-hero-brand strong{font-size:27px}.ed-hero-brand small{font-size:8px}.ed-faq h2{font-size:52px}.ed-faq-list summary{font-size:16px}}

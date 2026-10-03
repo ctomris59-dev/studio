@@ -14,9 +14,11 @@ const timetable = [
 ];
 
 const services = [
-  { n: "01", title: "Turn interest into members.", category: "LEADS / CRM", description: "Capture enquiries, track trial classes and keep each prospective member moving through the journey.", icon: CalendarDays },
-  { n: "02", title: "Know who to reach out to.", category: "MEMBER RETENTION", description: "Spot lapsed members, low class-pack balances and missed follow-ups before they disappear into spreadsheets.", icon: Users },
-  { n: "03", title: "Give every day direction.", category: "BOOKINGS / INSIGHTS", description: "Manage bookings, class credits, follow-up tasks and useful studio performance signals from one place.", icon: CreditCard },
+  { n: "01", title: "Plan every class.", category: "SCHEDULING", description: "Organize instructors, class schedules and available places in a clear studio calendar.", icon: CalendarDays },
+  { n: "02", title: "Keep bookings flowing.", category: "RESERVATIONS", description: "Manage class reservations, package credits and waitlist changes without a paper register.", icon: Check },
+  { n: "03", title: "Know your members.", category: "MEMBERSHIP / CRM", description: "Keep member information, trials and membership status in one organized place.", icon: Users },
+  { n: "04", title: "Never miss a follow-up.", category: "TASKS / RENEWALS", description: "Review explainable reminders for expiring packs, unanswered leads and low class credits.", icon: Clock3 },
+  { n: "05", title: "See what needs attention.", category: "INSIGHTS", description: "Review occupancy, member activity and customer-journey trends without misleading revenue estimates.", icon: CreditCard },
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
@@ -45,7 +47,7 @@ function MiniSchedule({ compact = false }: { compact?: boolean }) {
           <span className="ed-sch-cap"><b>{c.spots}</b><i><i style={{width:c.value+"%"}}/></i></span>
           <span className={"ed-sch-status" + (c.state==="FULL" ? " is-full" : "")}>{c.state}</span>
         </div>)}</div>
-      <div className="ed-sch-foot"><span><i/> Your studio, in sync.</span><span>VIEW SCHEDULE <ArrowRight size={12}/></span></div>
+      <div className="ed-sch-foot"><span><i/> Your studio, in sync.</span><span>VIEW DEMO <ArrowRight size={12}/></span></div>
     </div>
   );
 }
@@ -57,7 +59,7 @@ export default function HomePage() {
       <header className="ed-header">
         <div className="ed-container ed-nav">
           <Identity/>
-          <nav aria-label="Main navigation"><a href="#features">The essentials</a><a href="#studio">Inside the studio</a><a href="#pricing">Pricing</a></nav>
+          <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#studio">Product tour</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
           <Link className="ed-nav-cta" href="/demo">OPEN THE DEMO <ArrowUpRight size={16}/></Link>
         </div>
       </header>
@@ -66,23 +68,27 @@ export default function HomePage() {
         <section className="ed-hero" aria-labelledby="main-heading">
           <div className="ed-container ed-hero-grid">
             <div className="ed-hero-copy">
-              <div className="ed-index"><span className="ed-index-line"/> INDEPENDENT STUDIOS / BETTER DAYS</div>
+              <div className="ed-hero-brand">
+                <span className="ed-hero-brand-icon"><StudioTaskerMark/></span>
+                <div><strong>StudioTasker</strong><small>ALL-IN-ONE STUDIO MANAGEMENT</small></div>
+              </div>
+              <div className="ed-index"><span className="ed-index-line"/> PILATES · YOGA · BARRE · BOUTIQUE STUDIOS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
-                <p>Meet StudioTasker: an all-in-one studio management workspace for class scheduling, member CRM, bookings and follow-ups—without another spreadsheet.</p>
-                <Link className="ed-primary-cta" href="/demo"><span>EXPLORE THE DEMO</span><ArrowUpRight size={20}/></Link>
+                <p>Classes, bookings, memberships and follow-ups — one clear workspace for people who run independent studios.</p>
+                <Link className="ed-primary-cta" href="/demo"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={20}/></Link>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
             <div className="ed-hero-canvas">
-              <div className="ed-canvas-meta"><span>FIG. 01</span><span>YOUR STUDIO, IN FRAME</span></div>
+              <div className="ed-canvas-meta"><span>STUDIOTASKER / PRODUCT PREVIEW</span><span>SAMPLE DATA · NO SIGN-UP NEEDED</span></div>
               <div className="ed-hero-disc" aria-hidden="true"><span>KEEP<br/>THINGS<br/>MOVING.</span><i>↗</i></div>
               <div className="ed-hero-card"><MiniSchedule/></div>
               <div className="ed-hero-sticker"><span className="ed-sticker-cross">✳</span><span>MORE ROOM<br/>TO DO YOUR<br/>THING.</span></div>
               <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
             </div>
           </div>
-          <div className="ed-hero-end ed-container"><span>ONE PLACE FOR YOUR ENTIRE STUDIO.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
+          <div className="ed-hero-end ed-container"><span>STUDIOTASKER · ONE PLACE FOR YOUR ENTIRE STUDIO.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
         </section>
 
         <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b>✳</b><span>YOGA</span><b>✳</b><span>BARRE</span><b>✳</b><span>BOUTIQUE FITNESS</span><b>✳</b><span>GROUP CLASSES</span><b>✳</b></div></section>
@@ -99,7 +105,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Built to help you notice who is ready to join, who may need a check-in and which classes have room to grow.</p></div>
             <div className="ed-feature-list">{services.map((item)=><div className="ed-feature-row" key={item.n}>
-              <span className="ed-feature-num">{item.n} / 03</span>
+              <span className="ed-feature-num">{item.n} / 05</span>
               <div className="ed-feature-title"><span>{item.category}</span><h3>{item.title}</h3></div>
               <p>{item.description}</p>
               <span className="ed-feature-arrow" aria-hidden="true"><ArrowUpRight size={22}/></span>
@@ -118,7 +124,7 @@ export default function HomePage() {
               <div className="ed-window-edition">THE STUDIO EDIT <span>VOL. 01</span></div>
             </div>
             <div className="ed-window-showcase">
-              <div className="ed-window-label"><span>THE DESK / LIVE DEMO</span><span>01 — 04</span></div>
+              <div className="ed-window-label"><span>STUDIOTASKER / SAMPLE DEMO</span><span>01 — 04</span></div>
               <div className="ed-window-schedule"><MiniSchedule compact/></div>
               <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong>✳</strong></div>
             </div>
@@ -129,15 +135,27 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. A single-studio pricing idea, shaped with independent businesses in mind.</p></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>129<small> / MONTH</small></div><p>Illustrative pricing for one studio. Not yet available for purchase.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Client booking demo with class credits","Email drafts with consent checks","Studio occupancy and conversion insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Interactive browser demo only. Real client logins, hosted CRM storage, outbound emails and payments are not enabled.</div></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>129<small> / MONTH</small></div><p>Illustrative, non-binding pricing for one studio. Subscription checkout is not live.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Client booking demo with class credits","Email drafts with consent checks","Studio occupancy and conversion insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo only. No real accounts, outbound emails or payments. A separate secure workspace is still in development.</div></div>
             </div>
           </div>
         </section>
 
+        <section className="ed-faq" id="faq" aria-labelledby="faq-heading">
+          <div className="ed-container ed-faq-grid">
+            <div><span className="ed-overline">05 / GOOD TO KNOW</span><h2 id="faq-heading">Clear answers.<br/><em>No fine print tricks.</em></h2><p>StudioTasker is an interactive product prototype today, not a live paid service. Explore it using fictional sample data.</p></div>
+            <div className="ed-faq-list">
+              <details><summary>What kinds of studios is StudioTasker for?</summary><p>Designed for independent Pilates, yoga, barre, boutique fitness and other class-based studios. The demo has example studio presets and does not yet support every business model.</p></details>
+              <details><summary>Can I use it for real customer bookings today?</summary><p>Not yet. The public demo stores sample information in your browser. The database-backed workspace is a separate development system, not an active commercial service.</p></details>
+              <details><summary>Does it collect payments or send member messages?</summary><p>No customer payments or automatic emails are processed by the public demo. Commercial billing and verified notification delivery must be configured before launch.</p></details>
+              <details><summary>Is the displayed price final?</summary><p>No. The $129/month example is indicative, not an offer. Packages and final pricing will be established after product validation.</p></details>
+              <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
+            </div>
+          </div>
+        </section>
         <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/demo" className="ed-last-link"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">The essentials</a><a href="#pricing">Pricing</a><Link href="/demo">Live demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · EARLY CONCEPT</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ &amp; product status</a><Link href="/demo">Live demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
