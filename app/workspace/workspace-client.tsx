@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useState,type FormEvent} from "react";
+import {StudioOperations} from "./studio-operations";
 type User={id:string;email:string;role:string};
 type Studio={id:string;name:string};
 type Person={id:string;kind:"lead"|"member";full_name:string;email:string;phone:string;created_at:string};
@@ -70,6 +71,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
        <label>Phone (or use email)<input type="tel" value={person.phone} onChange={e=>setPerson({...person,phone:e.target.value})}/></label>
        <button type="submit" className="rd-primary" disabled={busy}>Add secure contact</button>
       </form>
+      <StudioOperations role={user.role}/>
      </>:<p className="rd-feedback">Your role does not grant access to studio contacts.</p>}
    </>}
  </section>;

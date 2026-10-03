@@ -45,3 +45,18 @@ npm run dev
 `Dockerfile` builds a standard Node 22 Next.js server image; `compose.yaml` runs LOCAL Postgres only. Provision a compatible server later and provide `DATABASE_URL` for runtime and `MIGRATION_DATABASE_URL` only to the separate migration job. Migrations live in GitHub; **actual customer records always reside in PostgreSQL and must be moved by an encrypted database backup/restore**, not a GitHub repository copy. NEVER store DB dumps or secrets in GitHub.
 
 `db/schema.sql` is a historical un-applied proposal; **the versioned migration directory is authoritative** for new installations.
+
+## Increment 2 — transactional bookings and explainable operator actions
+
+The next versioned migration adds booking ledger indexes and idempotency keys. New authenticated, per-studio server endpoints:
+
+- `GET/POST /api/studio/classes` — list and create; instructor/room conflicts serialized under a studio-specific transaction advisory lock.
+- `GET/POST /api/studio/bookings` — list and reserve; a locked class session serializes capacity decisions; waitlisted members are not charged.
+- `DELETE /api/studio/bookings/[id]` — cancellation and one-time refund with the first eligible waitlist member automatically promoted.
+- `GET /api/studio/members`, `POST /api/studio/members/[id]/package`, `POST /api/studio/members/[id]/credits` — confirmed packages and idempotent, reasoned ledger corrections. Payment is NEVER verified or collected.
+- `GET /api/studio/action-center` — deterministic evidence-based suggestions with no paid APIs or auto-sent messages.
+- `GET/POST /api/studio/tasks`, `PATCH /api/studio/tasks/[id]` — manual follow-ups and outcome history.
+
+The operational interface is in `/workspace`, not `/demo`; it is disabled on Vercel without a configured database. Existing authentication/role checks and FORCE RLS apply to every endpoint. The CI HTTP test exercises multiple studios, simultaneous booking requests and independent credit/booking audit records.
+
+**These APIs and sample workflows are not a completed commercial system.** They lack verified payment, member self-service, email verification/invitations, actual outbound notifications, full backups/restore and an audited production security posture.

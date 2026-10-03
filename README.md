@@ -90,3 +90,9 @@ Memberships can be paused and resumed from the Members table, with Undo. Linked 
 ## Secure backend foundation (new)
 
 The first portable PostgreSQL/authentication increment is documented in [docs/backend-foundation.md](docs/backend-foundation.md). The production backend is still incomplete; do not enable registration or enter real customer data on Vercel.
+
+## Secure Workspace — incremental backend build
+
+The PostgreSQL-backed `/workspace` now includes upcoming classes, class creation, transactional booking/waitlist and cancellation with one-time credit refunds, manual package confirmation, auditable credit adjustments, follow-up tasks and an explainable **Action Center**. This is a separate dev-stage workspace; the public `/demo` is still a browser-local prototype. No paid infrastructure was provisioned and real client PII must not be used.
+
+See [backend foundation](docs/backend-foundation.md) and [competitor features / differentiation hypotheses](docs/product-research.md) for tests, controls and remaining blockers.
