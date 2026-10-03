@@ -13,7 +13,7 @@ export async function actionCenter(client:PoolClient,studioId:string){
      GREATEST((now() AT TIME ZONE s.timezone)::date-p.next_contact,0)::int AS days_late,
      p.next_contact::text
    FROM people p JOIN studios s ON s.id=p.studio_id
-   WHERE p.studio_id=$1 AND p.kind='lead'
+   WHERE p.studio_id=$1 AND p.kind='lead' AND p.archived_at IS NULL
      AND p.lead_stage NOT IN('Won','Lost') AND p.next_contact IS NOT NULL
      AND p.next_contact<=(now() AT TIME ZONE s.timezone)::date
    ORDER BY p.next_contact ASC,p.id ASC LIMIT 20`,[studioId]),
@@ -22,14 +22,14 @@ export async function actionCenter(client:PoolClient,studioId:string){
       (p.expiry_date-(now() AT TIME ZONE s.timezone)::date)::int AS days_left,
       p.expiry_date::text
    FROM people p JOIN studios s ON s.id=p.studio_id
-   WHERE p.studio_id=$1 AND p.kind='member' AND p.package_status='Paid'
+   WHERE p.studio_id=$1 AND p.kind='member' AND p.archived_at IS NULL AND p.package_status='Paid'
     AND p.member_status='Active' AND p.expiry_date IS NOT NULL
     AND p.expiry_date BETWEEN (now() AT TIME ZONE s.timezone)::date
     AND (now() AT TIME ZONE s.timezone)::date+14
    ORDER BY p.expiry_date,p.id LIMIT 20`,[studioId]),
   client.query<{id:string;full_name:string;credits:number}>(`
    SELECT id,full_name,credits FROM people
-   WHERE studio_id=$1 AND kind='member' AND member_status='Active'
+   WHERE studio_id=$1 AND kind='member' AND member_status='Active' AND archived_at IS NULL
     AND package_status='Paid' AND credits BETWEEN 0 AND 2
    ORDER BY credits ASC,id ASC LIMIT 20`,[studioId]),
   client.query<{id:string;title:string;starts_at:string;empty_seats:number}>(`

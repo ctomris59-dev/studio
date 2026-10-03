@@ -21,7 +21,7 @@ export async function POST(request:NextRequest){
       AND created_at>now()-interval '5 minutes' LIMIT 1`,[u.rows[0].id]);
    if(recent.rowCount)return;
    const challenge=await newChallenge(client,{purpose:"password_reset",email,userId:u.rows[0].id,hours:1});
-   await queueMessage(client,email,"password_reset",{url:origin+"/workspace?reset="+encodeURIComponent(challenge.secret)});
+   await queueMessage(client,email,"password_reset",{url:origin+"/workspace#reset="+encodeURIComponent(challenge.secret)});
   });
   return successResponse({ok:true,notice:"If this address belongs to a verified account, reset instructions will be sent."});
  }catch{return backendError()}

@@ -25,7 +25,7 @@ export async function POST(request:NextRequest){
    if(recent.rowCount)return {error:"Invitation recently queued. Wait 10 minutes.",status:429};
    const challenge=await newChallenge(client,{purpose:"member_invitation",email:row.email,studioId:auth.studioId,memberId:row.id,hours:24});
    await queueMessage(client,row.email,"member_invitation",{
-    url:origin+"/workspace?invite="+encodeURIComponent(challenge.secret),
+    url:origin+"/workspace#invite="+encodeURIComponent(challenge.secret),
     studio:auth.studioName,
     memberName:row.full_name
    });

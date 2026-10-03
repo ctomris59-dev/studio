@@ -107,7 +107,7 @@ type Member={
 async function lockedMember(client:PoolClient,studioId:string,memberId:string):Promise<Member>{
  const member=await client.query<Member>(`
  SELECT id,kind,credits,package_status,member_status,start_date::text,expiry_date::text
- FROM people WHERE studio_id=$1 AND id=$2 FOR UPDATE`,[studioId,memberId]);
+ FROM people WHERE studio_id=$1 AND id=$2 AND archived_at IS NULL FOR UPDATE`,[studioId,memberId]);
  if(!member.rowCount||member.rows[0].kind!=="member")fail(404,"Member not found in this studio.");
  return member.rows[0];
 }

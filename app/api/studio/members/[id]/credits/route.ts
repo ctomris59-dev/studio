@@ -15,7 +15,7 @@ export async function POST(request:NextRequest,context:{params:Promise<{id:strin
   const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
    const m=await client.query<{kind:string;credits:number|null;package_status:string|null}>(`
      SELECT kind,credits,package_status FROM people
-     WHERE studio_id=$1 AND id=$2 FOR UPDATE`,[auth.studioId,id]);
+     WHERE studio_id=$1 AND id=$2 AND archived_at IS NULL FOR UPDATE`,[auth.studioId,id]);
    if(!m.rowCount||m.rows[0].kind!=="member")throw new StudioOperationError(404,"Member not found.");
    const prior=await client.query<{id:string;member_id:string;delta:number;reason:string}>(`
      SELECT id,member_id,delta,reason FROM credit_ledger

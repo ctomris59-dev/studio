@@ -30,7 +30,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   }else setPeople([]);
  }
  useEffect(()=>{
-  const qs=new URLSearchParams(window.location.search);
+  const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));
+  if(window.location.hash)window.history.replaceState(null,"",window.location.pathname);
   for(const name of ["verify","reset","invite"] as const){
    const found=qs.get(name);
    if(found){setMode(name);setToken(found);break;}

@@ -7,7 +7,7 @@ export async function GET(request:NextRequest){
   const result=await authenticated(request,["owner","manager","receptionist"],async(client,auth)=>{
    const rows=await client.query(`SELECT id,full_name,email,phone,plan,credits,package_status,
     member_status,start_date::text,expiry_date::text
-    FROM people WHERE studio_id=$1 AND kind='member'
+    FROM people WHERE studio_id=$1 AND kind='member' AND archived_at IS NULL
     ORDER BY created_at DESC,id DESC LIMIT 120`,[auth.studioId]);
    return rows.rows;
   });

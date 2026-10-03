@@ -20,7 +20,12 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  const nextContact=data.nextContact===undefined?undefined:stringField(data,"nextContact",10);
  const startDate=data.startDate===undefined?undefined:stringField(data,"startDate",10);
  const expiryDate=data.expiryDate===undefined?undefined:stringField(data,"expiryDate",10);
- const dateValid=(str:string|undefined|null)=>str===undefined||str===null||str===""||/^\d{4}-\d{2}-\d{2}$/.test(str)&&new Date(str+"T12:00:00Z").toISOString().startsWith(str);
+ const dateValid=(str:string|undefined|null)=>{
+  if(str===undefined||str===null||str==="")return true;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(str))return false;
+  const date=new Date(str+"T12:00:00Z");
+  return Number.isFinite(date.getTime())&&date.toISOString().startsWith(str);
+ };
  if(name===null||name!==undefined&&name.length<2||email===null||email!==undefined&&email!==""&&!emailIsValid(normalizeEmail(email))||
  phone===null||phone!==undefined&&phone!==""&&!/^\+?[0-9]{7,15}$/.test(phone.replace(/[\s().-]/g,""))||
  notes===null||stage===null||source===null||status===null||

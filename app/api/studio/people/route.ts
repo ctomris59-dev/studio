@@ -9,8 +9,8 @@ export async function GET(request:NextRequest){
   const r=await authenticated(request,staffRoles,async(client,auth)=>{
    const kind=request.nextUrl.searchParams.get("kind");
    if(kind&&kind!=="lead"&&kind!=="member")return {badKind:true};
-   const result=await client.query(`SELECT id,kind,full_name,email,phone,lead_stage,notes,created_at
-      FROM people WHERE studio_id=$1 AND ($2::text IS NULL OR kind=$2)
+   const result=await client.query(`SELECT id,kind,full_name,email,phone,lead_stage,notes,member_status,created_at
+      FROM people WHERE studio_id=$1 AND archived_at IS NULL AND ($2::text IS NULL OR kind=$2)
       ORDER BY created_at DESC,id DESC LIMIT 101`,[auth.studioId,kind||null]);
    return {records:result.rows.slice(0,100),hasMore:result.rows.length>100};
   });

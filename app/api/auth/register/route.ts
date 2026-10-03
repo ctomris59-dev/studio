@@ -23,7 +23,7 @@ export async function POST(request:NextRequest){
    await client.query("SELECT set_config('app.studio_id',$1,true)",[studio.rows[0].id]);
    await client.query("INSERT INTO subscriptions(studio_id) VALUES($1)",[studio.rows[0].id]);
    const challenge=await newChallenge(client,{purpose:"verify_email",email,userId:u.rows[0].id,hours:24});
-   await queueMessage(client,email,"verify_email",{url:origin+"/workspace?verify="+encodeURIComponent(challenge.secret),studioName});
+   await queueMessage(client,email,"verify_email",{url:origin+"/workspace#verify="+encodeURIComponent(challenge.secret),studioName});
   });
   return successResponse({ok:true,notice:"Check your email to verify your account before signing in. If delivery is not configured, registration should remain disabled."},202);
  }catch(e){

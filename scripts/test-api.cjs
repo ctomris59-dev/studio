@@ -50,7 +50,7 @@ async function main(){
    assert.equal((await call("/api/auth/login",{method:"POST",body:{email,password}})).status,401,"Unverified users cannot sign in.");
    const emailRow=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='verify_email' ORDER BY created_at DESC LIMIT 1",[email]);
    assert.equal(emailRow.rowCount,1,"A verification notification should be queued.");
-   const verifyToken=new URL(emailRow.rows[0].url).searchParams.get("verify");
+   const verifyToken=new URLSearchParams(new URL(emailRow.rows[0].url).hash.slice(1)).get("verify");
    const verified=await call("/api/auth/verify",{method:"POST",body:{token:verifyToken}});
    assert.equal(verified.status,200,JSON.stringify(verified.data));
    assert.equal((await call("/api/auth/verify",{method:"POST",body:{token:verifyToken}})).status,400,"Verification links must be single-use.");
@@ -231,7 +231,7 @@ async function main(){
   assert.equal(invitation.status,202,JSON.stringify(invitation.data));
   const invitationRow=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='member_invitation' ORDER BY created_at DESC LIMIT 1",[memberEmail]);
   assert.equal(invitationRow.rowCount,1);
-  const inviteToken=new URL(invitationRow.rows[0].url).searchParams.get("invite");
+  const inviteToken=new URLSearchParams(new URL(invitationRow.rows[0].url).hash.slice(1)).get("invite");
   const memberPassword="Member Test Pass 2026! "+unique.slice(0,5);
   const accepted=await call("/api/auth/invite/accept",{method:"POST",body:{token:inviteToken,password:memberPassword}});
   assert.equal(accepted.status,200,JSON.stringify(accepted.data));
@@ -308,6 +308,8 @@ async function main(){
   })).status,404);
   const archived=await call("/api/studio/people/"+pa.data.record.id,{method:"DELETE",cookie:a.cookie});
   assert.equal(archived.status,200,JSON.stringify(archived.data));
+  const afterArchive=await call("/api/studio/people",{cookie:a.cookie});
+  assert(!afterArchive.data.records.some(x=>x.id===pa.data.record.id),"Archived contacts must be hidden from active CRM.");
   assert.equal((await call("/api/studio/privacy",{cookie:a.cookie})).status,200);
   assert.equal((await call("/api/studio/privacy",{cookie:memberCookie})).status,403);
   const twoDozen=await Promise.all(Array.from({length:24},async()=>{
@@ -326,7 +328,7 @@ async function main(){
   assert.equal(forgotUnknown.status,200,"No user enumeration.");
   const resetRow=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='password_reset' ORDER BY created_at DESC LIMIT 1",[a.email]);
   assert.equal(resetRow.rowCount,1);
-  const resetToken=new URL(resetRow.rows[0].url).searchParams.get("reset");
+  const resetToken=new URLSearchParams(new URL(resetRow.rows[0].url).hash.slice(1)).get("reset");
   const resetDone=await call("/api/auth/password/reset",{method:"POST",body:{token:resetToken,password:"A New Password 2026! "+unique.slice(0,5)}});
   assert.equal(resetDone.status,200,JSON.stringify(resetDone.data));
   assert.equal((await call("/api/auth/password/reset",{method:"POST",body:{token:resetToken,password:"Another Test Password 2026!"}})).status,400);
