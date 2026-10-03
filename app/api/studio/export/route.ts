@@ -25,13 +25,13 @@ export async function GET(request:NextRequest){
    ]);
    await client.query(`INSERT INTO data_export_audits(studio_id,actor_id,reason)
     VALUES($1,$2,'studio_export')`,[auth.studioId,auth.userId]);
-   return {format:"ReformDesk Studio Export v1",exportedAt:new Date().toISOString(),
+   return {format:"StudioTasker Studio Export v1",exportedAt:new Date().toISOString(),
     studio:studio.rows[0],people:people.rows,classes:sessions.rows,bookings:bookings.rows,
     creditLedger:credits.rows,tasks:tasks.rows,activity:activity.rows,subscription:sub.rows[0]};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
   if(result.value&&"tooLarge" in result.value)return errorResponse(413,"Export exceeds the per-table limit; use the database backup procedure.");
-  const file="reformdesk-studio-"+new Date().toISOString().slice(0,10)+".json";
+  const file="studiotasker-studio-"+new Date().toISOString().slice(0,10)+".json";
   return new NextResponse(JSON.stringify(result.value),{status:200,headers:{
    "Content-Type":"application/json; charset=utf-8","Content-Disposition":'attachment; filename="'+file+'"',
    "Cache-Control":"private, no-store, max-age=0","X-Content-Type-Options":"nosniff"

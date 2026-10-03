@@ -295,6 +295,7 @@ async function main(){
   // Owner-only data portability, contact updates and safe soft-archive.
   const exported=await call("/api/studio/export",{cookie:a.cookie});
   assert.equal(exported.status,200,JSON.stringify(exported.data));
+  assert.equal(exported.data.format,"StudioTasker Studio Export v1");
   assert.equal(exported.data.studio.id,studioA);
   assert(exported.data.people.every(p=>p.id!==pb.data.record.id),"Tenant export must never leak another studio.");
   assert.equal((await call("/api/studio/export",{cookie:memberCookie})).status,403);

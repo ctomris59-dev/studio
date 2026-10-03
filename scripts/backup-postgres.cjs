@@ -8,7 +8,7 @@ async function main(){
  if(!BACKUP_DATABASE_URL||!BACKUP_PASSPHRASE||!BACKUP_OUTPUT_DIR)throw Error("BACKUP_DATABASE_URL, BACKUP_PASSPHRASE and BACKUP_OUTPUT_DIR required");
  await fs.mkdir(BACKUP_OUTPUT_DIR,{recursive:true,mode:0o700});
  const now=new Date().toISOString().replace(/[:.]/g,"-");
- const filename="reformdesk-"+now+"-"+randomUUID().slice(0,8)+".rdbk";
+ const filename="studiotasker-"+now+"-"+randomUUID().slice(0,8)+".rdbk";
  const output=path.join(BACKUP_OUTPUT_DIR,filename),partial=output+".partial";
  const proc=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges"],{
   env:{...process.env,PGDATABASE:BACKUP_DATABASE_URL},stdio:["ignore","pipe","pipe"]

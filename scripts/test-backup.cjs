@@ -4,7 +4,7 @@ const {mkdtemp,readFile,writeFile,rm}=require("node:fs/promises");
 const os=require("node:os"),path=require("node:path");
 const {encryptStream,decryptStream}=require("../scripts/backup-crypto.cjs");
 (async()=>{
- const dir=await mkdtemp(path.join(os.tmpdir(),"reformdesk-bkp-"));
+ const dir=await mkdtemp(path.join(os.tmpdir(),"studiotasker-bkp-"));
  try{
   const input=Buffer.from("Studio A lead\nStudio B member\n".repeat(250));
   const password="LOCAL_ONLY_very_long_test_passphrase_2026";
