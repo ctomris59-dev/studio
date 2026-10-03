@@ -75,7 +75,7 @@ export async function createRecurringClasses(client:PoolClient,auth:Authenticate
  const seriesId=randomUUID(),classes=[];
  // Inside authenticated() transaction: failures roll back all series occurrences.
  for(let stamp=first;stamp<=last;stamp+=86400000){
-  if(!weekdays.includes(new Date(stamp).getUTCDay()))continue;
+  if(!(weekdays as number[]).includes(new Date(stamp).getUTCDay()))continue;
   if(classes.length>=52)fail(400,"Maximum 52 classes per recurring series.");
   const day=new Date(stamp).toISOString().slice(0,10);
   const startsAt=localDateTimeToUTC(day,time,timezone);
