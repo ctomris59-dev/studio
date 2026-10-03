@@ -42,7 +42,7 @@ export async function authenticated<T>(
    const {entitlement}=await import("./billing");
    const access=await entitlement(client,row.studio_id);
    if(!access.enabled)return {access:{ok:false as const,status:402,
-     message:"An active ReformDesk subscription is required for this workspace."}};
+     message:"An active StudioTasker subscription is required for this workspace."}};
   }
   const context:Authenticated={userId:row.user_id,studioId:row.studio_id,role:row.role,email:row.email,studioName:row.studio_name};
   const value=await execute(client,context);

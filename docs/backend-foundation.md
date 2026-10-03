@@ -1,4 +1,4 @@
-# ReformDesk — Portable Secure Backend: Increment 1
+# StudioTasker — Portable Secure Backend: Increment 1
 
 **State:** Work in progress, not a production-ready multi-user CRM. No paid server, external database, billing provider, or domain was created. Existing browser-only `/demo` is unchanged.
 

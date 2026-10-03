@@ -1,9 +1,9 @@
 const {Pool}=require("pg");
 const nodemailer=require("nodemailer");
 const templates={
- verify_email:(d)=>({subject:"Verify your ReformDesk email",text:"Verify your ReformDesk account by opening this one-time link:\n"+d.url+"\nLink expires after 24 hours."}),
- password_reset:(d)=>({subject:"Reset your ReformDesk password",text:"Reset your password using this one-time link:\n"+d.url+"\nIf you did not request this, ignore it."}),
- member_invitation:(d)=>({subject:"Your ReformDesk studio invitation",text:"You have been invited to "+(d.studio||"your studio")+". Complete registration here:\n"+d.url+"\nThis link expires after 24 hours."}),
+ verify_email:(d)=>({subject:"Verify your StudioTasker email",text:"Verify your StudioTasker account by opening this one-time link:\n"+d.url+"\nLink expires after 24 hours."}),
+ password_reset:(d)=>({subject:"Reset your StudioTasker password",text:"Reset your password using this one-time link:\n"+d.url+"\nIf you did not request this, ignore it."}),
+ member_invitation:(d)=>({subject:"Your StudioTasker studio invitation",text:"You have been invited to "+(d.studio||"your studio")+". Complete registration here:\n"+d.url+"\nThis link expires after 24 hours."}),
  booking_confirmed:(d)=>({subject:"Class reservation confirmed",text:"Your reservation for "+d.className+" has been confirmed. Start: "+d.start+"."}),
  booking_cancelled:(d)=>({subject:"Class reservation cancelled",text:"Your reservation for "+d.className+" has been cancelled. Start: "+d.start+"."}),
  waitlist_promoted:(d)=>({subject:"A class place is now yours",text:"A place became available in "+d.className+". Your reservation is now confirmed. Start: "+d.start+"."}),

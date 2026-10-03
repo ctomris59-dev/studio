@@ -1,4 +1,4 @@
-# ReformDesk launch-readiness checklist
+# StudioTasker launch-readiness checklist
 Updated 2026-10-03. This is a technical development snapshot, NOT a production security certification.
 
 | Workstream | Implemented and CI-covered | Remaining before customers |

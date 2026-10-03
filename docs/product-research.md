@@ -1,4 +1,4 @@
-# ReformDesk: competitive product research and differentiation hypotheses
+# StudioTasker: competitive product research and differentiation hypotheses
 Research checked: 2026-10-03. This is feature evidence, not proof of willingness to pay.
 
 ## Competing feature sets (public provider descriptions)

@@ -1,4 +1,4 @@
--- ReformDesk PostgreSQL schema — design migration, NOT applied to a live database.
+-- StudioTasker PostgreSQL schema — design migration, NOT applied to a live database.
 -- Deploy only after choosing a managed Postgres provider and implementing verified authentication.
 -- All application database operations MUST run server-side with a verified studio membership.
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
