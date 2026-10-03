@@ -12,8 +12,17 @@ export function backendError(){
 export function sameOrigin(request:NextRequest):boolean{
  const origin=request.headers.get("origin");
  if(!origin)return false;
- try{return new URL(origin).origin===new URL(request.url).origin}
- catch{return false}
+ try{
+  const provided=new URL(origin);
+  const canonical=new URL(request.url);
+  if(provided.origin===canonical.origin)return true;
+  // Next.js may normalize the absolute URL hostname on self-hosted Node.
+  // In that case require the browser Origin to match the HTTP Host header
+  // AND the request scheme. Do not trust arbitrary Origin or X-Forwarded-Host.
+  const host=request.headers.get("host")?.toLowerCase();
+  const scheme=request.headers.get("x-forwarded-proto")||canonical.protocol.slice(0,-1);
+  return Boolean(host&&provided.host.toLowerCase()===host&&provided.protocol===scheme+":");
+ }catch{return false}
 }
 export async function jsonObject(request:Request):Promise<Record<string,unknown>|null>{
  const length=Number(request.headers.get("content-length")||0);
