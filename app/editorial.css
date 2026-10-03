@@ -217,3 +217,20 @@
 @media(max-width:1000px){.ed-hero h1{font-size:clamp(70px,8vw,105px)}.ed-hero-brand strong{font-size:30px}}
 @media(max-width:760px){.ed-identity{font-size:23px}.ed-identity-icon{width:35px;height:35px;flex-basis:35px}.ed-hero h1{font-size:clamp(72px,12vw,100px);margin:34px 0}.ed-hero-copy{min-height:610px}.ed-hero-brand strong{font-size:30px}.ed-faq{padding:75px 0}.ed-faq-grid{grid-template-columns:1fr;gap:35px}}
 @media(max-width:460px){.ed-hero h1{font-size:clamp(67px,15vw,90px)}.ed-hero-copy{min-height:625px}.ed-hero-brand-icon{width:48px;height:48px}.ed-hero-brand-icon svg{width:39px;height:39px}.ed-hero-brand strong{font-size:27px}.ed-hero-brand small{font-size:8px}.ed-faq h2{font-size:52px}.ed-faq-list summary{font-size:16px}}
+
+/* Brand-consistent class-to-renewal lifecycle, clearly distinct from pricing. */
+.ed-member-commerce{background:var(--ed-paper);border-top:1px solid var(--ed-ink);padding:95px 0 100px}
+.ed-member-commerce-heading{display:grid;grid-template-columns:1.1fr 1fr;column-gap:56px;align-items:end}
+.ed-member-commerce-heading .ed-overline{grid-column:1/-1}
+.ed-member-commerce-heading h2{font-size:clamp(48px,5.5vw,84px);line-height:1.03;margin-top:27px;letter-spacing:-.055em}
+.ed-member-commerce-heading h2 em{color:var(--ed-blue)}
+.ed-member-commerce-heading>p{font-size:16px;color:#5f6571;line-height:1.7;max-width:460px}
+.ed-member-commerce-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--ed-ink);margin-top:49px}
+.ed-member-commerce-steps article{padding:22px 18px 27px;min-width:0;background:#fffefa}
+.ed-member-commerce-steps article+article{border-left:1px solid #d5d6d3}
+.ed-member-commerce-steps span{font:600 12px "IBM Plex Mono",monospace;color:var(--ed-blue)}
+.ed-member-commerce-steps h3{font-size:clamp(23px,2.2vw,37px);margin-top:28px;line-height:1}
+.ed-member-commerce-steps p{font-size:13px;line-height:1.65;color:#686e7a;margin-top:14px}
+.ed-member-commerce-note{color:#5e6772;font:500 11px/1.6 "IBM Plex Mono",monospace;margin-top:20px}
+@media(max-width:880px){.ed-member-commerce-heading{grid-template-columns:1fr}.ed-member-commerce-heading>p{margin-top:25px}.ed-member-commerce-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.ed-member-commerce-steps article{border-bottom:1px solid #d5d6d3}.ed-member-commerce-steps article+article{border-left:0}.ed-member-commerce-steps article:nth-child(even){border-left:1px solid #d5d6d3}}
+@media(max-width:460px){.ed-member-commerce{padding:70px 0}.ed-member-commerce-steps{grid-template-columns:1fr}.ed-member-commerce-steps article:nth-child(even){border-left:0}.ed-member-commerce-steps article h3{margin-top:14px}.ed-member-commerce-steps article{padding:17px}}

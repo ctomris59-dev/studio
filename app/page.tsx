@@ -103,7 +103,7 @@ export default function HomePage() {
 
         <section className="ed-features" aria-labelledby="essentials-title">
           <div className="ed-container">
-            <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Built to help you notice who is ready to join, who may need a check-in and which classes have room to grow.</p></div>
+            <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>From first class discovery to successful payment, reservation, attendance and renewal — a complete studio journey.</p></div>
             <div className="ed-feature-list">{services.map((item)=><div className="ed-feature-row" key={item.n}>
               <span className="ed-feature-num">{item.n} / 05</span>
               <div className="ed-feature-title"><span>{item.category}</span><h3>{item.title}</h3></div>
@@ -113,6 +113,25 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section className="ed-member-commerce" aria-labelledby="member-commerce-title">
+          <div className="ed-container">
+            <div className="ed-member-commerce-heading">
+              <span className="ed-overline">A COMPLETE STUDIO JOURNEY</span>
+              <h2 id="member-commerce-title">From first class.<br/><em>To the next one.</em></h2>
+              <p>Give members a simple experience and your team one place to keep everything in sync. Studio-direct Stripe payments are available only after the studio's payment account is connected and verified.</p>
+            </div>
+            <div className="ed-member-commerce-steps">
+              {[
+                {n:"01",name:"Choose",desc:"Find the right class and available time."},
+                {n:"02",name:"Purchase",desc:"Buy a studio-priced pack using secure hosted checkout."},
+                {n:"03",name:"Reserve",desc:"Book a place, use credits and manage the waitlist."},
+                {n:"04",name:"Attend",desc:"Studio staff check in the member against the reservation."},
+                {n:"05",name:"Renew",desc:"Add credits and extend membership validity when it's time."}
+              ].map(item=><article key={item.n}><span>{item.n}</span><h3>{item.name}</h3><p>{item.desc}</p></article>)}
+            </div>
+            <p className="ed-member-commerce-note">Payment integration is currently in development. The public demo uses fictional data and does not charge cards.</p>
+          </div>
+        </section>
         <section className="ed-window" id="studio">
           <div className="ed-container ed-window-grid">
             <div className="ed-window-copy">
@@ -136,7 +155,7 @@ export default function HomePage() {
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. One studio, one proposed price: $49/month. Member class-pack purchases are separate.</p></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>49<small> / MONTH</small></div><p>Proposed $49/month per studio · $39/month on annual billing ($468/year). No live StudioTasker checkout yet. Member pack charges go to each studio, not StudioTasker.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Client booking demo with class credits","Email drafts with consent checks","Studio occupancy and conversion insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo only. No real accounts, outbound emails or payments. A separate secure workspace is still in development.</div></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Studio packages, credits & booking management","Email drafts with consent checks","Studio occupancy, check-in & member insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo remains sample-only. Studio member payments require verified Stripe Connect accounts; live customer onboarding is not yet open.</div></div>
             </div>
           </div>
         </section>
