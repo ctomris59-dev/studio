@@ -7,7 +7,7 @@ const operation=fs.readFileSync("app/workspace/studio-operations.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
 assert(client.includes('type="email"')&&client.includes('autoComplete="username"'));
 assert(client.includes('type="password"')&&client.includes("new-password"));
-assert(member.includes("My reservations")&&member.includes("Available classes"));
+assert(member.includes("My reservations")&&member.includes("Choose a class")&&member.includes("member-pack-shop"),"Member journey must support choose → package → booking.");
 assert(member.includes("window.confirm"),"Cancellations must require confirmation.");
 assert(operation.includes("rd-action-item")&&operation.includes("Create follow-up"));
 assert(css.includes("@media(max-width:720px)")&&css.includes("@media(max-width:600px)"),"Phone layouts should be explicitly accounted for.");
