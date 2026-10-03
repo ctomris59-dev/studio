@@ -1,4 +1,4 @@
-export type StudioFocus = "Pilates" | "Yoga" | "Boutique fitness" | "Gym";
+export type StudioFocus = "Pilates" | "Yoga" | "Barre" | "Dance" | "Boutique fitness" | "Gym";
 export type LeadStage = "New" | "Contacted" | "Trial booked" | "Trial attended" | "Won" | "Lost";
 export type View = "overview" | "leads" | "members" | "schedule" | "followups" | "reports" | "client" | "settings";
 export type Member = { id:string; name:string; email:string; plan:string; credits:number|null; joined:string; lastVisit:string|null; consent:boolean; status:"Active"|"Paused"; notes:string; phone?:string; startDate?:string; expiryDate?:string; paymentStatus?:"Pending"|"Paid"; sourceLeadId?:string; initialCredits?:number; };
@@ -9,13 +9,15 @@ export type Activity = { id:string; personKind:"lead"|"member"; personId:string;
 export type StudioData = { version:3; studioFocus:StudioFocus; studioName:string; leads:Lead[]; members:Member[]; sessions:Session[]; tasks:Task[]; activities:Activity[]; closedOpportunities:string[] };
 export type Opportunity = { id:string; personKind:"lead"|"member"; personId:string; personName:string; label:string; detail:string; category:"Lead"|"Renewal"|"Re-engage"|"Trial"; priority:number; due:string };
 
-export const focuses:StudioFocus[]=["Pilates","Yoga","Boutique fitness","Gym"];
+export const focuses:StudioFocus[]=["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"];
 export const leadStages:LeadStage[]=["New","Contacted","Trial booked","Trial attended","Won","Lost"];
 export const planOptions=["5 Class Pack","10 Class Pack","Unlimited Monthly"];
-export const studioNameByFocus:Record<StudioFocus,string>={Pilates:"Willow Pilates Studio",Yoga:"Willow Yoga Studio","Boutique fitness":"Willow Fitness Studio",Gym:"Willow Gym"};
+export const studioNameByFocus:Record<StudioFocus,string>={Pilates:"Willow Pilates Studio",Yoga:"Willow Yoga Studio",Barre:"Willow Barre Studio",Dance:"Willow Dance Studio","Boutique fitness":"Willow Fitness Studio",Gym:"Willow Gym"};
 export const focusClasses:Record<StudioFocus,string[]> = {
   Pilates:["Reformer Foundations","Morning Flow","Sculpt & Strength","Stretch & Reset","Evening Reformer","Dynamic Pilates"],
   Yoga:["Morning Vinyasa","Hatha Foundations","Power Yoga","Yin & Restore","Evening Flow","Breath & Balance"],
+  Barre:["Barre Foundations","Morning Barre Flow","Barre Sculpt","Stretch & Align","Evening Barre","Core & Balance"],
+  Dance:["Contemporary Basics","Ballet Foundations","Jazz Technique","Movement Workshop","Modern Dance","Dance Conditioning"],
   "Boutique fitness":["HIIT Express","Strength Circuit","Functional Training","Core & Conditioning","Evening Burn","Mobility Flow"],
   Gym:["Group Strength","Functional Circuit","Morning Conditioning","Core Training","Evening Fitness","Mobility & Stretch"]
 };

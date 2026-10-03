@@ -16,7 +16,7 @@ export async function POST(request:NextRequest){
  const studioName=stringField(body,"studioName",100),focus=stringField(body,"focus",40)||"Pilates";
  const timezone=stringField(body,"timezone",80)||"UTC";
  if(!email||!emailIsValid(normalizeEmail(email))||!password||!validatePassword(password)||
- !studioName||studioName.length<2||!["Pilates","Yoga","Boutique fitness","Gym"].includes(focus)||!validStudioTimezone(timezone))
+ !studioName||studioName.length<2||!["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(focus)||!validStudioTimezone(timezone))
  return errorResponse(400,"Check email, password (12+ characters) and studio details.");
  try{
   const origin=publicMailOrigin(),secured=await passwordHash(password);

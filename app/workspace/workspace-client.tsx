@@ -132,7 +132,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      {mode==="verify"?"Verify your email to activate your account.":mode==="invite"?"Accept your secure studio invitation.":"Choose a new password. Existing sessions will be revoked."}
     </p>}
     {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label>
-     <label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{["Pilates","Yoga","Boutique fitness","Gym"].map(f=><option key={f}>{f}</option>)}</select></label></>}
+     <label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(f=><option key={f}>{f}</option>)}</select></label></>}
     {["login","register","forgot"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
     {["login","register","reset","invite"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
     {mode==="register"&&<label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label>}
@@ -152,7 +152,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      <button type="button" onClick={()=>setSettingsOpen(o=>!o)} aria-expanded={settingsOpen}>Edit studio settings</button>
      {settingsOpen&&<form className="rd-form rd-settings-form" onSubmit={async event=>{event.preventDefault();setBusy(true);try{const response=await fetch("/api/studio/settings",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(settings)});const data=await response.json();if(!response.ok)throw Error(data.error||"Save failed");setStudio(v=>v?{...v,name:data.studio.name}:v);setNote("Studio settings saved.");setSettingsOpen(false)}catch(e){setNote(e instanceof Error?e.message:"Save failed")}finally{setBusy(false)}}}>
       <label>Studio name<input required minLength={2} maxLength={100} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label>
-      <label>Studio type<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}>{["Pilates","Yoga","Boutique fitness","Gym"].map(x=><option key={x}>{x}</option>)}</select></label>
+      <label>Studio type<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>IANA timezone<input required maxLength={80} value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})} placeholder="Europe/London"/></label>
       <p className="rd-tiny">Set your actual studio timezone before scheduling. Changing it after classes exist requires a controlled migration.</p>
       <button className="rd-primary" type="submit" disabled={busy}>Save studio settings</button>

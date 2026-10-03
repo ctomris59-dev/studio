@@ -103,7 +103,7 @@ export function fromExcelTables(tables:ExcelTables):ValidationOutcome {
   const kv=new Map(guide.map(r=>[norm(r[0]),norm(r[1])]));
   if(![EXCEL_FORMAT,"ReformDesk Excel v1","ReformDesk Excel v2"].includes(kv.get("Format")||""))issue(errors,"Guide",2,"Unsupported format version.");
   const focus=kv.get("Studio Type") as StudioFocus;
-  if(!focuses.includes(focus))issue(errors,"Guide",3,"Studio Type must be Pilates, Yoga, Boutique fitness, or Gym.");
+  if(!focuses.includes(focus))issue(errors,"Guide",3,"Studio Type must match an available StudioTasker studio preset.");
   const studioName=norm(kv.get("Studio Name")||"");
   if(studioName.length<2||studioName.length>100)issue(errors,"Guide",4,"Studio Name must contain 2–100 characters.");
 

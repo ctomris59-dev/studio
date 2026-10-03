@@ -115,7 +115,8 @@ async function main(){
   }
   const config=await call("/api/studio/settings",{cookie:a.cookie});
   assert.equal(config.status,200);assert.equal(config.data.studio.timezone,"UTC");
-  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:b.cookie,body:{name:"Bluebird Studio",focus:"Yoga",timezone:"Europe/London"}})).status,200);
+  assert(["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(config.data.studio.focus));
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:b.cookie,body:{name:"Bluebird Studio",focus:"Dance",timezone:"Europe/London"}})).status,200);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Not/A_Zone"}})).status,400);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:coachLogin.cookie,body:{name:"Forbidden",focus:"Yoga",timezone:"UTC"}})).status,403);
   const member1=await createMember(a,"Member One");

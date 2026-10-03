@@ -16,7 +16,7 @@ export async function PATCH(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const body=await jsonObject(request);if(!body)return errorResponse(400,"Invalid studio settings.");
  const name=stringField(body,"name",100),focus=stringField(body,"focus",40),timezone=stringField(body,"timezone",80);
- if(!name||name.length<2||!focus||!["Pilates","Yoga","Boutique fitness","Gym"].includes(focus)||!validStudioTimezone(timezone))
+ if(!name||name.length<2||!focus||!["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(focus)||!validStudioTimezone(timezone))
   return errorResponse(400,"Provide a name, studio type and valid IANA timezone.");
  try{
   const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
