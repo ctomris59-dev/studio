@@ -46,7 +46,7 @@ To move beyond a sample prototype, select and connect a managed Postgres provide
 
 ## Pricing and branding
 
-Brand name and `$129` pricing on the landing page are exploratory, **not** a payment offer. Trial clients and performance metrics are simulated. Prioritize customer interviews before enabling paid plans.
+StudioTasker is the product name. The proposed $49/month studio subscription ($468/year if prepaid) remains a **launch pricing hypothesis**, not an active payment offer. Studio class-pack sales are separate from StudioTasker subscriptions. Trial clients and performance metrics in the public demo are fictional; validate willingness to pay before commercial launch.
 
 ## Design language
 
