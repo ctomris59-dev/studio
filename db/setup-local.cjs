@@ -19,7 +19,7 @@ async function main(){
   await pool.query("GRANT USAGE ON SCHEMA public TO reformdesk_app");
   await pool.query("GRANT SELECT, INSERT, UPDATE ON app_users, studios, studio_users, auth_sessions, login_attempts TO reformdesk_app");
   await pool.query("GRANT SELECT, INSERT, UPDATE ON people, class_sessions, bookings, credit_ledger, followup_tasks, activity_log, subscriptions TO reformdesk_app");
-  await pool.query("GRANT SELECT, INSERT ON billing_events TO reformdesk_app");
+  await pool.query("GRANT SELECT, INSERT, UPDATE ON billing_events TO reformdesk_app");
   await pool.query("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO reformdesk_app");
   const check=await pool.query("SELECT rolbypassrls,rolsuper FROM pg_roles WHERE rolname='reformdesk_app'");
   if(check.rows[0]?.rolsuper||check.rows[0]?.rolbypassrls)throw new Error("Unsafe application role detected.");

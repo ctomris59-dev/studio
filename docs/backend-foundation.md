@@ -60,3 +60,27 @@ The next versioned migration adds booking ledger indexes and idempotency keys. N
 The operational interface is in `/workspace`, not `/demo`; it is disabled on Vercel without a configured database. Existing authentication/role checks and FORCE RLS apply to every endpoint. The CI HTTP test exercises multiple studios, simultaneous booking requests and independent credit/booking audit records.
 
 **These APIs and sample workflows are not a completed commercial system.** They lack verified payment, member self-service, email verification/invitations, actual outbound notifications, full backups/restore and an audited production security posture.
+
+## Increment 3 — identity, billing, members and operations
+- Registration is opt-in and creates an **unverified** account; a 24-hour email challenge must be consumed before login. Production SMTP is not configured and registration stays disabled by default.
+- `/api/auth/verify`, `/api/auth/password/forgot`, `/api/auth/password/reset`: hashed single-use links; resetting a password revokes previous sessions.
+- `/api/studio/invitations` queues a time-limited member invitation; `/api/auth/invite/accept` creates a verified member user and links them to exactly one studio member. Existing-account cross-studio joining is **not implemented**.
+- `/api/member/me`, `/api/member/classes`, `/api/member/bookings`: self-service is protected by server-verified user/member identity, never a member ID supplied by the browser.
+- `/api/studio/people/[id]` supports authorized contact edits and controlled archival; archive is **not permanent erasure**.
+- `/api/studio/export` creates owner-only JSON export with an audit record; `/api/studio/privacy` shows archived contacts and export activity.
+- `/api/billing/lemon-webhook` uses timing-safe HMAC-SHA256 signature comparison, known store/variant checks, per-studio scoping, event deduplication and monotonic provider timestamps.
+- `/api/studio/subscription` can create hosted Lemon Squeezy monthly/yearly checkouts only with explicit secrets. Browser return pages never activate a license; only verified webhooks can update it. `BILLING_ENFORCEMENT=required` enforces an active, valid entitlement for studio operations. OFF by default until billing has been audited and configured.
+- `scripts/process-mail.cjs` dispatches an SMTP outbox (requires explicit secure SMTP configuration), `scripts/queue-renewal-emails.cjs` generates deduplicated renewal notices. No messages sent without SMTP and a scheduled worker.
+- `scripts/backup-postgres.cjs`, `scripts/verify-backup.cjs`, `scripts/restore-backup.cjs` provide authenticated AES-256-GCM encrypted custom-format PostgreSQL archives. Restore refuses a nonempty target and requires an explicit opt-in; encryption key must be backed up separately. Backups still need automated scheduling, **external off-site storage**, restore drills and retention policies.
+- `/workspace` exposes a staff operational CRM and a separate restricted member portal; public `/demo` remains browser-local and separate.
+
+### Commercial launch still BLOCKED
+1. Real mail sender/domain with verified sending, deliverability and anti-abuse/captcha safeguards.
+2. Actual provider account, signed test-mode event verification, checkout + cancellation + renewal reconciliation in a sandbox, billing failure policy and production entitlement tests.
+3. Third-party security review, session/cookie hardening, account enumeration and abuse analysis, member identity access reviews, per-tenant rate limits.
+4. Complete CRM parity: recurring classes, full history editing, attendance, safe member linking to existing accounts and real trial journeys.
+5. Independent GDPR/privacy legal review, irreversible deletion/anonymization with retention exceptions, consent and retention policies.
+6. Backup automation to independent storage, tested fresh-db restores, monitoring, operations guide and incident response.
+7. Manual multi-device browser accessibility testing, performance testing on the chosen VPS and pilot feedback from real studio owners.
+
+No local test credentials, temporary SMTP tokens, PII or customer card data belong in the GitHub repository.

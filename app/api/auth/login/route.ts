@@ -24,7 +24,7 @@ export async function POST(request:NextRequest){
     RETURNING attempts`,[key]);
    if(throttle.rows[0].attempts>5)return {ok:false as const,rateLimited:true};
    const u=await client.query<{id:string;password_hash:string}>(`SELECT id,password_hash FROM app_users
-       WHERE email=$1 AND disabled_at IS NULL LIMIT 1`,[normalizeEmail(email)]);
+       WHERE email=$1 AND disabled_at IS NULL AND email_verified_at IS NOT NULL LIMIT 1`,[normalizeEmail(email)]);
    const hash=u.rows[0]?.password_hash;
    const matches=hash?await passwordMatches(password,hash):false;
    if(!matches)return {ok:false as const,rateLimited:false};

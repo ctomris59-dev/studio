@@ -34,6 +34,16 @@ export async function authenticated<T>(
   // SET LOCAL is isolated to the current transaction and the checked membership.
   await client.query("SELECT set_config('app.studio_id',$1,true)",[row.studio_id]);
   await client.query("SELECT set_config('app.user_id',$1,true)",[row.user_id]);
+  // Opt-in production license gate. Auth, checkout, account exports and privacy requests
+  // remain accessible without a paid entitlement.
+  if(process.env.BILLING_ENFORCEMENT==="required"&&
+   !request.nextUrl.pathname.startsWith("/api/auth/")&&
+   !["/api/studio/subscription","/api/studio/export","/api/studio/privacy"].some(path=>request.nextUrl.pathname.startsWith(path))){
+   const {entitlement}=await import("./billing");
+   const access=await entitlement(client,row.studio_id);
+   if(!access.enabled)return {access:{ok:false as const,status:402,
+     message:"An active ReformDesk subscription is required for this workspace."}};
+  }
   const context:Authenticated={userId:row.user_id,studioId:row.studio_id,role:row.role,email:row.email,studioName:row.studio_name};
   const value=await execute(client,context);
   return {access:{ok:true as const,auth:context},value};

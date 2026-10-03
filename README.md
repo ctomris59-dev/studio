@@ -96,3 +96,11 @@ The first portable PostgreSQL/authentication increment is documented in [docs/ba
 The PostgreSQL-backed `/workspace` now includes upcoming classes, class creation, transactional booking/waitlist and cancellation with one-time credit refunds, manual package confirmation, auditable credit adjustments, follow-up tasks and an explainable **Action Center**. This is a separate dev-stage workspace; the public `/demo` is still a browser-local prototype. No paid infrastructure was provisioned and real client PII must not be used.
 
 See [backend foundation](docs/backend-foundation.md) and [competitor features / differentiation hypotheses](docs/product-research.md) for tests, controls and remaining blockers.
+
+## Increment 3 — secure accounts, member booking and future billing
+
+The server-backed `/workspace` now includes opt-in email verification, password reset, one-time member invitations, member-owned booking APIs, studio export, contact archival, manually auditable credit corrections, inactive-by-default subscription gating and signed Lemon Squeezy webhook processing. Message delivery is queued; SMTP requires later configuration. Production billing and public registration are **OFF** until configured and independently verified.
+
+Maintenance tools and their limits: `npm run jobs:mail`, `npm run jobs:renewals`, `npm run backup:create`, `npm run backup:verify -- /path/file.rdbk`, `npm run backup:restore -- /path/file.rdbk`. Encrypted backups must be stored off-server with a separately held secret.
+
+**Not production-ready**: payment provider account, hosted PostgreSQL, verified email delivery, account hardening, true full CRM parity, legally compliant erasure/retention, independent security audit, accessibility field review and actual VPS load testing remain to be completed. No paid services were provisioned.

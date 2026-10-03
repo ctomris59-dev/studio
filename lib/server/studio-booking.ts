@@ -1,6 +1,7 @@
 import "server-only";
 import type {PoolClient} from "pg";
 import type {Authenticated} from "./auth";
+import {queueMessage} from "./challenges";
 
 export class StudioOperationError extends Error{
  constructor(public readonly status:number,message:string){super(message);this.name="StudioOperationError";}
@@ -71,13 +72,13 @@ export async function listClasses(client:PoolClient,studioId:string){
 }
 
 type LockedClass={
- id:string;starts_at:Date;duration_minutes:number;capacity:number;booking_cutoff_hours:number;
+ id:string;title:string;starts_at:Date;duration_minutes:number;capacity:number;booking_cutoff_hours:number;
  cancel_cutoff_hours:number;timezone:string;
 };
 async function lockClass(client:PoolClient,studioId:string,sessionId:string):Promise<LockedClass>{
  if(!validUUID(sessionId))fail(400,"Invalid class identifier.");
  const found=await client.query<LockedClass>(`
- SELECT c.id,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,
+ SELECT c.id,c.title,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,
    st.timezone
  FROM class_sessions c JOIN studios st ON st.id=c.studio_id
  WHERE c.id=$1 AND c.studio_id=$2 FOR UPDATE OF c`,[sessionId,studioId]);
@@ -85,6 +86,15 @@ async function lockClass(client:PoolClient,studioId:string,sessionId:string):Pro
  return found.rows[0];
 }
 const cutoffPassed=(startsAt:Date,hours:number):boolean=>Date.now()>=new Date(startsAt).getTime()-hours*3600000;
+async function queueBookingNotice(client:PoolClient,studioId:string,personId:string,
+ kind:"booking_confirmed"|"booking_cancelled"|"waitlist_promoted",session:LockedClass){
+ const member=await client.query<{email:string}>(`
+  SELECT email FROM people WHERE studio_id=$1 AND id=$2 AND kind='member'`,[studioId,personId]);
+ const email=member.rows[0]?.email;
+ if(email)await queueMessage(client,email,kind,{
+  className:session.title,start:new Date(session.starts_at).toISOString()
+ });
+}
 async function studioDate(client:PoolClient,timezone:string,time:Date){
  const date=await client.query<{local_day:string}>(`
  SELECT ($1::timestamptz AT TIME ZONE $2)::date::text AS local_day`,[time,timezone]);
@@ -149,6 +159,7 @@ export async function reserveClass(client:PoolClient,auth:Authenticated,sessionI
  if(member.credits!==null)await client.query(`
  INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by)
  VALUES($1,$2,$3,-1,'class_booking',$4)`,[auth.studioId,memberId,row.rows[0].id,auth.userId]);
+ await queueBookingNotice(client,auth.studioId,memberId,"booking_confirmed",session);
  await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
  VALUES($1,$2,$3,'booking.confirmed')`,[auth.studioId,memberId,auth.userId]);
  return {...row.rows[0],alreadyExists:false};
@@ -182,6 +193,7 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
     [auth.studioId,booking.member_id,bookingId,previous.rows[0].id,auth.userId]);
   }
  }
+ await queueBookingNotice(client,auth.studioId,booking.member_id,"booking_cancelled",session);
  await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
  VALUES($1,$2,$3,'booking.cancelled')`,[auth.studioId,booking.member_id,auth.userId]);
  // Cancelled waitlist entries must never trigger a promotion.
@@ -202,6 +214,7 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
   if(member.credits!==null)await client.query(`
    INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by)
    VALUES($1,$2,$3,-1,'class_booking',$4)`,[auth.studioId,next.member_id,next.id,auth.userId]);
+  await queueBookingNotice(client,auth.studioId,next.member_id,"waitlist_promoted",session);
   await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
    VALUES($1,$2,$3,'booking.promoted')`,[auth.studioId,next.member_id,auth.userId]);
   promoted={id:next.id,memberId:next.member_id};

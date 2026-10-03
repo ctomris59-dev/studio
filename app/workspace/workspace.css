@@ -54,3 +54,11 @@
  .rd-action-item button{min-height:44px}
  .rd-class-choice strong{font-size:17px}
 }
+
+.rd-contact-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.rd-contact-actions button,.rd-privacy-actions button{min-height:42px;cursor:pointer;background:#fff;border:1px solid #334bdd;color:#334bdd;font-size:13px;font-weight:700;padding:8px 13px}
+.rd-contact-actions button:hover,.rd-privacy-actions button:hover{background:#334bdd;color:#fff}
+.rd-contact-edit{background:#f6f6f9;padding:16px;margin:12px 0;border:1px solid #c6cfe1}
+.rd-contact-edit textarea{min-height:70px;padding:12px;border:1px solid #bfc6d4;color:#1b2237;font-size:16px}
+.rd-privacy-actions{margin:22px 0;padding:18px;background:#edf0ff;border-left:3px solid #334bdd}
+.rd-contact-actions button:focus-visible,.rd-privacy-actions button:focus-visible{outline:3px solid #ff8360;outline-offset:2px}

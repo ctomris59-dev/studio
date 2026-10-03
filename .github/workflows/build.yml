@@ -25,6 +25,12 @@ jobs:
       MIGRATION_DATABASE_URL: postgresql://postgres:local_postgres_only@127.0.0.1:5432/reformdesk
       DATABASE_URL: postgresql://reformdesk_app:reformdesk_dev_only@127.0.0.1:5432/reformdesk
       AUTH_ALLOW_REGISTRATION: 'false'
+      PUBLIC_APP_ORIGIN: http://127.0.0.1:3187
+      LEMON_WEBHOOK_SECRET: ci_only_mock_secret_not_for_production
+      LEMON_STORE_ID: '101'
+      LEMON_MONTHLY_VARIANT_ID: '501'
+      LEMON_ANNUAL_VARIANT_ID: '502'
+      BILLING_ALLOW_LOCAL_TEST: 'true'
     timeout-minutes: 15
     steps:
       - name: Checkout repository
@@ -49,6 +55,10 @@ jobs:
         run: npm run test:history
       - name: Test extended CRM forms, repeat classes and task outcomes
         run: npm run test:workflows
+      - name: Test encrypted database backup format
+        run: npm run test:backup
+      - name: Test basic accessibility and mobile layout guards
+        run: npm run test:ui
       - name: Compile production build
         run: npm run build
       - name: Test live HTTP auth and tenant access

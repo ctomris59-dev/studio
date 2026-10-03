@@ -14,7 +14,14 @@
     "test:db": "node scripts/test-db.cjs",
     "db:migrate": "node db/migrate.cjs",
     "db:setup:local": "node db/setup-local.cjs",
-    "test:api": "node scripts/test-api.cjs"
+    "test:api": "node scripts/test-api.cjs",
+    "test:backup": "node scripts/test-backup.cjs",
+    "test:ui": "node scripts/test-ui.cjs",
+    "jobs:mail": "node scripts/process-mail.cjs",
+    "jobs:renewals": "node scripts/queue-renewal-emails.cjs",
+    "backup:create": "node scripts/backup-postgres.cjs",
+    "backup:verify": "node scripts/verify-backup.cjs",
+    "backup:restore": "node scripts/restore-backup.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -22,13 +29,15 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "exceljs": "^4.4.0",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "nodemailer": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.7.0",
-    "@types/pg": "^8.11.11"
+    "@types/pg": "^8.11.11",
+    "@types/nodemailer": "^7.0.0"
   }
 }

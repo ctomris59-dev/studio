@@ -47,6 +47,7 @@ export function StudioOperations({role}:{role:string}){
  const [adjust,setAdjust]=useState({memberId:"",delta:5,reason:"Credit balance correction"});
  const [selectedPlan,setSelectedPlan]=useState<Record<string,string>>({});
  const [taskOutcomes,setTaskOutcomes]=useState<Record<string,string>>({});
+ const [billing,setBilling]=useState<{subscription:{status:string;plan:string;enabled:boolean;periodEnd:string|null};checkoutConfigured:boolean}|null>(null);
  const refresh=useCallback(async()=>{
   const [c,m,a,t]=await Promise.all([
    api<{classes:ClassRow[]}>("/api/studio/classes"),
@@ -55,6 +56,7 @@ export function StudioOperations({role}:{role:string}){
    api<{tasks:TaskRow[]}>("/api/studio/tasks")
   ]);
   setClasses(c.classes);setMembers(m.members);setActions(a.items);setTasks(t.tasks);
+  void api<{subscription:{status:string;plan:string;enabled:boolean;periodEnd:string|null};checkoutConfigured:boolean}>("/api/studio/subscription").then(setBilling).catch(()=>setBilling(null));
   setSelectedClass(old=>old||c.classes[0]?.id||"");
   setSelectedMember(old=>old||m.members[0]?.id||"");
   setAdjust(old=>({...old,memberId:old.memberId||m.members[0]?.id||""}));
@@ -141,6 +143,22 @@ export function StudioOperations({role}:{role:string}){
    return "Class credits now: "+reply.adjustment.credits+". Reversal requires a new audited correction.";
   });
  }
+ function sendInvite(m:MemberRow){
+  if(!m.email){setMessage("Member must have an email address.");return;}
+  if(!window.confirm("Queue a secure invitation to "+m.email+"? Email dispatch must be configured."))return;
+  void perform(async()=>{
+   const result=await api<{notice:string}>("/api/studio/invitations","POST",{memberId:m.id});
+   return result.notice;
+  });
+ }
+ function startCheckout(plan:"monthly"|"annual"){
+  if(!billing?.checkoutConfigured){setMessage("Checkout is not configured. No payment was started.");return;}
+  void perform(async()=>{
+   const result=await api<{checkoutUrl:string}>("/api/studio/subscription","POST",{plan});
+   window.location.assign(result.checkoutUrl);
+   return "Opening secure payment checkout.";
+  });
+ }
  function createTaskFor(item:Signal){
   if(!item.personId)return;
   const title=item.kind==="lead_followup"?"Follow up with lead":
@@ -163,6 +181,16 @@ export function StudioOperations({role}:{role:string}){
   });
  }
  return <div className="rd-ops" aria-label="Live studio operations">
+  {owner&&<section className="rd-ops-section">
+   <div className="rd-ops-section-title"><div><h3>ReformDesk subscription</h3>
+    <p>Monthly or annual access managed by the payment provider. This workspace does not collect card details.</p></div></div>
+   <p><strong>{billing?.subscription.plan||"No plan"} · {billing?.subscription.status||"Inactive"}</strong>
+    {billing?.subscription.periodEnd&&" · Through "+new Date(billing.subscription.periodEnd).toLocaleDateString()}</p>
+   {billing?.checkoutConfigured?<div className="rd-contact-actions">
+    <button type="button" disabled={busy} onClick={()=>startCheckout("monthly")}>Choose monthly</button>
+    <button type="button" disabled={busy} onClick={()=>startCheckout("annual")}>Choose annual</button>
+   </div>:<p className="rd-tiny">Payment provider credentials are intentionally absent. Checkout is disabled; no charges can be made.</p>}
+  </section>}
   <div className="rd-ops-heading"><div><p className="rd-eyebrow">DATABASE-BACKED OPERATIONS</p><h2>Studio daily operations</h2><p>All records below are scoped to your authenticated studio. Sample /demo data is separate.</p></div>
    <button type="button" disabled={busy} onClick={()=>void perform(async()=>"Latest workspace records loaded.")}>Refresh</button></div>
   {message&&<div className="rd-feedback" role="status">{message}</div>}
@@ -206,6 +234,7 @@ export function StudioOperations({role}:{role:string}){
   </section>
   {owner&&<section className="rd-ops-section"><h3>Member packages and credits</h3><p className="rd-tiny">Package confirmation is a manual admin acknowledgement, NOT a verified payment.</p>
     <div className="rd-pack-list">{members.length?members.map(m=><div key={m.id}><div><strong>{m.full_name}</strong><small>{m.package_status||"Pending"} · {m.plan||"No pack"} · {m.credits===null?"Unlimited":m.credits+" credits"}</small></div>
+     {m.email&&<button type="button" disabled={busy} onClick={()=>sendInvite(m)}>Invite member</button>}
      {m.package_status==="Pending"&&<div className="rd-pack-confirm">
       <label><span>Pack</span><select value={selectedPlan[m.id]||"10 Class Pack"} onChange={e=>setSelectedPlan(prev=>({...prev,[m.id]:e.target.value}))}>
        {["5 Class Pack","10 Class Pack","Unlimited Monthly"].map(x=><option key={x}>{x}</option>)}</select></label>

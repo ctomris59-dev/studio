@@ -1,0 +1,16 @@
+const assert=require("node:assert/strict");
+const fs=require("node:fs");
+const client=fs.readFileSync("app/workspace/workspace-client.tsx","utf8");
+const member=fs.readFileSync("app/workspace/member-portal.tsx","utf8");
+const css=fs.readFileSync("app/workspace/workspace.css","utf8");
+const operation=fs.readFileSync("app/workspace/studio-operations.tsx","utf8");
+assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
+assert(client.includes('type="email"')&&client.includes('autoComplete="username"'));
+assert(client.includes('type="password"')&&client.includes("new-password"));
+assert(member.includes("My reservations")&&member.includes("Available classes"));
+assert(member.includes("window.confirm"),"Cancellations must require confirmation.");
+assert(operation.includes("rd-action-item")&&operation.includes("Create follow-up"));
+assert(css.includes("@media(max-width:720px)")&&css.includes("@media(max-width:600px)"),"Phone layouts should be explicitly accounted for.");
+assert(css.includes(":focus-visible"),"Keyboard focus should be styled.");
+assert(css.includes("font-size:16px"),"Forms must avoid sub-16px input text on phones.");
+console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
