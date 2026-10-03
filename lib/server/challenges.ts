@@ -23,7 +23,7 @@ export async function newChallenge(client:PoolClient,values:{
  return {secret,id:result.rows[0].id};
 }
 export async function queueMessage(client:PoolClient,email:string,template:ChallengeKind|
- "booking_confirmed"|"booking_cancelled"|"waitlist_promoted"|"renewal_alert",
+ "booking_confirmed"|"booking_cancelled"|"waitlist_promoted"|"renewal_alert"|"package_payment_confirmed"|"package_payment_review",
  payload:Record<string,unknown>){
  await client.query("INSERT INTO mail_outbox(recipient_email,template,payload) VALUES($1,$2,$3::jsonb)",
  [normalizeEmail(email),template,JSON.stringify(payload)]);

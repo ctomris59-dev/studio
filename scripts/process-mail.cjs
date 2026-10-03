@@ -7,7 +7,9 @@ const templates={
  booking_confirmed:(d)=>({subject:"Class reservation confirmed",text:"Your reservation for "+d.className+" has been confirmed. Start: "+d.start+"."}),
  booking_cancelled:(d)=>({subject:"Class reservation cancelled",text:"Your reservation for "+d.className+" has been cancelled. Start: "+d.start+"."}),
  waitlist_promoted:(d)=>({subject:"A class place is now yours",text:"A place became available in "+d.className+". Your reservation is now confirmed. Start: "+d.start+"."}),
- renewal_alert:(d)=>({subject:"Your class package expires soon",text:"Your class package is due to expire on "+d.expiryDate+". Contact your studio if you would like to renew."})
+ renewal_alert:(d)=>({subject:"Your class package expires soon",text:"Your class package is due to expire on "+d.expiryDate+". Contact your studio if you would like to renew."}),
+ package_payment_confirmed:(d)=>({subject:"Your studio class pack is ready",text:"Your payment for "+d.packName+" at "+d.studioName+" was confirmed. "+d.credits+" credits were added. Current pass expiry: "+d.expiryDate+". You can now reserve classes in your StudioTasker member portal."}),
+ package_payment_review:(d)=>({subject:"Studio class pass needs review",text:"A payment change affecting your class pass at "+d.studioName+" requires review. Further class reservations have been paused while the studio checks the payment. Please contact your studio for help."})
 };
 const validText=x=>typeof x==="string"&&x.length<5000?x:"";
 async function main(){

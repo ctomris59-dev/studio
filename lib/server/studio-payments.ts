@@ -3,6 +3,7 @@ import {createHmac,timingSafeEqual} from "node:crypto";
 import type {PoolClient} from "pg";
 import {StudioOperationError,validUUID} from "./studio-booking";
 import {inTransaction} from "./database";
+import {queueMessage} from "./challenges";
 const fail=(status:number,message:string):never=>{throw new StudioOperationError(status,message)};
 const accountPattern=/^acct_[a-zA-Z0-9]+$/;
 export const currencies=["usd","eur","gbp","cad","aud"] as const;
@@ -118,6 +119,12 @@ export async function settleStudioPurchase(event:StripeEvent){
     [studioId,p.id,obj.id,typeof obj.payment_intent==="string"?obj.payment_intent:null]);
    await client.query("INSERT INTO activity_log(studio_id,person_id,action,details) VALUES($1,$2,'package.payment_verified',$3::jsonb)",
     [studioId,p.member_id,JSON.stringify({purchaseId:p.id,packageId:p.package_id,expiry:row.rows[0].expiry_date})]);
+   const mail=await client.query<{email:string;studio_name:string}>(`SELECT p.email,s.name AS studio_name
+    FROM people p JOIN studios s ON s.id=p.studio_id WHERE p.studio_id=$1 AND p.id=$2`,[studioId,p.member_id]);
+   if(mail.rows[0]?.email)await queueMessage(client,mail.rows[0].email,"package_payment_confirmed",{
+    studioName:mail.rows[0].studio_name,packName:pkg.rows[0].name,
+    credits:pkg.rows[0].credits,expiryDate:row.rows[0].expiry_date
+   });
    return {processed:true,reason:"paid"};
   }
   // Refunds/disputes require human reconciliation, and immediately block NEW bookings.
@@ -142,6 +149,11 @@ export async function settleStudioPurchase(event:StripeEvent){
     [studioId,p.member_id,-toReverse]);
    await client.query("INSERT INTO activity_log(studio_id,person_id,action,details) VALUES($1,$2,'package.payment_review_required',$3::jsonb)",
     [studioId,p.member_id,JSON.stringify({purchaseId:p.id,reason:event.type,creditsReversed:toReverse,manualReview:true})]);
+   const mail=await client.query<{email:string;studio_name:string}>(`SELECT p.email,s.name AS studio_name
+    FROM people p JOIN studios s ON s.id=p.studio_id WHERE p.studio_id=$1 AND p.id=$2`,[studioId,p.member_id]);
+   if(mail.rows[0]?.email)await queueMessage(client,mail.rows[0].email,"package_payment_review",{
+    studioName:mail.rows[0].studio_name
+   });
    return {processed:true,reason:"review_required"};
   }
   return {processed:false,reason:"ignored"};
