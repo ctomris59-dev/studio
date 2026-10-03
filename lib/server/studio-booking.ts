@@ -78,7 +78,7 @@ export async function createRecurringClasses(client:PoolClient,auth:Authenticate
   if(!(weekdays as number[]).includes(new Date(stamp).getUTCDay()))continue;
   if(classes.length>=52)fail(400,"Maximum 52 classes per recurring series.");
   const day=new Date(stamp).toISOString().slice(0,10);
-  const startsAt=localDateTimeToUTC(day,time,timezone);
+  const startsAt=localDateTimeToUTC(day,time as string,timezone);
   const input=parseClass({...body,startsAt});
   classes.push(await createClass(client,auth,input,seriesId));
  }
