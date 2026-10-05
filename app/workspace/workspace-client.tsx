@@ -1,14 +1,13 @@
 "use client";
 import {useEffect,useState,type FormEvent} from "react";
 import {StudioOperations} from "./studio-operations";
-import {MemberPortal} from "./member-portal";
 import {OnboardingPanel} from "./onboarding-panel";
 
 type User={id:string;email:string;role:string};
 type Studio={id:string;name:string};
 type Person={id:string;kind:"lead"|"member";full_name:string;email:string;phone:string;
  created_at:string;lead_stage:string|null;notes:string;member_status:string|null;};
-type AuthMode="login"|"register"|"forgot"|"reset"|"verify"|"invite";
+type AuthMode="login"|"register"|"forgot"|"reset"|"verify";
 const modes:{mode:AuthMode;name:string}[]=[{mode:"login",name:"Sign in"},{mode:"forgot",name:"Forgot password"}];
 export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boolean}){
  const [user,setUser]=useState<User|null>(null);
@@ -20,7 +19,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [person,setPerson]=useState({kind:"lead",name:"",email:"",phone:""});
  const [editing,setEditing]=useState<string|null>(null);
  const [editForm,setEditForm]=useState({name:"",notes:"",stage:"New"});
- const [settings,setSettings]=useState({name:"",focus:"Pilates",timezone:"UTC",public_slug:"",public_booking_enabled:false,self_signup_enabled:false});
+ const [settings,setSettings]=useState({name:"",focus:"Pilates",timezone:"UTC"});
  const [settingsOpen,setSettingsOpen]=useState(false);
  async function load(){
   const res=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
@@ -41,7 +40,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   if(detected)setForm(prev=>({...prev,timezone:detected}));
   const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));
   if(window.location.hash)window.history.replaceState(null,"",window.location.pathname);
-  for(const name of ["verify","reset","invite"] as const){
+  for(const name of ["verify","reset"] as const){
    const found=qs.get(name);
    if(found){setMode(name);setToken(found);break;}
   }
@@ -53,10 +52,10 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    const target={
     login:"/api/auth/login",register:"/api/auth/register",
     verify:"/api/auth/verify",reset:"/api/auth/password/reset",
-    forgot:"/api/auth/password/forgot",invite:"/api/auth/invite/accept"
+    forgot:"/api/auth/password/forgot"
    }[mode];
    const payload=mode==="verify"?{token}:
-    mode==="reset"||mode==="invite"?{token,password:form.password}:
+    mode==="reset"?{token,password:form.password}:
     mode==="forgot"?{email:form.email}:form;
    const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)});
    const body=await res.json();
@@ -65,7 +64,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    if(mode==="login"){await load();setNote("Signed in successfully.");}
    else{
     setNote(body.notice||"Request accepted.");
-    if(["verify","reset","invite"].includes(mode)){
+    if(["verify","reset"].includes(mode)){
      setMode("login");setToken("");window.history.replaceState(null,"","/workspace");
     }
     if(mode==="register")setMode("login");
@@ -129,18 +128,17 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     {registrationEnabled&&<button type="button" className={mode==="register"?"active":""} onClick={()=>setMode("register")}>Create development studio</button>}
    </div>
    <form className="rd-form" onSubmit={submitAuth}>
-    {["verify","invite","reset"].includes(mode)&&<p className="rd-tiny">
-     {mode==="verify"?"Verify your email to activate your account.":mode==="invite"?"Accept your secure studio invitation.":"Choose a new password. Existing sessions will be revoked."}
+    {["verify","reset"].includes(mode)&&<p className="rd-tiny">
+     {mode==="verify"?"Verify your email to activate your account.":"Choose a new password. Existing sessions will be revoked."}
     </p>}
     {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label>
      <label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(f=><option key={f}>{f}</option>)}</select></label></>}
     {["login","register","forgot"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
-    {["login","register","reset","invite"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
+    {["login","register","reset"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
     {mode==="register"&&<label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label>}
     {mode==="register"&&<p className="rd-tiny">You must verify your email before signing in. Email delivery and billing must be configured before public registration.</p>}
     <button className="rd-primary" disabled={busy} type="submit">{busy?"Please wait…":{
-     login:"Sign in",register:"Create and verify studio",verify:"Verify email",invite:"Accept member invitation",
-     reset:"Reset password",forgot:"Send reset instructions"
+     login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions"
     }[mode]}</button>
    </form>
    {!registrationEnabled&&<p className="rd-tiny">Public studio registration is disabled while the backend is in development.</p>}
@@ -152,14 +150,13 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      <strong>Studio profile & public booking controls</strong>
      <p>Keep your studio identity, timezone and public member access in one place.</p>
      <button type="button" onClick={()=>setSettingsOpen(o=>!o)} aria-expanded={settingsOpen}>Edit studio settings</button>
-     {settings.public_slug&&<p className="rd-tiny">Public path: <a href={"/book/"+settings.public_slug} target="_blank" rel="noreferrer">/book/{settings.public_slug} ↗</a></p>}
-     {settingsOpen&&<form className="rd-form rd-settings-form" onSubmit={async event=>{event.preventDefault();setBusy(true);try{const response=await fetch("/api/studio/settings",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:settings.name,focus:settings.focus,timezone:settings.timezone,publicBookingEnabled:settings.public_booking_enabled,selfSignupEnabled:settings.self_signup_enabled})});const data=await response.json();if(!response.ok)throw Error(data.error||"Save failed");setStudio(v=>v?{...v,name:data.studio.name}:v);setSettings(data.studio);setNote("Studio settings saved.");setSettingsOpen(false)}catch(e){setNote(e instanceof Error?e.message:"Save failed")}finally{setBusy(false)}}}>
+     
+     {settingsOpen&&<form className="rd-form rd-settings-form" onSubmit={async event=>{event.preventDefault();setBusy(true);try{const response=await fetch("/api/studio/settings",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:settings.name,focus:settings.focus,timezone:settings.timezone})});const data=await response.json();if(!response.ok)throw Error(data.error||"Save failed");setStudio(v=>v?{...v,name:data.studio.name}:v);setSettings(data.studio);setNote("Studio settings saved.");setSettingsOpen(false)}catch(e){setNote(e instanceof Error?e.message:"Save failed")}finally{setBusy(false)}}}>
       <label>Studio name<input required minLength={2} maxLength={100} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label>
       <label>Studio type<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>IANA timezone<input required maxLength={80} value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})} placeholder="Europe/London"/></label>
-      <label className="rd-toggle"><input type="checkbox" checked={settings.public_booking_enabled} onChange={e=>setSettings({...settings,public_booking_enabled:e.target.checked,self_signup_enabled:e.target.checked?settings.self_signup_enabled:false})}/> Public booking page</label>
-      <label className="rd-toggle"><input type="checkbox" checked={settings.self_signup_enabled} disabled={!settings.public_booking_enabled} onChange={e=>setSettings({...settings,self_signup_enabled:e.target.checked})}/> Allow member self-registration</label>
-      <p className="rd-tiny">Publishing requires at least one upcoming class and one active class package. Set your actual timezone before scheduling; existing class times are never silently reinterpreted.</p>
+      
+      <p className="rd-tiny">Set your actual studio timezone before scheduling; existing class times are never silently reinterpreted.</p>
       <button className="rd-primary" type="submit" disabled={busy}>Save studio settings</button>
      </form>}
     </div>
@@ -189,7 +186,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      <p className="rd-tiny">Export includes sensitive studio records. Save securely; archiving is not permanent erasure.</p>
     </div>}
     <StudioOperations role={user.role}/>
-   </>:user.role==="member"?<MemberPortal/>:<p className="rd-feedback">Your role does not have access to studio contacts.</p>}
+   </>:<p className="rd-feedback">Your staff role does not have access to studio contacts.</p>}
   </>}
  </section>;
 }
