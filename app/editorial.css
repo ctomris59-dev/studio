@@ -236,3 +236,14 @@
 @media(max-width:460px){.ed-member-commerce{padding:70px 0}.ed-member-commerce-steps{grid-template-columns:1fr}.ed-member-commerce-steps article:nth-child(even){border-left:0}.ed-member-commerce-steps article h3{margin-top:14px}.ed-member-commerce-steps article{padding:17px}}
 
 .ed-member-commerce-actions{display:flex;margin-top:27px}
+
+/* StudioTasker Today differentiation story */
+.ed-today-story{background:#17203c;color:white;padding:100px 0;border-top:1px solid #0f162a}.ed-today-story-grid{display:grid;grid-template-columns:1.03fr .97fr;gap:70px;align-items:center}
+.ed-today-story .ed-overline{color:#e7f982}.ed-today-story h2{font-size:clamp(49px,5.5vw,82px);line-height:1.01;letter-spacing:-.05em;margin:28px 0}.ed-today-story h2 em{color:#e7f982}
+.ed-today-story-grid>div:first-child>p{color:#c2cbe2;font-size:15px;line-height:1.75;max-width:580px;margin-bottom:28px}.ed-today-story .ed-primary-cta{background:#e7f982;color:#17203c;border-color:#e7f982}
+.ed-today-story-card{background:#fffefa;color:#17203c;padding:22px;box-shadow:12px 14px 0 #334bdd}.ed-today-story-card>div{display:grid;grid-template-columns:1fr auto;align-items:end;border-bottom:2px solid #17203c;padding-bottom:15px;margin-bottom:6px}
+.ed-today-story-card>div>span{font:700 10px "IBM Plex Mono",monospace;color:#334bdd}.ed-today-story-card>div>b{font:700 58px/0.8 "Barlow Condensed",sans-serif;color:#334bdd;grid-row:1/3;grid-column:2}.ed-today-story-card>div>small{font-size:11px;color:#697286}
+.ed-today-story-card article{display:grid;grid-template-columns:42px 1fr 20px;gap:9px;align-items:center;padding:13px 2px;border-bottom:1px solid #d8d9d6}.ed-today-story-card article>span{font:700 9px "IBM Plex Mono",monospace;color:#334bdd}
+.ed-today-story-card article b,.ed-today-story-card article small{display:block}.ed-today-story-card article b{font-size:13px}.ed-today-story-card article small{font-size:10px;color:#687184;margin-top:3px}.ed-today-story-card article i{font-style:normal;color:#334bdd}
+.ed-today-story-card>p{font:500 9px/1.55 "IBM Plex Mono",monospace;color:#677184;margin:15px 0 0}.ed-member-commerce-actions{align-items:center;gap:22px;flex-wrap:wrap}.ed-member-commerce-actions .ed-text-link{margin-top:0}
+@media(max-width:850px){.ed-today-story{padding:75px 0}.ed-today-story-grid{grid-template-columns:1fr;gap:45px}}@media(max-width:460px){.ed-today-story h2{font-size:49px}.ed-today-story-card{padding:15px;box-shadow:7px 8px 0 #334bdd}}

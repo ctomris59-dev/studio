@@ -75,8 +75,8 @@ export default function HomePage() {
               <div className="ed-index"><span className="ed-index-line"/> PILATES · YOGA · BARRE · BOUTIQUE STUDIOS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
-                <p>Classes, bookings, memberships and follow-ups — one clear workspace for people who run independent studios.</p>
-                <Link className="ed-primary-cta" href="/demo"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={20}/></Link>
+                <p>Members book and pay themselves. StudioTasker keeps track of classes, memberships and the next actions that need your attention.</p>
+                <Link className="ed-primary-cta" href="/today"><span>SEE WHAT NEEDS ATTENTION TODAY</span><ArrowUpRight size={20}/></Link>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
@@ -88,7 +88,7 @@ export default function HomePage() {
               <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
             </div>
           </div>
-          <div className="ed-hero-end ed-container"><span>STUDIOTASKER · ONE PLACE FOR YOUR ENTIRE STUDIO.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
+          <div className="ed-hero-end ed-container"><span>STUDIOTASKER · KNOW WHAT YOUR STUDIO NEEDS TODAY.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
         </section>
 
         <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b>✳</b><span>YOGA</span><b>✳</b><span>BARRE</span><b>✳</b><span>BOUTIQUE FITNESS</span><b>✳</b><span>GROUP CLASSES</span><b>✳</b></div></section>
@@ -113,6 +113,24 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section className="ed-today-story" aria-labelledby="today-story-title">
+          <div className="ed-container ed-today-story-grid">
+            <div><span className="ed-overline">THE DIFFERENCE / STUDIOTASKER TODAY</span><h2 id="today-story-title">Your software should tell you<br/><em>what needs attention next.</em></h2>
+             <p>Trials that never became members. Active members drifting away. Packs ready to renew. A checkout left unfinished. Tomorrow&apos;s class with open places. StudioTasker brings those signals together with the reason they appeared and a human-controlled next action.</p>
+             <Link className="ed-primary-cta" href="/today"><span>TRY STUDIOTASKER TODAY</span><ArrowUpRight size={20}/></Link></div>
+            <div className="ed-today-story-card">
+             <div><span>STUDIOTASKER TODAY</span><b>5</b><small>things need attention</small></div>
+             {[
+              ["HIGH","Trial needs a next step","Mia attended yesterday · no package yet"],
+              ["HIGH","Renewal opportunity","Oliver · 1 class credit remaining"],
+              ["MED","Member may be drifting","Emma · no visit for 24 days"],
+              ["MED","Checkout still pending","Studio Ten · $135 pending"],
+              ["LOW","Open places","Barre Foundations · 3 spots tomorrow"]
+             ].map((x,i)=><article key={i}><span>{x[0]}</span><div><b>{x[1]}</b><small>{x[2]}</small></div><i>→</i></article>)}
+             <p>Explainable rules · no automatic marketing · no speculative “revenue saved” claim</p>
+            </div>
+          </div>
+        </section>
         <section className="ed-member-commerce" aria-labelledby="member-commerce-title">
           <div className="ed-container">
             <div className="ed-member-commerce-heading">
@@ -129,7 +147,7 @@ export default function HomePage() {
                 {n:"05",name:"Renew",desc:"Add credits and extend membership validity when it's time."}
               ].map(item=><article key={item.n}><span>{item.n}</span><h3>{item.name}</h3><p>{item.desc}</p></article>)}
             </div>
-            <div className="ed-member-commerce-actions"><Link className="ed-primary-cta" href="/experience"><span>TRY THE FIVE-STEP DEMO</span><ArrowUpRight size={20}/></Link></div><p className="ed-member-commerce-note">Payment integration is currently in development. The walkthrough uses fictional data and does not charge cards.</p>
+            <div className="ed-member-commerce-actions"><Link className="ed-primary-cta" href="/experience"><span>TRY THE FIVE-STEP MEMBER DEMO</span><ArrowUpRight size={20}/></Link><Link className="ed-text-link" href="/book/preview">VIEW PUBLIC BOOKING PREVIEW <ArrowUpRight size={18}/></Link></div><p className="ed-member-commerce-note">Payment integration is currently in development. The walkthrough uses fictional data and does not charge cards.</p>
           </div>
         </section>
         <section className="ed-window" id="studio">
@@ -155,7 +173,7 @@ export default function HomePage() {
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. One studio, one proposed price: $49/month. Member class-pack purchases are separate.</p></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>49<small> / MONTH</small></div><p>Proposed $49/month per studio · $39/month on annual billing ($468/year). No live StudioTasker checkout yet. Member pack charges go to each studio, not StudioTasker.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["Lead and member CRM records","Trial-to-member journey tracking","Follow-up and retention opportunities","Studio packages, credits & booking management","Email drafts with consent checks","Studio occupancy, check-in & member insights"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo remains sample-only. Studio member payments require verified Stripe Connect accounts; live customer onboarding is not yet open.</div></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["StudioTasker Today daily priorities","Revenue Rescue opportunity signals","Lead and member CRM records","Public booking & member self-registration","CSV migration with preview","Studio packages, credits & booking management"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo remains sample-only. Studio member payments require verified Stripe Connect accounts; live customer onboarding is not yet open.</div></div>
             </div>
           </div>
         </section>
@@ -172,9 +190,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/demo" className="ed-last-link"><span>TRY THE INTERACTIVE DEMO</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
+        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/today" className="ed-last-link"><span>START WITH TODAY</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ &amp; product status</a><Link href="/demo">Live demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/today">StudioTasker Today</Link><Link href="/book/preview">Booking preview</Link><a href="#pricing">Pricing</a><Link href="/demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
