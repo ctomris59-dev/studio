@@ -1,11 +1,12 @@
 import {NextRequest} from "next/server";
+import type {PoolClient} from "pg";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
 import {jsonObject,stringField,errorResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
 import {findPublicStudio} from "@/lib/server/public-studio";
 import {emailIsValid,normalizeEmail,tokenHash} from "@/lib/auth-crypto";
 import {newChallenge,queueMessage,publicMailOrigin} from "@/lib/server/challenges";
 export const runtime="nodejs";
-async function bump(client:any,key:string,limit:number){
+async function bump(client:PoolClient,key:string,limit:number){
  const r=await client.query<{attempts:number}>(`
   INSERT INTO public_signup_attempts(key_hash,attempts,window_started_at) VALUES($1,1,now())
   ON CONFLICT(key_hash) DO UPDATE SET
