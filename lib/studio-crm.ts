@@ -1,7 +1,7 @@
 export type StudioFocus = "Pilates" | "Yoga" | "Barre" | "Dance" | "Boutique fitness" | "Gym";
 export type LeadStage = "New" | "Contacted" | "Trial booked" | "Trial attended" | "Won" | "Lost";
 export type View = "overview" | "leads" | "members" | "schedule" | "followups" | "reports" | "client" | "settings";
-export type Member = { id:string; name:string; email:string; plan:string; credits:number|null; joined:string; lastVisit:string|null; consent:boolean; status:"Active"|"Paused"; notes:string; phone?:string; startDate?:string; expiryDate?:string; paymentStatus?:"Pending"|"Paid"; sourceLeadId?:string; initialCredits?:number; };
+export type Member = { id:string; name:string; email:string; plan:string; credits:number|null; joined:string; lastVisit:string|null; consent:boolean; status:"Active"|"Paused"; notes:string; phone?:string; startDate?:string; expiryDate?:string; paymentStatus?:"Pending"|"Confirmed"; sourceLeadId?:string; initialCredits?:number; };
 export type Lead = { id:string; name:string; email:string; stage:LeadStage; source:string; created:string; nextContact:string; consent:boolean; notes:string; trialAttended?:string; phone?:string; preferredService?:string; preferredChannel?:"Email"|"Phone"|"Either"; interestPlan?:string; };
 export type Session = { id:string; title:string; coach:string; date:string; time:string; capacity:number; booked:string[]; waitlist:string[]; durationMinutes?:number; room?:string; seriesId?:string; bookingCutoffHours?:number; cancelCutoffHours?:number; description?:string; };
 export type Task = { id:string; personKind:"lead"|"member"; personId:string; reason:string; due:string; completed:boolean; created:string; category?:"Call"|"Email"|"Renewal"|"Trial"|"General"; priority?:"Low"|"Normal"|"High"; dueTime?:string; assignee?:string; repeat?:"None"|"Weekly"|"Monthly"; notes?:string; outcome?:"Contacted"|"No answer"|"Reschedule"|"Converted"|"Completed"; completedAt?:string; };
@@ -40,7 +40,7 @@ export function makeSeed(focus:StudioFocus="Pilates"):StudioData {
   const memberNames=["Amelia Hart","Sophia Chen","Mia Oliver","Isabella Reed","Olivia Patel","Grace Taylor","Ella Brooks","Noah Mitchell","Lily James","Ava Williams","Chloe Adams","Charlotte Davis"];
   const members=memberNames.map((name,i):Member=>({
     id:"m"+(i+1),name,email:name.toLowerCase().replace(/\s+/g,".")+"@example.com",
-    paymentStatus:"Paid",startDate:day(-90+i*4),expiryDate:day(100-i*2),initialCredits:i%4===0?0:i%3===0?5:10,
+    paymentStatus:"Confirmed",startDate:day(-90+i*4),expiryDate:day(100-i*2),initialCredits:i%4===0?0:i%3===0?5:10,
     plan:i%4===0?"Unlimited Monthly":i%3===0?"5 Class Pack":"10 Class Pack",
     credits:i%4===0?null:Math.max(0,(i%3===0?5:10)-Math.floor(i/2)),
     joined:day(-90+i*4),lastVisit:[-18,-3,-7,-24,-2,-5,-16,-1,-11,-4,-26,-3][i]===null?null:day([-18,-3,-7,-24,-2,-5,-16,-1,-11,-4,-26,-3][i]),
