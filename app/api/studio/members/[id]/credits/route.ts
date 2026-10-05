@@ -25,7 +25,7 @@ export async function POST(request:NextRequest,context:{params:Promise<{id:strin
       throw new StudioOperationError(409,"This request key was already used for a different adjustment.");
     return {credits:m.rows[0].credits,alreadyApplied:true,entryId:prior.rows[0].id};
    }
-   if(m.rows[0].package_status!=="Paid"||m.rows[0].credits===null)
+   if(m.rows[0].package_status!=="Confirmed"||m.rows[0].credits===null)
     throw new StudioOperationError(409,"Only confirmed class packs with numeric credits can be adjusted.");
    const newCredits=m.rows[0].credits+delta;
    if(newCredits<0||newCredits>1000000)throw new StudioOperationError(409,"Adjustment exceeds available credits or limit.");
