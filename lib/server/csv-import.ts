@@ -28,7 +28,7 @@ export async function analyzeCsvImport(client:PoolClient,studioId:string,csv:str
  };
  if(indexes.name<0)throw new Error("CSV needs a Name or Full Name column.");
  const parsed:ImportContact[]=grid.slice(1).map((cells,idx)=>{
-  const issues:string[]=[],warnings:string[];const get=(i:number)=>i<0?"":clipped(cells[i],2000);
+  const issues:string[]=[],warnings:string[]=[];const get=(i:number)=>i<0?"":clipped(cells[i],2000);
   const name=clipped(get(indexes.name),80),rawKind=get(indexes.kind).toLowerCase();
   const kind:ImportContact["kind"]=rawKind==="lead"?"lead":"member";
   if(rawKind&&!["lead","member"].includes(rawKind))issues.push("Type must be lead or member.");
