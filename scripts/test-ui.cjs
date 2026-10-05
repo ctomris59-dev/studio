@@ -4,6 +4,8 @@ const client=fs.readFileSync("app/workspace/workspace-client.tsx","utf8");
 const member=fs.readFileSync("app/workspace/member-portal.tsx","utf8");
 const css=fs.readFileSync("app/workspace/workspace.css","utf8");
 const operation=fs.readFileSync("app/workspace/studio-operations.tsx","utf8");
+const onboarding=fs.readFileSync("app/workspace/onboarding-panel.tsx","utf8");
+const booking=fs.readFileSync("app/book/[slug]/public-booking-client.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
 assert(client.includes('type="email"')&&client.includes('autoComplete="username"'));
 assert(client.includes('type="password"')&&client.includes("new-password"));
@@ -13,4 +15,6 @@ assert(operation.includes("StudioTasker Today")&&operation.includes("REVENUE RES
 assert(css.includes("@media(max-width:720px)")&&css.includes("@media(max-width:600px)"),"Phone layouts should be explicitly accounted for.");
 assert(css.includes(":focus-visible"),"Keyboard focus should be styled.");
 assert(css.includes("font-size:16px"),"Forms must avoid sub-16px input text on phones.");
+assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Publish booking page + self-registration"),"Self-service onboarding and CSV preview must remain available.");
+assert(booking.includes("Choose your class")&&booking.includes("Email my secure setup link")&&booking.includes("Preview only"),"Public booking must preserve class-first self-registration flow.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
