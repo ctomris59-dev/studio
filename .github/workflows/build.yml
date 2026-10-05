@@ -49,6 +49,8 @@ jobs:
         run: npm run test:db
       - name: Run CRM regression checks
         run: npm run test:crm
+      - name: Test CSV parser and migration file guards
+        run: npm run test:csv
       - name: Test Excel import/export and validation
         run: npm run test:excel
       - name: Test credit corrections and Undo/Redo

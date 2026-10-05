@@ -1,0 +1,14 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),ts=require("typescript");
+const source=fs.readFileSync("lib/csv-import-core.ts","utf8");
+const compiled={exports:{}};
+const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+new Function("module","exports",js)(compiled,compiled.exports);
+const {parseCsv,headerIndex}=compiled.exports;
+const rows=parseCsv("\uFEFFname,email,notes\r\n\"Jane, Example\",jane@example.com,\"Said \"\"hello\"\"\"\r\nSam,sam@example.com,Simple");
+assert.equal(rows.length,3);assert.equal(rows[1][0],"Jane, Example");assert.equal(rows[1][2],'Said "hello"');
+assert.equal(headerIndex(rows[0],["full name","name"]),0);
+assert.throws(()=>parseCsv('name,email\n\"Broken,jane@example.com'),/unterminated/);
+assert.throws(()=>parseCsv("name\n"),/header and at least one/);
+const tooMany="name,email\n"+Array.from({length:501},(_,i)=>"Person "+i+",p"+i+"@example.com").join("\n");
+assert.throws(()=>parseCsv(tooMany),/500 data rows/);
+console.log("CSV parser checks passed: BOM, CRLF, quoted commas, escaped quotes, row limits and malformed input.");
