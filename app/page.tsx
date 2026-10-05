@@ -60,7 +60,7 @@ export default function HomePage() {
         <div className="ed-container ed-nav">
           <Identity/>
           <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#studio">Product tour</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
-          <Link className="ed-nav-cta" href="/app-demo">OPEN THE OWNER APP <ArrowUpRight size={16}/></Link>
+          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-cta" href="/app-demo">OPEN THE DEMO <ArrowUpRight size={16}/></Link></div>
         </div>
       </header>
 
@@ -76,7 +76,7 @@ export default function HomePage() {
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
                 <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — then tells your team what needs attention next.</p>
-                <Link className="ed-primary-cta" href="/today"><span>SEE WHAT NEEDS ATTENTION TODAY</span><ArrowUpRight size={20}/></Link><Link className="ed-text-link" href="/app-demo">SIGN IN TO APP DEMO <ArrowUpRight size={18}/></Link>
+                <Link className="ed-primary-cta" href="/today"><span>SEE WHAT NEEDS ATTENTION TODAY</span><ArrowUpRight size={20}/></Link><Link className="ed-text-link" href="/app-demo">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
@@ -164,7 +164,7 @@ export default function HomePage() {
             <div><span className="ed-overline">05 / GOOD TO KNOW</span><h2 id="faq-heading">Clear answers.<br/><em>No fine print tricks.</em></h2><p>StudioTasker is an interactive product prototype today, not a live paid service. Explore it using fictional sample data.</p></div>
             <div className="ed-faq-list">
               <details><summary>What kinds of studios is StudioTasker for?</summary><p>Designed for independent Pilates, yoga, barre, boutique fitness and other class-based studios. The demo has example studio presets and does not yet support every business model.</p></details>
-              <details><summary>Can I use it for real customer bookings today?</summary><p>Not yet. The public demo stores sample information in your browser. The database-backed workspace is a separate development system, not an active commercial service.</p></details>
+              <details><summary>Can I use it for real customer bookings today?</summary><p>Not yet. The public demo stores sample information in your browser. The database-backed workspace is a separate development system, not an active commercial service.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Each studio keeps its own isolated data and settings.</p></details>
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
               <details><summary>Is the displayed price final?</summary><p>The proposed StudioTasker subscription is $49/month per studio, or $39/month when billed annually ($468/year). This is a launch target, not a live purchase offer. A studio\u2019s class packs are priced and sold separately by that studio.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
@@ -173,7 +173,7 @@ export default function HomePage() {
         </section>
         <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/today" className="ed-last-link"><span>START WITH TODAY</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/app-demo">App login demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/app-demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/workspace">Customer sign in</Link><Link href="/app-demo">Interactive demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/app-demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
