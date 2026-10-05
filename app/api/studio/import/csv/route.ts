@@ -34,9 +34,9 @@ export async function POST(request:NextRequest){
       row.memberStatus,row.plan,row.credits,row.packageStatus]);
     if(insert.rowCount){
      imported++;
-     if(row.kind==="member"&&row.packageStatus==="Paid")await client.query(
+     if(row.kind==="member"&&row.packageStatus==="Confirmed")await client.query(
       "INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,'import.member_entitlement',$4::jsonb)",
-      [auth.studioId,insert.rows[0].id,auth.userId,JSON.stringify({credits:row.credits,plan:row.plan,expiryDate:row.expiryDate,source:"CSV migration"})]
+      [auth.studioId,insert.rows[0].id,auth.userId,JSON.stringify({credits:row.credits,plan:row.plan,expiryDate:row.expiryDate,source:"CSV migration entitlement"})]
      );
     }else conflicts++;
    }
