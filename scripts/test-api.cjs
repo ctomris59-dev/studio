@@ -357,7 +357,8 @@ async function main(){
 
   assert.equal((await call("/api/auth/logout",{method:"POST",cookie:signin.cookie})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,401,"Revoked session should not work");
-  assert.equal((await callLogo("/api/studio/logo",{method:"DELETE",cookie:a.cookie})).status,200);\n  console.log("HTTP integration passed: auth, tenant isolation, personalization, logo isolation, studio operations and billing.");
+  assert.equal((await callLogo("/api/studio/logo",{method:"DELETE",cookie:a.cookie})).status,200);
+  console.log("HTTP integration passed: auth, tenant isolation, personalization, logo isolation, studio operations and billing.");
  }catch(e){
   throw Error(e.message+"\nServer logs:\n"+logs.join("").slice(-2500));
  }finally{
