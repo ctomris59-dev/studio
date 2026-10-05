@@ -15,6 +15,8 @@ export async function POST(request:NextRequest,context:{params:Promise<{id:strin
     SELECT kind,package_status FROM people WHERE studio_id=$1 AND id=$2 AND archived_at IS NULL FOR UPDATE`,
     [auth.studioId,id]);
    if(!member.rowCount||member.rows[0].kind!=="member")throw new StudioOperationError(404,"Member not found.");
+   if(member.rows[0].package_status==="Confirmed")
+    throw new StudioOperationError(409,"Member already has a confirmed package. Use audited credit adjustment or a future renewal workflow.");
    const pack=await client.query<{name:string;credits:number;valid_days:number}>(`
     SELECT name,credits,valid_days FROM studio_packages
     WHERE studio_id=$1 AND id=$2 AND active=true`,[auth.studioId,packageId]);
