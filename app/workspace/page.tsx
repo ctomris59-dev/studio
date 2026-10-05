@@ -12,7 +12,7 @@ export default function Workspace(){
   <header className="rd-workspace-header"><Link href="/" className="rd-wordmark"><StudioTaskerMark className="rd-logo-mark"/>studio<b>tasker.</b></Link><Link href="/demo">← Back to sample demo</Link></header>
   <div className="rd-workspace-body"><p className="rd-eyebrow">REAL WORKSPACE / DEVELOPMENT</p><h1>Studio workspace</h1>
   <p className="rd-intro">Separate studio accounts and server-side records. This is a development foundation, not a production-ready customer portal.</p>
-  {!ready?<section className="rd-not-ready"><h2>Secure backend not configured</h2><p>The existing CRM demo remains available. This page is intentionally disabled until a local or private PostgreSQL connection is configured. No server purchase or hosted database was created.</p><Link href="/demo">Explore the sample CRM →</Link></section>:<WorkspaceClient registrationEnabled={registration}/>}
+  {!ready?<section className="rd-not-ready"><h2>Secure backend not configured</h2><p>The production workspace stays intentionally disabled until a private PostgreSQL connection is configured. You can still sign in to the full role-based sandbox with public demo credentials.</p><Link href="/app-demo">Sign in to the app demo →</Link><br/><Link href="/demo">Explore the sample CRM →</Link></section>:<WorkspaceClient registrationEnabled={registration}/>}
   </div>
  </main>;
 }

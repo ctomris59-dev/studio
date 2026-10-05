@@ -8,6 +8,8 @@ const onboarding=fs.readFileSync("app/workspace/onboarding-panel.tsx","utf8");
 const booking=fs.readFileSync("app/book/[slug]/public-booking-client.tsx","utf8");
 const today=fs.readFileSync("app/today/page.tsx","utf8");
 const home=fs.readFileSync("app/page.tsx","utf8");
+const appDemo=fs.readFileSync("app/app-demo/page.tsx","utf8");
+const appDemoCss=fs.readFileSync("app/app-demo/app-demo.css","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
 assert(client.includes('type="email"')&&client.includes('autoComplete="username"'));
 assert(client.includes('type="password"')&&client.includes("new-password"));
@@ -21,4 +23,8 @@ assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=prev
 assert(booking.includes("Choose your class")&&booking.includes("Email my secure setup link")&&booking.includes("Preview only"),"Public booking must preserve class-first self-registration flow.");
 assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today.includes("Mark contacted")&&today.includes("Known value currently sitting in unfinished checkout"),"StudioTasker Today preview must expose explainable action-first differentiation.");
 assert(home.includes("what needs attention")&&home.includes("/today")&&home.includes("/book/preview"),"Homepage must lead with Today differentiation and self-service preview.");
+assert(appDemo.includes("owner@demo.studiotasker.com")&&appDemo.includes("member@demo.studiotasker.com")&&appDemo.includes("StudioTaskerDemo!")&&appDemo.includes("MemberDemo!"),"App demo must expose owner/member sandbox credentials.");
+assert(appDemo.includes("STUDIOTASKER TODAY")&&appDemo.includes("MEMBER PORTAL")&&appDemo.includes("Sign in to StudioTasker"),"Role-based app demo must include login, owner workspace and member portal.");
+assert(appDemo.includes("sessionStorage")&&appDemoCss.includes(":focus-visible")&&appDemoCss.includes("font-size:16px"),"App demo must persist only a browser-session role and remain keyboard/mobile friendly.");
+assert(home.includes("/app-demo"),"Homepage must link directly to the role-based app login demo.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");

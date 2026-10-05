@@ -76,7 +76,7 @@ export default function HomePage() {
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
                 <p>Members book and pay themselves. StudioTasker keeps track of classes, memberships and the next actions that need your attention.</p>
-                <Link className="ed-primary-cta" href="/today"><span>SEE WHAT NEEDS ATTENTION TODAY</span><ArrowUpRight size={20}/></Link>
+                <Link className="ed-primary-cta" href="/today"><span>SEE WHAT NEEDS ATTENTION TODAY</span><ArrowUpRight size={20}/></Link><Link className="ed-text-link" href="/app-demo">SIGN IN TO APP DEMO <ArrowUpRight size={18}/></Link>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
@@ -192,7 +192,7 @@ export default function HomePage() {
         </section>
         <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/today" className="ed-last-link"><span>START WITH TODAY</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/today">StudioTasker Today</Link><Link href="/book/preview">Booking preview</Link><a href="#pricing">Pricing</a><Link href="/demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/app-demo">App login demo</Link><Link href="/today">StudioTasker Today</Link><Link href="/book/preview">Booking preview</Link><a href="#pricing">Pricing</a><Link href="/demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
