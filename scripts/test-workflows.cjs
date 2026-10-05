@@ -34,7 +34,7 @@ assert(!crm.bookMember(linked.data,linked.data.sessions[0].id,member.id).success
 const activated=workflow.confirmPackage(linked.data,member.id);
 assert(activated.ok);
 assert.equal(activated.data.members.find(m=>m.id===member.id).credits,5);
-assert.equal(activated.data.members.find(m=>m.id===member.id).paymentStatus,"Paid");
+assert.equal(activated.data.members.find(m=>m.id===member.id).paymentStatus,"Confirmed");
 const booked=crm.bookMember(activated.data,activated.data.sessions[0].id,member.id);
 assert(booked.success);
 assert(!workflow.confirmPackage(activated.data,member.id).ok);

@@ -7,7 +7,7 @@ export type ImportContact={
  row:number;kind:"lead"|"member";name:string;email:string;phone:string;notes:string;
  leadStage:"New"|"Contacted"|"Trial booked"|"Trial attended"|"Won"|"Lost"|null;
  memberStatus:"Active"|"Paused"|null;plan:string|null;credits:number|null;
- packageStatus:"Pending"|"Paid"|null;expiryDate:string|null;startDate:string|null;
+ packageStatus:"Pending"|"Confirmed"|null;expiryDate:string|null;startDate:string|null;
  ready:boolean;issues:string[];warnings:string[];
 };
 const dateValid=(value:string)=>{
@@ -55,10 +55,10 @@ export async function analyzeCsvImport(client:PoolClient,studioId:string,csv:str
    const n=Number(rawCredits);if(!Number.isSafeInteger(n)||n<0||n>1000)issues.push("Credits must be a whole number from 0 to 1000.");else credits=n;
   }
   const rawPackage=get(indexes.packageStatus).toLowerCase();
-  let packageStatus:"Pending"|"Paid"=rawPackage==="paid"?"Paid":"Pending";
-  if(rawPackage&&!["paid","pending"].includes(rawPackage))issues.push("Package status must be Paid or Pending.");
-  if(!rawPackage&&credits!==null){packageStatus="Paid";warnings.push("Existing imported credits are treated as a migration entitlement, not as payment verification.");}
-  if(packageStatus==="Paid"&&credits===null)issues.push("Paid imports need an explicit credits value. Unlimited migration is not supported yet.");
+  let packageStatus:"Pending"|"Confirmed"=["confirmed","paid"].includes(rawPackage)?"Confirmed":"Pending";
+  if(rawPackage&&!["confirmed","paid","pending"].includes(rawPackage))issues.push("Package status must be Confirmed or Pending.");
+  if(!rawPackage&&credits!==null){packageStatus="Confirmed";warnings.push("Existing imported credits are treated as a studio migration entitlement.");}
+  if(packageStatus==="Confirmed"&&credits===null)issues.push("Confirmed imports need an explicit credits value. Unlimited migration is not supported yet.");
   if(packageStatus==="Pending")credits=0;
   const rawStatus=get(indexes.memberStatus).toLowerCase();
   const memberStatus:"Active"|"Paused"=rawStatus==="paused"?"Paused":"Active";

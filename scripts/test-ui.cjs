@@ -17,8 +17,8 @@ assert(operation.includes("StudioTasker Today")&&operation.includes("REVENUE RES
 assert(css.includes("@media(max-width:720px)")&&css.includes("@media(max-width:600px)"),"Phone layouts should be explicitly accounted for.");
 assert(css.includes(":focus-visible"),"Keyboard focus should be styled.");
 assert(css.includes("font-size:16px"),"Forms must avoid sub-16px input text on phones.");
-assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Publish booking page + self-registration"),"Self-service onboarding and CSV preview must remain available.");
-assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today.includes("Mark contacted")&&today.includes("Known value currently sitting in unfinished checkout"),"StudioTasker Today preview must expose explainable action-first differentiation.");
+assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Finish setup"),"Studio-owner onboarding and CSV preview must remain available.");
+assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today.includes("Mark contacted")&&today.includes("StudioTasker does not process member payments"),"StudioTasker Today preview must expose studio-only action-first differentiation.");
 assert(home.includes("what needs attention")&&home.includes("/today")&&home.includes("/book/preview"),"Homepage must lead with Today differentiation and self-service preview.");
 assert(demoAuth.includes("owner@demo.studiotasker.com")&&!demoAuth.includes("member@demo.studiotasker.com"),"App demo must expose only the studio-owner sandbox account.");
 assert(appDemo.includes("STUDIOTASKER TODAY")&&appDemo.includes("OWNER WORKSPACE")&&appDemo.includes("Sign in to StudioTasker"),"Owner app demo must include login and studio workspace.");

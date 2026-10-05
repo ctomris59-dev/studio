@@ -5,7 +5,7 @@ export const TASK_PRIORITIES=["Low","Normal","High"] as const;
 export const TASK_OUTCOMES=["Contacted","No answer","Reschedule","Converted","Completed"] as const;
 export const TASK_REPEAT=["None","Weekly","Monthly"] as const;
 export const CONTACT_CHANNELS=["Either","Email","Phone"] as const;
-export const PAYMENT_STATES=["Pending","Paid"] as const;
+export const PAYMENT_STATES=["Pending","Confirmed"] as const;
 export const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] as const;
 export type Result={ok:boolean;message:string;data:StudioData;created?:number};
 
@@ -36,7 +36,7 @@ export function addLead(data:StudioData,input:LeadInput):Result {
   const task:Task={id:uid("t"),personKind:"lead",personId:item.id,reason:"Contact "+item.name,category:"Call",priority:"Normal",due:input.nextContact,created:day(),completed:false,repeat:"None",assignee:"Studio owner"};
   return good({...data,leads:[item,...data.leads],tasks:[task,...data.tasks],activities:[{id:uid("a"),personKind:"lead",personId:item.id,text:"Lead added via "+item.source,date:day()},...data.activities]},"Lead saved; follow-up scheduled.",1);
 }
-export type MemberInput={name:string;email:string;phone:string;plan:string;startDate:string;expiryDate:string;credits:number;paymentStatus:"Pending"|"Paid";status:"Active"|"Paused";notes:string;consent:boolean;sourceLeadId?:string};
+export type MemberInput={name:string;email:string;phone:string;plan:string;startDate:string;expiryDate:string;credits:number;paymentStatus:"Pending"|"Confirmed";status:"Active"|"Paused";notes:string;consent:boolean;sourceLeadId?:string};
 export function addMember(data:StudioData,input:MemberInput):Result {
   const name=input.name.trim(),email=input.email.trim().toLowerCase(),phone=cleanPhone(input.phone);
   if(name.length<2||name.length>80)return error(data,"Enter a valid member name.");
@@ -54,17 +54,17 @@ export function addMember(data:StudioData,input:MemberInput):Result {
     consent:input.consent,status:input.status,notes:input.notes.trim(),sourceLeadId:input.sourceLeadId};
   const leads=input.sourceLeadId?data.leads.map(l=>l.id===input.sourceLeadId?{...l,stage:"Won" as const}:l):data.leads;
   return good({...data,leads,members:[item,...data.members],
-    activities:[{id:uid("a"),personKind:"member",personId:item.id,text:"Member added. Package "+input.plan+" · "+input.paymentStatus+" (manual status; no payment processed)",date:day()},...data.activities]
-  },input.paymentStatus==="Pending"?"Member saved; package requires confirmation before credits become usable.":"Member added; paid status was manually confirmed (no payment processed).",1);
+    activities:[{id:uid("a"),personKind:"member",personId:item.id,text:"Member added. Package "+input.plan+" · "+input.paymentStatus+" (studio entitlement status)",date:day()},...data.activities]
+  },input.paymentStatus==="Pending"?"Member saved; package requires confirmation before credits become usable.":"Member added; package entitlement was confirmed by the studio.",1);
 }
 export function confirmPackage(data:StudioData,memberId:string):Result {
   const m=data.members.find(m=>m.id===memberId);
   if(!m)return error(data,"Member not found.");
   if(m.paymentStatus!=="Pending")return error(data,"Package is not pending.");
   const credits=m.plan==="Unlimited Monthly"?null:Math.min(1000,m.initialCredits??creditsFor(m.plan)??0);
-  return good({...data,members:data.members.map(x=>x.id===memberId?{...x,paymentStatus:"Paid",credits}:x),
-    activities:[{id:uid("a"),personKind:"member",personId:memberId,text:"Manager manually confirmed package; no payment processed",date:day()},...data.activities]
-  },"Package manually confirmed, credits activated. No payment was collected.");
+  return good({...data,members:data.members.map(x=>x.id===memberId?{...x,paymentStatus:"Confirmed",credits}:x),
+    activities:[{id:uid("a"),personKind:"member",personId:memberId,text:"Manager confirmed package entitlement; no member payment processed by StudioTasker",date:day()},...data.activities]
+  },"Package entitlement confirmed; credits activated.");
 }
 export function convertLead(data:StudioData,leadId:string,plan?:string):Result {
   const lead=data.leads.find(l=>l.id===leadId);

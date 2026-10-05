@@ -142,7 +142,7 @@ async function lockedMember(client:PoolClient,studioId:string,memberId:string):P
  return member.rows[0];
 }
 const eligible=(m:Member,onDay:string)=>
- m.member_status==="Active"&&m.package_status==="Paid"&&
+ m.member_status==="Active"&&m.package_status==="Confirmed"&&
  (!m.start_date||m.start_date<=onDay)&&(!m.expiry_date||m.expiry_date>=onDay)&&
  (m.credits===null||m.credits>0);
 async function changeCredits(client:PoolClient,studioId:string,memberId:string,delta:number){
