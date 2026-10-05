@@ -47,13 +47,10 @@ async function run(){
    await scoped(studio1,client=>client.query("INSERT INTO people(studio_id,kind,full_name,email) VALUES($1,'lead','Malicious Example',$2)",[studio2,"malicious-"+key+"@example.com"]));
   }catch(err){blocked=err.code==="42501"}
   assert(blocked,"Cross-tenant insert must be blocked by database policy");
-  // Commerce tables must inherit the same forced tenant isolation as customer records.
+  // Internal package templates must inherit the same forced tenant isolation as customer records.
   const packageA=await scoped(studio1,async client=>{
-   const row=await client.query(`INSERT INTO studio_packages(studio_id,name,description,price_cents,currency,credits,valid_days)
-    VALUES($1,'Ten Visits','Sample package',9900,'usd',10,60) RETURNING id`,[studio1]);
-   await client.query("INSERT INTO studio_payment_accounts(studio_id,stripe_account_id,country) VALUES($1,$2,'US')",
-    [studio1,"acct_TEST"+key.replace(/-/g,"")]);
-   await client.query("INSERT INTO studio_payment_events(studio_id,stripe_event_id) VALUES($1,'evt_TENANTCHECK')",[studio1]);
+   const row=await client.query(`INSERT INTO studio_packages(studio_id,name,description,credits,valid_days,price_cents,currency)
+    VALUES($1,'Ten Visits','Sample entitlement template',10,60,NULL,NULL) RETURNING id`,[studio1]);
    return row.rows[0].id;
   });
   await scoped(studio1,client=>client.query("INSERT INTO action_center_snoozes(studio_id,action_key,snoozed_until,created_by) VALUES($1,'inactive:test',now()+interval '1 day',$2)",[studio1,user1]));
@@ -63,14 +60,12 @@ async function run(){
   const visibleB=await scoped(studio2,client=>client.query("SELECT id FROM studio_packages WHERE id=$1",[packageA]));
   assert.equal(visibleB.rowCount,0,"Tenant B cannot view tenant A class packs.");
   assert.equal((await runtime.query("SELECT id FROM studio_packages WHERE id=$1",[packageA])).rowCount,0,"Unscoped catalog reads must be empty.");
-  assert.equal((await scoped(studio2,client=>client.query("SELECT stripe_account_id FROM studio_payment_accounts"))).rowCount,0,"Connected accounts cannot leak across studios.");
-  assert.equal((await scoped(studio2,client=>client.query("SELECT stripe_event_id FROM studio_payment_events"))).rowCount,0,"Payment event history cannot leak across studios.");
   let illegal=false;
   try{
-   await scoped(studio1,client=>client.query(`INSERT INTO studio_packages(studio_id,name,price_cents,currency,credits,valid_days)
-    VALUES($1,'Cross Studio Pack',1900,'usd',2,30)`,[studio2]));
+   await scoped(studio1,client=>client.query(`INSERT INTO studio_packages(studio_id,name,credits,valid_days,price_cents,currency)
+    VALUES($1,'Cross Studio Pack',2,30,NULL,NULL)`,[studio2]));
   }catch(e){illegal=e.code==="42501"}
-  assert(illegal,"Cross-tenant commerce writes must be denied by PostgreSQL RLS.");
+  assert(illegal,"Cross-tenant package-template writes must be denied by PostgreSQL RLS.");
     const afterTransaction=await runtime.query("SELECT COUNT(*)::int AS count FROM people");
   assert.equal(afterTransaction.rows[0].count,0,"Tenant context must not leak across pooled connections");
   const permitted=await runtime.query("SELECT 1 FROM studio_users WHERE studio_id=$1 AND user_id=$2",[studio1,user1]);
