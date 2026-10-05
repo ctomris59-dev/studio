@@ -12,7 +12,7 @@ export type ValidationOutcome={valid:boolean;errors:string[];data:StudioData|nul
 export const HEADERS:Record<SheetName,string[]>={
   Guide:["Setting","Value"],
   Leads:["Lead ID","Full Name","Email","Stage","Source","Created (YYYY-MM-DD)","Next Contact (YYYY-MM-DD)","Consent (Yes/No)","Notes","Trial Attended (YYYY-MM-DD)","Phone","Preferred Service","Preferred Channel","Interested Plan"],
-  Members:["Member ID","Full Name","Email","Plan","Credits","Joined (YYYY-MM-DD)","Last Visit (YYYY-MM-DD)","Consent (Yes/No)","Status","Notes","Phone","Start Date (YYYY-MM-DD)","Expiry Date (YYYY-MM-DD)","Payment Status","Source Lead ID","Credits on Confirmation"],
+  Members:["Member ID","Full Name","Email","Plan","Credits","Joined (YYYY-MM-DD)","Last Visit (YYYY-MM-DD)","Consent (Yes/No)","Status","Notes","Phone","Start Date (YYYY-MM-DD)","Expiry Date (YYYY-MM-DD)","Package Status","Source Lead ID","Credits on Confirmation"],
   Classes:["Class ID","Class Title","Instructor","Date (YYYY-MM-DD)","Time (HH:MM)","Capacity","Duration Minutes","Room","Series ID","Book Cutoff Hours","Cancel Cutoff Hours","Description"],
   Bookings:["Class ID","Member ID","Status (Booked/Waitlisted)"],
   FollowUps:["Task ID","Person Type (lead/member)","Person ID","Reason","Due (YYYY-MM-DD)","Completed (Yes/No)","Created (YYYY-MM-DD)","Task Category","Priority","Due Time (HH:MM)","Assignee","Repeat","Notes","Outcome","Completed At (YYYY-MM-DD)"],
@@ -45,13 +45,13 @@ export function toExcelTables(data:StudioData,template=false):ExcelTables {
       ["Dates","Dates must be YYYY-MM-DD; class times HH:MM (24-hour)."],
       ["Consent","Yes only with documented permission; blank means No. Email OR phone required."],
       ["Compatibility","Existing ReformDesk Excel v1/v2 files remain importable."],
-      ["Payment","Pending packages have zero usable credits until manually confirmed."],
+      ["Package entitlement","Pending packages have zero usable credits until confirmed by the studio. StudioTasker does not verify member payment."],
       ["Repeat","Recurring sessions export as individual Classes rows with the same Series ID."],
       ["Security","Browser demo only. Do not import real clients before secure accounts launch."],
       ["Credits","Credits are balances; importing bookings does not automatically debit credits."]
     ]),
     Leads:arr(data.leads.map(l=>[l.id,l.name,l.email,l.stage,l.source,l.created,l.nextContact,l.consent?"Yes":"No",l.notes,l.trialAttended||"",l.phone||"",l.preferredService||"",l.preferredChannel||"Either",l.interestPlan||""]),"Leads"),
-    Members:arr(data.members.map(m=>[m.id,m.name,m.email,m.plan,m.credits===null?"":m.credits,m.joined,m.lastVisit||"",m.consent?"Yes":"No",m.status,m.notes,m.phone||"",m.startDate||m.joined,m.expiryDate||"",m.paymentStatus||"Paid",m.sourceLeadId||"",m.initialCredits??""]),"Members"),
+    Members:arr(data.members.map(m=>[m.id,m.name,m.email,m.plan,m.credits===null?"":m.credits,m.joined,m.lastVisit||"",m.consent?"Yes":"No",m.status,m.notes,m.phone||"",m.startDate||m.joined,m.expiryDate||"",m.paymentStatus||"Confirmed",m.sourceLeadId||"",m.initialCredits??""]),"Members"),
     Classes:arr(data.sessions.map(s=>[s.id,s.title,s.coach,s.date,s.time,s.capacity,s.durationMinutes||50,s.room||"Main studio",s.seriesId||"",s.bookingCutoffHours??0,s.cancelCutoffHours??0,s.description||""]),"Classes"),
     Bookings:arr(data.sessions.flatMap(s=>[
       ...s.booked.map(id=>[s.id,id,"Booked"]),
@@ -144,9 +144,9 @@ export function fromExcelTables(tables:ExcelTables):ValidationOutcome {
     ids.member.add(id);memberEmails.add(email);
     let credits:null|number=null;
     const c=norm(rawCredits||"");
-    const paymentStatus=norm(r[13]||"")||"Paid";
-    if(!["Paid","Pending"].includes(paymentStatus))issue(errors,"Members",row,"Payment Status must be Paid or Pending.");
-    if(plan==="Unlimited Monthly"){if(c&&!(paymentStatus==="Pending"&&c==="0"))issue(errors,"Members",row,"Unlimited Monthly requires blank Credits when Paid (or 0 when Pending).");if(paymentStatus==="Pending")credits=0;}
+    const paymentStatus=norm(r[13]||"")||"Confirmed";
+    if(!["Confirmed","Pending"].includes(paymentStatus))issue(errors,"Members",row,"Package Status must be Confirmed or Pending.");
+    if(plan==="Unlimited Monthly"){if(c&&!(paymentStatus==="Pending"&&c==="0"))issue(errors,"Members",row,"Unlimited Monthly requires blank Credits when Confirmed (or 0 when Pending).");if(paymentStatus==="Pending")credits=0;}
     else if(!/^\d+$/.test(c)||Number(c)>1000000)issue(errors,"Members",row,"Credits must be a whole number from 0 to 1,000,000.");
     else credits=Number(c);
     const notes=norm(rawNotes||"");if(notes.length>1600)issue(errors,"Members",row,"Notes exceed 1,600 characters.");

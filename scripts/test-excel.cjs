@@ -28,7 +28,7 @@ assert.deepEqual(result.data.sessions.map(sessionCore),original.sessions.map(ses
 assert.deepEqual(result.data.tasks.map(taskCore),original.tasks.map(taskCore));
 assert.equal(result.data.sessions[0].durationMinutes,50);
 assert.equal(result.data.sessions[0].room,"Main studio");
-assert.equal(result.data.members[0].paymentStatus,"Paid");
+assert.equal(result.data.members[0].paymentStatus,"Confirmed");
 assert.deepEqual(result.data.activities,original.activities);
 assert.deepEqual(result.data.closedOpportunities,original.closedOpportunities);
 assert.equal(format.SHEETS.length,8);
@@ -45,7 +45,7 @@ const badConsent=clone(rows);badConsent.Members[1][7]="Maybe";assert(!format.fro
 const wrongVersion=clone(rows);wrongVersion.Guide[1][1]="Unknown format";assert(!format.fromExcelTables(wrongVersion).valid);
 const empty=format.toExcelTables(original,true);assert(!format.fromExcelTables(empty).valid);
 const oneLead=clone(empty);oneLead.Leads.push(rows.Leads[1]);assert(format.fromExcelTables(oneLead).valid);
-const priorError=clone(rows);priorError.Bookings[1][2]="Paid";assert(!format.fromExcelTables(priorError).valid);
+const priorError=clone(rows);priorError.Bookings[1][2]="Confirmed";assert(!format.fromExcelTables(priorError).valid);
 const old=clone(rows);
 old.Guide[1][1]="ReformDesk Excel v1";
 for(const name of ["Leads","Members","Classes","FollowUps"]){

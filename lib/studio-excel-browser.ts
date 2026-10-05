@@ -14,7 +14,7 @@ const widths:Record<SheetName,number[]>={
 };
 const selection:Partial<Record<SheetName,{col:number;items:string[]}[]>>={
   Leads:[{col:4,items:["New","Contacted","Trial booked","Trial attended","Won","Lost"]},{col:8,items:["Yes","No"]},{col:13,items:["Either","Email","Phone"]}],
-  Members:[{col:4,items:["5 Class Pack","10 Class Pack","Unlimited Monthly"]},{col:8,items:["Yes","No"]},{col:9,items:["Active","Paused"]},{col:14,items:["Pending","Paid"]}],
+  Members:[{col:4,items:["5 Class Pack","10 Class Pack","Unlimited Monthly"]},{col:8,items:["Yes","No"]},{col:9,items:["Active","Paused"]},{col:14,items:["Pending","Confirmed"]}],
   Bookings:[{col:3,items:["Booked","Waitlisted"]}],
   FollowUps:[{col:2,items:["lead","member"]},{col:6,items:["Yes","No"]},{col:8,items:["Call","Email","Renewal","Trial","General"]},{col:9,items:["Low","Normal","High"]},{col:12,items:["None","Weekly","Monthly"]},{col:14,items:["Contacted","No answer","Reschedule","Converted","Completed"]}],
   Activity:[{col:2,items:["lead","member"]}]
