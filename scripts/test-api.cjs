@@ -16,6 +16,13 @@ async function call(path,{method="GET",body,cookie,origin=HOST}={}){
  let data;try{data=await response.json()}catch{data={}};
  return {status:response.status,data,cookie:cookieFrom(response),headers:response.headers};
 }
+async function callRaw(path,{method="POST",text="",cookie,origin=HOST,filename="studio-import.csv"}={}){
+ const headers={"Origin":origin,"Content-Type":"text/csv","X-StudioTasker-Filename":filename};
+ if(cookie)headers.Cookie=cookie;
+ const response=await fetch(HOST+path,{method,headers,body:text,redirect:"manual",cache:"no-store"});
+ let data;try{data=await response.json()}catch{data={}};
+ return {status:response.status,data,cookie:cookieFrom(response),headers:response.headers};
+}
 async function waitForBoot(proc,logs){
  for(let i=0;i<100;i++){
   if(proc.exitCode!==null)throw Error("Next.js server exited before ready: "+logs.join("").slice(-2500));
@@ -34,7 +41,7 @@ async function main(){
  server.stdout.on("data",d=>{if(logs.length<100)logs.push(d.toString())});
  server.stderr.on("data",d=>{if(logs.length<100)logs.push(d.toString())});
  const admin=new Pool({connectionString:process.env.MIGRATION_DATABASE_URL});
- let studioA,studioB,ownerA,ownerB,instructor,invitedUser;
+ let studioA,studioB,ownerA,ownerB,instructor,invitedUser,selfSignupUser;
  try{
   await waitForBoot(server,logs);
   assert.equal((await call("/api/auth/me")).status,401);
@@ -116,6 +123,26 @@ async function main(){
   const config=await call("/api/studio/settings",{cookie:a.cookie});
   assert.equal(config.status,200);assert.equal(config.data.studio.timezone,"UTC");
   assert(["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(config.data.studio.focus));
+  assert(/^[a-z0-9][a-z0-9-]{2,70}$/.test(config.data.studio.public_slug),"Every studio needs a stable public slug.");
+  assert.equal(config.data.studio.public_booking_enabled,false);
+  const csv=[
+   "name,email,phone,type,credits,expiry_date,plan,package_status,member_status,lead_stage,notes",
+   "Imported Member,imported-"+unique+"@example.com,,member,,,,pending,active,,Existing customer",
+   "Public Lead,public-lead-"+unique+"@example.com,,lead,,,,,,Trial attended,\"Interested, prefers mornings\""
+  ].join("\n");
+  const csvPreview=await callRaw("/api/studio/import/csv?mode=preview",{cookie:a.cookie,text:csv,filename:"previous-studio.csv"});
+  assert.equal(csvPreview.status,200,JSON.stringify(csvPreview.data));
+  assert.equal(csvPreview.data.summary.ready,2);
+  const csvCommit=await callRaw("/api/studio/import/csv?mode=commit",{cookie:a.cookie,text:csv,filename:"previous-studio.csv"});
+  assert.equal(csvCommit.status,201,JSON.stringify(csvCommit.data));
+  assert.equal(csvCommit.data.summary.imported,2);
+  const csvAgain=await callRaw("/api/studio/import/csv?mode=preview",{cookie:a.cookie,text:csv});
+  assert.equal(csvAgain.data.summary.ready,0,"CSV duplicate preview must not silently duplicate contacts.");
+  const bAfterImport=await call("/api/studio/people",{cookie:b.cookie});
+  assert(!bAfterImport.data.records.some(x=>x.email==="imported-"+unique+"@example.com"),"CSV imports remain tenant-isolated.");
+  const onboardingEarly=await call("/api/studio/onboarding",{cookie:a.cookie});
+  assert.equal(onboardingEarly.status,200);assert(onboardingEarly.data.steps.find(x=>x.id==="import").done);
+  assert.equal((await callRaw("/api/studio/import/csv?mode=commit",{cookie:coachLogin.cookie,text:csv})).status,403);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:b.cookie,body:{name:"Bluebird Studio",focus:"Dance",timezone:"Europe/London"}})).status,200);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Not/A_Zone"}})).status,400);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:coachLogin.cookie,body:{name:"Forbidden",focus:"Yoga",timezone:"UTC"}})).status,403);
@@ -273,6 +300,38 @@ async function main(){
   assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,200);
   assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:b.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,404);
   assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:coachLogin.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,403);
+  const publish=await call("/api/studio/onboarding",{method:"POST",cookie:a.cookie,body:{operation:"publish"}});
+  assert.equal(publish.status,200,JSON.stringify(publish.data));
+  assert.equal(publish.data.published,true);
+  const publishedSettings=await call("/api/studio/settings",{cookie:a.cookie});
+  assert.equal(publishedSettings.data.studio.public_booking_enabled,true);
+  assert.equal(publishedSettings.data.studio.self_signup_enabled,true);
+  const publicPage=await call("/api/public/studios/"+config.data.studio.public_slug);
+  assert.equal(publicPage.status,200,JSON.stringify(publicPage.data));
+  assert.equal(publicPage.data.studio.name,"Alpine Studio");
+  assert(publicPage.data.classes.some(x=>x.id===thirdClass.data.class.id));
+  assert(publicPage.data.packages.some(x=>x.id===rescuePack));
+  const configB=await call("/api/studio/settings",{cookie:b.cookie});
+  assert.equal((await call("/api/public/studios/"+configB.data.studio.public_slug)).status,404,"Unpublished studios are not publicly discoverable.");
+  const selfEmail="public-lead-"+unique+"@example.com";
+  const signup=await call("/api/public/studios/"+config.data.studio.public_slug+"/register",{method:"POST",body:{
+   name:"Public Lead",email:selfEmail,phone:"+441234567890",termsAccepted:true,marketingConsent:false
+  }});
+  assert.equal(signup.status,202,JSON.stringify(signup.data));
+  assert.equal((await call("/api/public/studios/"+config.data.studio.public_slug+"/register",{method:"POST",origin:"https://evil.example",body:{
+   name:"Bad Origin",email:"bad-"+unique+"@example.com",termsAccepted:true
+  }})).status,403);
+  const selfInvite=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='member_invitation' ORDER BY created_at DESC LIMIT 1",[selfEmail]);
+  assert.equal(selfInvite.rowCount,1,"Self-registration queues a one-time account link.");
+  const selfToken=new URLSearchParams(new URL(selfInvite.rows[0].url).hash.slice(1)).get("invite");
+  const selfPassword="Self Signup Password 2026! "+unique.slice(0,4);
+  const selfAccepted=await call("/api/auth/invite/accept",{method:"POST",body:{token:selfToken,password:selfPassword}});
+  assert.equal(selfAccepted.status,200,JSON.stringify(selfAccepted.data));
+  selfSignupUser=(await admin.query("SELECT id FROM app_users WHERE email=$1",[selfEmail])).rows[0].id;
+  const converted=await admin.query("SELECT kind,lead_stage,package_status FROM people WHERE studio_id=$1 AND email=$2",[studioA,selfEmail]);
+  assert.equal(converted.rows[0].kind,"member","Verified public signup converts matching lead without duplicating email.");
+  assert.equal(converted.rows[0].lead_stage,"Won");
+  assert.equal((await call("/api/auth/login",{method:"POST",body:{email:selfEmail,password:selfPassword}})).status,200);
   assert.equal((await call("/api/studio/action-center",{cookie:coachLogin.cookie})).status,403);
   const actionB=await call("/api/studio/action-center",{cookie:b.cookie});
   assert(!actionB.data.items.some(x=>x.personId===pa.data.record.id));
@@ -405,7 +464,7 @@ async function main(){
  }finally{
   if(studioA)await admin.query("DELETE FROM studios WHERE id=$1",[studioA]).catch(()=>{});
   if(studioB)await admin.query("DELETE FROM studios WHERE id=$1",[studioB]).catch(()=>{});
-  for(const id of [invitedUser,instructor,ownerA,ownerB])if(id)await admin.query("DELETE FROM app_users WHERE id=$1",[id]).catch(()=>{});
+  for(const id of [invitedUser,selfSignupUser,instructor,ownerA,ownerB])if(id)await admin.query("DELETE FROM app_users WHERE id=$1",[id]).catch(()=>{});
   await admin.end();
   server.kill("SIGTERM");
   await Promise.race([once(server,"close"),new Promise(r=>setTimeout(r,2000))]);
