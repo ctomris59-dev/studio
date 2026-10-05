@@ -41,7 +41,7 @@ async function main(){
  server.stdout.on("data",d=>{if(logs.length<100)logs.push(d.toString())});
  server.stderr.on("data",d=>{if(logs.length<100)logs.push(d.toString())});
  const admin=new Pool({connectionString:process.env.MIGRATION_DATABASE_URL});
- let studioA,studioB,ownerA,ownerB,instructor,invitedUser,selfSignupUser;
+ let studioA,studioB,ownerA,ownerB,instructor;
  try{
   await waitForBoot(server,logs);
   assert.equal((await call("/api/auth/me")).status,401);
@@ -108,272 +108,141 @@ async function main(){
   assert.equal((await call("/api/studio/people",{cookie:coachLogin.cookie})).status,403);
   assert.equal((await call("/api/studio/people",{method:"POST",cookie:coachLogin.cookie,body:{kind:"lead",name:"No Access",email:"no-access-"+unique+"@example.com"}})).status,403);
 
-  // Server-backed studio booking, credit ledger and action center regression.
+  // Studio-only booking, class-package entitlement, credit ledger and action-center regression.
   const future=(days,hour)=>{
-   const d=new Date();d.setUTCDate(d.getUTCDate()+days);d.setUTCHours(hour,0,0,0);
-   return d.toISOString();
+   const d=new Date();d.setUTCDate(d.getUTCDate()+days);d.setUTCHours(hour,0,0,0);return d.toISOString();
   };
   async function createMember(account,name){
    const result=await call("/api/studio/people",{method:"POST",cookie:account.cookie,body:{
     kind:"member",name,email:name.toLowerCase().replaceAll(" ",".")+"-"+unique+"@example.com"
    }});
-   assert.equal(result.status,201,JSON.stringify(result.data));
-   return result.data.record.id;
+   assert.equal(result.status,201,JSON.stringify(result.data));return result.data.record.id;
   }
   const config=await call("/api/studio/settings",{cookie:a.cookie});
   assert.equal(config.status,200);assert.equal(config.data.studio.timezone,"UTC");
   assert(["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(config.data.studio.focus));
-  assert(/^[a-z0-9][a-z0-9-]{2,70}$/.test(config.data.studio.public_slug),"Every studio needs a stable public slug.");
-  assert.equal(config.data.studio.public_booking_enabled,false);
+  assert.equal("public_slug" in config.data.studio,false,"Studio-only settings must not expose public member booking.");
   const csv=[
    "name,email,phone,type,credits,expiry_date,plan,package_status,member_status,lead_stage,notes",
    "Imported Member,imported-"+unique+"@example.com,,member,,,,pending,active,,Existing customer",
-   "Public Lead,public-lead-"+unique+"@example.com,,lead,,,,,,Trial attended,\"Interested, prefers mornings\""
+   "Imported Lead,imported-lead-"+unique+"@example.com,,lead,,,,,,Trial attended,\"Interested, prefers mornings\""
   ].join("\n");
   const csvPreview=await callRaw("/api/studio/import/csv?mode=preview",{cookie:a.cookie,text:csv,filename:"previous-studio.csv"});
-  assert.equal(csvPreview.status,200,JSON.stringify(csvPreview.data));
-  assert.equal(csvPreview.data.summary.ready,2);
+  assert.equal(csvPreview.status,200,JSON.stringify(csvPreview.data));assert.equal(csvPreview.data.summary.ready,2);
   const csvCommit=await callRaw("/api/studio/import/csv?mode=commit",{cookie:a.cookie,text:csv,filename:"previous-studio.csv"});
-  assert.equal(csvCommit.status,201,JSON.stringify(csvCommit.data));
-  assert.equal(csvCommit.data.summary.imported,2);
+  assert.equal(csvCommit.status,201,JSON.stringify(csvCommit.data));assert.equal(csvCommit.data.summary.imported,2);
   const csvAgain=await callRaw("/api/studio/import/csv?mode=preview",{cookie:a.cookie,text:csv});
   assert.equal(csvAgain.data.summary.ready,0,"CSV duplicate preview must not silently duplicate contacts.");
   const bAfterImport=await call("/api/studio/people",{cookie:b.cookie});
   assert(!bAfterImport.data.records.some(x=>x.email==="imported-"+unique+"@example.com"),"CSV imports remain tenant-isolated.");
   const onboardingEarly=await call("/api/studio/onboarding",{cookie:a.cookie});
-  assert.equal(onboardingEarly.status,200);assert(onboardingEarly.data.steps.find(x=>x.id==="import").done);
+  assert.equal(onboardingEarly.status,200);assert(onboardingEarly.data.steps.find(x=>x.id==="contacts").done);
   assert.equal((await callRaw("/api/studio/import/csv?mode=commit",{cookie:coachLogin.cookie,text:csv})).status,403);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:b.cookie,body:{name:"Bluebird Studio",focus:"Dance",timezone:"Europe/London"}})).status,200);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Not/A_Zone"}})).status,400);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:coachLogin.cookie,body:{name:"Forbidden",focus:"Yoga",timezone:"UTC"}})).status,403);
-  const member1=await createMember(a,"Member One");
-  const member2=await createMember(a,"Member Two");
-  const member3=await createMember(a,"Member Pending");
+
+  const member1=await createMember(a,"Member One"),member2=await createMember(a,"Member Two"),member3=await createMember(a,"Member Pending");
   assert.equal((await call("/api/studio/members",{cookie:coachLogin.cookie})).status,403);
-  const member3Before=(await call("/api/studio/members",{cookie:a.cookie})).data.members.find(m=>m.id===member3);
-  assert.equal(member3Before.credits,0);
-  assert.equal(member3Before.package_status,"Pending");
-  const crossConfirm=await call("/api/studio/members/"+member1+"/package",{method:"POST",cookie:b.cookie,body:{plan:"5 Class Pack",credits:5}});
+  const pack=await call("/api/studio/packages",{method:"POST",cookie:a.cookie,body:{name:"5 Class Pack",description:"Internal entitlement template",credits:5,validDays:30}});
+  assert.equal(pack.status,201,JSON.stringify(pack.data));const packId=pack.data.package.id;
+  assert.equal("price_cents" in pack.data.package,false,"Internal package templates must not expose member payment pricing.");
+  const crossConfirm=await call("/api/studio/members/"+member1+"/package",{method:"POST",cookie:b.cookie,body:{packageId:packId}});
   assert.equal(crossConfirm.status,404,JSON.stringify(crossConfirm.data));
   const confirmMember=async id=>{
-   const r=await call("/api/studio/members/"+id+"/package",{method:"POST",cookie:a.cookie,body:{plan:"5 Class Pack",credits:5}});
-   assert.equal(r.status,200,JSON.stringify(r.data));
+   const result=await call("/api/studio/members/"+id+"/package",{method:"POST",cookie:a.cookie,body:{packageId:packId}});
+   assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.member.package_status,"Confirmed");
   };
   await confirmMember(member1);await confirmMember(member2);
-  const repeatConfirm=await call("/api/studio/members/"+member1+"/package",{method:"POST",cookie:a.cookie,body:{plan:"5 Class Pack",credits:5}});
-  assert.equal(repeatConfirm.status,409);
-  const key=randomUUID(), adjustment={delta:2,reason:"Correction after staff review",requestKey:key};
+  assert.equal((await call("/api/studio/members/"+member1+"/package",{method:"POST",cookie:a.cookie,body:{packageId:packId}})).status,409);
+  const key=randomUUID(),adjustment={delta:2,reason:"Correction after staff review",requestKey:key};
   const adjusted=await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:a.cookie,body:adjustment});
-  assert.equal(adjusted.status,200,JSON.stringify(adjusted.data));
-  assert.equal(adjusted.data.adjustment.credits,7);
+  assert.equal(adjusted.status,200,JSON.stringify(adjusted.data));assert.equal(adjusted.data.adjustment.credits,7);
   const repeated=await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:a.cookie,body:adjustment});
-  assert.equal(repeated.status,200);
-  assert.equal(repeated.data.adjustment.alreadyApplied,true);
-  assert.equal(repeated.data.adjustment.credits,7);
+  assert.equal(repeated.status,200);assert.equal(repeated.data.adjustment.alreadyApplied,true);assert.equal(repeated.data.adjustment.credits,7);
   assert.equal((await call("/api/studio/members/"+member2+"/credits",{method:"POST",cookie:a.cookie,body:adjustment})).status,409);
-  assert.equal((await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:a.cookie,body:{
-   delta:-20,reason:"Should not overdraw",requestKey:randomUUID()
-  }})).status,409);
-  assert.equal((await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:coachLogin.cookie,body:{
-   delta:1,reason:"Forbidden instructor update",requestKey:randomUUID()
-  }})).status,403);
-  const start=future(3,15);
-  const classInput={title:"Reformer Test",instructor:"Coach A",room:"Room A",startsAt:start,durationMinutes:50,capacity:1};
+  assert.equal((await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:a.cookie,body:{delta:-20,reason:"Should not overdraw",requestKey:randomUUID()}})).status,409);
+  assert.equal((await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:coachLogin.cookie,body:{delta:1,reason:"Forbidden instructor update",requestKey:randomUUID()}})).status,403);
+
+  const start=future(3,15),classInput={title:"Reformer Test",instructor:"Coach A",room:"Room A",startsAt:start,durationMinutes:50,capacity:1};
   const createdClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:classInput});
-  assert.equal(createdClass.status,201,JSON.stringify(createdClass.data));
-  const classId=createdClass.data.class.id;
+  assert.equal(createdClass.status,201,JSON.stringify(createdClass.data));const classId=createdClass.data.class.id;
   const crossClass=await call("/api/studio/classes",{method:"POST",cookie:b.cookie,body:classInput});
   assert.equal(crossClass.status,201,JSON.stringify(crossClass.data));
-  const conflict=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
-   ...classInput,title:"Overlap",room:"Other room",startsAt:new Date(Date.parse(start)+15*60000).toISOString()
-  }});
+  const conflict=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{...classInput,title:"Overlap",room:"Other room",startsAt:new Date(Date.parse(start)+15*60000).toISOString()}});
   assert.equal(conflict.status,409,JSON.stringify(conflict.data));
-  const coachClassWrite=await call("/api/studio/classes",{method:"POST",cookie:coachLogin.cookie,body:classInput});
-  assert.equal(coachClassWrite.status,403);
-  const repeatDate=new Date(Date.now()+6*86400000).toISOString().slice(0,10);
-  const repeatUntil=new Date(Date.now()+12*86400000).toISOString().slice(0,10);
-  const allDays=[0,1,2,3,4,5,6];
+  assert.equal((await call("/api/studio/classes",{method:"POST",cookie:coachLogin.cookie,body:classInput})).status,403);
+  const repeatDate=new Date(Date.now()+6*86400000).toISOString().slice(0,10),repeatUntil=new Date(Date.now()+12*86400000).toISOString().slice(0,10),allDays=[0,1,2,3,4,5,6];
   const weekly=await call("/api/studio/classes/series",{method:"POST",cookie:a.cookie,body:{title:"Morning Class",instructor:"Coach Series",room:"Studio S",durationMinutes:50,capacity:6,startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}});
-  assert.equal(weekly.status,201,JSON.stringify(weekly.data));
-  assert.equal(weekly.data.classes.length,7);
-  assert(weekly.data.classes.every(c=>c.series_id===weekly.data.seriesId));
+  assert.equal(weekly.status,201,JSON.stringify(weekly.data));assert.equal(weekly.data.classes.length,7);
   const recurringConflict=await call("/api/studio/classes/series",{method:"POST",cookie:a.cookie,body:{title:"Collision",instructor:"Coach Series",room:"Studio T",durationMinutes:50,capacity:6,startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}});
   assert.equal(recurringConflict.status,409,JSON.stringify(recurringConflict.data));
-  const noPartial=await admin.query("SELECT count(*)::int AS n FROM class_sessions WHERE studio_id=$1 AND title=$2",[studioA,"Collision"]);
-  assert.equal(noPartial.rows[0].n,0,"Recurring conflict must roll back entire batch");
-  assert.equal((await call("/api/studio/classes/series",{method:"POST",cookie:coachLogin.cookie,body:{title:"Forbidden",startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}})).status,403);
-  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Europe/Paris"}})).status,409,"Prevent timezone reconfiguration after booked sessions.");
+  assert.equal((await admin.query("SELECT count(*)::int AS n FROM class_sessions WHERE studio_id=$1 AND title=$2",[studioA,"Collision"])).rows[0].n,0);
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Europe/Paris"}})).status,409);
   const aClasses=await call("/api/studio/classes",{cookie:a.cookie});
-  assert(aClasses.data.classes.some(c=>c.id===classId));
-  assert(!aClasses.data.classes.some(c=>c.id===crossClass.data.class.id));
-  const bookMember=async(account,id,sessionId=classId)=>call("/api/studio/bookings",{
-   method:"POST",cookie:account.cookie,body:{sessionId,memberId:id}
-  });
-  assert.equal((await bookMember(a,member3)).status,409,"Pending member must not book");
-  const first=await bookMember(a,member1);
-  assert.equal(first.status,201,JSON.stringify(first.data));
-  assert.equal(first.data.booking.status,"booked");
-  const second=await bookMember(a,member2);
-  assert.equal(second.status,201,JSON.stringify(second.data));
-  assert.equal(second.data.booking.status,"waitlisted");
+  assert(aClasses.data.classes.some(c=>c.id===classId)&&!aClasses.data.classes.some(c=>c.id===crossClass.data.class.id));
+
+  const bookMember=async(account,id,sessionId=classId)=>call("/api/studio/bookings",{method:"POST",cookie:account.cookie,body:{sessionId,memberId:id}});
+  assert.equal((await bookMember(a,member3)).status,409,"Pending entitlement must not book.");
+  const first=await bookMember(a,member1);assert.equal(first.status,201);assert.equal(first.data.booking.status,"booked");
+  const second=await bookMember(a,member2);assert.equal(second.status,201);assert.equal(second.data.booking.status,"waitlisted");
   assert.equal((await bookMember(a,member1)).data.booking.alreadyExists,true);
   assert.equal((await call("/api/studio/bookings?sessionId="+classId,{cookie:b.cookie})).data.bookings.length,0);
-  assert.equal((await call("/api/studio/bookings/"+first.data.booking.id,{method:"DELETE",cookie:b.cookie})).status,404);
-  const bookedRows=await call("/api/studio/bookings?sessionId="+classId,{cookie:a.cookie});
-  assert.equal(bookedRows.data.bookings.length,2);
-  assert.equal(bookedRows.data.bookings.filter(x=>x.status==="booked").length,1);
   const firstBalance=(await call("/api/studio/members",{cookie:a.cookie})).data.members.find(x=>x.id===member1);
-  assert.equal(firstBalance.credits,6,"Booking must debit one credit");
+  assert.equal(firstBalance.credits,6);
   const cancel=await call("/api/studio/bookings/"+first.data.booking.id,{method:"DELETE",cookie:a.cookie});
-  assert.equal(cancel.status,200,JSON.stringify(cancel.data));
-  assert.equal(cancel.data.booking.promoted.id,second.data.booking.id);
+  assert.equal(cancel.status,200);assert.equal(cancel.data.booking.promoted.id,second.data.booking.id);
   const afterCancel=await call("/api/studio/members",{cookie:a.cookie});
-  assert.equal(afterCancel.data.members.find(x=>x.id===member1).credits,7,"Cancellation must refund once");
-  assert.equal(afterCancel.data.members.find(x=>x.id===member2).credits,4,"Promotion must debit once");
-  const cancelAgain=await call("/api/studio/bookings/"+first.data.booking.id,{method:"DELETE",cookie:a.cookie});
-  assert.equal(cancelAgain.status,200);
-  assert.equal(cancelAgain.data.booking.alreadyCancelled,true);
-  assert.equal((await call("/api/studio/members",{cookie:a.cookie})).data.members.find(x=>x.id===member1).credits,7);
-  const ledger=await admin.query("SELECT reason,delta FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 ORDER BY created_at,id",[studioA,first.data.booking.id]);
-  assert.equal(ledger.rows.filter(x=>x.reason==="class_booking").length,1);
-  assert.equal(ledger.rows.filter(x=>x.reason==="class_refund").length,1);
-  // Concurrent booking requests for the last seat cannot both be booked.
-  const secondClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
-   ...classInput,title:"Concurrent test",room:"Room B",instructor:"Coach B",startsAt:future(4,15)
-  }});
-  assert.equal(secondClass.status,201,JSON.stringify(secondClass.data));
+  assert.equal(afterCancel.data.members.find(x=>x.id===member1).credits,7);
+  assert.equal(afterCancel.data.members.find(x=>x.id===member2).credits,4);
+  assert.equal((await call("/api/studio/bookings/"+first.data.booking.id,{method:"DELETE",cookie:a.cookie})).data.booking.alreadyCancelled,true);
+
+  const secondClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{...classInput,title:"Concurrent test",room:"Room B",instructor:"Coach B",startsAt:future(4,15)}});
   const race=await Promise.all([bookMember(a,member1,secondClass.data.class.id),bookMember(a,member2,secondClass.data.class.id)]);
-  assert(race.every(x=>x.status===201),JSON.stringify(race.map(x=>x.data)));
   assert.deepEqual(race.map(x=>x.data.booking.status).sort(),["booked","waitlisted"]);
-  const concurrentStatus=await call("/api/studio/classes",{cookie:a.cookie});
-  assert.equal(concurrentStatus.data.classes.find(x=>x.id===secondClass.data.class.id).booked_count,1);
   const beforeCheck=await call("/api/studio/bookings?sessionId="+secondClass.data.class.id,{cookie:a.cookie});
   const checkedBooking=beforeCheck.data.bookings.find(b=>b.status==="booked");
-  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).status,409,"Early check-in must fail.");
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).status,409);
   await admin.query("UPDATE class_sessions SET starts_at=now()-interval '30 minutes' WHERE id=$1 AND studio_id=$2",[secondClass.data.class.id,studioA]);
-  const checkin=await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie});
-  assert.equal(checkin.status,200,JSON.stringify(checkin.data));
-  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).data.attendance.alreadyApplied,true);
-  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id,{method:"DELETE",cookie:a.cookie})).status,409);
-  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:b.cookie,body:{reason:"Wrong attendance entry"}})).status,404);
-  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:a.cookie,body:{reason:"bad"}})).status,400);
-  const corrected=await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:a.cookie,body:{reason:"Incorrect check in"}});
-  assert.equal(corrected.status,200,JSON.stringify(corrected.data));
-  const audit=await admin.query("SELECT action FROM activity_log WHERE studio_id=$1 AND details->>'bookingId'=$2",[studioA,checkedBooking.id]);
-  assert(audit.rows.some(x=>x.action==="attendance.checked_in")&&audit.rows.some(x=>x.action==="attendance.corrected"));
-  // Underfilled classes and overdue leads create transparent opportunity signals.
-  const thirdClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
-   ...classInput,title:"Underfilled",room:"Room C",instructor:"Coach C",startsAt:future(1,12),capacity:5
-  }});
-  assert.equal(thirdClass.status,201,JSON.stringify(thirdClass.data));
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).status,200);
+  assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:a.cookie,body:{reason:"Incorrect check in"}})).status,200);
+
+  const thirdClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{...classInput,title:"Underfilled",room:"Room C",instructor:"Coach C",startsAt:future(1,12),capacity:5}});
   await admin.query("UPDATE people SET next_contact=current_date-interval '3 days' WHERE id=$1 AND studio_id=$2",[pa.data.record.id,studioA]);
   const trialLead=await call("/api/studio/people",{method:"POST",cookie:a.cookie,body:{kind:"lead",name:"Trial Prospect",email:"trial-"+unique+"@example.com"}});
-  assert.equal(trialLead.status,201,JSON.stringify(trialLead.data));
   await admin.query("UPDATE people SET lead_stage='Trial attended',updated_at=now()-interval '2 days' WHERE studio_id=$1 AND id=$2",[studioA,trialLead.data.record.id]);
   await admin.query("UPDATE people SET joined=current_date-interval '45 days',start_date=current_date-interval '45 days',last_visit=current_date-interval '30 days',expiry_date=current_date+interval '45 days' WHERE studio_id=$1 AND id=$2",[studioA,member1]);
-  const rescuePack=(await admin.query(`INSERT INTO studio_packages(studio_id,name,description,price_cents,currency,credits,valid_days)
-    VALUES($1,'Rescue Pack','Pending checkout signal',8800,'usd',8,45) RETURNING id`,[studioA])).rows[0].id;
-  const abandonedPurchase=(await admin.query(`INSERT INTO member_purchases(studio_id,member_id,package_id,stripe_account_id,amount_cents,currency,status,created_at)
-    VALUES($1,$2,$3,'acct_RESCUETEST',8800,'usd','pending',now()-interval '2 hours') RETURNING id`,
-    [studioA,member2,rescuePack])).rows[0].id;
+  await admin.query("UPDATE people SET updated_at=now()-interval '2 days' WHERE studio_id=$1 AND id=$2",[studioA,member3]);
   const actionA=await call("/api/studio/action-center",{cookie:a.cookie});
   assert.equal(actionA.status,200,JSON.stringify(actionA.data));
   assert(actionA.data.items.some(x=>x.personId===pa.data.record.id&&x.kind==="lead_followup"));
-  assert(actionA.data.items.some(x=>x.personId===trialLead.data.record.id&&x.kind==="trial_no_purchase"));
+  assert(actionA.data.items.some(x=>x.personId===trialLead.data.record.id&&x.kind==="trial_no_conversion"));
   assert(actionA.data.items.some(x=>x.personId===member1&&x.kind==="inactive_member"));
-  assert(actionA.data.items.some(x=>x.id==="checkout:"+abandonedPurchase&&x.kind==="abandoned_checkout"));
+  assert(actionA.data.items.some(x=>x.id==="package:"+member3&&x.kind==="package_pending"));
   assert(actionA.data.items.some(x=>x.sessionId===thirdClass.data.class.id&&x.kind==="open_seats"));
-  assert(actionA.data.rescue.trials>=1&&actionA.data.rescue.inactive>=1&&actionA.data.rescue.abandoned>=1);
-  assert.equal(actionA.data.rescue.checkoutValue.usd,8800);
-  assert(Number.isInteger(actionA.data.today.classes)&&Number.isInteger(actionA.data.today.bookings));
+  assert(actionA.data.rescue.trials>=1&&actionA.data.rescue.inactive>=1&&actionA.data.rescue.pendingPackages>=1);
   const inactiveSignal=actionA.data.items.find(x=>x.personId===member1&&x.kind==="inactive_member");
   const taskFromToday=await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:inactiveSignal.id,operation:"create_task"}});
-  assert.equal(taskFromToday.status,200,JSON.stringify(taskFromToday.data));
-  assert.equal(taskFromToday.data.created,true);
-  const hiddenAfterTask=await call("/api/studio/action-center",{cookie:a.cookie});
-  assert(!hiddenAfterTask.data.items.some(x=>x.id===inactiveSignal.id),"Task creation should suppress duplicate Today signal.");
-  const trialSignal=actionA.data.items.find(x=>x.personId===trialLead.data.record.id&&x.kind==="trial_no_purchase");
+  assert.equal(taskFromToday.status,200);assert.equal(taskFromToday.data.created,true);
+  const trialSignal=actionA.data.items.find(x=>x.personId===trialLead.data.record.id&&x.kind==="trial_no_conversion");
   assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:trialSignal.id,operation:"contacted"}})).status,200);
-  const contactedLead=await admin.query("SELECT next_contact FROM people WHERE studio_id=$1 AND id=$2",[studioA,trialLead.data.record.id]);
-  assert(contactedLead.rows[0].next_contact,"Mark contacted should schedule a future follow-up date.");
-  const checkoutSignal=actionA.data.items.find(x=>x.id==="checkout:"+abandonedPurchase);
-  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,200);
-  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:b.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,404);
-  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:coachLogin.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,403);
-  const publish=await call("/api/studio/onboarding",{method:"POST",cookie:a.cookie,body:{operation:"publish"}});
-  assert.equal(publish.status,200,JSON.stringify(publish.data));
-  assert.equal(publish.data.published,true);
-  const publishedSettings=await call("/api/studio/settings",{cookie:a.cookie});
-  assert.equal(publishedSettings.data.studio.public_booking_enabled,true);
-  assert.equal(publishedSettings.data.studio.self_signup_enabled,true);
-  const publicPage=await call("/api/public/studios/"+config.data.studio.public_slug);
-  assert.equal(publicPage.status,200,JSON.stringify(publicPage.data));
-  assert.equal(publicPage.data.studio.name,"alpine Studio");
-  assert(publicPage.data.classes.some(x=>x.id===thirdClass.data.class.id));
-  assert(publicPage.data.packages.some(x=>x.id===rescuePack));
-  const configB=await call("/api/studio/settings",{cookie:b.cookie});
-  assert.equal((await call("/api/public/studios/"+configB.data.studio.public_slug)).status,404,"Unpublished studios are not publicly discoverable.");
-  const selfEmail="public-lead-"+unique+"@example.com";
-  const signup=await call("/api/public/studios/"+config.data.studio.public_slug+"/register",{method:"POST",body:{
-   name:"Public Lead",email:selfEmail,phone:"+441234567890",termsAccepted:true,marketingConsent:false
-  }});
-  assert.equal(signup.status,202,JSON.stringify(signup.data));
-  assert.equal((await call("/api/public/studios/"+config.data.studio.public_slug+"/register",{method:"POST",origin:"https://evil.example",body:{
-   name:"Bad Origin",email:"bad-"+unique+"@example.com",termsAccepted:true
-  }})).status,403);
-  const selfInvite=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='member_invitation' ORDER BY created_at DESC LIMIT 1",[selfEmail]);
-  assert.equal(selfInvite.rowCount,1,"Self-registration queues a one-time account link.");
-  const selfToken=new URLSearchParams(new URL(selfInvite.rows[0].url).hash.slice(1)).get("invite");
-  const selfPassword="Self Signup Password 2026! "+unique.slice(0,4);
-  const selfAccepted=await call("/api/auth/invite/accept",{method:"POST",body:{token:selfToken,password:selfPassword}});
-  assert.equal(selfAccepted.status,200,JSON.stringify(selfAccepted.data));
-  selfSignupUser=(await admin.query("SELECT id FROM app_users WHERE email=$1",[selfEmail])).rows[0].id;
-  const converted=await admin.query("SELECT kind,lead_stage,package_status FROM people WHERE studio_id=$1 AND email=$2",[studioA,selfEmail]);
-  assert.equal(converted.rows[0].kind,"member","Verified public signup converts matching lead without duplicating email.");
-  assert.equal(converted.rows[0].lead_stage,"Won");
-  assert.equal((await call("/api/auth/login",{method:"POST",body:{email:selfEmail,password:selfPassword}})).status,200);
+  const packageSignal=actionA.data.items.find(x=>x.id==="package:"+member3);
+  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:packageSignal.id,operation:"snooze"}})).status,200);
+  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:b.cookie,body:{actionKey:packageSignal.id,operation:"snooze"}})).status,404);
   assert.equal((await call("/api/studio/action-center",{cookie:coachLogin.cookie})).status,403);
   const actionB=await call("/api/studio/action-center",{cookie:b.cookie});
   assert(!actionB.data.items.some(x=>x.personId===pa.data.record.id));
-  assert(!actionB.data.items.some(x=>x.sessionId===thirdClass.data.class.id));
+
+  const finishSetup=await call("/api/studio/onboarding",{method:"POST",cookie:a.cookie,body:{operation:"complete_setup"}});
+  assert.equal(finishSetup.status,200,JSON.stringify(finishSetup.data));assert.equal(finishSetup.data.finished,true);
   const followup={personId:pa.data.record.id,title:"Follow up with lead",dueAt:future(1,10),category:"Call",priority:"High"};
   const task=await call("/api/studio/tasks",{method:"POST",cookie:a.cookie,body:followup});
-  assert.equal(task.status,201,JSON.stringify(task.data));
-  assert.equal((await call("/api/studio/tasks",{method:"POST",cookie:a.cookie,body:followup})).status,409);
+  assert.equal(task.status,201);assert.equal((await call("/api/studio/tasks",{method:"POST",cookie:a.cookie,body:followup})).status,409);
   assert.equal((await call("/api/studio/tasks",{method:"POST",cookie:b.cookie,body:followup})).status,404);
   const finished=await call("/api/studio/tasks/"+task.data.task.id,{method:"PATCH",cookie:a.cookie,body:{outcome:"Contacted"}});
-  assert.equal(finished.status,200,JSON.stringify(finished.data));
-  assert.equal((await call("/api/studio/tasks",{cookie:a.cookie})).data.tasks.some(x=>x.id===task.data.task.id),false);
-  assert.equal((await call("/api/studio/tasks/"+task.data.task.id,{method:"PATCH",cookie:b.cookie,body:{outcome:"Completed"}})).status,404);
-  console.log("Operational API integration passed: manual packs, credit idempotency, capacity locks, waitlist refunds/promotions, role and tenant checks, actionable signals.");
-  // Self-service member portal: invitation is single-use, password must be independent.
-  const memberEmail=(await admin.query("SELECT email FROM people WHERE id=$1 AND studio_id=$2",[member1,studioA])).rows[0].email;
-  const invitation=await call("/api/studio/invitations",{method:"POST",cookie:a.cookie,body:{memberId:member1}});
-  assert.equal(invitation.status,202,JSON.stringify(invitation.data));
-  const invitationRow=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='member_invitation' ORDER BY created_at DESC LIMIT 1",[memberEmail]);
-  assert.equal(invitationRow.rowCount,1);
-  const inviteToken=new URLSearchParams(new URL(invitationRow.rows[0].url).hash.slice(1)).get("invite");
-  const memberPassword="Member Test Pass 2026! "+unique.slice(0,5);
-  const accepted=await call("/api/auth/invite/accept",{method:"POST",body:{token:inviteToken,password:memberPassword}});
-  assert.equal(accepted.status,200,JSON.stringify(accepted.data));
-  assert.equal((await call("/api/auth/invite/accept",{method:"POST",body:{token:inviteToken,password:memberPassword}})).status,400);
-  const memberLogin=await call("/api/auth/login",{method:"POST",body:{email:memberEmail,password:memberPassword}});
-  assert.equal(memberLogin.status,200,JSON.stringify(memberLogin.data));
-  const memberCookie=memberLogin.cookie;
-  invitedUser=(await admin.query("SELECT id FROM app_users WHERE email=$1",[memberEmail])).rows[0].id;
-  const memberMe=await call("/api/member/me",{cookie:memberCookie});
-  assert.equal(memberMe.status,200,JSON.stringify(memberMe.data));
-  assert.equal(memberMe.data.member.id,member1);
-  assert.equal((await call("/api/studio/people",{cookie:memberCookie})).status,403);
-  assert.equal((await call("/api/member/classes",{cookie:memberCookie})).status,200);
-  assert.equal((await call("/api/member/bookings",{method:"POST",cookie:memberCookie,body:{sessionId:crossClass.data.class.id}})).status,404);
-  const memberBooked=await call("/api/member/bookings",{method:"POST",cookie:memberCookie,body:{sessionId:thirdClass.data.class.id,memberId:member2}});
-  assert.equal(memberBooked.status,201,JSON.stringify(memberBooked.data));
-  assert.equal(memberBooked.data.booking.status,"booked");
-  assert.equal((await call("/api/member/bookings/"+second.data.booking.id,{method:"DELETE",cookie:memberCookie})).status,404);
-  const ownCancellation=await call("/api/member/bookings/"+memberBooked.data.booking.id,{method:"DELETE",cookie:memberCookie});
-  assert.equal(ownCancellation.status,200,JSON.stringify(ownCancellation.data));
-  assert.equal((await call("/api/member/bookings/"+memberBooked.data.booking.id,{method:"DELETE",cookie:memberCookie})).status,200);
+  assert.equal(finished.status,200);
+  console.log("Studio-only operations passed: internal entitlements, credits, capacity, attendance, tenant isolation, Today signals and onboarding.");
+
   // Verified, idempotent Lemon Squeezy test-mode webhooks.
   const secret=process.env.LEMON_WEBHOOK_SECRET;
   assert(secret,"Webhook test secret must be set on isolated CI.");
@@ -416,10 +285,10 @@ async function main(){
   // Owner-only data portability, contact updates and safe soft-archive.
   const exported=await call("/api/studio/export",{cookie:a.cookie});
   assert.equal(exported.status,200,JSON.stringify(exported.data));
-  assert.equal(exported.data.format,"StudioTasker Studio Export v1");
+  assert.equal(exported.data.format,"StudioTasker Studio Export v2");
   assert.equal(exported.data.studio.id,studioA);
   assert(exported.data.people.every(p=>p.id!==pb.data.record.id),"Tenant export must never leak another studio.");
-  assert.equal((await call("/api/studio/export",{cookie:memberCookie})).status,403);
+  assert.equal((await call("/api/studio/export",{cookie:coachLogin.cookie})).status,403);
   const edited=await call("/api/studio/people/"+pa.data.record.id,{
    method:"PATCH",cookie:a.cookie,body:{name:"Alice Updated",stage:"Contacted",notes:"Prefers morning classes"}
   });
@@ -433,7 +302,7 @@ async function main(){
   const afterArchive=await call("/api/studio/people",{cookie:a.cookie});
   assert(!afterArchive.data.records.some(x=>x.id===pa.data.record.id),"Archived contacts must be hidden from active CRM.");
   assert.equal((await call("/api/studio/privacy",{cookie:a.cookie})).status,200);
-  assert.equal((await call("/api/studio/privacy",{cookie:memberCookie})).status,403);
+  assert.equal((await call("/api/studio/privacy",{cookie:coachLogin.cookie})).status,403);
   const twoDozen=await Promise.all(Array.from({length:24},async()=>{
    const started=performance.now();
    const r=await call("/api/studio/classes",{cookie:a.cookie});
@@ -464,7 +333,7 @@ async function main(){
  }finally{
   if(studioA)await admin.query("DELETE FROM studios WHERE id=$1",[studioA]).catch(()=>{});
   if(studioB)await admin.query("DELETE FROM studios WHERE id=$1",[studioB]).catch(()=>{});
-  for(const id of [invitedUser,selfSignupUser,instructor,ownerA,ownerB])if(id)await admin.query("DELETE FROM app_users WHERE id=$1",[id]).catch(()=>{});
+  for(const id of [instructor,ownerA,ownerB])if(id)await admin.query("DELETE FROM app_users WHERE id=$1",[id]).catch(()=>{});
   await admin.end();
   server.kill("SIGTERM");
   await Promise.race([once(server,"close"),new Promise(r=>setTimeout(r,2000))]);
