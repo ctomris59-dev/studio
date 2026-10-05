@@ -342,6 +342,11 @@ async function main(){
   const p95=twoDozen.map(t=>t.elapsed).sort((x,y)=>x-y)[Math.floor(twoDozen.length*.95)];
   assert(p95<10000,"CI smoke-test 95th percentile exceeded 10 seconds");
   console.log("Performance smoke: 24 concurrent class reads; p95",Math.round(p95),"ms (CI test only, not capacity SLA)");
+  // Logo removal must work while the owner's authenticated studio session is still valid.
+  assert.equal((await callLogo("/api/studio/logo",{method:"DELETE",cookie:a.cookie})).status,200);
+  const afterLogoDelete=await call("/api/studio/settings",{cookie:a.cookie});
+  assert.equal(afterLogoDelete.status,200);assert.equal(afterLogoDelete.data.studio.hasLogo,false);
+
   // Password reset is one-time and revokes all sessions belonging to the user.
   const forgot=await call("/api/auth/password/forgot",{method:"POST",body:{email:a.email}});
   assert.equal(forgot.status,200);
@@ -357,7 +362,6 @@ async function main(){
 
   assert.equal((await call("/api/auth/logout",{method:"POST",cookie:signin.cookie})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,401,"Revoked session should not work");
-  assert.equal((await callLogo("/api/studio/logo",{method:"DELETE",cookie:a.cookie})).status,200);
   console.log("HTTP integration passed: auth, tenant isolation, personalization, logo isolation, studio operations and billing.");
  }catch(e){
   throw Error(e.message+"\nServer logs:\n"+logs.join("").slice(-2500));
