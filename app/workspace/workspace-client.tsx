@@ -2,6 +2,7 @@
 import {useEffect,useState,type FormEvent} from "react";
 import {StudioOperations} from "./studio-operations";
 import {MemberPortal} from "./member-portal";
+import {OnboardingPanel} from "./onboarding-panel";
 
 type User={id:string;email:string;role:string};
 type Studio={id:string;name:string};
@@ -19,7 +20,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [person,setPerson]=useState({kind:"lead",name:"",email:"",phone:""});
  const [editing,setEditing]=useState<string|null>(null);
  const [editForm,setEditForm]=useState({name:"",notes:"",stage:"New"});
- const [settings,setSettings]=useState({name:"",focus:"Pilates",timezone:"UTC"});
+ const [settings,setSettings]=useState({name:"",focus:"Pilates",timezone:"UTC",public_slug:"",public_booking_enabled:false,self_signup_enabled:false});
  const [settingsOpen,setSettingsOpen]=useState(false);
  async function load(){
   const res=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
@@ -146,15 +147,19 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   </>:<>
    <div className="rd-account-head"><div><h2>{studio?.name}</h2><p>Signed in as {user.email} · {user.role}</p></div><button type="button" onClick={()=>void logout()}>Sign out</button></div>
    {["owner","manager","receptionist"].includes(user.role)?<>
-    <div className="rd-onboard" aria-label="Studio setup checklist">
-     <strong>Set up your studio in four steps</strong>
-     <p>1. Confirm timezone · 2. Add a member · 3. Create your first class · 4. Invite members and test bookings.</p>
+    <OnboardingPanel role={user.role} onDataChange={()=>void load()}/>
+    <div className="rd-onboard" aria-label="Studio settings">
+     <strong>Studio profile & public booking controls</strong>
+     <p>Keep your studio identity, timezone and public member access in one place.</p>
      <button type="button" onClick={()=>setSettingsOpen(o=>!o)} aria-expanded={settingsOpen}>Edit studio settings</button>
-     {settingsOpen&&<form className="rd-form rd-settings-form" onSubmit={async event=>{event.preventDefault();setBusy(true);try{const response=await fetch("/api/studio/settings",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(settings)});const data=await response.json();if(!response.ok)throw Error(data.error||"Save failed");setStudio(v=>v?{...v,name:data.studio.name}:v);setNote("Studio settings saved.");setSettingsOpen(false)}catch(e){setNote(e instanceof Error?e.message:"Save failed")}finally{setBusy(false)}}}>
+     {settings.public_slug&&<p className="rd-tiny">Public path: <a href={"/book/"+settings.public_slug} target="_blank" rel="noreferrer">/book/{settings.public_slug} ↗</a></p>}
+     {settingsOpen&&<form className="rd-form rd-settings-form" onSubmit={async event=>{event.preventDefault();setBusy(true);try{const response=await fetch("/api/studio/settings",{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:settings.name,focus:settings.focus,timezone:settings.timezone,publicBookingEnabled:settings.public_booking_enabled,selfSignupEnabled:settings.self_signup_enabled})});const data=await response.json();if(!response.ok)throw Error(data.error||"Save failed");setStudio(v=>v?{...v,name:data.studio.name}:v);setSettings(data.studio);setNote("Studio settings saved.");setSettingsOpen(false)}catch(e){setNote(e instanceof Error?e.message:"Save failed")}finally{setBusy(false)}}}>
       <label>Studio name<input required minLength={2} maxLength={100} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label>
       <label>Studio type<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>IANA timezone<input required maxLength={80} value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})} placeholder="Europe/London"/></label>
-      <p className="rd-tiny">Set your actual studio timezone before scheduling. Changing it after classes exist requires a controlled migration.</p>
+      <label className="rd-toggle"><input type="checkbox" checked={settings.public_booking_enabled} onChange={e=>setSettings({...settings,public_booking_enabled:e.target.checked,self_signup_enabled:e.target.checked?settings.self_signup_enabled:false})}/> Public booking page</label>
+      <label className="rd-toggle"><input type="checkbox" checked={settings.self_signup_enabled} disabled={!settings.public_booking_enabled} onChange={e=>setSettings({...settings,self_signup_enabled:e.target.checked})}/> Allow member self-registration</label>
+      <p className="rd-tiny">Publishing requires at least one upcoming class and one active class package. Set your actual timezone before scheduling; existing class times are never silently reinterpreted.</p>
       <button className="rd-primary" type="submit" disabled={busy}>Save studio settings</button>
      </form>}
     </div>
