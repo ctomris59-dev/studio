@@ -265,12 +265,14 @@ async function main(){
    return {status:response.status,data:await response.json()};
   }
   assert.equal((await signedEvent(eventBody,false)).status,401);
+  console.log("HTTP stage: billing webhook");
   const paid=await signedEvent(eventBody);
   assert.equal(paid.status,200,JSON.stringify(paid.data));
   assert.equal(paid.data.processed,true);
   const duplicateWebhook=await signedEvent(eventBody);
   assert.equal(duplicateWebhook.status,200);
   assert.equal(duplicateWebhook.data.processed,false);
+  console.log("HTTP stage: subscription read");
   const subscribed=await call("/api/studio/subscription",{cookie:a.cookie});
   assert.equal(subscribed.status,200);
   assert.equal(subscribed.data.subscription.enabled,true);
@@ -286,12 +288,14 @@ async function main(){
   const afterExpiry=await call("/api/studio/subscription",{cookie:a.cookie});
   assert.equal(afterExpiry.data.subscription.enabled,false,"Expired subscription must not grant access.");
   // Owner-only data portability, contact updates and safe soft-archive.
+  console.log("HTTP stage: owner export");
   const exported=await call("/api/studio/export",{cookie:a.cookie});
   assert.equal(exported.status,200,JSON.stringify(exported.data));
   assert.equal(exported.data.format,"StudioTasker Studio Export v2");
   assert.equal(exported.data.studio.id,studioA);
   assert(exported.data.people.every(p=>p.id!==pb.data.record.id),"Tenant export must never leak another studio.");
   assert.equal((await call("/api/studio/export",{cookie:coachLogin.cookie})).status,403);
+  console.log("HTTP stage: post-billing CRM");
   const edited=await call("/api/studio/people/"+pa.data.record.id,{
    method:"PATCH",cookie:a.cookie,body:{name:"Alice Updated",stage:"Contacted",notes:"Prefers morning classes"}
   });
