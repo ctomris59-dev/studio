@@ -15,7 +15,11 @@ export async function GET(request:NextRequest){
     UNION ALL SELECT 'studio_packages',count(*)::int FROM studio_packages WHERE studio_id=$1`,[auth.studioId]);
    if(counts.rows.some(r=>r.count>10000))return {tooLarge:true};
    // A pg client executes one query at a time; keep export reads sequential inside the tenant transaction.
-   const studio=await client.query("SELECT id,name,focus,timezone,created_at FROM studios WHERE id=$1",[auth.studioId]);
+   const studio=await client.query(`SELECT id,name,focus,timezone,accent_color,member_term,class_term,credit_term,week_starts,time_format,default_view,
+    default_class_duration,default_class_capacity,default_room,inactive_days,low_credits_threshold,renewal_window_days,trial_followup_hours,
+    package_review_hours,open_seats_threshold,onboarding_completed_at,created_at,
+    EXISTS(SELECT 1 FROM studio_brand_assets a WHERE a.studio_id=studios.id) AS has_logo
+    FROM studios WHERE id=$1`,[auth.studioId]);
    const people=await client.query("SELECT id,kind,full_name,email,phone,notes,source,lead_stage,next_contact,preferred_service,preferred_channel,interest_plan,joined,start_date,expiry_date,last_visit,member_status,plan,credits,initial_credits,package_status,source_lead_id,email_consent,created_at,archived_at FROM people WHERE studio_id=$1 ORDER BY created_at,id",[auth.studioId]);
    const sessions=await client.query("SELECT * FROM class_sessions WHERE studio_id=$1 ORDER BY starts_at,id",[auth.studioId]);
    const bookings=await client.query("SELECT * FROM bookings WHERE studio_id=$1 ORDER BY booked_at,id",[auth.studioId]);
