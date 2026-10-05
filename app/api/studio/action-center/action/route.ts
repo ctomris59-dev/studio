@@ -25,13 +25,13 @@ export async function POST(request:NextRequest){
    }
    if(!item.personId)throw new StudioOperationError(409,"This signal does not belong to a person.");
    if(operation==="create_task"){
-    const category=item.kind==="trial_no_purchase"?"Trial":
-     ["expiring_pass","low_credits","abandoned_checkout"].includes(item.kind)?"Renewal":
+    const category=item.kind==="trial_no_conversion"?"Trial":
+     ["expiring_pass","low_credits","package_pending"].includes(item.kind)?"Renewal":
      item.kind==="lead_followup"?"Call":"General";
     const priority=item.priority==="high"?"High":"Normal";
-    const title=item.kind==="trial_no_purchase"?"Follow up after trial":
+    const title=item.kind==="trial_no_conversion"?"Follow up after trial":
      item.kind==="inactive_member"?"Check in with inactive member":
-     item.kind==="abandoned_checkout"?"Follow up on unfinished checkout":
+     item.kind==="package_pending"?"Review package status":
      item.kind==="lead_followup"?"Follow up with lead":
      item.kind==="expiring_pass"||item.kind==="low_credits"?"Discuss membership renewal":
      "Review StudioTasker Today item";
@@ -53,7 +53,7 @@ export async function POST(request:NextRequest){
    await client.query(
     "INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,'today.contacted',$4::jsonb)",
     [auth.studioId,item.personId,auth.userId,JSON.stringify({actionKey:item.id,kind:item.kind})]);
-   if(item.kind==="lead_followup"||item.kind==="trial_no_purchase"){
+   if(item.kind==="lead_followup"||item.kind==="trial_no_conversion"){
     await client.query(`UPDATE people p SET
       lead_stage=CASE WHEN lead_stage='New' THEN 'Contacted' ELSE lead_stage END,
       next_contact=(now() AT TIME ZONE s.timezone)::date+7,updated_at=now()
