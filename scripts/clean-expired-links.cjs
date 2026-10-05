@@ -10,8 +10,11 @@ async function main(){
     AND created_at<now()-interval '48 hours' AND payload<>'{}'::jsonb`);
   const challenges=await pool.query(`
    DELETE FROM auth_challenges WHERE expires_at<now()-interval '30 days'`);
+  const publicAttempts=await pool.query(`
+   DELETE FROM public_signup_attempts WHERE window_started_at<now()-interval '2 days'`).catch(()=>({rowCount:0}));
   console.log("Expired sensitive notification payloads cleared:",clear.rowCount,
-    "expired auth challenges purged:",challenges.rowCount);
+    "expired auth challenges purged:",challenges.rowCount,
+    "old public signup throttle rows purged:",publicAttempts.rowCount);
  }finally{await pool.end()}
 }
 main().catch(e=>{console.error("Cleanup failed:",e.message);process.exitCode=1});
