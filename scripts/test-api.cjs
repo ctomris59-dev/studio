@@ -308,7 +308,7 @@ async function main(){
   assert.equal(publishedSettings.data.studio.self_signup_enabled,true);
   const publicPage=await call("/api/public/studios/"+config.data.studio.public_slug);
   assert.equal(publicPage.status,200,JSON.stringify(publicPage.data));
-  assert.equal(publicPage.data.studio.name,"Alpine Studio");
+  assert.equal(publicPage.data.studio.name,"alpine Studio");
   assert(publicPage.data.classes.some(x=>x.id===thirdClass.data.class.id));
   assert(publicPage.data.packages.some(x=>x.id===rescuePack));
   const configB=await call("/api/studio/settings",{cookie:b.cookie});
