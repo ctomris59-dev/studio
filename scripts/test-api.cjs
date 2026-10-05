@@ -23,6 +23,14 @@ async function callRaw(path,{method="POST",text="",cookie,origin=HOST,filename="
  let data;try{data=await response.json()}catch{data={}};
  return {status:response.status,data,cookie:cookieFrom(response),headers:response.headers};
 }
+async function callLogo(path,{method="POST",cookie,bytes,mime="image/png"}={}){
+ const headers={"Origin":HOST};if(cookie)headers.Cookie=cookie;
+ let body;
+ if(method==="POST"){body=new FormData();body.set("logo",new Blob([bytes],{type:mime}),"studio-logo.png");}
+ const response=await fetch(HOST+path,{method,headers,body,redirect:"manual",cache:"no-store"});
+ const buffer=new Uint8Array(await response.arrayBuffer());
+ return {status:response.status,buffer,contentType:response.headers.get("content-type")||""};
+}
 async function waitForBoot(proc,logs){
  for(let i=0;i<100;i++){
   if(proc.exitCode!==null)throw Error("Next.js server exited before ready: "+logs.join("").slice(-2500));
@@ -121,6 +129,21 @@ async function main(){
   const config=await call("/api/studio/settings",{cookie:a.cookie});
   assert.equal(config.status,200);assert.equal(config.data.studio.timezone,"UTC");
   assert(["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(config.data.studio.focus));
+  const customized=await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{
+   name:"Alpine Studio",focus:"Pilates",timezone:"UTC",accentColor:"#7C3AED",memberTerm:"Clients",classTerm:"Sessions",creditTerm:"Visits",
+   weekStarts:"sunday",timeFormat:"12h",defaultView:"members",defaultClassDuration:60,defaultClassCapacity:12,defaultRoom:"Purple Room",
+   inactiveDays:7,lowCreditsThreshold:5,renewalWindowDays:30,trialFollowupHours:1,packageReviewHours:1,openSeatsThreshold:1
+  }});
+  assert.equal(customized.status,200,JSON.stringify(customized.data));
+  assert.equal(customized.data.studio.accentColor,"#7C3AED");assert.equal(customized.data.studio.memberTerm,"Clients");
+  assert.equal(customized.data.studio.classTerm,"Sessions");assert.equal(customized.data.studio.creditTerm,"Visits");
+  assert.equal(customized.data.studio.defaultClassDuration,60);assert.equal(customized.data.studio.inactiveDays,7);
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{accentColor:"purple"}})).status,400);
+  const tinyPng=Uint8Array.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]);
+  const logoUp=await callLogo("/api/studio/logo",{cookie:a.cookie,bytes:tinyPng});assert.equal(logoUp.status,200);
+  const logoA=await callLogo("/api/studio/logo",{method:"GET",cookie:a.cookie});assert.equal(logoA.status,200);assert.equal(logoA.contentType,"image/png");
+  assert.equal((await callLogo("/api/studio/logo",{method:"GET",cookie:b.cookie})).status,404,"Studio B must not see Studio A logo.");
+  const afterBrand=await call("/api/studio/settings",{cookie:a.cookie});assert.equal(afterBrand.data.studio.hasLogo,true);
   assert.equal("public_slug" in config.data.studio,false,"Studio-only settings must not expose public member booking.");
   const csv=[
    "name,email,phone,type,credits,expiry_date,plan,package_status,member_status,lead_stage,notes",
@@ -334,7 +357,7 @@ async function main(){
 
   assert.equal((await call("/api/auth/logout",{method:"POST",cookie:signin.cookie})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,401,"Revoked session should not work");
-  console.log("HTTP integration passed: register/login/logout, CSRF, roles, tenant isolation and cross-tenant forgery protection.");
+  assert.equal((await callLogo("/api/studio/logo",{method:"DELETE",cookie:a.cookie})).status,200);\n  console.log("HTTP integration passed: auth, tenant isolation, personalization, logo isolation, studio operations and billing.");
  }catch(e){
   throw Error(e.message+"\nServer logs:\n"+logs.join("").slice(-2500));
  }finally{

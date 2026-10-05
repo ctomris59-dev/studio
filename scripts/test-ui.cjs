@@ -17,6 +17,9 @@ assert(operation.includes("StudioTasker Today")&&operation.includes("REVENUE RES
 assert(css.includes("@media(max-width:720px)")&&css.includes("@media(max-width:600px)"),"Phone layouts should be explicitly accounted for.");
 assert(css.includes(":focus-visible"),"Keyboard focus should be styled.");
 assert(css.includes("font-size:16px"),"Forms must avoid sub-16px input text on phones.");
+assert(client.includes("MAKE STUDIOTASKER YOURS")&&client.includes("Primary brand color")&&client.includes("Today rules"),"Real workspace must expose studio appearance and operating-rule customization.");
+assert(client.includes("memberTerm")&&client.includes("classTerm")&&client.includes("creditTerm")&&client.includes("/api/studio/logo"),"Real workspace must apply terminology and studio logo personalization.");
+assert(css.includes("--studio-accent")&&css.includes(".rd-live-sidebar"),"Real workspace must use tenant accent color in the owner-app shell.");
 assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Finish setup"),"Studio-owner onboarding and CSV preview must remain available.");
 assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today.includes("Mark contacted")&&today.includes("StudioTasker does not process member payments"),"StudioTasker Today preview must expose studio-only action-first differentiation.");
 assert(home.includes("what needs attention")&&home.includes("/today")&&home.includes("/app-demo")&&!home.includes("/book/preview"),"Homepage must lead with Today differentiation and the owner-only app demo.");
