@@ -42,11 +42,6 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
    if(!old.rowCount)throw new StudioOperationError(404,"Contact not found.");
    if(stage!==undefined&&old.rows[0].kind!=="lead"||status!==undefined&&old.rows[0].kind!=="member")
     throw new StudioOperationError(400,"Field is not applicable to this contact type.");
-   // Prevent detaching a verified member login from its email identity.
-   if(email!==undefined&&email!==old.rows[0].email&&old.rows[0].kind==="member"){
-    const linked=await client.query("SELECT 1 FROM member_identities WHERE studio_id=$1 AND person_id=$2",[auth.studioId,id]);
-    if(linked.rowCount)throw new StudioOperationError(409,"An invited member's login email cannot be changed here.");
-   }
    const columns:string[]=[],values:unknown[]=[auth.studioId,id];
    const append=(key:string,value:unknown)=>{if(value!==undefined){values.push(value);columns.push(key+"=$"+values.length)}};
    append("full_name",name);append("email",email===undefined?undefined:normalizeEmail(email));
@@ -83,8 +78,6 @@ export async function DELETE(request:NextRequest,{params}:{params:Promise<{id:st
     SELECT 1 FROM bookings WHERE studio_id=$1 AND member_id=$2 AND status IN('booked','waitlisted') LIMIT 1`,
     [auth.studioId,id]);
    if(active.rowCount)throw new StudioOperationError(409,"Cancel active bookings before archiving a member.");
-   const identity=await client.query("SELECT 1 FROM member_identities WHERE studio_id=$1 AND person_id=$2",[auth.studioId,id]);
-   if(identity.rowCount)throw new StudioOperationError(409,"Revoke the linked member login before archiving.");
    await client.query("UPDATE people SET archived_at=now(),updated_at=now(),lead_stage=CASE WHEN kind='lead' THEN 'Lost' ELSE lead_stage END,member_status=CASE WHEN kind='member' THEN 'Paused' ELSE member_status END WHERE studio_id=$1 AND id=$2",[auth.studioId,id]);
    await client.query("UPDATE followup_tasks SET completed_at=now(),outcome='Archived' WHERE studio_id=$1 AND person_id=$2 AND completed_at IS NULL",[auth.studioId,id]);
    await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action) VALUES($1,$2,$3,'contact.archived')",[auth.studioId,id,auth.userId]);
