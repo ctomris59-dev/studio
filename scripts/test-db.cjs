@@ -58,6 +58,8 @@ async function run(){
   });
   await scoped(studio1,client=>client.query("INSERT INTO action_center_snoozes(studio_id,action_key,snoozed_until,created_by) VALUES($1,'inactive:test',now()+interval '1 day',$2)",[studio1,user1]));
   assert.equal((await scoped(studio2,client=>client.query("SELECT action_key FROM action_center_snoozes"))).rowCount,0,"Today snoozes must be tenant-isolated.");
+  await scoped(studio1,client=>client.query("INSERT INTO import_batches(studio_id,actor_id,filename,row_count,imported_count,skipped_count) VALUES($1,$2,'tenant-a.csv',2,2,0)",[studio1,user1]));
+  assert.equal((await scoped(studio2,client=>client.query("SELECT id FROM import_batches"))).rowCount,0,"CSV import audits must be tenant-isolated.");
   const visibleB=await scoped(studio2,client=>client.query("SELECT id FROM studio_packages WHERE id=$1",[packageA]));
   assert.equal(visibleB.rowCount,0,"Tenant B cannot view tenant A class packs.");
   assert.equal((await runtime.query("SELECT id FROM studio_packages WHERE id=$1",[packageA])).rowCount,0,"Unscoped catalog reads must be empty.");
