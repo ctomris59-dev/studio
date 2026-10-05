@@ -58,6 +58,7 @@ export async function analyzeCsvImport(client:PoolClient,studioId:string,csv:str
   let packageStatus:"Pending"|"Paid"=rawPackage==="paid"?"Paid":"Pending";
   if(rawPackage&&!["paid","pending"].includes(rawPackage))issues.push("Package status must be Paid or Pending.");
   if(!rawPackage&&credits!==null){packageStatus="Paid";warnings.push("Existing imported credits are treated as a migration entitlement, not as payment verification.");}
+  if(packageStatus==="Paid"&&credits===null)issues.push("Paid imports need an explicit credits value. Unlimited migration is not supported yet.");
   if(packageStatus==="Pending")credits=0;
   const rawStatus=get(indexes.memberStatus).toLowerCase();
   const memberStatus:"Active"|"Paused"=rawStatus==="paused"?"Paused":"Active";

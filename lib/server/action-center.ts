@@ -92,14 +92,20 @@ export async function actionCenter(client:PoolClient,studioId:string,options?:{i
       AND o.created_at<=now()-interval '60 minutes' AND o.created_at>=now()-interval '7 days'
     ORDER BY o.created_at,o.id LIMIT 20`,[studioId]),
   client.query<{classes:number;bookings:number;waitlisted:number;capacity:number}>(`
-    SELECT count(DISTINCT c.id)::int AS classes,
-      count(b.id) FILTER(WHERE b.status='booked')::int AS bookings,
-      count(b.id) FILTER(WHERE b.status='waitlisted')::int AS waitlisted,
-      coalesce(sum(DISTINCT c.capacity),0)::int AS capacity
-    FROM class_sessions c JOIN studios s ON s.id=c.studio_id
-    LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id
-    WHERE c.studio_id=$1
-      AND (c.starts_at AT TIME ZONE s.timezone)::date=(now() AT TIME ZONE s.timezone)::date`,[studioId]),
+    SELECT count(*)::int AS classes,
+      coalesce(sum(day_class.booked_count),0)::int AS bookings,
+      coalesce(sum(day_class.waitlist_count),0)::int AS waitlisted,
+      coalesce(sum(day_class.capacity),0)::int AS capacity
+    FROM (
+      SELECT c.id,c.capacity,
+        count(b.id) FILTER(WHERE b.status='booked')::int AS booked_count,
+        count(b.id) FILTER(WHERE b.status='waitlisted')::int AS waitlist_count
+      FROM class_sessions c JOIN studios s ON s.id=c.studio_id
+      LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id
+      WHERE c.studio_id=$1
+        AND (c.starts_at AT TIME ZONE s.timezone)::date=(now() AT TIME ZONE s.timezone)::date
+      GROUP BY c.id
+    ) day_class`,[studioId]),
   client.query<{action_key:string}>(`
     SELECT action_key FROM action_center_snoozes
     WHERE studio_id=$1 AND snoozed_until>now()`,[studioId])
