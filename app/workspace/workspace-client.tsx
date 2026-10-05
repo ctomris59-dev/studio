@@ -124,7 +124,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  ];
  const visibleNav=user.role==="instructor"?nav.filter(([id])=>["classes","followups"].includes(id)):nav;
  const currentPeople=people.filter(p=>p.kind===(view==="leads"?"lead":"member"));
- const style={{"--studio-accent":settings.accentColor} as CSSProperties};
+ const style={"--studio-accent":settings.accentColor} as CSSProperties;
 
  return <section className="rd-live-shell" style={style}>
   <aside className="rd-live-sidebar">
