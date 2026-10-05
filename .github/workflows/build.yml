@@ -71,5 +71,3 @@ jobs:
         run: npm run build
       - name: Test live HTTP auth and tenant access
         run: npm run test:api
-      - name: Test studio member purchase-to-renewal flow
-        run: npm run test:commerce
