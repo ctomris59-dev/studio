@@ -24,5 +24,8 @@ export async function POST(request:NextRequest){
    return applyLemonEvent(client,event,text);
   });
   return successResponse({ok:true,...result});
- }catch{return backendError()}
+ }catch(error){
+  if(process.env.BILLING_ALLOW_LOCAL_TEST==="true")console.error("Lemon webhook apply failed:",error instanceof Error?error.message:"unknown error");
+  return backendError();
+ }
 }
