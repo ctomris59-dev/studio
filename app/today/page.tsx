@@ -6,17 +6,17 @@ import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import "./today.css";
 
 type Priority="high"|"medium"|"low";
-type Kind="trial"|"renewal"|"inactive"|"checkout"|"seat";
+type Kind="trial"|"renewal"|"inactive"|"package"|"seat";
 type Item={id:string;kind:Kind;priority:Priority;title:string;reason:string;action:string;value?:string};
 
 const initial:Item[]=[
  {id:"trial-mia",kind:"trial",priority:"high",title:"Mia Carter · trial follow-up",reason:"Trial class attended 22 hours ago. No membership or package purchase followed.",action:"Ask whether Mia wants to join"},
  {id:"renew-oliver",kind:"renewal",priority:"high",title:"Oliver James · renewal opportunity",reason:"1 class credit remaining. Package expires in 3 days.",action:"Offer a renewal"},
  {id:"inactive-emma",kind:"inactive",priority:"medium",title:"Emma Wilson · member may be drifting",reason:"No recorded attendance for 24 days. Membership is still active.",action:"Check in with Emma"},
- {id:"checkout-ava",kind:"checkout",priority:"medium",title:"Ava Reed · checkout still pending",reason:"Studio Ten checkout has been pending for 3 hours.",action:"Confirm whether Ava still wants the package",value:"$135 pending"},
+ {id:"package-ava",kind:"package",priority:"medium",title:"Ava Reed · package status needs review",reason:"No class package has been confirmed for Ava for 2 days.",action:"Review Ava's package status"},
  {id:"seat-barre",kind:"seat",priority:"low",title:"18:30 Barre Foundations · open places",reason:"3 of 8 places are still open for tomorrow evening.",action:"Review the class and eligible members"}
 ];
-const names:Record<Kind,string>={trial:"Trial rescue",renewal:"Renewal",inactive:"Member rescue",checkout:"Checkout rescue",seat:"Seat rescue"};
+const names:Record<Kind,string>={trial:"Trial rescue",renewal:"Renewal",inactive:"Member rescue",package:"Package review",seat:"Seat rescue"};
 
 export default function TodayPreview(){
  const [items,setItems]=useState(initial);
@@ -27,7 +27,7 @@ export default function TodayPreview(){
   trials:items.filter(x=>x.kind==="trial").length,
   renewals:items.filter(x=>x.kind==="renewal").length,
   inactive:items.filter(x=>x.kind==="inactive").length,
-  checkout:items.filter(x=>x.kind==="checkout").length,
+  checkout:items.filter(x=>x.kind==="package").length,
   seats:items.filter(x=>x.kind==="seat").length
  }),[items]);
  function act(item:Item,action:"contacted"|"task"|"tomorrow"){
@@ -61,15 +61,15 @@ export default function TodayPreview(){
 
    <section className="std-rescue" aria-labelledby="revenue-rescue">
     <div className="std-rescue-head"><div><span>REVENUE RESCUE</span><h2 id="revenue-rescue">{items.length} opportunities to review</h2></div>
-     <p>Known operational signals, not invented “revenue saved.” The only money shown is an actual fictional pending checkout value.</p></div>
+     <p>Operational signals only. StudioTasker does not process member payments or claim speculative “revenue saved.”</p></div>
     <div className="std-rescue-cards">
      <button onClick={()=>setFilter(filter==="trial"?"all":"trial")} className={filter==="trial"?"active":""}><b>{counts.trials}</b><span>Trial follow-ups</span></button>
      <button onClick={()=>setFilter(filter==="renewal"?"all":"renewal")} className={filter==="renewal"?"active":""}><b>{counts.renewals}</b><span>Renewals</span></button>
      <button onClick={()=>setFilter(filter==="inactive"?"all":"inactive")} className={filter==="inactive"?"active":""}><b>{counts.inactive}</b><span>Inactive members</span></button>
-     <button onClick={()=>setFilter(filter==="checkout"?"all":"checkout")} className={filter==="checkout"?"active":""}><b>{counts.checkout}</b><span>Pending checkouts</span></button>
+     <button onClick={()=>setFilter(filter==="package"?"all":"package")} className={filter==="package"?"active":""}><b>{counts.package}</b><span>Package reviews</span></button>
      <button onClick={()=>setFilter(filter==="seat"?"all":"seat")} className={filter==="seat"?"active":""}><b>{counts.seats}</b><span>Underfilled classes</span></button>
     </div>
-    {counts.checkout>0&&<div className="std-known-value"><Sparkles size={16}/><span>Known value currently sitting in unfinished checkout: <b>$135</b></span></div>}
+    
    </section>
 
    <section className="std-actions">
@@ -82,7 +82,7 @@ export default function TodayPreview(){
        {item.kind!=="seat"&&<button onClick={()=>act(item,"task")}>Make task</button>}
        {item.kind==="seat"&&<button onClick={()=>act(item,"task")}>Review class</button>}
        <button onClick={()=>act(item,"tomorrow")}>Tomorrow</button></div>
-     </article>):<div className="std-clear"><Check size={31}/><h3>{filter==="all"?"You&apos;re clear for now.":"No items in this category."}</h3><p>As bookings, visits, trials, credits and payments change, StudioTasker Today recalculates what deserves attention.</p></div>}
+     </article>):<div className="std-clear"><Check size={31}/><h3>{filter==="all"?"You&apos;re clear for now.":"No items in this category."}</h3><p>As studio-entered bookings, visits, trials, credits and package status change, StudioTasker Today recalculates what deserves attention.</p></div>}
     </div>
    </section>
 
@@ -96,7 +96,7 @@ export default function TodayPreview(){
     ["02","Give the next action","Turn a signal into a contact, task or review."],
     ["03","Avoid alert noise","Related renewal signals are de-duplicated and actions can be snoozed."],
     ["04","Keep humans in control","No automatic marketing blast and no paid AI dependency."],
-    ["05","Measure what is known","Pending checkout value is factual; speculative recovered revenue is not presented as fact."]
+    ["05","Stay out of payments","StudioTasker tracks studio operations; member payment collection stays with the studio."]
    ].map(x=><article key={x[0]}><span>{x[0]}</span><b>{x[1]}</b><p>{x[2]}</p></article>)}</div>
   </section>
   <footer className="std-footer"><div><StudioTaskerMark/><span><b>StudioTasker</b><small>Less admin. More movement.</small></span></div><Link href="/book/preview">Next: try the self-service booking experience <ArrowRight size={17}/></Link></footer>
