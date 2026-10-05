@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       {key:"Permissions-Policy",value:"camera=(), microphone=(), geolocation=()"},
       {key:"Cache-Control",value:"private, no-store"}
     ];
-    return [{source:"/workspace",headers:secure},{source:"/book/:path*",headers:secure},{source:"/api/:path*",headers:secure}];
+    return [{source:"/workspace",headers:secure},{source:"/api/:path*",headers:secure}];
   },
 };
 
