@@ -154,6 +154,9 @@ async function main(){
    assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.member.package_status,"Confirmed");
   };
   await confirmMember(member1);await confirmMember(member2);
+  const confirmedState=await admin.query("SELECT package_status,credits FROM people WHERE studio_id=$1 AND id=$2",[studioA,member1]);
+  assert.equal(confirmedState.rows[0].package_status,"Confirmed","Package confirmation must persist before credit adjustment.");
+  assert.equal(confirmedState.rows[0].credits,5,"Package confirmation must persist numeric credits.");
   assert.equal((await call("/api/studio/members/"+member1+"/package",{method:"POST",cookie:a.cookie,body:{packageId:packId}})).status,409);
   const key=randomUUID(),adjustment={delta:2,reason:"Correction after staff review",requestKey:key};
   const adjusted=await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:a.cookie,body:adjustment});

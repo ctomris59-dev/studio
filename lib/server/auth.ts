@@ -3,7 +3,7 @@ import type {NextRequest} from "next/server";
 import type {PoolClient} from "pg";
 import {inTransaction,dbIsReady} from "./database";
 import {SESSION_COOKIE,tokenHash,SESSION_LIFETIME_SECONDS} from "../auth-crypto";
-export type StudioRole="owner"|"manager"|"instructor"|"receptionist"|"member";
+export type StudioRole="owner"|"manager"|"instructor"|"receptionist";
 export type Authenticated={userId:string;studioId:string;role:StudioRole;email:string;studioName:string};
 export const sessionCookieConfig=()=>({
  httpOnly:true,secure:process.env.NODE_ENV==="production",
