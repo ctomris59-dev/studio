@@ -24,6 +24,10 @@ assert(demoAuth.includes("owner@demo.studiotasker.com")&&!demoAuth.includes("mem
 assert(appDemo.includes("STUDIOTASKER TODAY")&&appDemo.includes("OWNER WORKSPACE")&&appDemo.includes("Sign in to StudioTasker"),"Owner app demo must include login and studio workspace.");
 assert(["Today","Leads / CRM","Members","Classes","Follow-ups","Insights","Settings"].every(label=>appDemo.includes(label)),"Canonical owner app must expose the complete unified navigation.");
 assert(appDemo.includes('view==="leads"')&&appDemo.includes('view==="settings"'),"Owner app must include Leads / CRM and Settings views.");
+assert(["+ Add lead","+ Add member","+ Add class","+ Add follow-up"].every(label=>appDemo.includes(label)),"Interactive owner demo must expose limited add actions for core records.");
+assert(appDemo.includes("DEMO_ADD_LIMIT=3")&&appDemo.includes("Reset demo"),"Demo mutations must be explicitly limited and resettable.");
+assert(appDemo.includes("removeLead")&&appDemo.includes("removeMember")&&appDemo.includes("removeClass")&&appDemo.includes("removeTask"),"Demo must let visitors remove sandbox records.");
+assert(appDemo.includes("completeTask")&&appDemo.includes("advanceLead"),"Demo must teach basic workflow actions, not just display data.");
 assert(legacyDemo.includes('redirect("/app-demo")'),"Legacy /demo must redirect to the canonical owner app.");
 assert(appDemo.includes("sessionStorage")&&appDemoCss.includes(":focus-visible")&&appDemoCss.includes("font-size:16px"),"App demo must persist only a browser-session role and remain keyboard/mobile friendly.");
 assert(home.includes("/app-demo"),"Homepage must link directly to the role-based app login demo.");

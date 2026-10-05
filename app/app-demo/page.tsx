@@ -3,19 +3,22 @@ import {useEffect,useMemo,useState,type FormEvent} from "react";
 import Link from "next/link";
 import {
  ArrowRight,BarChart3,CalendarDays,Check,CheckCircle2,ChevronRight,LayoutDashboard,LogOut,
- RefreshCw,Search,Settings2,ShieldCheck,Target,Users
+ Plus,RefreshCw,Search,Settings2,ShieldCheck,Target,Trash2,Users,X
 } from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {DEMO_ACCOUNT,authenticateDemo} from "../../lib/demo-auth";
 import "./app-demo.css";
 
 type OwnerView="today"|"leads"|"members"|"classes"|"followups"|"insights"|"settings";
+type AddView="leads"|"members"|"classes"|"followups"|null;
 type Signal={id:string;priority:"high"|"medium"|"low";title:string;reason:string;next:string;kind:"trial"|"renewal"|"inactive"|"package"|"seat"};
 type DemoClass={id:string;title:string;time:string;coach:string;room:string;capacity:number;booked:number};
 type DemoMember={id:string;name:string;plan:string;credits:number;status:string;lastVisit:string};
 type DemoLead={id:string;name:string;source:string;stage:string;nextContact:string;interest:string};
+type DemoTask={id:string;priority:"HIGH"|"NORMAL";person:string;title:string;due:string};
 type StudioSettings={name:string;focus:string;timezone:string};
 
+const DEMO_ADD_LIMIT=3;
 const seedSignals:Signal[]=[
  {id:"s1",priority:"high",kind:"trial",title:"Mia Carter · trial needs a next step",reason:"Trial attended yesterday. No member conversion followed.",next:"Ask whether Mia wants to join"},
  {id:"s2",priority:"high",kind:"renewal",title:"Oliver James · renewal opportunity",reason:"1 class credit remaining. Package expires in 3 days.",next:"Discuss renewal with Oliver"},
@@ -29,45 +32,88 @@ const seedLeads:DemoLead[]=[
  {id:"l3",name:"Nora White",source:"Referral",stage:"Contacted",nextContact:"Wednesday",interest:"Barre"},
  {id:"l4",name:"Ella Hall",source:"Website",stage:"Trial booked",nextContact:"Friday",interest:"Pilates"}
 ];
-const classes:DemoClass[]=[
+const seedClasses:DemoClass[]=[
  {id:"c1",title:"Morning Flow",time:"MON · 07:30",coach:"Sophie M.",room:"Studio One",capacity:8,booked:6},
  {id:"c2",title:"Barre Foundations",time:"TUE · 09:00",coach:"Olivia K.",room:"Studio Two",capacity:10,booked:7},
  {id:"c3",title:"Midday Sculpt",time:"WED · 12:30",coach:"Ava R.",room:"Studio One",capacity:8,booked:5},
  {id:"c4",title:"Evening Reset",time:"THU · 17:30",coach:"Sophie M.",room:"Studio One",capacity:8,booked:8}
 ];
-const members:DemoMember[]=[
+const seedMembers:DemoMember[]=[
  {id:"m1",name:"Emma Wilson",plan:"Studio Ten",credits:4,status:"Confirmed",lastVisit:"24 days ago"},
  {id:"m2",name:"Oliver James",plan:"10 Class Pack",credits:1,status:"Confirmed",lastVisit:"4 days ago"},
  {id:"m3",name:"Ava Reed",plan:"Studio Ten",credits:8,status:"Needs review",lastVisit:"9 days ago"},
  {id:"m4",name:"Noah Martin",plan:"20 Class Pack",credits:13,status:"Confirmed",lastVisit:"Yesterday"},
  {id:"m5",name:"Sofia Lane",plan:"Starter Pack",credits:3,status:"Confirmed",lastVisit:"2 days ago"}
 ];
+const seedTasks:DemoTask[]=[
+ {id:"t1",priority:"HIGH",person:"Mia Carter",title:"Follow up after trial",due:"Today"},
+ {id:"t2",priority:"HIGH",person:"Oliver James",title:"Discuss membership renewal",due:"Today"},
+ {id:"t3",priority:"NORMAL",person:"Emma Wilson",title:"Check in with inactive member",due:"Tomorrow"},
+ {id:"t4",priority:"NORMAL",person:"Ava Reed",title:"Review package status",due:"Tomorrow"}
+];
 const stageOrder=["New","Contacted","Trial booked","Trial attended","Won"];
 const pLabel=(p:Signal["priority"])=>p==="high"?"HIGH":p==="medium"?"MEDIUM":"LOW";
+const isCreated=(id:string)=>id.startsWith("u-");
+const newId=(kind:string)=>"u-"+kind+"-"+Date.now().toString(36);
 
 export default function AppDemo(){
  const [signedIn,setSignedIn]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[message,setMessage]=useState("");
- const [view,setView]=useState<OwnerView>("today"),[signals,setSignals]=useState(seedSignals),[activity,setActivity]=useState<string[]>([]);
- const [query,setQuery]=useState(""),[leadQuery,setLeadQuery]=useState(""),[leads,setLeads]=useState(seedLeads);
+ const [view,setView]=useState<OwnerView>("today"),[adding,setAdding]=useState<AddView>(null),[signals,setSignals]=useState(seedSignals),[activity,setActivity]=useState<string[]>([]);
+ const [query,setQuery]=useState(""),[leadQuery,setLeadQuery]=useState("");
+ const [leads,setLeads]=useState(seedLeads),[memberList,setMemberList]=useState(seedMembers),[classList,setClassList]=useState(seedClasses),[tasks,setTasks]=useState(seedTasks);
  const [settings,setSettings]=useState<StudioSettings>({name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London"});
+ const [leadForm,setLeadForm]=useState({name:"",source:"Website",interest:"Pilates"});
+ const [memberForm,setMemberForm]=useState({name:"",plan:"10 Class Pack",credits:10});
+ const [classForm,setClassForm]=useState({title:"",time:"FRI · 18:00",coach:"Sophie M.",capacity:8});
+ const [taskForm,setTaskForm]=useState({person:"",title:"",due:"Tomorrow",priority:"NORMAL" as DemoTask["priority"]});
  useEffect(()=>{try{if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true)}catch{}},[]);
+
  function login(e:FormEvent){e.preventDefault();setMessage("");if(!authenticateDemo(email,password)){setMessage("Demo email or password is incorrect.");return}
   setSignedIn(true);setPassword("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}
  }
  function logout(){setSignedIn(false);setEmail("");setPassword("");setMessage("");try{sessionStorage.removeItem("studiotasker-owner-demo")}catch{}}
- function reset(){setSignals(seedSignals);setLeads(seedLeads);setSettings({name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London"});setActivity([]);setView("today");setMessage("")}
+ function reset(){
+  setSignals(seedSignals);setLeads(seedLeads);setMemberList(seedMembers);setClassList(seedClasses);setTasks(seedTasks);
+  setSettings({name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London"});setActivity([]);setView("today");setAdding(null);setMessage("Demo restored to its original sample data.");
+ }
  function act(signal:Signal,kind:"contacted"|"task"|"tomorrow"){
   const label=kind==="contacted"?"Contact recorded":kind==="task"?"Follow-up task created":"Hidden until tomorrow";
+  if(kind==="task"&&signal.kind!=="seat")setTasks(list=>[{id:newId("task"),priority:signal.priority==="high"?"HIGH":"NORMAL",person:signal.title.split(" · ")[0],title:signal.next,due:"Tomorrow"},...list]);
   setSignals(list=>list.filter(x=>x.id!==signal.id));setActivity(x=>[label+" · "+signal.title,...x].slice(0,6));
  }
  function advanceLead(lead:DemoLead){
-  const index=stageOrder.indexOf(lead.stage),next=stageOrder[Math.min(stageOrder.length-1,index+1)];
-  if(next===lead.stage)return;
+  const index=stageOrder.indexOf(lead.stage),next=stageOrder[Math.min(stageOrder.length-1,index+1)];if(next===lead.stage)return;
   setLeads(list=>list.map(x=>x.id===lead.id?{...x,stage:next,nextContact:next==="Won"?"—":"Tomorrow"}:x));
   setActivity(x=>["Lead moved to "+next+" · "+lead.name,...x].slice(0,6));
  }
+ function removeLead(id:string){setLeads(x=>x.filter(v=>v.id!==id));setActivity(x=>["Lead removed in demo",...x].slice(0,6))}
+ function removeMember(id:string){setMemberList(x=>x.filter(v=>v.id!==id));setActivity(x=>["Member removed in demo",...x].slice(0,6))}
+ function removeClass(id:string){setClassList(x=>x.filter(v=>v.id!==id));setActivity(x=>["Class removed in demo",...x].slice(0,6))}
+ function removeTask(id:string){setTasks(x=>x.filter(v=>v.id!==id));setActivity(x=>["Follow-up removed in demo",...x].slice(0,6))}
+ function completeTask(task:DemoTask){setTasks(x=>x.filter(v=>v.id!==task.id));setActivity(x=>["Task completed · "+task.person,...x].slice(0,6))}
+ function atLimit<T extends {id:string}>(items:T[]){return items.filter(x=>isCreated(x.id)).length>=DEMO_ADD_LIMIT}
+ function addLead(e:FormEvent){e.preventDefault();if(atLimit(leads)){setMessage("Demo limit reached: up to 3 new leads.");return}
+  const name=leadForm.name.trim();if(name.length<2)return;
+  setLeads(x=>[{id:newId("lead"),name,source:leadForm.source,stage:"New",nextContact:"Tomorrow",interest:leadForm.interest},...x]);
+  setLeadForm({name:"",source:"Website",interest:"Pilates"});setAdding(null);setMessage("Demo lead added.");setActivity(x=>["Lead added · "+name,...x].slice(0,6));
+ }
+ function addMember(e:FormEvent){e.preventDefault();if(atLimit(memberList)){setMessage("Demo limit reached: up to 3 new members.");return}
+  const name=memberForm.name.trim();if(name.length<2)return;
+  setMemberList(x=>[{id:newId("member"),name,plan:memberForm.plan,credits:Math.max(0,Math.min(100,memberForm.credits)),status:"Confirmed",lastVisit:"New member"},...x]);
+  setMemberForm({name:"",plan:"10 Class Pack",credits:10});setAdding(null);setMessage("Demo member added. No payment was processed.");setActivity(x=>["Member added · "+name,...x].slice(0,6));
+ }
+ function addClass(e:FormEvent){e.preventDefault();if(atLimit(classList)){setMessage("Demo limit reached: up to 3 new classes.");return}
+  const title=classForm.title.trim();if(title.length<2)return;
+  setClassList(x=>[{id:newId("class"),title,time:classForm.time,coach:classForm.coach.trim()||"Studio Coach",room:"Studio One",capacity:Math.max(1,Math.min(30,classForm.capacity)),booked:0},...x]);
+  setClassForm({title:"",time:"FRI · 18:00",coach:"Sophie M.",capacity:8});setAdding(null);setMessage("Demo class added.");setActivity(x=>["Class added · "+title,...x].slice(0,6));
+ }
+ function addTask(e:FormEvent){e.preventDefault();if(atLimit(tasks)){setMessage("Demo limit reached: up to 3 new follow-ups.");return}
+  const person=taskForm.person.trim(),title=taskForm.title.trim();if(person.length<2||title.length<2)return;
+  setTasks(x=>[{id:newId("task"),priority:taskForm.priority,person,title,due:taskForm.due},...x]);
+  setTaskForm({person:"",title:"",due:"Tomorrow",priority:"NORMAL"});setAdding(null);setMessage("Demo follow-up added.");setActivity(x=>["Follow-up added · "+person,...x].slice(0,6));
+ }
  function saveSettings(e:FormEvent){e.preventDefault();setMessage("Demo studio settings saved in this browser session.");setActivity(x=>["Studio settings updated · "+settings.name,...x].slice(0,6))}
- const filteredMembers=useMemo(()=>members.filter(m=>m.name.toLowerCase().includes(query.toLowerCase())||m.plan.toLowerCase().includes(query.toLowerCase())),[query]);
+ const filteredMembers=useMemo(()=>memberList.filter(m=>m.name.toLowerCase().includes(query.toLowerCase())||m.plan.toLowerCase().includes(query.toLowerCase())),[memberList,query]);
  const filteredLeads=useMemo(()=>leads.filter(l=>[l.name,l.source,l.stage,l.interest].some(v=>v.toLowerCase().includes(leadQuery.toLowerCase()))),[leads,leadQuery]);
 
  if(!signedIn)return <main className="sad-login">
@@ -75,7 +121,7 @@ export default function AppDemo(){
   <section className="sad-login-grid">
    <div className="sad-login-story"><span className="sad-kicker">STUDIO OWNER APP / SANDBOX</span><h1>Sign in like a<br/><em>StudioTasker customer.</em></h1>
     <p>One canonical StudioTasker owner workspace: Today, Leads / CRM, Members, Classes, Follow-ups, Insights and Settings.</p>
-    <div className="sad-safety"><ShieldCheck size={20}/><span><b>Safe demo environment.</b> No member login, payment processing, email sending or real customer data.</span></div>
+    <div className="sad-safety"><ShieldCheck size={20}/><span><b>Safe demo environment.</b> Add, edit the flow and remove fictional records. Everything resets; no real data or payments.</span></div>
     <button className="sad-demo-account" type="button" onClick={()=>{setEmail(DEMO_ACCOUNT.email);setPassword(DEMO_ACCOUNT.password)}}>
      <span>STUDIO OWNER DEMO</span><b>{DEMO_ACCOUNT.email}</b><small>Password: {DEMO_ACCOUNT.password}</small><i>Use demo credentials <ArrowRight size={17}/></i>
     </button>
@@ -97,29 +143,56 @@ export default function AppDemo(){
  return <main className="sad-app">
   <aside className="sad-sidebar"><Link href="/" className="sad-brand sad-sidebar-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
    <div className="sad-studio"><span className="sad-avatar">WS</span><div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
-   <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>setView(id)}><Icon size={19}/>{label}</button>)}</nav>
+   <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
   <section className="sad-main">
    <header className="sad-app-top"><div><span className="sad-kicker">OWNER WORKSPACE</span><h1>{settings.name}</h1></div><div className="sad-user-chip"><span>S</span><div><b>{DEMO_ACCOUNT.email}</b><small>Owner</small></div></div></header>
-   <div className="sad-demo-strip"><ShieldCheck size={17}/><span>Studio-only sandbox — member payments and member accounts are intentionally outside StudioTasker.</span><Link href="/today">View Today product tour <ChevronRight size={16}/></Link></div>
+   <div className="sad-demo-strip"><ShieldCheck size={17}/><span>Interactive sandbox — add/remove is limited to 3 new records per section and resets on demand.</span><Link href="/today">View Today product tour <ChevronRight size={16}/></Link></div>
    {message&&signedIn&&<p className="sad-app-message" role="status">{message}</p>}
 
    {view==="today"&&<OwnerToday signals={signals} activity={activity} onAction={act}/>}
    {view==="leads"&&<section className="sad-view"><ViewHead eyebrow="LEADS / CRM" title="Make every enquiry count." text="Track the path from first enquiry to studio member, with the next contact always visible."/>
+    <DemoToolbar label="+ Add lead" count={leads.filter(x=>isCreated(x.id)).length} open={adding==="leads"} onToggle={()=>setAdding(adding==="leads"?null:"leads")}/>
+    {adding==="leads"&&<form className="sad-quick-form" onSubmit={addLead}><button type="button" className="sad-form-close" aria-label="Close add lead" onClick={()=>setAdding(null)}><X size={17}/></button>
+     <label>Name<input autoFocus required minLength={2} maxLength={60} value={leadForm.name} onChange={e=>setLeadForm({...leadForm,name:e.target.value})} placeholder="Jamie Taylor"/></label>
+     <label>Source<select value={leadForm.source} onChange={e=>setLeadForm({...leadForm,source:e.target.value})}><option>Website</option><option>Instagram</option><option>Referral</option><option>Walk-in</option></select></label>
+     <label>Interest<select value={leadForm.interest} onChange={e=>setLeadForm({...leadForm,interest:e.target.value})}><option>Pilates</option><option>Reformer</option><option>Yoga</option><option>Barre</option></select></label>
+     <button type="submit" disabled={atLimit(leads)}><Plus size={16}/> Add demo lead</button></form>}
     <div className="sad-pipeline">{stageOrder.slice(0,4).map(stage=><article key={stage}><small>{stage.toUpperCase()}</small><strong>{leads.filter(l=>l.stage===stage).length}</strong><span>active lead{leads.filter(l=>l.stage===stage).length===1?"":"s"}</span></article>)}</div>
     <div className="sad-search"><Search size={18}/><input aria-label="Search leads" placeholder="Search lead, source, stage or interest" value={leadQuery} onChange={e=>setLeadQuery(e.target.value)}/></div>
-    <div className="sad-lead-table"><div className="sad-lead-row sad-lead-head"><span>Lead</span><span>Source</span><span>Stage</span><span>Interest</span><span>Next contact</span><span>Action</span></div>
-     {filteredLeads.map(lead=><div className="sad-lead-row" key={lead.id}><span><b>{lead.name}</b><small>{lead.name.toLowerCase().replace(" ",".")}@sample.test</small></span><span>{lead.source}</span><span><i className={"sad-stage "+lead.stage.toLowerCase().replaceAll(" ","-")}>{lead.stage}</i></span><span>{lead.interest}</span><span>{lead.nextContact}</span><span><button type="button" disabled={lead.stage==="Won"} onClick={()=>advanceLead(lead)}>{lead.stage==="Won"?"Converted":"Advance stage"}</button></span></div>)}
+    <div className="sad-lead-table"><div className="sad-lead-row sad-lead-head"><span>Lead</span><span>Source</span><span>Stage</span><span>Interest</span><span>Next contact</span><span>Actions</span></div>
+     {filteredLeads.map(lead=><div className="sad-lead-row" key={lead.id}><span><b>{lead.name}</b><small>{isCreated(lead.id)?"Added in demo":lead.name.toLowerCase().replace(" ",".")+"@sample.test"}</small></span><span>{lead.source}</span><span><i className={"sad-stage "+lead.stage.toLowerCase().replaceAll(" ","-")}>{lead.stage}</i></span><span>{lead.interest}</span><span>{lead.nextContact}</span><span className="sad-row-actions"><button type="button" disabled={lead.stage==="Won"} onClick={()=>advanceLead(lead)}>{lead.stage==="Won"?"Converted":"Advance"}</button><button type="button" className="danger" aria-label={"Remove "+lead.name} onClick={()=>removeLead(lead.id)}><Trash2 size={15}/></button></span></div>)}
     </div>
    </section>}
    {view==="members"&&<section className="sad-view"><ViewHead eyebrow="MEMBERS / INTERNAL CRM" title="Your studio people." text="Track member status, class entitlement and follow-up context without handling how the studio gets paid."/>
+    <DemoToolbar label="+ Add member" count={memberList.filter(x=>isCreated(x.id)).length} open={adding==="members"} onToggle={()=>setAdding(adding==="members"?null:"members")}/>
+    {adding==="members"&&<form className="sad-quick-form" onSubmit={addMember}><button type="button" className="sad-form-close" aria-label="Close add member" onClick={()=>setAdding(null)}><X size={17}/></button>
+     <label>Name<input autoFocus required minLength={2} maxLength={60} value={memberForm.name} onChange={e=>setMemberForm({...memberForm,name:e.target.value})} placeholder="Alex Morgan"/></label>
+     <label>Class package<select value={memberForm.plan} onChange={e=>setMemberForm({...memberForm,plan:e.target.value})}><option>Starter Pack</option><option>10 Class Pack</option><option>Studio Ten</option><option>20 Class Pack</option></select></label>
+     <label>Credits<input type="number" min={0} max={100} value={memberForm.credits} onChange={e=>setMemberForm({...memberForm,credits:Number(e.target.value)})}/></label>
+     <button type="submit" disabled={atLimit(memberList)}><Plus size={16}/> Add demo member</button></form>}
     <div className="sad-search"><Search size={18}/><input aria-label="Search members" placeholder="Search members or plans" value={query} onChange={e=>setQuery(e.target.value)}/></div>
-    <div className="sad-table"><div className="sad-tr sad-th"><span>Member</span><span>Plan</span><span>Credits</span><span>Status</span><span>Last visit</span></div>{filteredMembers.map(m=><div className="sad-tr" key={m.id}><span><b>{m.name}</b><small>member@sample.test</small></span><span>{m.plan}</span><span><b>{m.credits}</b></span><span><i className={m.status==="Confirmed"?"good":"pending"}>{m.status}</i></span><span>{m.lastVisit}</span></div>)}</div>
+    <div className="sad-table"><div className="sad-tr sad-th sad-tr-actions"><span>Member</span><span>Plan</span><span>Credits</span><span>Status</span><span>Last visit</span><span>Actions</span></div>{filteredMembers.map(m=><div className="sad-tr sad-tr-actions" key={m.id}><span><b>{m.name}</b><small>{isCreated(m.id)?"Added in demo":"member@sample.test"}</small></span><span>{m.plan}</span><span><b>{m.credits}</b></span><span><i className={m.status==="Confirmed"?"good":"pending"}>{m.status}</i></span><span>{m.lastVisit}</span><span className="sad-row-actions"><button type="button" className="danger" aria-label={"Remove "+m.name} onClick={()=>removeMember(m.id)}><Trash2 size={15}/></button></span></div>)}</div>
    </section>}
-   {view==="classes"&&<section className="sad-view"><ViewHead eyebrow="CLASSES / CAPACITY" title="Make room for movement." text="See class capacity and studio-managed reservations without a separate consumer booking app."/><DemoClasses/></section>}
+   {view==="classes"&&<section className="sad-view"><ViewHead eyebrow="CLASSES / CAPACITY" title="Make room for movement." text="See class capacity and studio-managed reservations without a separate consumer booking app."/>
+    <DemoToolbar label="+ Add class" count={classList.filter(x=>isCreated(x.id)).length} open={adding==="classes"} onToggle={()=>setAdding(adding==="classes"?null:"classes")}/>
+    {adding==="classes"&&<form className="sad-quick-form sad-class-form" onSubmit={addClass}><button type="button" className="sad-form-close" aria-label="Close add class" onClick={()=>setAdding(null)}><X size={17}/></button>
+     <label>Class name<input autoFocus required minLength={2} maxLength={70} value={classForm.title} onChange={e=>setClassForm({...classForm,title:e.target.value})} placeholder="Friday Flow"/></label>
+     <label>Day & time<input required maxLength={30} value={classForm.time} onChange={e=>setClassForm({...classForm,time:e.target.value})}/></label>
+     <label>Coach<input required maxLength={50} value={classForm.coach} onChange={e=>setClassForm({...classForm,coach:e.target.value})}/></label>
+     <label>Capacity<input type="number" min={1} max={30} value={classForm.capacity} onChange={e=>setClassForm({...classForm,capacity:Number(e.target.value)})}/></label>
+     <button type="submit" disabled={atLimit(classList)}><Plus size={16}/> Add demo class</button></form>}
+    <DemoClasses items={classList} onRemove={removeClass}/></section>}
    {view==="followups"&&<section className="sad-view"><ViewHead eyebrow="FOLLOW-UPS / WORKFLOW" title="The next action, not another note." text="A small work queue built from studio signals."/>
-    <div className="sad-task-list">{[["HIGH","Mia Carter","Follow up after trial","Today"],["HIGH","Oliver James","Discuss membership renewal","Today"],["NORMAL","Emma Wilson","Check in with inactive member","Tomorrow"],["NORMAL","Ava Reed","Review package status","Tomorrow"]].map((t,i)=><article key={i}><span className={t[0]==="HIGH"?"high":"normal"}>{t[0]}</span><div><b>{t[1]}</b><p>{t[2]}</p></div><small>{t[3]}</small><button onClick={()=>setActivity(x=>["Task completed · "+t[1],...x])}><Check size={17}/> Complete</button></article>)}</div>
+    <DemoToolbar label="+ Add follow-up" count={tasks.filter(x=>isCreated(x.id)).length} open={adding==="followups"} onToggle={()=>setAdding(adding==="followups"?null:"followups")}/>
+    {adding==="followups"&&<form className="sad-quick-form" onSubmit={addTask}><button type="button" className="sad-form-close" aria-label="Close add follow-up" onClick={()=>setAdding(null)}><X size={17}/></button>
+     <label>Person<input autoFocus required minLength={2} maxLength={60} value={taskForm.person} onChange={e=>setTaskForm({...taskForm,person:e.target.value})} placeholder="Jamie Taylor"/></label>
+     <label>Follow-up<input required minLength={2} maxLength={100} value={taskForm.title} onChange={e=>setTaskForm({...taskForm,title:e.target.value})} placeholder="Check in after trial"/></label>
+     <label>Due<select value={taskForm.due} onChange={e=>setTaskForm({...taskForm,due:e.target.value})}><option>Today</option><option>Tomorrow</option><option>This week</option></select></label>
+     <label>Priority<select value={taskForm.priority} onChange={e=>setTaskForm({...taskForm,priority:e.target.value as DemoTask["priority"]})}><option>NORMAL</option><option>HIGH</option></select></label>
+     <button type="submit" disabled={atLimit(tasks)}><Plus size={16}/> Add demo follow-up</button></form>}
+    <div className="sad-task-list">{tasks.map(task=><article key={task.id}><span className={task.priority==="HIGH"?"high":"normal"}>{task.priority}</span><div><b>{task.person}</b><p>{task.title}</p>{isCreated(task.id)&&<small>Added in demo</small>}</div><small>{task.due}</small><span className="sad-row-actions"><button onClick={()=>completeTask(task)}><Check size={17}/> Complete</button><button className="danger" aria-label={"Remove follow-up for "+task.person} onClick={()=>removeTask(task.id)}><Trash2 size={15}/></button></span></article>)}</div>
    </section>}
    {view==="insights"&&<section className="sad-view"><ViewHead eyebrow="INSIGHTS / EXPLAINABLE" title="See what changed." text="Operational metrics that help a studio owner decide what to do next."/>
     <div className="sad-metrics"><article><small>TRIAL → MEMBER</small><strong>41%</strong><span>7 of 17 recent trials</span></article><article><small>AVG. OCCUPANCY</small><strong>78%</strong><span>last 30 days</span></article><article><small>RENEWALS DUE</small><strong>8</strong><span>next 14 days</span></article><article><small>INACTIVE MEMBERS</small><strong>5</strong><span>21+ days without attendance</span></article></div>
@@ -144,6 +217,7 @@ export default function AppDemo(){
  </main>;
 }
 function ViewHead({eyebrow,title,text}:{eyebrow:string;title:string;text:string}){return <div className="sad-view-head"><span className="sad-kicker">{eyebrow}</span><h2>{title}</h2><p>{text}</p></div>}
+function DemoToolbar({label,count,open,onToggle}:{label:string;count:number;open:boolean;onToggle:()=>void}){return <div className="sad-demo-toolbar"><button type="button" onClick={onToggle}>{open?<X size={16}/>:<Plus size={16}/>} {open?"Close":label}</button><span>DEMO LIMIT · {count}/{DEMO_ADD_LIMIT} NEW RECORDS</span></div>}
 function OwnerToday({signals,activity,onAction}:{signals:Signal[];activity:string[];onAction:(s:Signal,k:"contacted"|"task"|"tomorrow")=>void}){
  return <section className="sad-view"><ViewHead eyebrow="STUDIOTASKER TODAY" title="What needs attention." text="A daily operating view with reasons and next actions."/>
   <div className="sad-owner-stats"><article><small>CLASSES TODAY</small><strong>6</strong><span>07:30 → 19:30</span></article><article><small>BOOKINGS</small><strong>42</strong><span>across today</span></article><article><small>OCCUPANCY</small><strong>83%</strong><span>42 / 51 places</span></article><article><small>WAITLISTED</small><strong>2</strong><span>roster monitored</span></article></div>
@@ -152,4 +226,4 @@ function OwnerToday({signals,activity,onAction}:{signals:Signal[];activity:strin
   {activity.length>0&&<div className="sad-activity"><span className="sad-kicker">RECENT DEMO ACTIONS</span>{activity.map((a,i)=><p key={i}>{a}</p>)}</div>}
  </section>;
 }
-function DemoClasses(){return <div className="sad-class-grid">{classes.map(c=><article key={c.id}><small>{c.time}</small><h3>{c.title}</h3><p>{c.coach} · {c.room}</p><div><span style={{width:(c.booked/c.capacity*100)+"%"}}/></div><b>{c.booked}/{c.capacity} booked</b><em>{Math.max(0,c.capacity-c.booked)} places left</em></article>)}</div>}
+function DemoClasses({items,onRemove}:{items:DemoClass[];onRemove:(id:string)=>void}){return <div className="sad-class-grid">{items.map(c=><article key={c.id}><small>{c.time}</small><h3>{c.title}</h3><p>{c.coach} · {c.room}</p><div><span style={{width:(c.booked/c.capacity*100)+"%"}}/></div><b>{c.booked}/{c.capacity} booked</b><em>{Math.max(0,c.capacity-c.booked)} places left</em>{isCreated(c.id)&&<small className="sad-demo-created">ADDED IN DEMO</small>}<button type="button" className="sad-card-remove" aria-label={"Remove "+c.title} onClick={()=>onRemove(c.id)}><Trash2 size={15}/> Remove</button></article>)}</div>}
