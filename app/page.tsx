@@ -173,7 +173,7 @@ export default function HomePage() {
         </section>
         <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/today" className="ed-last-link"><span>START WITH TODAY</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/app-demo">App login demo</Link><Link href="/today">StudioTasker Today</Link><Link href="/book/preview">Booking preview</Link><a href="#pricing">Pricing</a><Link href="/demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/app-demo">App login demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
