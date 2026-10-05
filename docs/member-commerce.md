@@ -1,32 +1,55 @@
-# StudioTasker: member commerce and $49 SaaS launch
+# StudioTasker product boundary — no member commerce
 
-## Two separate payments
+This document replaces the earlier member-commerce experiment.
 
-**StudioTasker software:** proposed $49 per month per studio or $468 per year paid upfront (equivalent $39/month). Lemon Squeezy collects the studio software subscription; the server validates the Lemon variant price matches the advertised amount before creating checkout. Tax and currency settings require independent provider verification.
+## Decision
 
-**Member class packs:** the studio defines individual package name, class credits, USD/EUR/GBP/CAD/AUD price, and validity (7–365 days). Members pay the studio using **Stripe Connect Express direct charges** on that studio's verified connected account. StudioTasker never collects card details, and its code does not assess a separate platform processing fee. Stripe's own processing/Connect fees may apply. Stripe Connect is not available in every country and requires merchant verification.
+StudioTasker is a **studio-facing B2B operations product**. StudioTasker does not act as a payment platform, merchant intermediary, consumer booking product or member account system.
 
-## Product journey and security
+The prior experimental Stripe Connect/member checkout/member portal implementation has been removed from the application and database model by migration `011_studio_only.sql`.
 
-1. Staff add a member and send a one-time invitation for secure member login. Member chooses an available class.
-2. Studio creates class packs. Member chooses and buys a pack through Stripe-hosted checkout only after the studio has completed Express onboarding.
-3. Pending purchase = zero new credits. Stripe connected-account webhooks validate HMAC signature, freshness (five-minute replay window), studio ID, merchant account, immutable purchase ID, session, amount and currency. Verified payment activates credits and queues confirmation email once.
-4. Member books a place, spends one class credit, or joins the waitlist subject to capacity/cutoffs; staff check in against an actual booking with a corrective audit trail.
-5. Verified renewal adds credits and extends existing expiry from the later of today or previous expiry, with a new immutable receipt record and confirmation notification.
-6. Refunds/disputes revoke unspent package credits, pause new bookings, log the incident and queue a review notification. Existing future bookings, partial refunds and complex disputes require a studio operator to reconcile them. A refund is not an automatic chargeback resolution.
+## What an internal package means
 
-The public `/experience` page is **simulation only** and charges no cards. The public CRM demo also uses fictitious data. A live PostgreSQL backend and real provider credentials are required for the secure `/workspace` experience.
+A studio may define an internal class-package template:
+- name;
+- number of class credits;
+- validity in days;
+- optional description.
 
-## Prerequisites to collect real payments
+Staff may confirm that a member is entitled to that package. That creates/updates operational credits and validity inside StudioTasker.
 
-- Eligible **Stripe Connect** platform account and approved merchant onboarding. Create a **connected-account webhook** at `https://YOUR_DOMAIN/api/payments/stripe-connect-webhook` listening to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`, `charge.dispute.created`. Use the connected-account endpoint signing secret in `STRIPE_CONNECT_WEBHOOK_SECRET`.
-- Set `STRIPE_SECRET_KEY`, `STRIPE_STUDIO_PAYMENTS_ENABLED=true`, and exact HTTPS `PUBLIC_APP_ORIGIN`. Keep `STRIPE_STUDIO_PAYMENTS_TEST_BASE_URL` unset outside isolated localhost CI. Stripe Express requirements, processing fees and platform liability need review in each supported jurisdiction.
-- Separately create Lemon Squeezy **USD $49/month** and **$468/year** subscription variants and set `LEMON_*_VARIANT_ID` and `LEMON_WEBHOOK_SECRET`. Actual provider prices/intervals are checked at checkout.
-- Supply restricted production `DATABASE_URL`; migrate `db/migrations/007_member_commerce.sql` and `008_payment_notifications.sql`; grant the runtime role access to new tables. `db:setup:local` is only for localhost.
-- Configure real SMTP worker scheduling, offsite encrypted backups and a successful restore drill, company policies for GDPR/retention/erasure, Stripe payments security review and appropriate Terms, Privacy and refund/cancellation policies.
-- Run `npm run launch:verify`, `npm run test:api`, `npm run test:commerce`, and production build. These checks do not replace real charge/refund/email/backup tests or qualified legal review.
-- **Do not enable public registration** until all prerequisites are verified. Backend registration now fails closed if required live service configuration is missing (except explicit localhost integration mode).
+**Confirmed does not mean StudioTasker verified a payment.**
 
-## Limits to address later
+The studio remains responsible for how, where and whether it collects money from its member. StudioTasker does not need or store the payment method.
 
-Real customer journey is an authenticated member portal, not public guest checkout. Members currently require staff invitations. Checkout expiry/cancellation reconciliation needs scheduling. Different package types (unlimited, multi-site, recurring automatically charged class packs) are not covered. Refund reconciliation needs staff review of pre-existing future bookings. Payments are restricted to supported Stripe Connect countries and card processing. Payment provider fees, currency conversion, taxes, billing regulations and accessibility need production acceptance testing.
+## What StudioTasker bills
+
+StudioTasker may charge the **studio** for use of the SaaS:
+- proposed $49/month;
+- proposed $468/year.
+
+That B2B subscription can be handled by the configured StudioTasker billing provider. It is unrelated to member class-pack money.
+
+## Explicitly out of scope
+
+- Stripe Connect or equivalent member-payment orchestration
+- member card checkout
+- member wallet/payment history
+- refunds/chargebacks
+- public member self-registration
+- member login/portal
+- public booking marketplace
+- automated member payment reminders
+- settlement or payout handling
+
+## Operational signals retained
+
+StudioTasker Today may still flag:
+- trial not converted;
+- low credits / upcoming expiry;
+- inactive member;
+- package status requiring staff review;
+- open class capacity;
+- overdue follow-up.
+
+These are studio workflow signals only.

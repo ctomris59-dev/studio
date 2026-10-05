@@ -1,29 +1,34 @@
 # StudioTasker launch-readiness checklist
-Updated 2026-10-03. This is a technical development snapshot, NOT a production security certification.
 
-| Workstream | Implemented and CI-covered | Remaining before customers |
+Updated 2026-10-05. This is a technical development snapshot, not a production security certification.
+
+| Workstream | Implemented / CI-covered | Remaining before customers |
 | --- | --- | --- |
-| 1. Identity | Unverified signup requires one-time email proof; password reset invalidates sessions; single-use member invite; staff roles | SMTP sender and deliverability, per-IP abuse controls, MFA decision, existing-account invites, security review |
-| 2. Database CRM | Tenant-isolated people, classes, bookings, credits, tasks and deterministic action signals; editing, archival and owner export | Full CRM parity with browser demo, recurring schedule CRUD, edit history, profile ownership and full data migration |
-| 3. Member portal | Member-specific profile, class listing, book/waitlist/cancel; server resolves member identity | Member-facing onboarding pilot, attendance workflows, booking confirmation policies and notification delivery |
-| 4. SaaS billing | Hosted checkout integration gated by secrets; raw HMAC verification, idempotent event handling and opt-in paid entitlement | Merchant verification, provider test transactions end-to-end, subscription reconciliation, tax/invoices, grace-policy decision |
-| 5. Notifications, privacy, backups | SMTP-ready outbox, renewal scheduler, soft archive, export audit, authenticated AES-256-GCM backup/verify/restore | Actual SMTP, secure offsite storage, retention policy, scheduled restore drill, compliant erasure workflow, incident response |
-| 6. QA | Auth/CRM/Excel/Postgres RLS, concurrent booking, webhook and password tests, 24-request CI performance smoke and static a11y checks | Cross-device browser testing, formal WCAG review, load test on target VPS, real pilot-studio usability, independent pen test |
+| Studio staff identity | Email verification, password reset, owner/manager/receptionist/instructor role checks, server sessions | Production SMTP, stronger abuse controls, MFA decision, security review |
+| Tenant database | PostgreSQL tenant IDs, forced RLS, cross-tenant tests for CRM/package/import records | Production DB hardening, monitoring, migration/rollback runbook |
+| Studio operations | Members/leads, classes, studio-managed bookings, waitlist, attendance, internal packages, credit ledger, tasks | Pilot usability, edge-case policy decisions, production acceptance tests |
+| StudioTasker Today | Explainable trial/renewal/inactive/package-review/open-seat/overdue signals; task/contact/snooze actions | Validate thresholds with real studio owners |
+| Studio onboarding | Five-step owner setup and CSV preview/import | Real onboarding timing study, help copy, production import acceptance tests |
+| SaaS billing | Lemon Squeezy-style signed webhook and entitlement code for StudioTasker's studio subscription | Merchant approval, exact $49/$468 variants, tax/invoice review, live sandbox acceptance |
+| Privacy/backups | Owner export, archive tracking, encrypted backup/verify/restore utilities | GDPR documentation, irreversible erasure policy, off-site schedule, restore drill |
+| QA | Auth/RLS/CRM/CSV/Excel/booking/timezone/UI/build/HTTP CI | Cross-device testing, WCAG review, VPS load test, independent security review |
+
+## Explicit product boundary
+
+Member payments and member accounts are **not part of StudioTasker**.
+
+There is no member portal, member self-registration, public member booking page or StudioTasker-mediated member checkout. A studio handles its own member payments independently. Internal package status is studio-confirmed entitlement only.
 
 ## Release gates
-- **Current public /demo** is a localStorage sample. **Do not import real personal data.**
-- **/workspace** is intentionally disabled on Vercel until secure PostgreSQL is configured. Nothing was provisioned or purchased.
-- **Owner registration** defaults off and requires SMTP before any internet-facing launch.
-- **BILLING_ENFORCEMENT** defaults off to permit local integration testing; before commercial launch set to `required`, configure and verify provider webhooks, and test activation plus cancellation/expiration.
-- Data export JSON is not an encrypted cloud backup; keep exported files private.
-- **Archive is not deletion**; legal retention and irreversible erasure are not yet complete.
-- The project is NOT ready to accept paying customers or production personal data until all release gates have been satisfied.
 
-## Privacy-conscious token transport
-One-time email links use `/workspace#verify=...`, `#reset=...`, or `#invite=...`. The fragment is read and removed in-browser; it is not sent in the HTTP path or referrer. SMTP dispatch clears payloads after delivery, and a cleanup job removes expired link payloads.
+- `/app-demo`, `/today` and `/demo` contain fictional sample data only.
+- `/workspace` remains disabled when the secure PostgreSQL backend is absent.
+- Owner registration defaults off and must remain off until production infrastructure is verified.
+- `BILLING_ENFORCEMENT=required` is for the **StudioTasker SaaS subscription**, not studio-member money.
+- Data export is not a substitute for encrypted off-site backup.
+- Archive is not permanent erasure.
+- Run `npm run launch:verify`, the complete CI pipeline and a real backup restore before launch.
 
-## Commercial registration safety gate (2026-10-03)
-Public registration now fails closed unless a real PostgreSQL database, SMTP sending account, commercial Lemon Squeezy billing/webhook settings, backup configuration and HTTPS origin are present with `BILLING_ENFORCEMENT=required`. Local HTTP loopback integration tests have an explicit local-only exemption. Run `npm run launch:verify` before a launch; it checks environment presence, not service connectivity or legal compliance. This does **not** constitute production approval. Do not enable public registration until the pending third-party security review, GDPR documentation, retention/erasure workflow, email deliverability and real restore drill have been completed.
+## Account email
 
-## Member commerce
-The secure member purchase → reserve → check-in → renew code and public five-step simulation at `/experience` are implemented. **SaaS $49/month (or $468 annually)** is separate from studio-priced class packs. Stripe Connect onboarding, live webhook delivery, production data/privacy controls and real payment/backup verification remain required before opening accounts. See `docs/member-commerce.md`.
+Outbound email support is limited to StudioTasker account operations such as owner/staff email verification and password reset. Member-facing marketing/booking/payment email is intentionally outside the product.
