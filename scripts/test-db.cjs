@@ -56,6 +56,8 @@ async function run(){
    await client.query("INSERT INTO studio_payment_events(studio_id,stripe_event_id) VALUES($1,'evt_TENANTCHECK')",[studio1]);
    return row.rows[0].id;
   });
+  await scoped(studio1,client=>client.query("INSERT INTO action_center_snoozes(studio_id,action_key,snoozed_until,created_by) VALUES($1,'inactive:test',now()+interval '1 day',$2)",[studio1,user1]));
+  assert.equal((await scoped(studio2,client=>client.query("SELECT action_key FROM action_center_snoozes"))).rowCount,0,"Today snoozes must be tenant-isolated.");
   const visibleB=await scoped(studio2,client=>client.query("SELECT id FROM studio_packages WHERE id=$1",[packageA]));
   assert.equal(visibleB.rowCount,0,"Tenant B cannot view tenant A class packs.");
   assert.equal((await runtime.query("SELECT id FROM studio_packages WHERE id=$1",[packageA])).rowCount,0,"Unscoped catalog reads must be empty.");

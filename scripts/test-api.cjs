@@ -240,10 +240,39 @@ async function main(){
   }});
   assert.equal(thirdClass.status,201,JSON.stringify(thirdClass.data));
   await admin.query("UPDATE people SET next_contact=current_date-interval '3 days' WHERE id=$1 AND studio_id=$2",[pa.data.record.id,studioA]);
+  const trialLead=await call("/api/studio/people",{method:"POST",cookie:a.cookie,body:{kind:"lead",name:"Trial Prospect",email:"trial-"+unique+"@example.com"}});
+  assert.equal(trialLead.status,201,JSON.stringify(trialLead.data));
+  await admin.query("UPDATE people SET lead_stage='Trial attended',updated_at=now()-interval '2 days' WHERE studio_id=$1 AND id=$2",[studioA,trialLead.data.record.id]);
+  await admin.query("UPDATE people SET joined=current_date-interval '45 days',start_date=current_date-interval '45 days',last_visit=current_date-interval '30 days',expiry_date=current_date+interval '45 days' WHERE studio_id=$1 AND id=$2",[studioA,member1]);
+  const rescuePack=(await admin.query(`INSERT INTO studio_packages(studio_id,name,description,price_cents,currency,credits,valid_days)
+    VALUES($1,'Rescue Pack','Pending checkout signal',8800,'usd',8,45) RETURNING id`,[studioA])).rows[0].id;
+  const abandonedPurchase=(await admin.query(`INSERT INTO member_purchases(studio_id,member_id,package_id,stripe_account_id,amount_cents,currency,status,created_at)
+    VALUES($1,$2,$3,'acct_RESCUETEST',8800,'usd','pending',now()-interval '2 hours') RETURNING id`,
+    [studioA,member2,rescuePack])).rows[0].id;
   const actionA=await call("/api/studio/action-center",{cookie:a.cookie});
   assert.equal(actionA.status,200,JSON.stringify(actionA.data));
   assert(actionA.data.items.some(x=>x.personId===pa.data.record.id&&x.kind==="lead_followup"));
+  assert(actionA.data.items.some(x=>x.personId===trialLead.data.record.id&&x.kind==="trial_no_purchase"));
+  assert(actionA.data.items.some(x=>x.personId===member1&&x.kind==="inactive_member"));
+  assert(actionA.data.items.some(x=>x.id==="checkout:"+abandonedPurchase&&x.kind==="abandoned_checkout"));
   assert(actionA.data.items.some(x=>x.sessionId===thirdClass.data.class.id&&x.kind==="open_seats"));
+  assert(actionA.data.rescue.trials>=1&&actionA.data.rescue.inactive>=1&&actionA.data.rescue.abandoned>=1);
+  assert.equal(actionA.data.rescue.checkoutValue.usd,8800);
+  assert(Number.isInteger(actionA.data.today.classes)&&Number.isInteger(actionA.data.today.bookings));
+  const inactiveSignal=actionA.data.items.find(x=>x.personId===member1&&x.kind==="inactive_member");
+  const taskFromToday=await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:inactiveSignal.id,operation:"create_task"}});
+  assert.equal(taskFromToday.status,200,JSON.stringify(taskFromToday.data));
+  assert.equal(taskFromToday.data.created,true);
+  const hiddenAfterTask=await call("/api/studio/action-center",{cookie:a.cookie});
+  assert(!hiddenAfterTask.data.items.some(x=>x.id===inactiveSignal.id),"Task creation should suppress duplicate Today signal.");
+  const trialSignal=actionA.data.items.find(x=>x.personId===trialLead.data.record.id&&x.kind==="trial_no_purchase");
+  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:trialSignal.id,operation:"contacted"}})).status,200);
+  const contactedLead=await admin.query("SELECT next_contact FROM people WHERE studio_id=$1 AND id=$2",[studioA,trialLead.data.record.id]);
+  assert(contactedLead.rows[0].next_contact,"Mark contacted should schedule a future follow-up date.");
+  const checkoutSignal=actionA.data.items.find(x=>x.id==="checkout:"+abandonedPurchase);
+  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:a.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,200);
+  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:b.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,404);
+  assert.equal((await call("/api/studio/action-center/action",{method:"POST",cookie:coachLogin.cookie,body:{actionKey:checkoutSignal.id,operation:"snooze"}})).status,403);
   assert.equal((await call("/api/studio/action-center",{cookie:coachLogin.cookie})).status,403);
   const actionB=await call("/api/studio/action-center",{cookie:b.cookie});
   assert(!actionB.data.items.some(x=>x.personId===pa.data.record.id));

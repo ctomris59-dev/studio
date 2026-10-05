@@ -101,3 +101,24 @@
 
 /* Member flow is intentionally ordered class → package → reservation → check-in → renewal. */
 .rd-member-overview{order:1}.rd-member-classes{order:2}.rd-member-shop{order:3;scroll-margin-top:30px}.rd-member-reservations{order:4}.rd-member-visits{order:5}
+
+/* Stage A: StudioTasker Today + Revenue Rescue */
+.rd-today{background:#17203c;color:#fff;padding:26px;border:1px solid #17203c;display:flex;flex-direction:column;gap:21px}
+.rd-today .rd-eyebrow{color:#e7f982}.rd-today-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.rd-today-head h2{font:700 clamp(38px,5vw,58px)/.95 "Barlow Condensed",sans-serif;letter-spacing:-.035em;margin:7px 0 10px}
+.rd-today-head p{max-width:590px;color:#d6dced;font-size:14px;line-height:1.55;margin:0}
+.rd-today-head>span{background:#e7f982;color:#17203c;padding:9px 11px;font-size:12px;font-weight:800}
+.rd-today-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #4e5876}
+.rd-today-stats>div{padding:17px;border-right:1px solid #4e5876;min-width:0}.rd-today-stats>div:last-child{border-right:0}
+.rd-today-stats small{display:block;color:#aeb8d5;font:600 10px "IBM Plex Mono",monospace;letter-spacing:.05em}
+.rd-today-stats strong{display:block;font:700 38px "Barlow Condensed",sans-serif;color:#e7f982;margin-top:7px}.rd-today-stats span{font-size:11px;color:#aeb8d5}
+.rd-rescue{background:#fffefa;color:#17203c;padding:19px}.rd-rescue-title{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap}
+.rd-rescue-title small{font:700 10px "IBM Plex Mono",monospace;color:#334bdd;letter-spacing:.08em}.rd-rescue-title h3{font:700 27px "Barlow Condensed",sans-serif;margin:6px 0 0}
+.rd-rescue-title p{font-size:12px;color:#687287;margin:0}.rd-rescue-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:15px}
+.rd-rescue-grid span{border:1px solid #d7dce8;padding:10px;font-size:11px;line-height:1.35}.rd-rescue-grid b{display:block;color:#334bdd;font:700 25px "Barlow Condensed",sans-serif}
+.rd-rescue-value{font-size:12px;color:#536079;margin:13px 0 0}.rd-today .rd-action-list{gap:8px}
+.rd-today .rd-action-item{background:#fff;color:#17203c}.rd-today-actions{display:flex!important;flex:0 0 auto!important;gap:6px!important;flex-wrap:wrap;justify-content:flex-end}
+.rd-today-actions button{min-height:40px}.rd-action-trial_no_purchase{border-left:4px solid #ff8360}.rd-action-inactive_member{border-left:4px solid #9a78e8}
+.rd-action-abandoned_checkout{border-left:4px solid #e4ad3a}.rd-action-expiring_pass,.rd-action-low_credits{border-left:4px solid #e7f982}
+.rd-today>.rd-tiny{color:#aeb8d5}
+@media(max-width:760px){.rd-today{padding:18px}.rd-today-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.rd-today-stats>div:nth-child(2){border-right:0}.rd-today-stats>div:nth-child(-n+2){border-bottom:1px solid #4e5876}.rd-rescue-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rd-today-actions{justify-content:flex-start!important}}

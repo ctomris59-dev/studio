@@ -20,7 +20,11 @@ type Signal={
  id:string;kind:string;priority:"high"|"medium"|"low";title:string;reason:string;
  suggestedAction:string;personId?:string;sessionId?:string;
 };
-type ActionReply={items:Signal[];total:number;rules:string};
+type ActionReply={
+ items:Signal[];total:number;rules:string;
+ today:{classes:number;bookings:number;waitlisted:number;capacity:number;occupancy:number};
+ rescue:{total:number;trials:number;inactive:number;renewals:number;abandoned:number;openSeats:number;checkoutValue:Record<string,number>};
+};
 
 async function api<T>(path:string,method="GET",body?:unknown):Promise<T>{
  const response=await fetch(path,{
@@ -42,6 +46,8 @@ export function StudioOperations({role}:{role:string}){
  const [members,setMembers]=useState<MemberRow[]>([]);
  const [bookings,setBookings]=useState<BookingRow[]>([]);
  const [actions,setActions]=useState<Signal[]>([]);
+ const [today,setToday]=useState({classes:0,bookings:0,waitlisted:0,capacity:0,occupancy:0});
+ const [rescue,setRescue]=useState({total:0,trials:0,inactive:0,renewals:0,abandoned:0,openSeats:0,checkoutValue:{} as Record<string,number>});
  const [tasks,setTasks]=useState<TaskRow[]>([]);
  const [selectedClass,setSelectedClass]=useState("");
  const [selectedMember,setSelectedMember]=useState("");
@@ -66,7 +72,7 @@ export function StudioOperations({role}:{role:string}){
    api<ActionReply>("/api/studio/action-center"),
    api<{tasks:TaskRow[]}>("/api/studio/tasks")
   ]);
-  setClasses(c.classes);setMembers(m.members);setActions(a.items);setTasks(t.tasks);
+  setClasses(c.classes);setMembers(m.members);setActions(a.items);setToday(a.today);setRescue(a.rescue);setTasks(t.tasks);
   if(owner){
    void api<{packages:StudioPack[]}>("/api/studio/packages").then(x=>setPacks(x.packages)).catch(()=>{});
    void api<{orders:PaymentOrder[]}>("/api/studio/payments/orders").then(x=>setOrders(x.orders)).catch(()=>{});
@@ -218,17 +224,10 @@ export function StudioOperations({role}:{role:string}){
    return "Opening secure payment checkout.";
   });
  }
- function createTaskFor(item:Signal){
-  if(!item.personId)return;
-  const title=item.kind==="lead_followup"?"Follow up with lead":
-   item.kind==="expiring_pass"?"Discuss membership renewal":"Review class pack renewal";
+ function todayAction(item:Signal,operation:"create_task"|"contacted"|"snooze"){
   void perform(async()=>{
-   await api("/api/studio/tasks","POST",{
-    personId:item.personId,title,
-    dueAt:new Date(Date.now()+86400000).toISOString(),
-    category:item.kind==="lead_followup"?"Call":"Renewal",priority:item.priority==="high"?"High":"Normal"
-   });
-   return "Follow-up task added to your action list. No message was sent.";
+   const result=await api<{notice:string}>("/api/studio/action-center/action","POST",{actionKey:item.id,operation});
+   return result.notice;
   });
  }
  function completeTask(task:TaskRow){
@@ -240,6 +239,39 @@ export function StudioOperations({role}:{role:string}){
   });
  }
  return <div className="rd-ops" aria-label="Live studio operations">
+  <section className="rd-today" aria-labelledby="studiotasker-today-title">
+   <div className="rd-today-head"><div><p className="rd-eyebrow">YOUR DAILY OPERATING VIEW</p><h2 id="studiotasker-today-title">StudioTasker Today</h2>
+    <p>What deserves attention now — with a reason and a next action, not another wall of charts.</p></div><span>{actions.length} things to review</span></div>
+   <div className="rd-today-stats">
+    <div><small>CLASSES TODAY</small><strong>{today.classes}</strong></div>
+    <div><small>BOOKINGS TODAY</small><strong>{today.bookings}</strong></div>
+    <div><small>OCCUPANCY</small><strong>{today.occupancy}%</strong><span>{today.bookings}/{today.capacity||0} places</span></div>
+    <div><small>WAITLISTED</small><strong>{today.waitlisted}</strong></div>
+   </div>
+   <div className="rd-rescue">
+    <div className="rd-rescue-title"><div><small>REVENUE RESCUE</small><h3>{rescue.total} opportunities to review</h3></div>
+     <p>Observed operational signals only — no speculative revenue claim.</p></div>
+    <div className="rd-rescue-grid">
+     <span><b>{rescue.trials}</b> trial follow-ups</span><span><b>{rescue.renewals}</b> renewals</span>
+     <span><b>{rescue.inactive}</b> inactive members</span><span><b>{rescue.abandoned}</b> unfinished checkouts</span>
+     <span><b>{rescue.openSeats}</b> underfilled classes</span>
+    </div>
+    {Object.keys(rescue.checkoutValue).length>0&&<p className="rd-rescue-value">Known value in unfinished checkout sessions: {Object.entries(rescue.checkoutValue).map(([currency,cents])=>(cents/100).toFixed(2)+" "+currency.toUpperCase()).join(" · ")}</p>}
+   </div>
+   <div className="rd-action-list">
+    {actions.length?actions.slice(0,18).map(item=><article key={item.id} className={"rd-action-item rd-action-"+item.kind}>
+     <div><span className={"rd-priority "+item.priority}>{item.priority}</span><strong>{item.title}</strong>
+      <p>{item.reason}</p><small>Suggested: {item.suggestedAction}</small></div>
+     <div className="rd-today-actions">
+      {item.personId&&!item.id.startsWith("task:")&&<button type="button" disabled={busy} onClick={()=>todayAction(item,"contacted")}>Mark contacted</button>}
+      {item.personId&&!item.id.startsWith("task:")&&<button type="button" disabled={busy} onClick={()=>todayAction(item,"create_task")}>Make task</button>}
+      {item.sessionId&&<button type="button" onClick={()=>{setSelectedClass(item.sessionId||"");setMessage("Class selected in bookings below.");}}>Review class</button>}
+      <button type="button" disabled={busy} onClick={()=>todayAction(item,"snooze")}>Tomorrow</button>
+     </div>
+    </article>):<p className="rd-empty">Nothing urgent from current studio data. Keep the day moving.</p>}
+   </div>
+   <p className="rd-tiny">Inactive = 21+ days without recorded attendance. Trial follow-up = trial attended 18+ hours ago without a member conversion. Unfinished checkout = still pending after 60 minutes. Signals are explainable rules; no messages are sent automatically.</p>
+  </section>
   {owner&&<section className="rd-ops-section">
    <div className="rd-ops-section-title"><div><h3>StudioTasker subscription</h3>
     <p>Monthly or annual access managed by the payment provider. This workspace does not collect card details.</p></div></div>
@@ -286,18 +318,6 @@ export function StudioOperations({role}:{role:string}){
   <div className="rd-ops-heading"><div><p className="rd-eyebrow">DATABASE-BACKED OPERATIONS</p><h2>Studio daily operations</h2><p>All records below are scoped to your authenticated studio. Sample /demo data is separate.</p></div>
    <button type="button" disabled={busy} onClick={()=>void perform(async()=>"Latest workspace records loaded.")}>Refresh</button></div>
   {message&&<div className="rd-feedback" role="status">{message}</div>}
-  <section className="rd-ops-section">
-   <div className="rd-ops-section-title"><div><h3>Action center</h3><p>Clear reasons, human-controlled follow-ups and no paid AI API.</p></div><span>{actions.length} signals</span></div>
-   <div className="rd-action-list">
-    {actions.length?actions.slice(0,15).map(item=><article key={item.id} className="rd-action-item">
-     <div><span className={"rd-priority "+item.priority}>{item.priority}</span><strong>{item.title}</strong>
-      <p>{item.reason}</p><small>Next step: {item.suggestedAction}</small></div>
-     {item.personId&&!item.id.startsWith("task:")&&<button type="button" disabled={busy} onClick={()=>createTaskFor(item)}>Create follow-up</button>}
-     {item.sessionId&&<button type="button" onClick={()=>{setSelectedClass(item.sessionId||"");setMessage("Class selected in bookings below.");}}>Review class</button>}
-    </article>):<p className="rd-empty">No immediate follow-up signals from current studio data.</p>}
-   </div>
-   <p className="rd-tiny">Signals are deterministic: overdue leads, expiring packages, low credits, overdue tasks and underfilled upcoming classes. No automatic marketing is sent.</p>
-  </section>
   <section className="rd-ops-section">
    <div className="rd-ops-section-title"><div><h3>Class schedule</h3><p>Transactional capacity checks and controlled waitlist promotion.</p></div></div>
    {owner&&<details className="rd-ops-details"><summary>Create a class</summary>
