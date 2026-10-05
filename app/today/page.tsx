@@ -1,7 +1,7 @@
 "use client";
 import {useMemo,useState} from "react";
 import Link from "next/link";
-import {ArrowRight,CalendarDays,Check,Clock3,CreditCard,RotateCcw,ShieldCheck,Sparkles,Users} from "lucide-react";
+import {ArrowRight,BarChart3,CalendarDays,Check,Clock3,RotateCcw,ShieldCheck,Users} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import "./today.css";
 
@@ -27,7 +27,7 @@ export default function TodayPreview(){
   trials:items.filter(x=>x.kind==="trial").length,
   renewals:items.filter(x=>x.kind==="renewal").length,
   inactive:items.filter(x=>x.kind==="inactive").length,
-  checkout:items.filter(x=>x.kind==="package").length,
+  package:items.filter(x=>x.kind==="package").length,
   seats:items.filter(x=>x.kind==="seat").length
  }),[items]);
  function act(item:Item,action:"contacted"|"task"|"tomorrow"){
@@ -39,12 +39,12 @@ export default function TodayPreview(){
  return <main className="std">
   <header className="std-top">
    <Link href="/" className="std-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
-   <nav><Link href="/book/preview">Public booking preview</Link><Link href="/demo">CRM demo</Link><Link href="/">Website ↗</Link></nav>
+   <nav><Link href="/app-demo">Owner app demo</Link><Link href="/demo">CRM demo</Link><Link href="/">Website ↗</Link></nav>
   </header>
   <section className="std-hero">
    <div><span className="std-kicker">STUDIOTASKER TODAY / INTERACTIVE PREVIEW</span>
     <h1>Know what your<br/><em>studio needs today.</em></h1>
-    <p>Members book and pay themselves. StudioTasker watches the operational signals around the studio and brings the next actions into one clear daily view.</p>
+    <p>Your team keeps the studio records current. StudioTasker watches those operational signals and brings the next actions into one clear daily view.</p>
     <div className="std-preview-note"><ShieldCheck size={17}/><span><b>Fictional preview.</b> No customer data, messages or payments are used. Buttons below only change this browser demonstration.</span></div>
    </div>
    <aside><small>TODAY / WEDNESDAY</small><strong>{String(items.length).padStart(2,"0")}</strong><span>things still need attention</span><button onClick={reset}><RotateCcw size={15}/> Reset preview</button></aside>
@@ -55,7 +55,7 @@ export default function TodayPreview(){
    <div className="std-today-stats">
     <article><CalendarDays/><small>CLASSES TODAY</small><strong>6</strong><span>07:30 → 19:30</span></article>
     <article><Users/><small>BOOKINGS</small><strong>42</strong><span>across today&apos;s classes</span></article>
-    <article><CreditCard/><small>OCCUPANCY</small><strong>83%</strong><span>42 / 51 available places</span></article>
+    <article><BarChart3/><small>OCCUPANCY</small><strong>83%</strong><span>42 / 51 available places</span></article>
     <article><Clock3/><small>WAITLISTED</small><strong>2</strong><span>promotion rules monitored</span></article>
    </div>
 
