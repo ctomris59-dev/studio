@@ -60,7 +60,7 @@ export default function HomePage() {
         <div className="ed-container ed-nav">
           <Identity/>
           <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#studio">Product tour</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
-          <Link className="ed-nav-cta" href="/demo">OPEN THE DEMO <ArrowUpRight size={16}/></Link>
+          <Link className="ed-nav-cta" href="/app-demo">OPEN THE OWNER APP <ArrowUpRight size={16}/></Link>
         </div>
       </header>
 
@@ -138,7 +138,7 @@ export default function HomePage() {
               <h2>One place.<br/><em>Every moving</em><br/>part.</h2>
               <p>From a new enquiry to their next class, follow the customer journey in one clear workspace. The everyday admin gets a little easier to act on.</p>
               <div className="ed-window-list"><span><Check size={17}/> Lead-to-member CRM pipeline</span><span><Check size={17}/> Retention and renewal prompts</span><span><Check size={17}/> Studio-managed bookings and attendance</span></div>
-              <Link className="ed-text-link" href="/demo">STEP INSIDE THE DEMO <ArrowUpRight size={18}/></Link>
+              <Link className="ed-text-link" href="/app-demo">STEP INSIDE THE APP <ArrowUpRight size={18}/></Link>
               <div className="ed-window-edition">THE STUDIO EDIT <span>VOL. 01</span></div>
             </div>
             <div className="ed-window-showcase">
@@ -153,7 +153,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>No puzzle of features to untangle. One studio, one proposed price: $49/month. Member payments stay completely outside StudioTasker.</p></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>49<small> / MONTH</small></div><p>Proposed $49/month per studio · $39/month on annual billing ($468/year). No live StudioTasker checkout yet. Member pack charges go to each studio, not StudioTasker.</p><Link href="/demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>01 / EARLY ACCESS</span></div><div className="ed-price-number"><span>$</span>49<small> / MONTH</small></div><p>Proposed $49/month per studio · $39/month on annual billing ($468/year). No live StudioTasker checkout yet. Member pack charges go to each studio, not StudioTasker.</p><Link href="/app-demo">EXPLORE BEFORE YOU COMMIT <ArrowUpRight size={19}/></Link></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT IT&apos;S DESIGNED TO INCLUDE</span>{["StudioTasker Today daily priorities","Revenue Rescue opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> Public demo remains sample-only. Studio member payments require verified Stripe Connect accounts; live customer onboarding is not yet open.</div></div>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function HomePage() {
         </section>
         <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/today" className="ed-last-link"><span>START WITH TODAY</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/app-demo">App login demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/app-demo">App login demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/app-demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · DEVELOPMENT PREVIEW</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }

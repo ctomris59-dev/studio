@@ -39,7 +39,7 @@ export default function TodayPreview(){
  return <main className="std">
   <header className="std-top">
    <Link href="/" className="std-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
-   <nav><Link href="/app-demo">Owner app demo</Link><Link href="/demo">CRM demo</Link><Link href="/">Website ↗</Link></nav>
+   <nav><Link href="/app-demo">Owner app demo</Link><Link href="/app-demo">Owner app demo</Link><Link href="/">Website ↗</Link></nav>
   </header>
   <section className="std-hero">
    <div><span className="std-kicker">STUDIOTASKER TODAY / INTERACTIVE PREVIEW</span>

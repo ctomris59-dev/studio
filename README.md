@@ -30,7 +30,7 @@ How a studio collects money from its own members stays entirely outside StudioTa
 - Marketing website: `/`
 - Owner-only app login sandbox: `/app-demo`
 - StudioTasker Today interactive preview: `/today`
-- Browser-local CRM sample: `/demo`
+- Legacy `/demo` URL redirects to the canonical owner app sandbox at `/app-demo`.
 - PostgreSQL workspace: `/workspace` (disabled when the secure backend is not configured)
 
 Owner demo credentials:

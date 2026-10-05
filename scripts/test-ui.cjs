@@ -9,6 +9,7 @@ const home=fs.readFileSync("app/page.tsx","utf8");
 const appDemo=fs.readFileSync("app/app-demo/page.tsx","utf8");
 const appDemoCss=fs.readFileSync("app/app-demo/app-demo.css","utf8");
 const demoAuth=fs.readFileSync("lib/demo-auth.ts","utf8");
+const legacyDemo=fs.readFileSync("app/demo/page.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
 assert(client.includes('type="email"')&&client.includes('autoComplete="username"'));
 assert(client.includes('type="password"')&&client.includes("new-password"));
@@ -21,6 +22,9 @@ assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today
 assert(home.includes("what needs attention")&&home.includes("/today")&&home.includes("/app-demo")&&!home.includes("/book/preview"),"Homepage must lead with Today differentiation and the owner-only app demo.");
 assert(demoAuth.includes("owner@demo.studiotasker.com")&&!demoAuth.includes("member@demo.studiotasker.com"),"App demo must expose only the studio-owner sandbox account.");
 assert(appDemo.includes("STUDIOTASKER TODAY")&&appDemo.includes("OWNER WORKSPACE")&&appDemo.includes("Sign in to StudioTasker"),"Owner app demo must include login and studio workspace.");
+assert(["Today","Leads / CRM","Members","Classes","Follow-ups","Insights","Settings"].every(label=>appDemo.includes(label)),"Canonical owner app must expose the complete unified navigation.");
+assert(appDemo.includes('view==="leads"')&&appDemo.includes('view==="settings"'),"Owner app must include Leads / CRM and Settings views.");
+assert(legacyDemo.includes('redirect("/app-demo")'),"Legacy /demo must redirect to the canonical owner app.");
 assert(appDemo.includes("sessionStorage")&&appDemoCss.includes(":focus-visible")&&appDemoCss.includes("font-size:16px"),"App demo must persist only a browser-session role and remain keyboard/mobile friendly.");
 assert(home.includes("/app-demo"),"Homepage must link directly to the role-based app login demo.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
