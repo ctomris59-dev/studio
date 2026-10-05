@@ -3,6 +3,7 @@ import {useEffect,useMemo,useState,type FormEvent} from "react";
 import Link from "next/link";
 import {ArrowRight,BarChart3,CalendarDays,Check,CheckCircle2,ChevronRight,CreditCard,LayoutDashboard,LogOut,RefreshCw,Search,ShieldCheck,Target,Ticket,Users,WalletCards} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
+import {DEMO_ACCOUNTS,authenticateDemo} from "../../lib/demo-auth";
 import "./app-demo.css";
 
 type Role="owner"|"member";
@@ -12,10 +13,10 @@ type Signal={id:string;priority:"high"|"medium"|"low";title:string;reason:string
 type DemoClass={id:string;title:string;time:string;coach:string;room:string;capacity:number;booked:number};
 type DemoMember={id:string;name:string;plan:string;credits:number;status:string;lastVisit:string};
 
-const OWNER_EMAIL="owner@demo.studiotasker.com";
-const OWNER_PASSWORD="StudioTaskerDemo!";
-const MEMBER_EMAIL="member@demo.studiotasker.com";
-const MEMBER_PASSWORD="MemberDemo!";
+const OWNER_EMAIL=DEMO_ACCOUNTS.owner.email;
+const OWNER_PASSWORD=DEMO_ACCOUNTS.owner.password;
+const MEMBER_EMAIL=DEMO_ACCOUNTS.member.email;
+const MEMBER_PASSWORD=DEMO_ACCOUNTS.member.password;
 
 const seedSignals:Signal[]=[
  {id:"s1",priority:"high",kind:"trial",title:"Mia Carter · trial needs a next step",reason:"Trial attended yesterday. No package purchase yet.",next:"Ask whether Mia wants to join"},
@@ -49,7 +50,7 @@ export default function AppDemo(){
  const [credits,setCredits]=useState(6),[selectedClass,setSelectedClass]=useState("c3"),[booked,setBooked]=useState<string[]>(["c1"]);
  useEffect(()=>{try{const saved=sessionStorage.getItem("studiotasker-demo-role");if(saved==="owner"||saved==="member")setRole(saved)}catch{}},[]);
  function login(e:FormEvent){e.preventDefault();setMessage("");const normalized=email.trim().toLowerCase();
-  const next=normalized===OWNER_EMAIL&&password===OWNER_PASSWORD?"owner":normalized===MEMBER_EMAIL&&password===MEMBER_PASSWORD?"member":null;
+  const next=authenticateDemo(normalized,password);
   if(!next){setMessage("Demo email or password is incorrect.");return}
   setRole(next);try{sessionStorage.setItem("studiotasker-demo-role",next)}catch{} setPassword("");setOwnerView("today");setMemberView("home");
  }

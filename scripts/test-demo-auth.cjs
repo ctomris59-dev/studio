@@ -1,0 +1,13 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),ts=require("typescript");
+const source=fs.readFileSync("lib/demo-auth.ts","utf8");
+const compiled={exports:{}};
+const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+new Function("module","exports",js)(compiled,compiled.exports);
+const {DEMO_ACCOUNTS,authenticateDemo}=compiled.exports;
+assert.equal(authenticateDemo(DEMO_ACCOUNTS.owner.email,DEMO_ACCOUNTS.owner.password),"owner");
+assert.equal(authenticateDemo("  OWNER@DEMO.STUDIOTASKER.COM  ",DEMO_ACCOUNTS.owner.password),"owner");
+assert.equal(authenticateDemo(DEMO_ACCOUNTS.member.email,DEMO_ACCOUNTS.member.password),"member");
+assert.equal(authenticateDemo(DEMO_ACCOUNTS.owner.email,"wrong"),null);
+assert.equal(authenticateDemo("unknown@example.com",DEMO_ACCOUNTS.member.password),null);
+assert.notEqual(DEMO_ACCOUNTS.owner.password,DEMO_ACCOUNTS.member.password);
+console.log("App demo authentication checks passed: owner/member roles, normalized email and wrong-password rejection.");

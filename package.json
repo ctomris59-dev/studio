@@ -8,6 +8,7 @@
     "start": "next start",
     "test:crm": "node scripts/test-crm.cjs",
     "test:csv": "node scripts/test-csv.cjs",
+    "test:demo-auth": "node scripts/test-demo-auth.cjs",
     "test:excel": "node scripts/test-excel.cjs",
     "test:history": "node scripts/test-history.cjs",
     "test:workflows": "node scripts/test-workflows.cjs",

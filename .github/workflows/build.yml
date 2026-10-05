@@ -51,6 +51,8 @@ jobs:
         run: npm run test:crm
       - name: Test CSV parser and migration file guards
         run: npm run test:csv
+      - name: Test role-based app demo authentication
+        run: npm run test:demo-auth
       - name: Test Excel import/export and validation
         run: npm run test:excel
       - name: Test credit corrections and Undo/Redo
