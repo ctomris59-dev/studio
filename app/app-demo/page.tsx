@@ -16,7 +16,8 @@ type DemoClass={id:string;title:string;time:string;coach:string;room:string;capa
 type DemoMember={id:string;name:string;plan:string;credits:number;status:string;lastVisit:string};
 type DemoLead={id:string;name:string;source:string;stage:string;nextContact:string;interest:string};
 type DemoTask={id:string;priority:"HIGH"|"NORMAL";person:string;title:string;due:string};
-type StudioSettings={name:string;focus:string;timezone:string};
+type StudioSettings={name:string;focus:string;timezone:string;accentColor:string;memberTerm:string;classTerm:string;creditTerm:string};
+const defaultStudioSettings:StudioSettings={name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London",accentColor:"#334BDD",memberTerm:"Members",classTerm:"Classes",creditTerm:"Credits"};
 
 const DEMO_ADD_LIMIT=3;
 const seedSignals:Signal[]=[
@@ -61,12 +62,12 @@ export default function AppDemo(){
  const [view,setView]=useState<OwnerView>("today"),[adding,setAdding]=useState<AddView>(null),[signals,setSignals]=useState(seedSignals),[activity,setActivity]=useState<string[]>([]);
  const [query,setQuery]=useState(""),[leadQuery,setLeadQuery]=useState("");
  const [leads,setLeads]=useState(seedLeads),[memberList,setMemberList]=useState(seedMembers),[classList,setClassList]=useState(seedClasses),[tasks,setTasks]=useState(seedTasks);
- const [settings,setSettings]=useState<StudioSettings>({name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London"});
+ const [settings,setSettings]=useState<StudioSettings>(defaultStudioSettings),[logoUrl,setLogoUrl]=useState<string|null>(null);
  const [leadForm,setLeadForm]=useState({name:"",source:"Website",interest:"Pilates"});
  const [memberForm,setMemberForm]=useState({name:"",plan:"10 Class Pack",credits:10});
  const [classForm,setClassForm]=useState({title:"",time:"FRI · 18:00",coach:"Sophie M.",capacity:8});
  const [taskForm,setTaskForm]=useState({person:"",title:"",due:"Tomorrow",priority:"NORMAL" as DemoTask["priority"]});
- useEffect(()=>{try{if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true)}catch{}},[]);
+ useEffect(()=>{try{if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true);const saved=sessionStorage.getItem("studiotasker-demo-settings");if(saved)setSettings({...defaultStudioSettings,...JSON.parse(saved)});const logo=sessionStorage.getItem("studiotasker-demo-logo");if(logo)setLogoUrl(logo)}catch{}},[]);
 
  function login(e:FormEvent){e.preventDefault();setMessage("");if(!authenticateDemo(email,password)){setMessage("Demo email or password is incorrect.");return}
   setSignedIn(true);setPassword("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}
@@ -74,7 +75,7 @@ export default function AppDemo(){
  function logout(){setSignedIn(false);setEmail("");setPassword("");setMessage("");try{sessionStorage.removeItem("studiotasker-owner-demo")}catch{}}
  function reset(){
   setSignals(seedSignals);setLeads(seedLeads);setMemberList(seedMembers);setClassList(seedClasses);setTasks(seedTasks);
-  setSettings({name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London"});setActivity([]);setView("today");setAdding(null);setMessage("Demo restored to its original sample data.");
+  setSettings(defaultStudioSettings);setLogoUrl(null);try{sessionStorage.removeItem("studiotasker-demo-settings");sessionStorage.removeItem("studiotasker-demo-logo")}catch{}setActivity([]);setView("today");setAdding(null);setMessage("Demo restored to its original sample data.");
  }
  function act(signal:Signal,kind:"contacted"|"task"|"tomorrow"){
   const label=kind==="contacted"?"Contact recorded":kind==="task"?"Follow-up task created":"Hidden until tomorrow";
@@ -112,7 +113,9 @@ export default function AppDemo(){
   setTasks(x=>[{id:newId("task"),priority:taskForm.priority,person,title,due:taskForm.due},...x]);
   setTaskForm({person:"",title:"",due:"Tomorrow",priority:"NORMAL"});setAdding(null);setMessage("Demo follow-up added.");setActivity(x=>["Follow-up added · "+person,...x].slice(0,6));
  }
- function saveSettings(e:FormEvent){e.preventDefault();setMessage("Demo studio settings saved in this browser session.");setActivity(x=>["Studio settings updated · "+settings.name,...x].slice(0,6))}
+ function saveSettings(e:FormEvent){e.preventDefault();try{sessionStorage.setItem("studiotasker-demo-settings",JSON.stringify(settings))}catch{}setMessage("Demo customization saved in this browser session.");setActivity(x=>["Studio customization updated · "+settings.name,...x].slice(0,6))}
+ function uploadDemoLogo(file:File){if(file.size>200000){setMessage("Demo logo must be 200 KB or smaller.");return}if(!["image/png","image/jpeg","image/webp"].includes(file.type)){setMessage("Use PNG, JPEG or WebP for the demo logo.");return}const reader=new FileReader();reader.onload=()=>{const value=typeof reader.result==="string"?reader.result:"";if(!value)return;setLogoUrl(value);try{sessionStorage.setItem("studiotasker-demo-logo",value)}catch{}setMessage("Demo logo added. You can see it in the sidebar and brand preview.")};reader.readAsDataURL(file)}
+ function removeDemoLogo(){setLogoUrl(null);try{sessionStorage.removeItem("studiotasker-demo-logo")}catch{}setMessage("Demo logo removed.")}
  const filteredMembers=useMemo(()=>memberList.filter(m=>m.name.toLowerCase().includes(query.toLowerCase())||m.plan.toLowerCase().includes(query.toLowerCase())),[memberList,query]);
  const filteredLeads=useMemo(()=>leads.filter(l=>[l.name,l.source,l.stage,l.interest].some(v=>v.toLowerCase().includes(leadQuery.toLowerCase()))),[leads,leadQuery]);
 
@@ -142,7 +145,7 @@ export default function AppDemo(){
  ];
  return <main className="sad-app">
   <aside className="sad-sidebar"><Link href="/" className="sad-brand sad-sidebar-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
-   <div className="sad-studio"><span className="sad-avatar">WS</span><div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
+   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{background:settings.accentColor}}>{settings.name.split(/\\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
    <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
@@ -198,20 +201,36 @@ export default function AppDemo(){
     <div className="sad-metrics"><article><small>TRIAL → MEMBER</small><strong>41%</strong><span>7 of 17 recent trials</span></article><article><small>AVG. OCCUPANCY</small><strong>78%</strong><span>last 30 days</span></article><article><small>RENEWALS DUE</small><strong>8</strong><span>next 14 days</span></article><article><small>INACTIVE MEMBERS</small><strong>5</strong><span>21+ days without attendance</span></article></div>
     <div className="sad-insight-note"><BarChart3 size={28}/><div><b>Built for action, not vanity.</b><p>These figures are fictional. In the real workspace, StudioTasker Today is calculated from studio-entered members, bookings, attendance, class packages and follow-up records.</p></div></div>
    </section>}
-   {view==="settings"&&<section className="sad-view"><ViewHead eyebrow="SETTINGS / STUDIO" title="Keep the workspace yours." text="Studio profile and operational defaults — without member payment configuration."/>
-    <div className="sad-settings-grid">
-     <form className="sad-settings-card" onSubmit={saveSettings}><h3>Studio profile</h3>
-      <label>Studio name<input required minLength={2} maxLength={80} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label>
-      <label>Studio focus<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}><option>Pilates · Yoga · Barre</option><option>Pilates</option><option>Yoga</option><option>Barre</option><option>Boutique fitness</option><option>Dance</option></select></label>
-      <label>Timezone<input required value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})}/></label>
-      <button type="submit">Save demo settings</button>
-     </form>
-     <div className="sad-settings-card"><h3>Internal class packages</h3><p>Operational entitlement templates only. StudioTasker does not price or collect member payments.</p>
-      <div className="sad-package-row"><div><b>Starter Pack</b><small>5 classes · 30 days</small></div><span>AVAILABLE</span></div>
-      <div className="sad-package-row"><div><b>Studio Ten</b><small>10 classes · 60 days</small></div><span>AVAILABLE</span></div>
-     </div>
-     <div className="sad-settings-card sad-boundary"><h3>StudioTasker product boundary</h3><ul><li>Staff-facing studio operations</li><li>Member CRM, classes, attendance and follow-ups</li><li>Studio-managed package entitlements and credits</li><li>No member login or member checkout</li><li>No member payment processing or card storage</li></ul></div>
+   {view==="settings"&&<section className="sad-view"><ViewHead eyebrow="SETTINGS / CUSTOMIZE" title="Make StudioTasker yours." text="This is where a studio customizes its identity, terminology and booking experience after purchase."/>
+    <div className="sad-customize-preview">
+     <div className="sad-brand-preview" style={{borderColor:settings.accentColor}}>{logoUrl?<img src={logoUrl} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.split(/\\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><small>LIVE BRAND PREVIEW</small><b>{settings.name}</b><em>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</em></div></div>
+     <div><span className="sad-kicker">CUSTOMER WORKSPACE</span><h3>One product. Their studio identity.</h3><p>Customers do not receive a separate codebase. These settings personalize their own StudioTasker workspace and public booking page.</p></div>
     </div>
+    <form className="sad-settings-grid" onSubmit={saveSettings}>
+     <div className="sad-settings-card"><h3>Identity & branding</h3><p>Studio owners upload their logo and choose the main brand color here.</p>
+      <label>Studio name<input required minLength={2} maxLength={80} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label>
+      <label>Studio focus<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}><option>Pilates · Yoga · Barre</option><option>Pilates</option><option>Yoga</option><option>Barre</option><option>Boutique fitness</option><option>Dance</option><option>Gym</option></select></label>
+      <label>Primary brand color<div className="sad-color-row"><input aria-label="Brand color picker" type="color" value={settings.accentColor} onChange={e=>setSettings({...settings,accentColor:e.target.value.toUpperCase()})}/><input aria-label="Brand color hex" pattern="^#[0-9A-Fa-f]{6}$" maxLength={7} value={settings.accentColor} onChange={e=>setSettings({...settings,accentColor:e.target.value})}/></div></label>
+      <label>Studio logo <small>PNG / JPEG / WebP · max 200 KB</small><input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];if(file)uploadDemoLogo(file);e.currentTarget.value=""}}/></label>
+      {logoUrl&&<button type="button" className="sad-remove-logo" onClick={removeDemoLogo}><Trash2 size={15}/> Remove demo logo</button>}
+     </div>
+     <div className="sad-settings-card"><h3>Terminology & display</h3><p>Studios can make the wording match how they actually operate.</p>
+      <label>People label<select value={settings.memberTerm} onChange={e=>setSettings({...settings,memberTerm:e.target.value})}>{["Members","Clients","Students","Customers"].map(x=><option key={x}>{x}</option>)}</select></label>
+      <label>Class label<select value={settings.classTerm} onChange={e=>setSettings({...settings,classTerm:e.target.value})}>{["Classes","Sessions","Lessons"].map(x=><option key={x}>{x}</option>)}</select></label>
+      <label>Credit label<select value={settings.creditTerm} onChange={e=>setSettings({...settings,creditTerm:e.target.value})}>{["Credits","Visits","Sessions"].map(x=><option key={x}>{x}</option>)}</select></label>
+      <label>Timezone<input required value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})}/></label>
+     </div>
+     <div className="sad-settings-card sad-booking-settings"><h3>Public booking page</h3><p>The studio gets its own customer-facing booking link. Logo, studio name and brand color come from these settings; member payments stay outside StudioTasker.</p>
+      <div className="sad-booking-mini" style={{borderColor:settings.accentColor}}><div>{logoUrl?<img src={logoUrl} alt="Booking page logo"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,1).toUpperCase()}</span>}<b>{settings.name}</b></div><small>{settings.focus}</small><strong style={{color:settings.accentColor}}>Book a {settings.classTerm.slice(0,-1).toLowerCase()}</strong></div>
+      <Link className="sad-preview-link" href="/book/preview">Open self-service booking preview <ArrowRight size={16}/></Link>
+     </div>
+     <div className="sad-settings-card"><h3>Internal class packages</h3><p>Operational entitlement templates only. StudioTasker does not price or collect member payments.</p>
+      <div className="sad-package-row"><div><b>Starter Pack</b><small>5 {settings.classTerm.toLowerCase()} · 30 days</small></div><span>AVAILABLE</span></div>
+      <div className="sad-package-row"><div><b>Studio Ten</b><small>10 {settings.classTerm.toLowerCase()} · 60 days</small></div><span>AVAILABLE</span></div>
+     </div>
+     <button className="sad-settings-save" type="submit">Save demo customization</button>
+     <div className="sad-settings-card sad-boundary"><h3>What the customer can customize</h3><ul><li>Studio name, type and timezone</li><li>Logo and primary brand color</li><li>Member / client terminology</li><li>Class / session terminology</li><li>Credit / visit terminology</li><li>Public booking page identity</li><li>Class defaults and Today rules in the real workspace</li><li>No member payment processing or card storage</li></ul></div>
+    </form>
    </section>}
   </section>
  </main>;
