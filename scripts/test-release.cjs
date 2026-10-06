@@ -4,7 +4,7 @@ const compiled={exports:{}};
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 new Function("require","module","exports",js)(name=>name==="server-only"?{}:require(name),compiled,compiled.exports);
 const gate=compiled.exports.commercialRegistrationReady;
-const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT",
+const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT","LAUNCH_PADDLE_ACCOUNT_APPROVED","LAUNCH_LEGAL_REVIEW_CONFIRMED","LAUNCH_TAX_REVIEW_CONFIRMED",
  "DATABASE_URL","SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD",
  "PADDLE_ENV","PADDLE_API_KEY","NEXT_PUBLIC_PADDLE_CLIENT_TOKEN","PADDLE_MONTHLY_PRICE_ID","PADDLE_ANNUAL_PRICE_ID","PADDLE_WEBHOOK_SECRET",
  "BACKUP_DATABASE_URL","BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR",
@@ -31,7 +31,11 @@ try{
  process.env.PADDLE_MONTHLY_PRICE_ID="pri_"+"a".repeat(26);
  process.env.PADDLE_ANNUAL_PRICE_ID="pri_"+"b".repeat(26);
  process.env.BILLING_ENFORCEMENT="required";
- assert.equal(gate(),true,"Fully configured live Paddle + individual-operator setup may proceed to manual launch checks");
+ assert.equal(gate(),false,"Technical configuration must not bypass manual legal/tax/Paddle approval gates");
+ process.env.LAUNCH_PADDLE_ACCOUNT_APPROVED="true";
+ process.env.LAUNCH_LEGAL_REVIEW_CONFIRMED="true";
+ process.env.LAUNCH_TAX_REVIEW_CONFIRMED="true";
+ assert.equal(gate(),true,"Fully configured live Paddle setup with explicit commercial reviews may enable registration");
 
  process.env.PADDLE_ENV="sandbox";
  assert.equal(gate(),false,"Sandbox mode must never enable public paid registration");
