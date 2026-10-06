@@ -164,7 +164,7 @@ export default function HomePage() {
               ["MED","Package status needs review","Ava · no confirmed package"],
               ["LOW","Open places","Barre Foundations · 3 spots tomorrow"]
              ].map((x,i)=><article key={i}><span>{x[0]}</span><div><b>{x[1]}</b><small>{x[2]}</small></div><i>→</i></article>)}
-             <p>Explainable rules · no automatic marketing · no speculative “revenue saved” claim</p>
+             <p>Explainable rules · no automatic marketing · staff-controlled follow-up decisions</p>
             </div>
           </div>
         </section>
@@ -191,7 +191,7 @@ export default function HomePage() {
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>One studio, one global subscription. Prices are shown in USD: $39.90 monthly, or $33.90/month with annual billing — save 15%. Member payments stay completely outside StudioTasker.</p></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p><strong>Annual option: $33.90/month · SAVE 15%</strong> · billed annually at $406.80/year. Your subscription covers StudioTasker software; what your studio charges members remains entirely separate.</p><div className="ed-price-actions"><Link href="/start?plan=monthly">BUY MONTHLY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BUY ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Revenue Rescue opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
             </div>
           </div>
         </section>
