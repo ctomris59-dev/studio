@@ -11,7 +11,12 @@ export default function sitemap():MetadataRoute.Sitemap{
   ["/legal",0.4,"monthly"],
   ["/legal/terms",0.3,"monthly"],
   ["/legal/privacy",0.3,"monthly"],
-  ["/legal/dpa",0.3,"monthly"]
+  ["/legal/turkiye-privacy",0.3,"monthly"],
+  ["/legal/dpa",0.3,"monthly"],
+  ["/legal/cancellation",0.3,"monthly"],
+  ["/legal/cookies",0.2,"monthly"],
+  ["/legal/subprocessors",0.2,"monthly"],
+  ["/legal/security",0.2,"monthly"]
  ] as const;
  return routes.map(([path,priority,changeFrequency])=>({url:base+path,lastModified:new Date(),changeFrequency,priority}));
 }
