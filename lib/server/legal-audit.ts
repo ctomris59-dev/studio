@@ -44,8 +44,8 @@ export async function recordLegalAcceptance(client:PoolClient,args:{
 export async function hasCurrentLegalAcceptance(client:PoolClient,studioId:string,userId:string,plan:LegalPlan){
  const result=await client.query(`SELECT 1 FROM legal_acceptances
   WHERE studio_id=$1 AND user_id=$2 AND terms_version=$3 AND dpa_version=$4 AND privacy_version=$5
-   AND plan=$6 AND price_cents=$7 LIMIT 1`,[
-  studioId,userId,LEGAL_VERSIONS.terms,LEGAL_VERSIONS.dpa,LEGAL_VERSIONS.privacy,plan,LEGAL_PLAN_PRICE_CENTS[plan]
+   AND cancellation_version=$6 AND plan=$7 AND price_cents=$8 LIMIT 1`,[
+  studioId,userId,LEGAL_VERSIONS.terms,LEGAL_VERSIONS.dpa,LEGAL_VERSIONS.privacy,LEGAL_VERSIONS.cancellation,plan,LEGAL_PLAN_PRICE_CENTS[plan]
  ]);
  return Boolean(result.rowCount);
 }
