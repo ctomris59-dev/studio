@@ -23,7 +23,7 @@ BEGIN
  END IF;
 END $;
 ALTER TABLE legal_acceptances ADD CONSTRAINT legal_acceptances_contract_version_key
- UNIQUE(studio_id,user_id,terms_version,dpa_version,privacy_version,cancellation_version,plan,price_cents);
+ UNIQUE(studio_id,user_id,terms_version,dpa_version,cancellation_version,plan,price_cents);
 
 CREATE INDEX subscriptions_paddle_customer_idx ON subscriptions(provider,provider_customer_id)
  WHERE provider='paddle' AND provider_customer_id IS NOT NULL;
