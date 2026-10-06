@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  async redirects(){
+    return [
+      {source:"/book/preview",destination:"/app-demo",permanent:true}
+    ];
+  },
   async headers(){
     const secure=[
       {key:"X-Frame-Options",value:"DENY"},

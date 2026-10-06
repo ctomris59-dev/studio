@@ -30,6 +30,7 @@ How a studio collects money from its own members stays entirely outside StudioTa
 - Marketing website: `/`
 - Owner-only app login sandbox: `/app-demo`
 - StudioTasker Today interactive preview: `/today`
+- Legacy `/book/preview` permanently redirects to the owner app demo because StudioTasker no longer exposes a member-facing public booking page.
 - Legacy `/demo` URL redirects to the canonical owner app sandbox at `/app-demo`.
 - PostgreSQL workspace: `/workspace` (disabled when the secure backend is not configured)
 
