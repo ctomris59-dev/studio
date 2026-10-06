@@ -14,5 +14,7 @@ export function commercialRegistrationReady():boolean{
   /^live_[A-Za-z0-9_-]{8,}$/.test(process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN||"")&&
   /^pri_[a-z\d]{26}$/.test(process.env.PADDLE_MONTHLY_PRICE_ID||"")&&
   /^pri_[a-z\d]{26}$/.test(process.env.PADDLE_ANNUAL_PRICE_ID||"");
- return origin.startsWith("https://")&&process.env.BILLING_ENFORCEMENT==="required"&&productionBilling&&required.every(k=>Boolean(process.env[k]));
+ const manualGates=process.env.LAUNCH_PADDLE_ACCOUNT_APPROVED==="true"&&
+  process.env.LAUNCH_LEGAL_REVIEW_CONFIRMED==="true"&&process.env.LAUNCH_TAX_REVIEW_CONFIRMED==="true";
+ return origin.startsWith("https://")&&process.env.BILLING_ENFORCEMENT==="required"&&productionBilling&&manualGates&&required.every(k=>Boolean(process.env[k]));
 }
