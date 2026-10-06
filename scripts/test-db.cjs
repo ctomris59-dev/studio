@@ -61,8 +61,8 @@ async function run(){
   assert.equal(visibleB.rowCount,0,"Tenant B cannot view tenant A class packs.");
   assert.equal((await runtime.query("SELECT id FROM studio_packages WHERE id=$1",[packageA])).rowCount,0,"Unscoped catalog reads must be empty.");
   await scoped(studio1,client=>client.query(`INSERT INTO legal_acceptances(
-   studio_id,user_id,source,terms_version,dpa_version,privacy_version,plan,price_cents,acceptance_text_hash,ip_hash,user_agent
-  ) VALUES($1,$2,'registration','2026-10-06','2026-10-06','2026-10-06','monthly',3990,$3,$4,'db-test')`,
+   studio_id,user_id,source,terms_version,dpa_version,privacy_version,cancellation_version,plan,price_cents,acceptance_text_hash,ip_hash,user_agent
+  ) VALUES($1,$2,'registration','2026-10-06','2026-10-06','2026-10-06','2026-10-06','monthly',3990,$3,$4,'db-test')`,
    [studio1,user1,"a".repeat(64),"b".repeat(64)]));
   assert.equal((await scoped(studio2,client=>client.query("SELECT id FROM legal_acceptances"))).rowCount,0,"Legal acceptance evidence must be tenant-isolated.");
   assert.equal((await runtime.query("SELECT id FROM legal_acceptances")).rowCount,0,"Unscoped legal acceptance reads must be empty.");
