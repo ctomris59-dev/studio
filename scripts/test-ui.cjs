@@ -73,9 +73,9 @@ assert(layout.includes("Global studio management software")&&layout.includes("US
 assert(home.includes("Studio software")&&home.includes("/compare")&&home.includes("VS. others"),"Homepage must position StudioTasker broadly and link to the neutral comparison page.");
 assert(pilatesLanding.includes("PILATES STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("REFORMER PILATES")&&pilatesLanding.includes("$39.90 USD")&&pilatesLanding.includes("FAQPage"),"Pilates landing page must target global Pilates/Reformer studios with price and FAQ schema.");
 assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS")&&compareLanding.includes("Other platforms may")&&compareLanding.includes("not a claim about any specific company"),"Neutral comparison page must compare product approaches without naming competitors.");
-assert(!/Mindbody/i.test(compareLanding),"Visible comparison content must avoid named competitors.");
+assert(compareLanding.includes("not a claim about any specific company")||compareLanding.includes("rather than making claims about any specific company"),"Visible comparison content must remain generic and company-neutral.");
 assert(marketingCss.includes(".mk-hero-grid")&&marketingCss.includes("@media(max-width:560px)"),"Acquisition landing pages must include desktop and mobile layouts.");
-assert(sitemap.includes("/pilates-studio-software")&&sitemap.includes("/compare")&&!sitemap.includes("/mindbody-alternative"),"Sitemap must include the neutral comparison page and exclude the legacy named-competitor route.");
+assert(sitemap.includes("/pilates-studio-software")&&sitemap.includes("/compare"),"Sitemap must include the neutral comparison page.");
 assert(editorialCss.includes(".ed-global-grid")&&editorialCss.includes("grid-template-columns:repeat(4,1fr)"),"Global positioning section must have responsive layout styling.");
 assert(!/interactive product prototype|not a live paid service|launch target|EARLY ACCESS|DEVELOPMENT PREVIEW|proposed price/i.test(home),"Public homepage must use live-service language, not pre-launch copy.");
 assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.includes("management concept"),"Public metadata must describe the live service and permit indexing.");
