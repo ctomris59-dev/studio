@@ -36,7 +36,7 @@ export async function recordLegalAcceptance(client:PoolClient,args:{
  await client.query(`INSERT INTO legal_acceptances(
   studio_id,user_id,source,terms_version,dpa_version,privacy_version,cancellation_version,plan,price_cents,acceptance_text_hash,ip_hash,user_agent
  ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
- ON CONFLICT(studio_id,user_id,terms_version,dpa_version,privacy_version,cancellation_version,plan,price_cents) DO NOTHING`,[
+ ON CONFLICT(studio_id,user_id,terms_version,dpa_version,cancellation_version,plan,price_cents) DO NOTHING`,[
   args.studioId,args.userId,args.source,LEGAL_VERSIONS.terms,LEGAL_VERSIONS.dpa,LEGAL_VERSIONS.privacy,LEGAL_VERSIONS.cancellation,args.plan,price,
   evidence.acceptanceTextHash,evidence.ipHash,evidence.userAgent
  ]);
