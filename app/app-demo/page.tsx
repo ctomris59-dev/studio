@@ -56,6 +56,7 @@ const stageOrder=["New","Contacted","Trial booked","Trial attended","Won"];
 const pLabel=(p:Signal["priority"])=>p==="high"?"HIGH":p==="medium"?"MEDIUM":"LOW";
 const isCreated=(id:string)=>id.startsWith("u-");
 const newId=(kind:string)=>"u-"+kind+"-"+Date.now().toString(36);
+const singular=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 
 export default function AppDemo(){
  const [signedIn,setSignedIn]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[message,setMessage]=useState("");
@@ -179,9 +180,9 @@ export default function AppDemo(){
     <div className="sad-table"><div className="sad-tr sad-th sad-tr-actions"><span>Member</span><span>Plan</span><span>Credits</span><span>Status</span><span>Last visit</span><span>Actions</span></div>{filteredMembers.map(m=><div className="sad-tr sad-tr-actions" key={m.id}><span><b>{m.name}</b><small>{isCreated(m.id)?"Added in demo":"member@sample.test"}</small></span><span>{m.plan}</span><span><b>{m.credits}</b></span><span><i className={m.status==="Confirmed"?"good":"pending"}>{m.status}</i></span><span>{m.lastVisit}</span><span className="sad-row-actions"><button type="button" className="danger" aria-label={"Remove "+m.name} onClick={()=>removeMember(m.id)}><Trash2 size={15}/></button></span></div>)}</div>
    </section>}
    {view==="classes"&&<section className="sad-view"><ViewHead eyebrow={settings.classTerm.toUpperCase()+" / CAPACITY"} title="Make room for movement." text="See capacity and studio-managed reservations alongside the public self-service booking preview."/>
-    <DemoToolbar label={"+ Add "+settings.classTerm.slice(0,-1).toLowerCase()} count={classList.filter(x=>isCreated(x.id)).length} open={adding==="classes"} onToggle={()=>setAdding(adding==="classes"?null:"classes")}/>
+    <DemoToolbar label={"+ Add "+singular(settings.classTerm).toLowerCase()} count={classList.filter(x=>isCreated(x.id)).length} open={adding==="classes"} onToggle={()=>setAdding(adding==="classes"?null:"classes")}/>
     {adding==="classes"&&<form className="sad-quick-form sad-class-form" onSubmit={addClass}><button type="button" className="sad-form-close" aria-label="Close add class" onClick={()=>setAdding(null)}><X size={17}/></button>
-     <label>{settings.classTerm.slice(0,-1)} name<input autoFocus required minLength={2} maxLength={70} value={classForm.title} onChange={e=>setClassForm({...classForm,title:e.target.value})} placeholder="Friday Flow"/></label>
+     <label>{singular(settings.classTerm)} name<input autoFocus required minLength={2} maxLength={70} value={classForm.title} onChange={e=>setClassForm({...classForm,title:e.target.value})} placeholder="Friday Flow"/></label>
      <label>Day & time<input required maxLength={30} value={classForm.time} onChange={e=>setClassForm({...classForm,time:e.target.value})}/></label>
      <label>Coach<input required maxLength={50} value={classForm.coach} onChange={e=>setClassForm({...classForm,coach:e.target.value})}/></label>
      <label>Room<input required maxLength={50} value={classForm.room} onChange={e=>setClassForm({...classForm,room:e.target.value})}/></label>
@@ -222,16 +223,36 @@ export default function AppDemo(){
       <label>Credit label<select value={settings.creditTerm} onChange={e=>setSettings({...settings,creditTerm:e.target.value})}>{["Credits","Visits","Sessions"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>Timezone<input required value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})}/></label>
      </div>
+     <div className="sad-settings-card"><h3>Workspace display</h3><p>These settings control how staff see dates, navigation and the first screen after sign-in.</p>
+      <label>Default landing page<select value={settings.defaultView} onChange={e=>setSettings({...settings,defaultView:e.target.value as OwnerView})}>{["today","leads","members","classes","followups","insights","settings"].map(x=><option key={x} value={x}>{x==="members"?settings.memberTerm:x==="classes"?settings.classTerm:x==="leads"?"Leads / CRM":x.charAt(0).toUpperCase()+x.slice(1)}</option>)}</select></label>
+      <label>Week starts<select value={settings.weekStarts} onChange={e=>setSettings({...settings,weekStarts:e.target.value as "monday"|"sunday"})}><option value="monday">Monday</option><option value="sunday">Sunday</option></select></label>
+      <label>Time format<select value={settings.timeFormat} onChange={e=>setSettings({...settings,timeFormat:e.target.value as "24h"|"12h"})}><option value="24h">24-hour</option><option value="12h">12-hour</option></select></label>
+      <p className="sad-settings-hint">The selected landing page is used the next time you sign in to this demo.</p>
+     </div>
+     <div className="sad-settings-card"><h3>{settings.classTerm} defaults</h3><p>New demo {settings.classTerm.toLowerCase()} pick up these starting values after you save customization.</p>
+      <label>Default duration (minutes)<input type="number" min={15} max={240} value={settings.defaultClassDuration} onChange={e=>setSettings({...settings,defaultClassDuration:Number(e.target.value)})}/></label>
+      <label>Default capacity<input type="number" min={1} max={30} value={settings.defaultClassCapacity} onChange={e=>setSettings({...settings,defaultClassCapacity:Number(e.target.value)})}/></label>
+      <label>Default room<input required minLength={1} maxLength={50} value={settings.defaultRoom} onChange={e=>setSettings({...settings,defaultRoom:e.target.value})}/></label>
+     </div>
+     <div className="sad-settings-card"><h3>StudioTasker Today rules</h3><p>Change when operational signals appear. The Today screen shows your saved demo rule values.</p>
+      <label>Inactive after (days)<input type="number" min={7} max={90} value={settings.inactiveDays} onChange={e=>setSettings({...settings,inactiveDays:Number(e.target.value)})}/></label>
+      <label>Low {settings.creditTerm.toLowerCase()} at or below<input type="number" min={0} max={10} value={settings.lowCreditsThreshold} onChange={e=>setSettings({...settings,lowCreditsThreshold:Number(e.target.value)})}/></label>
+      <label>Renewal window (days)<input type="number" min={1} max={60} value={settings.renewalWindowDays} onChange={e=>setSettings({...settings,renewalWindowDays:Number(e.target.value)})}/></label>
+      <label>Trial follow-up after (hours)<input type="number" min={1} max={168} value={settings.trialFollowupHours} onChange={e=>setSettings({...settings,trialFollowupHours:Number(e.target.value)})}/></label>
+      <label>Package review after (hours)<input type="number" min={1} max={168} value={settings.packageReviewHours} onChange={e=>setSettings({...settings,packageReviewHours:Number(e.target.value)})}/></label>
+      <label>Open-seat signal from<input type="number" min={1} max={30} value={settings.openSeatsThreshold} onChange={e=>setSettings({...settings,openSeatsThreshold:Number(e.target.value)})}/></label>
+     </div>
      <div className="sad-settings-card sad-booking-settings"><h3>Public booking page</h3><p>The studio gets its own customer-facing booking link. Logo, studio name and brand color come from these settings; member payments stay outside StudioTasker.</p>
-      <div className="sad-booking-mini" style={{borderColor:settings.accentColor}}><div>{logoUrl?<img src={logoUrl} alt="Booking page logo"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,1).toUpperCase()}</span>}<b>{settings.name}</b></div><small>{settings.focus}</small><strong style={{color:settings.accentColor}}>Book a {settings.classTerm.slice(0,-1).toLowerCase()}</strong></div>
+      <div className="sad-booking-mini" style={{borderColor:settings.accentColor}}><div>{logoUrl?<img src={logoUrl} alt="Booking page logo"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,1).toUpperCase()}</span>}<b>{settings.name}</b></div><small>{settings.focus}</small><strong style={{color:settings.accentColor}}>Book a {singular(settings.classTerm).toLowerCase()}</strong></div>
       <Link className="sad-preview-link" href="/book/preview">Open self-service booking preview <ArrowRight size={16}/></Link>
      </div>
      <div className="sad-settings-card"><h3>Internal class packages</h3><p>Operational entitlement templates only. StudioTasker does not price or collect member payments.</p>
       <div className="sad-package-row"><div><b>Starter Pack</b><small>5 {settings.classTerm.toLowerCase()} · 30 days</small></div><span>AVAILABLE</span></div>
       <div className="sad-package-row"><div><b>Studio Ten</b><small>10 {settings.classTerm.toLowerCase()} · 60 days</small></div><span>AVAILABLE</span></div>
      </div>
-     <button className="sad-settings-save" type="submit">Save demo customization</button>
-     <div className="sad-settings-card sad-boundary"><h3>What the customer can customize</h3><ul><li>Studio name, type and timezone</li><li>Logo and primary brand color</li><li>Member / client terminology</li><li>Class / session terminology</li><li>Credit / visit terminology</li><li>Public booking page identity</li><li>Class defaults and Today rules in the real workspace</li><li>No member payment processing or card storage</li></ul></div>
+     <div className="sad-demo-limit-card"><ShieldCheck size={18}/><div><b>DEMO LIMITS</b><span>Customization saves: {customizationSaves}/5 · Logo uploads: {logoUploads}/2 · CRUD additions: max {DEMO_ADD_LIMIT} per section.</span><small>Demo data is temporary to this browser tab and can be reset at any time.</small></div></div>
+     <button className="sad-settings-save" type="submit" disabled={customizationSaves>=5}>{customizationSaves>=5?"Demo customization limit reached":"Save demo customization"}</button>
+     <div className="sad-settings-card sad-boundary"><h3>What the customer can customize</h3><ul><li>Studio name, type and timezone</li><li>Logo and primary brand color</li><li>Member / client terminology</li><li>Class / session terminology</li><li>Credit / visit terminology</li><li>Public booking page identity</li><li>Landing page, week start and time format</li><li>Class defaults and Today signal rules</li><li>No member payment processing or card storage</li></ul></div>
     </form>
    </section>}
   </section>
