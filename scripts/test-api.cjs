@@ -284,47 +284,69 @@ async function main(){
   assert.equal(finished.status,200);
   console.log("Studio-only operations passed: internal entitlements, credits, capacity, attendance, tenant isolation, Today signals and onboarding.");
 
-  // Verified, idempotent Lemon Squeezy test-mode webhooks.
-  const secret=process.env.LEMON_WEBHOOK_SECRET;
-  assert(secret,"Webhook test secret must be set on isolated CI.");
+  // Verified, idempotent Paddle sandbox webhooks.
+  const secret=process.env.PADDLE_WEBHOOK_SECRET;
+  assert(secret,"Paddle webhook test secret must be set on isolated CI.");
   const eventBody={
-   meta:{event_name:"subscription_created",custom_data:{studio_id:studioA}},
-   data:{type:"subscriptions",id:"987654",attributes:{
-    store_id:Number(process.env.LEMON_STORE_ID),variant_id:Number(process.env.LEMON_MONTHLY_VARIANT_ID),
-    test_mode:true,status:"active",renews_at:future(30,12),ends_at:null,updated_at:new Date().toISOString()
-   }}
+   event_id:"evt_"+"a".repeat(26),
+   event_type:"subscription.created",
+   occurred_at:new Date().toISOString(),
+   notification_id:"ntf_"+"a".repeat(26),
+   data:{
+    id:"sub_"+"a".repeat(26),status:"active",customer_id:"ctm_"+"a".repeat(26),
+    updated_at:new Date().toISOString(),
+    current_billing_period:{starts_at:new Date().toISOString(),ends_at:future(30,12)},
+    items:[{price:{id:process.env.PADDLE_MONTHLY_PRICE_ID}}],
+    custom_data:{studio_id:studioA,plan:"monthly"}
+   }
   };
   async function signedEvent(event,valid=true){
-   const body=JSON.stringify(event);
-   const signature=createHmac("sha256",valid?secret:"incorrect-secret").update(body).digest("hex");
-   const response=await fetch(HOST+"/api/billing/lemon-webhook",{
-    method:"POST",headers:{"Content-Type":"application/json","X-Signature":signature},body
+   const body=JSON.stringify(event),ts=Math.floor(Date.now()/1000).toString();
+   const signature=createHmac("sha256",valid?secret:"incorrect-secret").update(ts+":"+body).digest("hex");
+   const response=await fetch(HOST+"/api/billing/paddle-webhook",{
+    method:"POST",headers:{"Content-Type":"application/json","Paddle-Signature":"ts="+ts+";h1="+signature},body
    });
    return {status:response.status,data:await response.json()};
   }
   assert.equal((await signedEvent(eventBody,false)).status,401);
-  console.log("HTTP stage: billing webhook");
+  console.log("HTTP stage: Paddle billing webhook");
   const paid=await signedEvent(eventBody);
   assert.equal(paid.status,200,JSON.stringify(paid.data));
   assert.equal(paid.data.processed,true);
   const duplicateWebhook=await signedEvent(eventBody);
   assert.equal(duplicateWebhook.status,200);
   assert.equal(duplicateWebhook.data.processed,false);
+
   console.log("HTTP stage: subscription read");
   const subscribed=await call("/api/studio/subscription",{cookie:a.cookie});
   assert.equal(subscribed.status,200);
   assert.equal(subscribed.data.subscription.enabled,true);
   assert.equal(subscribed.data.subscription.plan,"monthly");
+  assert.equal(subscribed.data.provider.provider,"paddle");
   const otherSubscription=await call("/api/studio/subscription",{cookie:b.cookie});
   assert.equal(otherSubscription.data.subscription.enabled,false);
-  const expiryEvent=structuredClone(eventBody);
-  expiryEvent.meta.event_name="subscription_expired";
-  expiryEvent.data.attributes.status="expired";
-  expiryEvent.data.attributes.ends_at=new Date(Date.now()-86400000).toISOString();
-  expiryEvent.data.attributes.updated_at=new Date(Date.now()+2000).toISOString();
-  assert.equal((await signedEvent(expiryEvent)).status,200);
-  const afterExpiry=await call("/api/studio/subscription",{cookie:a.cookie});
-  assert.equal(afterExpiry.data.subscription.enabled,false,"Expired subscription must not grant access.");
+
+  const pastDueEvent=structuredClone(eventBody);
+  pastDueEvent.event_id="evt_"+"b".repeat(26);
+  pastDueEvent.event_type="subscription.past_due";
+  pastDueEvent.occurred_at=new Date(Date.now()+1000).toISOString();
+  pastDueEvent.data.status="past_due";
+  pastDueEvent.data.updated_at=new Date(Date.now()+1000).toISOString();
+  assert.equal((await signedEvent(pastDueEvent)).status,200);
+  const inGrace=await call("/api/studio/subscription",{cookie:a.cookie});
+  assert.equal(inGrace.data.subscription.enabled,true,"Past-due subscription should receive only the short recovery grace.");
+  assert(inGrace.data.subscription.graceEndsAt,"Past-due access must expose a finite grace end.");
+
+  const canceledEvent=structuredClone(eventBody);
+  canceledEvent.event_id="evt_"+"c".repeat(26);
+  canceledEvent.event_type="subscription.canceled";
+  canceledEvent.occurred_at=new Date(Date.now()+2000).toISOString();
+  canceledEvent.data.status="canceled";
+  canceledEvent.data.updated_at=new Date(Date.now()+2000).toISOString();
+  canceledEvent.data.current_billing_period={starts_at:new Date(Date.now()-86400000*31).toISOString(),ends_at:new Date(Date.now()-1000).toISOString()};
+  assert.equal((await signedEvent(canceledEvent)).status,200);
+  const afterCancel=await call("/api/studio/subscription",{cookie:a.cookie});
+  assert.equal(afterCancel.data.subscription.enabled,false,"Canceled subscription after its paid period must not grant normal access.");
   // Owner-only data portability, contact updates and safe soft-archive.
   console.log("HTTP stage: owner export");
   const exported=await call("/api/studio/export",{cookie:a.cookie});
