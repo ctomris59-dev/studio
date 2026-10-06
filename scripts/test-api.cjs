@@ -52,9 +52,9 @@ async function main(){
  let studioA,studioB,ownerA,ownerB,instructor;
  try{
   await waitForBoot(server,logs);
-  const legacyBookingPreview=await call("/book/preview");
-  assert([307,308].includes(legacyBookingPreview.status),"Legacy booking preview must redirect instead of returning 404.");
-  assert.equal(legacyBookingPreview.headers.get("location"),"/app-demo");
+  const bookingPreview=await call("/book/preview");
+  assert.equal(bookingPreview.status,200,"Self-service booking preview must render.");
+  assert((bookingPreview.headers.get("content-type")||"").includes("text/html"));
   assert.equal((await call("/api/auth/me")).status,401);
   assert.equal((await call("/api/studio/people")).status,401);
   const badOrigin=await call("/api/auth/register",{method:"POST",origin:"https://cross-origin.example",body:{email:"x@example.com"}});
