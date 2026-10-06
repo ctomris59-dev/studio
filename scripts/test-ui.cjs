@@ -6,6 +6,7 @@ const operation=fs.readFileSync("app/workspace/studio-operations.tsx","utf8");
 const onboarding=fs.readFileSync("app/workspace/onboarding-panel.tsx","utf8");
 const today=fs.readFileSync("app/today/page.tsx","utf8");
 const home=fs.readFileSync("app/page.tsx","utf8");
+const editorialCss=fs.readFileSync("app/editorial.css","utf8");
 const layout=fs.readFileSync("app/layout.tsx","utf8");
 const subscriptionRoute=fs.readFileSync("app/api/studio/subscription/route.ts","utf8");
 const appDemo=fs.readFileSync("app/app-demo/page.tsx","utf8");
@@ -43,7 +44,7 @@ assert(home.includes("$39.90")&&home.includes("$34.90/month")&&home.includes("$4
 assert(!/interactive product prototype|not a live paid service|launch target|EARLY ACCESS|DEVELOPMENT PREVIEW|proposed price/i.test(home),"Public homepage must use live-service language, not pre-launch copy.");
 assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.includes("management concept"),"Public metadata must describe the live service and permit indexing.");
 assert(subscriptionRoute.includes('plan==="annual"?41880:3990')&&subscriptionRoute.includes("$39.90/month or $418.80/year"),"Checkout verification must match the published $39.90 monthly and $418.80 annual prices.");
-assert(css.includes(".ed-faq-list details p{font-size:16.5px")&&css.includes(".ed-topline{font-size:10.5px"),"Homepage FAQ and micro-copy must remain readable on laptop/tablet.");
+assert(editorialCss.includes(".ed-faq-list details p{font-size:16.5px")&&editorialCss.includes(".ed-topline{font-size:10.5px"),"Homepage FAQ and micro-copy must remain readable on laptop/tablet.");
 assert(!client.includes("production infrastructure is configured")&&!onboarding.includes("legal launch checks"),"Customer workspace must not expose development-stage launch wording.");
 assert(operation.includes("Monthly · $39.90")&&operation.includes("Annual · $418.80/year"),"Workspace subscription controls must show the published prices.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
