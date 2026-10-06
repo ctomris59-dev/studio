@@ -30,7 +30,7 @@ export function legalOperator():LegalOperator{
   hostingProvider:(process.env.LEGAL_HOSTING_PROVIDER||"").trim(),
   hostingRegion:(process.env.LEGAL_HOSTING_REGION||"").trim(),
   emailProvider:(process.env.LEGAL_EMAIL_PROVIDER||"").trim(),
-  billingProvider:(process.env.LEGAL_BILLING_PROVIDER||"Lemon Squeezy").trim()
+  billingProvider:(process.env.LEGAL_BILLING_PROVIDER||"Paddle").trim()
  };
  const configured=Boolean(
   values.name&&values.address&&values.country&&values.email&&values.governingLaw&&values.jurisdiction&&
