@@ -164,3 +164,13 @@
 @media(max-width:1000px){.rd-live-shell{grid-template-columns:215px minmax(0,1fr)}.rd-settings-grid{grid-template-columns:1fr}.rd-settings-save{grid-column:auto}.rd-live-insights{grid-template-columns:repeat(2,1fr)}.rd-live-insights article{border-bottom:1px solid #d8dce5}.rd-customize-head{align-items:flex-start;flex-direction:column}.rd-brand-preview{min-width:0;width:100%}}
 @media(max-width:720px){.rd-live-shell{grid-template-columns:1fr}.rd-live-sidebar{height:auto;min-height:0;position:static}.rd-live-sidebar nav{display:grid;grid-template-columns:repeat(3,1fr)}.rd-live-sidebar-bottom{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.rd-live-sidebar-bottom button{margin-left:auto}.rd-live-main{padding:0 16px 35px}.rd-live-top{min-height:82px}.rd-live-top h1{font-size:34px}.rd-live-accent{display:none}.rd-live-insights{grid-template-columns:1fr 1fr}.rd-live-insights article:nth-child(even){border-right:0}}
 @media(max-width:480px){.rd-live-sidebar nav{grid-template-columns:repeat(2,1fr)}.rd-live-insights{grid-template-columns:1fr}.rd-live-insights article{border-right:0}.rd-brand-preview{padding:10px}}
+
+
+/* Production workspace readability pass. */
+.rd-live-shell,.rd-auth{font-size:16px}
+.rd-live-shell small,.rd-auth small{font-size:12px}
+.rd-eyebrow,.rd-tiny{font-size:12px}
+.rd-live-brand small,.rd-live-sidebar-bottom small,.rd-live-sidebar-bottom span,.rd-powered{font-size:12px}
+.rd-live-accent,.rd-priority,.rd-rescue-title small,.rd-today-stats small{font-size:11.5px}
+.rd-action-item small,.rd-contact-list small,.rd-ops-section small,.rd-onboarding small{font-size:12px}
+.rd-form label,.rd-auth label{font-size:13px}

@@ -9,7 +9,7 @@ Updated 2026-10-05. This is a technical development snapshot, not a production s
 | Studio operations | Members/leads, classes, studio-managed bookings, waitlist, attendance, internal packages, credit ledger, tasks | Pilot usability, edge-case policy decisions, production acceptance tests |
 | StudioTasker Today | Explainable trial/renewal/inactive/package-review/open-seat/overdue signals; task/contact/snooze actions | Validate thresholds with real studio owners |
 | Studio onboarding | Five-step owner setup and CSV preview/import | Real onboarding timing study, help copy, production import acceptance tests |
-| SaaS billing | Lemon Squeezy-style signed webhook and entitlement code for StudioTasker's studio subscription | Merchant approval, exact $49/$468 variants, tax/invoice review, live sandbox acceptance |
+| SaaS billing | Lemon Squeezy-style signed webhook and entitlement code for StudioTasker's studio subscription | Merchant approval, exact $39.90/$418.80 variants, tax/invoice review, live sandbox acceptance |
 | Privacy/backups | Owner export, archive tracking, encrypted backup/verify/restore utilities | GDPR documentation, irreversible erasure policy, off-site schedule, restore drill |
 | QA | Auth/RLS/CRM/CSV/Excel/booking/timezone/UI/build/HTTP CI | Cross-device testing, WCAG review, VPS load test, independent security review |
 

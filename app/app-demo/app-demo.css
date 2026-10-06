@@ -69,3 +69,13 @@
 @media(max-width:1150px){.sad-class-form{grid-template-columns:1fr 1fr 1fr!important}.sad-class-form>button[type="submit"]{grid-column:1/-1}.sad-customize-preview{grid-template-columns:1fr}}
 @media(max-width:720px){.sad-class-form{grid-template-columns:1fr!important}.sad-settings-save,.sad-demo-limit-card{grid-column:auto}}
 .sad-display-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}.sad-display-preview span{background:#f8f8f4;border:1px solid #d8dce4;padding:9px;font:600 11px "IBM Plex Mono",monospace}.sad-display-preview b{display:block;color:#334bdd;font-size:8px;margin-bottom:5px}@media(max-width:560px){.sad-display-preview{grid-template-columns:1fr}}
+
+
+/* Demo readability pass. */
+.sad-login,.sad-app{font-size:16px}
+.sad-app small,.sad-login small{font-size:12px}
+.sad-app .sad-kicker,.sad-login .sad-kicker{font-size:12px}
+.sad-sidebar-bottom span,.sad-sidebar-bottom p,.sad-table small,.sad-lead-row small,.sad-signal-meta small{font-size:12px}
+.sad-stage,.sad-package-row span,.sad-rule-strip b,.sad-demo-limit-card b,.sad-brand-preview small,.sad-display-preview b{font-size:10.5px}
+.sad-settings-hint,.sad-demo-limit-card small,.sad-booking-mini small{font-size:12px!important}
+.sad-row-actions button,.sad-signal-buttons button,.sad-toolbar button{font-size:12px}

@@ -61,7 +61,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    setForm(prev=>({...prev,password:""}));
    if(mode==="login"){initializedView.current=false;await load();setNote("Signed in successfully.")}
    else{setNote(body.notice||"Request accepted.");if(["verify","reset"].includes(mode)){setMode("login");setToken("");window.history.replaceState(null,"","/workspace")}if(mode==="register")setMode("login")}
-  }catch{setNote("Request failed. Check server and database configuration.")}finally{setBusy(false)}
+  }catch{setNote("Request failed. Please try again in a moment.")}finally{setBusy(false)}
  }
  async function addPerson(event:FormEvent<HTMLFormElement>){
   event.preventDefault();setBusy(true);setNote("");
@@ -112,7 +112,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {mode==="register"&&<label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label>}
    <button className="rd-primary" disabled={busy}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions"}[mode]}</button>
   </form>
-  {!registrationEnabled&&<p className="rd-tiny">Public studio registration is disabled until production infrastructure is configured.</p>}
+  {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}
  </section>;
 
  const canContacts=["owner","manager","receptionist"].includes(user.role),canEdit=["owner","manager"].includes(user.role);
