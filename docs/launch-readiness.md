@@ -34,3 +34,7 @@ There is no member portal, member self-registration, public member booking page 
 ## Account email
 
 Outbound email support is limited to StudioTasker account operations such as owner/staff email verification and password reset. Member-facing marketing/booking/payment email is intentionally outside the product.
+
+## Paddle accounting control
+
+Before live sales, review and follow `docs/paddle-accounting-runbook.md`. The tax-review launch flag must only be enabled after the actual Turkish operator/payout bookkeeping treatment has been confirmed.
