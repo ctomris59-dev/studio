@@ -345,8 +345,8 @@ async function main(){
   canceledEvent.data.updated_at=new Date(Date.now()+2000).toISOString();
   canceledEvent.data.current_billing_period={starts_at:new Date(Date.now()-86400000*31).toISOString(),ends_at:new Date(Date.now()-1000).toISOString()};
   assert.equal((await signedEvent(canceledEvent)).status,200);
-  const afterCancel=await call("/api/studio/subscription",{cookie:a.cookie});
-  assert.equal(afterCancel.data.subscription.enabled,false,"Canceled subscription after its paid period must not grant normal access.");
+  const afterSubscriptionCancel=await call("/api/studio/subscription",{cookie:a.cookie});
+  assert.equal(afterSubscriptionCancel.data.subscription.enabled,false,"Canceled subscription after its paid period must not grant normal access.");
   // Owner-only data portability, contact updates and safe soft-archive.
   console.log("HTTP stage: owner export");
   const exported=await call("/api/studio/export",{cookie:a.cookie});
