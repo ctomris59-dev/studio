@@ -44,7 +44,7 @@ The app demo is fictional and browser-only. Do not enter real personal informati
 ## StudioTasker pricing
 
 - **$39.90/month per studio**
-- **$406.80/year** ($33.90/month equivalent when prepaid annually)
+- **$406.80/year** ($33.90/month equivalent; about 15% lower than paying monthly for twelve months)
 
 This fee is for StudioTasker software. It has no relationship to what the studio charges its members.
 
