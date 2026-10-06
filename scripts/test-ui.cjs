@@ -3,6 +3,7 @@ const fs=require("node:fs");
 const client=fs.readFileSync("app/workspace/workspace-client.tsx","utf8");
 const css=fs.readFileSync("app/workspace/workspace.css","utf8");
 const operation=fs.readFileSync("app/workspace/studio-operations.tsx","utf8");
+const workspacePage=fs.readFileSync("app/workspace/page.tsx","utf8");
 const onboarding=fs.readFileSync("app/workspace/onboarding-panel.tsx","utf8");
 const today=fs.readFileSync("app/today/page.tsx","utf8");
 const home=fs.readFileSync("app/page.tsx","utf8");
@@ -45,6 +46,6 @@ assert(!/interactive product prototype|not a live paid service|launch target|EAR
 assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.includes("management concept"),"Public metadata must describe the live service and permit indexing.");
 assert(subscriptionRoute.includes('plan==="annual"?41880:3990')&&subscriptionRoute.includes("$39.90/month or $418.80/year"),"Checkout verification must match the published $39.90 monthly and $418.80 annual prices.");
 assert(editorialCss.includes(".ed-faq-list details p{font-size:16.5px")&&editorialCss.includes(".ed-topline{font-size:10.5px"),"Homepage FAQ and micro-copy must remain readable on laptop/tablet.");
-assert(!client.includes("production infrastructure is configured")&&!onboarding.includes("legal launch checks"),"Customer workspace must not expose development-stage launch wording.");
+assert(!client.includes("production infrastructure is configured")&&!onboarding.includes("legal launch checks")&&!workspacePage.includes("Secure backend not configured")&&!workspacePage.includes("subscription infrastructure are configured"),"Customer workspace must not expose development-stage infrastructure wording.");
 assert(operation.includes("Monthly · $39.90")&&operation.includes("Annual · $418.80/year"),"Workspace subscription controls must show the published prices.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
