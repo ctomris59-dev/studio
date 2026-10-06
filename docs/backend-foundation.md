@@ -88,7 +88,7 @@ Never store production secrets, database dumps or customer data in the code repo
 - private VPS;
 - production PostgreSQL;
 - SMTP/domain verification;
-- Paddle live account/domain approval and exact StudioTasker $39.90/$418.80 price setup;
+- Paddle live account/domain approval and exact StudioTasker $39.90/$406.80 price setup;
 - off-site backup and successful clean restore;
 - monitoring/log policy;
 - GDPR/terms/privacy/retention/erasure review;
