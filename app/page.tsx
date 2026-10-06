@@ -83,7 +83,7 @@ export default function HomePage() {
                     <Link className="ed-buy-cta" href="/start"><span>START STUDIOTASKER</span><strong>$39.90 / month</strong><ArrowUpRight size={22}/></Link>
                     <Link className="ed-demo-cta" href="/app-demo"><span>TRY THE DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
                   </div>
-                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>USD billing · $39.90 monthly · $418.80 yearly · use your own studio timezone</span></div>
+                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>USD billing · $39.90 monthly · $406.80 yearly · use your own studio timezone</span></div>
                   <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
                 </div>
               </div>
@@ -104,7 +104,7 @@ export default function HomePage() {
           <div className="ed-container ed-start-simple-grid">
             <div className="ed-start-simple-head"><span className="ed-overline">START HERE</span><h2 id="start-simple-title">Three steps.<br/><em>Then you&apos;re in.</em></h2></div>
             <div className="ed-start-steps">
-              <article><b>1</b><div><strong>Choose your plan</strong><p>$39.90 monthly or $418.80 yearly.</p></div></article>
+              <article><b>1</b><div><strong>Choose your plan</strong><p>$39.90 monthly or $406.80 yearly.</p></div></article>
               <article><b>2</b><div><strong>Create your studio</strong><p>Add your email, studio name and basic setup.</p></div></article>
               <article><b>3</b><div><strong>Start using StudioTasker</strong><p>Import members, add your logo and begin managing the studio.</p></div></article>
             </div>
@@ -122,7 +122,7 @@ export default function HomePage() {
             <div className="ed-global-grid">
               <article><span>01</span><Globe2 size={24}/><h3>Your location.</h3><p>Choose your studio timezone and run the workspace around your own local day.</p></article>
               <article><span>02</span><Clock3 size={24}/><h3>Your clock.</h3><p>Use 12-hour or 24-hour time, and choose Monday or Sunday as the start of your week.</p></article>
-              <article><span>03</span><CreditCard size={24}/><h3>Your payments.</h3><p>Keep Stripe, Square, bank transfer or any other member-payment method outside StudioTasker.</p></article>
+              <article><span>03</span><CreditCard size={24}/><h3>Your payments.</h3><p>Keep your existing card processor, bank transfer or any other member-payment method outside StudioTasker.</p></article>
               <article><span>04</span><ShieldCheck size={24}/><h3>One clear price.</h3><p>$39.90 USD per studio each month. No per-member pricing and no country-specific software tier.</p></article>
             </div>
           </div>
@@ -188,9 +188,9 @@ export default function HomePage() {
 
         <section className="ed-pricing" id="pricing">
           <div className="ed-container">
-            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>One studio, one global subscription. Prices are shown in USD: $39.90 monthly, or $34.90/month with annual billing. Member payments stay completely outside StudioTasker.</p></div>
+            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>One studio, one global subscription. Prices are shown in USD: $39.90 monthly, or $33.90/month with annual billing — save 15%. Member payments stay completely outside StudioTasker.</p></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p><strong>Annual option: $34.90/month</strong> · billed annually at $418.80/year. Your subscription covers StudioTasker software; what your studio charges members remains entirely separate.</p><div className="ed-price-actions"><Link href="/start?plan=monthly">BUY MONTHLY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BUY ANNUAL · $418.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p><strong>Annual option: $33.90/month · SAVE 15%</strong> · billed annually at $406.80/year. Your subscription covers StudioTasker software; what your studio charges members remains entirely separate.</p><div className="ed-price-actions"><Link href="/start?plan=monthly">BUY MONTHLY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BUY ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Revenue Rescue opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function HomePage() {
               <details><summary>What kinds of studios is StudioTasker for?</summary><p>StudioTasker is designed for independent Pilates, yoga, barre, dance, gym, boutique fitness and other class-based studios. Studio name, logo, colors, terminology, class defaults and operating rules can be customized to fit the way your studio works.</p></details><details><summary>Where is StudioTasker available?</summary><p>StudioTasker is designed for independent studios in the United States, Canada, the United Kingdom, Europe and other international markets. The interface is English-first, pricing is shown in USD, and each studio can choose its own timezone, 12/24-hour clock and week-start preference.</p></details>
               <details><summary>Can I use it for real customer bookings today?</summary><p>Yes. Your private StudioTasker workspace is built for real studio operations: customer records, classes, studio-managed bookings, attendance, package entitlements and follow-ups. The public demo remains a separate sandbox so you can explore safely without changing your live studio data.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
-              <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $34.90/month, billed as $418.80 for the year. Paddle acts as Merchant of Record for StudioTasker subscription checkout, applicable transaction taxes, buyer billing documents and refunds. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
+              <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $33.90/month, billed as $406.80 for the year — about 15% less than paying monthly for 12 months. Paddle acts as Merchant of Record for StudioTasker subscription checkout, applicable transaction taxes, buyer billing documents and refunds. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
             </div>
           </div>
