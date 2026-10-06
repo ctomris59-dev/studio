@@ -13,3 +13,6 @@
 @media(max-width:480px){.st-start-top{height:70px;padding:0 15px}.st-start-brand{font-size:21px}.st-start-brand svg{width:33px;height:33px}.st-start-top-actions{font-size:13px}.st-start-hero{padding:30px 0 55px}.st-start h1{font-size:58px}.st-start-intro>p{font-size:16px}.st-start-steps{display:grid;gap:10px}.st-start-plans article{padding:20px;box-shadow:5px 5px 0 #17203c}.st-plan-price{font-size:74px}.st-plan-price em{font-size:32px}.st-plan-price small{font-size:12px}.st-plan-buy{font-size:12px}}
 
 .st-start-legal{margin-top:28px;border:1px solid #c8ccd7;background:#fffefa;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.55}.st-start-legal svg{color:#334bdd;flex:0 0 auto;margin-top:2px}.st-start-legal a{color:#334bdd;text-decoration:underline;text-underline-offset:2px;font-weight:800}
+
+.st-start-global{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-20px 0 28px;padding:10px 12px;border:1px solid #c9ceda;background:#fffefa;color:#17203c}.st-start-global svg{color:#334bdd;flex:0 0 auto}.st-start-global span{font:800 11px "IBM Plex Mono",monospace;letter-spacing:.045em}.st-start-global small{color:#667086;font-size:12px;margin-left:auto}
+@media(max-width:700px){.st-start-global{align-items:flex-start}.st-start-global small{width:100%;margin-left:29px}}
