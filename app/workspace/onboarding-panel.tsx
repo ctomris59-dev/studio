@@ -65,6 +65,6 @@ export function OnboardingPanel({role,onDataChange}:{role:string;onDataChange:()
    {state&&!state.steps.find(x=>x.id==="contacts")?.done&&<button type="button" className="rd-subtle-action" disabled={busy} onClick={()=>void action("skip_import")}>Skip migration for now</button>}
    {state&&!state.finished&&<button type="button" className="rd-primary" disabled={busy||!state.basics} onClick={()=>void action("complete_setup")}>Finish setup</button>}
   </div>}
-  <p className="rd-tiny">The five-step flow is a setup target, not a guaranteed completion time. Domain, account email, StudioTasker subscription billing and legal launch checks remain separate production tasks.</p>
+  <p className="rd-tiny">Complete the five steps at your own pace. Your studio profile, imported records and operating preferences can be updated later from Settings.</p>
  </section>;
 }
