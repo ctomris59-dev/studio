@@ -24,7 +24,7 @@ const modes:{mode:AuthMode;name:string}[]=[{mode:"login",name:"Sign in"},{mode:"
 
 export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boolean}){
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
- const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState("");
+ const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null);
  const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates",timezone:"UTC"}),[person,setPerson]=useState({kind:"lead",name:"",email:"",phone:""});
  const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New"});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
@@ -46,7 +46,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  }
  useEffect(()=>{
   const detected=Intl.DateTimeFormat().resolvedOptions().timeZone;if(detected)setForm(prev=>({...prev,timezone:detected}));
-  const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));if(window.location.hash)window.history.replaceState(null,"",window.location.pathname);
+  const search=new URLSearchParams(window.location.search),requestedPlan=search.get("plan"),requestedMode=search.get("mode");if(requestedPlan==="monthly"||requestedPlan==="annual")setPendingPlan(requestedPlan);if(requestedMode==="register"&&registrationEnabled)setMode("register");
+  const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));if(window.location.hash)window.history.replaceState(null,"",window.location.pathname+window.location.search);
   for(const name of ["verify","reset"] as const){const found=qs.get(name);if(found){setMode(name);setToken(found);break}}
   void load().catch(()=>setNote("Could not check your workspace session."));
  },[]);
@@ -59,7 +60,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)}),body=await res.json();
    if(!res.ok){setNote(body.error||"Unable to complete your request.");return}
    setForm(prev=>({...prev,password:""}));
-   if(mode==="login"){initializedView.current=false;await load();setNote("Signed in successfully.")}
+   if(mode==="login"){initializedView.current=false;await load();if(pendingPlan)setView("settings");setNote(pendingPlan?"Signed in. Complete your "+pendingPlan+" StudioTasker subscription below.":"Signed in successfully.")}
    else{setNote(body.notice||"Request accepted.");if(["verify","reset"].includes(mode)){setMode("login");setToken("");window.history.replaceState(null,"","/workspace")}if(mode==="register")setMode("login")}
   }catch{setNote("Request failed. Please try again in a moment.")}finally{setBusy(false)}
  }
@@ -102,6 +103,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  async function logout(){await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});setUser(null);setStudio(null);setPeople([]);initializedView.current=false;setNote("Signed out.")}
 
  if(!user)return <section className="rd-workspace-card rd-auth-card">
+  {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $418.80/YEAR":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
   <div className="rd-tab-buttons">{modes.map(({mode:next,name})=><button key={next} type="button" className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&<button type="button" className={mode==="register"?"active":""} onClick={()=>setMode("register")}>Create studio</button>}</div>
   <form className="rd-form" onSubmit={submitAuth}>

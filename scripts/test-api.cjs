@@ -52,6 +52,9 @@ async function main(){
  let studioA,studioB,ownerA,ownerB,instructor;
  try{
   await waitForBoot(server,logs);
+  const startPage=await call("/start?plan=annual");
+  assert.equal(startPage.status,200,"Purchase start page must render.");
+  assert((startPage.headers.get("content-type")||"").includes("text/html"));
   const bookingPreview=await call("/book/preview");
   assert.equal(bookingPreview.status,200,"Self-service booking preview must render.");
   assert((bookingPreview.headers.get("content-type")||"").includes("text/html"));

@@ -348,3 +348,94 @@
  .ed-faq-list details p{font-size:15.5px}
  .ed-sch-class b{font-size:10.5px}.ed-sch-class small,.ed-sch-time,.ed-sch-foot{font-size:9.5px}
 }
+
+
+/* Purchase-first homepage UX: obvious enough for first-time and older users. */
+.ed-nav-demo{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:0 16px;border:1px solid #9aa4c8;background:#fffefa;color:var(--ed-ink);font:700 12px "IBM Plex Mono",monospace;letter-spacing:.025em}
+.ed-nav-demo:hover{border-color:var(--ed-blue);color:var(--ed-blue)}
+.ed-nav-cta{min-height:48px;background:var(--ed-lime);color:var(--ed-ink);border:2px solid var(--ed-ink);font-size:12px;font-weight:800;gap:15px;padding:0 17px;box-shadow:4px 4px 0 #17203c}
+.ed-nav-cta:hover{background:#fff;color:var(--ed-ink);transform:translate(2px,2px);box-shadow:2px 2px 0 #17203c}
+.ed-hero-under{display:grid;grid-template-columns:minmax(230px,.8fr) minmax(390px,1.2fr);gap:30px;align-items:end}
+.ed-hero-under p{font-size:16px;line-height:1.72;max-width:380px}
+.ed-hero-action-stack{display:flex;flex-direction:column;gap:12px}
+.ed-hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ed-buy-cta,.ed-demo-cta{min-height:94px;padding:17px 18px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;border:2px solid #17203c;box-shadow:5px 5px 0 #17203c}
+.ed-buy-cta{background:var(--ed-lime);color:#17203c}
+.ed-demo-cta{background:#fffefa;color:#17203c}
+.ed-buy-cta span,.ed-demo-cta span{font:800 14px "IBM Plex Mono",monospace;letter-spacing:.02em}
+.ed-buy-cta strong,.ed-demo-cta strong{font:700 13px "Source Sans 3",Arial,sans-serif;color:#39445f}
+.ed-buy-cta svg,.ed-demo-cta svg{grid-column:2;grid-row:1/3;align-self:center}
+.ed-buy-cta:hover,.ed-demo-cta:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 #17203c}
+.ed-hero-price-note{display:flex;align-items:center;gap:8px;color:#f4f7ff;font-size:13px}
+.ed-hero-price-note svg{color:var(--ed-lime);flex:0 0 auto}
+.ed-hero-today-link{display:inline-flex;align-items:center;gap:8px;color:#fff;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.ed-hero-today-link:hover{color:var(--ed-lime)}
+.ed-hero-canvas{overflow:hidden}
+.ed-hero-disc{width:126px;height:126px;left:30px;top:70px;z-index:3;transform:rotate(-7deg);box-shadow:5px 6px 0 #17203c}
+.ed-hero-disc span{font-size:24px;line-height:.9}
+.ed-hero-disc i{font-size:18px;top:10px;right:14px}
+.ed-hero-card{left:8%;right:5%;top:184px;transform:rotate(-.7deg);filter:drop-shadow(8px 10px 0 #1e2d96)}
+.ed-canvas-meta{z-index:4}
+.ed-sch-week{padding-right:8px}
+
+.ed-start-simple{background:#fffefa;border-top:1px solid var(--ed-ink);border-bottom:1px solid var(--ed-ink);padding:58px 0}
+.ed-start-simple-grid{display:grid;grid-template-columns:.7fr 1.45fr .65fr;gap:34px;align-items:center}
+.ed-start-simple-head h2{font-size:clamp(38px,4vw,62px);line-height:1.02;margin-top:12px}
+.ed-start-simple-head h2 em{color:var(--ed-blue)}
+.ed-start-steps{display:grid;gap:9px}
+.ed-start-steps article{display:grid;grid-template-columns:48px 1fr;gap:14px;align-items:center;padding:12px 14px;border:1px solid #d2d5dd;background:#f7f4ec}
+.ed-start-steps article>b{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--ed-blue);color:#fff;font-size:20px}
+.ed-start-steps strong{display:block;font-size:17px}
+.ed-start-steps p{font-size:14px;color:#5d6573;margin-top:2px}
+.ed-start-simple-actions{display:grid;gap:10px}
+.ed-start-buy,.ed-start-demo{min-height:58px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:2px solid #17203c;font-weight:800;font-size:13px}
+.ed-start-buy{background:var(--ed-lime);box-shadow:4px 4px 0 #17203c}
+.ed-start-demo{background:#fff}
+.ed-start-buy:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 #17203c}
+.ed-start-demo:hover{background:#eef0ff}
+
+.ed-price-actions{margin-top:auto;display:grid;gap:10px}
+.ed-price-actions a{display:flex;align-items:center;justify-content:space-between;gap:15px;min-height:54px;padding:13px 16px;font:800 12px "IBM Plex Mono",monospace}
+.ed-price-actions a:nth-child(1){background:var(--ed-lime);color:var(--ed-ink)}
+.ed-price-actions a:nth-child(2){background:#fff;color:var(--ed-ink)}
+.ed-price-actions a:nth-child(3){border:1px solid #657087;color:#fff}
+.ed-price-actions a:hover{outline:3px solid var(--ed-orange);outline-offset:2px}
+.ed-last-demo-link{display:inline-block;margin-top:15px;font-size:14px;text-decoration:underline;text-underline-offset:4px}
+
+@media(max-width:1180px){
+ .ed-nav nav{display:none}
+ .ed-start-simple-grid{grid-template-columns:1fr 1.4fr}
+ .ed-start-simple-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+ .ed-nav-demo{display:none}
+ .ed-hero-under{grid-template-columns:1fr;align-items:start}
+ .ed-hero-under p{max-width:560px}
+ .ed-hero-action-stack{max-width:640px}
+ .ed-start-simple-grid{grid-template-columns:1fr}
+ .ed-start-simple-actions{grid-column:auto;grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+ .ed-nav-actions{gap:8px}.ed-customer-login{display:none}.ed-nav-cta{font-size:11px;min-height:45px;padding:0 12px}
+ .ed-hero-copy{min-height:auto;padding-bottom:38px}
+ .ed-hero-actions{grid-template-columns:1fr}
+ .ed-buy-cta,.ed-demo-cta{min-height:78px}
+ .ed-hero-canvas{min-height:520px}
+ .ed-hero-disc{width:104px;height:104px;top:44px;left:18px}
+ .ed-hero-disc span{font-size:19px}
+ .ed-hero-card{top:136px;left:5%;right:4%;transform:rotate(-.5deg)}
+ .ed-start-simple{padding:45px 0}.ed-start-simple-actions{grid-template-columns:1fr}
+}
+@media(max-width:460px){
+ .ed-nav-cta{font-size:10px;box-shadow:none}
+ .ed-hero-under p{font-size:15px}
+ .ed-buy-cta span,.ed-demo-cta span{font-size:13px}
+ .ed-buy-cta strong,.ed-demo-cta strong{font-size:12px}
+ .ed-hero-price-note{font-size:12px}
+ .ed-hero-canvas{min-height:455px}
+ .ed-hero-disc{width:86px;height:86px;top:35px;left:12px;box-shadow:3px 4px 0 #17203c}
+ .ed-hero-disc span{font-size:16px}.ed-hero-disc i{font-size:14px;top:7px;right:10px}
+ .ed-hero-card{top:112px;left:3%;right:3%}
+ .ed-start-steps article{grid-template-columns:40px 1fr}.ed-start-steps article>b{width:36px;height:36px;font-size:18px}
+ .ed-start-steps strong{font-size:16px}.ed-start-steps p{font-size:13px}
+}

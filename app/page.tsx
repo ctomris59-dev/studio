@@ -60,7 +60,7 @@ export default function HomePage() {
         <div className="ed-container ed-nav">
           <Identity/>
           <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#studio">Product tour</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
-          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-cta" href="/app-demo">OPEN THE DEMO <ArrowUpRight size={16}/></Link></div>
+          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">BUY NOW · $39.90 <ArrowUpRight size={16}/></Link></div>
         </div>
       </header>
 
@@ -76,19 +76,38 @@ export default function HomePage() {
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
                 <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — then tells your team what needs attention next.</p>
-                <Link className="ed-primary-cta" href="/today"><span>SEE WHAT NEEDS ATTENTION TODAY</span><ArrowUpRight size={20}/></Link><Link className="ed-text-link" href="/app-demo">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
+                <div className="ed-hero-action-stack">
+                  <div className="ed-hero-actions">
+                    <Link className="ed-buy-cta" href="/start"><span>START STUDIOTASKER</span><strong>$39.90 / month</strong><ArrowUpRight size={22}/></Link>
+                    <Link className="ed-demo-cta" href="/app-demo"><span>TRY THE DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
+                  </div>
+                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>Annual billing: $34.90/month · $418.80/year</span></div>
+                  <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
+                </div>
               </div>
               <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
             <div className="ed-hero-canvas">
               <div className="ed-canvas-meta"><span>STUDIOTASKER / PRODUCT PREVIEW</span><span>EXPLORE WITH SAMPLE DATA · NO SIGN-UP NEEDED</span></div>
-              <div className="ed-hero-disc" aria-hidden="true"><span>KEEP<br/>THINGS<br/>MOVING.</span><i>↗</i></div>
+              <div className="ed-hero-disc" aria-hidden="true"><span>YOUR<br/>STUDIO<br/>IN SYNC.</span><i>↗</i></div>
               <div className="ed-hero-card"><MiniSchedule/></div>
               <div className="ed-hero-sticker"><span className="ed-sticker-cross">✳</span><span>MORE ROOM<br/>TO DO YOUR<br/>THING.</span></div>
               <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
             </div>
           </div>
           <div className="ed-hero-end ed-container"><span>STUDIOTASKER · KNOW WHAT YOUR STUDIO NEEDS TODAY.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
+        </section>
+
+        <section className="ed-start-simple" aria-labelledby="start-simple-title">
+          <div className="ed-container ed-start-simple-grid">
+            <div className="ed-start-simple-head"><span className="ed-overline">START HERE</span><h2 id="start-simple-title">Three steps.<br/><em>Then you&apos;re in.</em></h2></div>
+            <div className="ed-start-steps">
+              <article><b>1</b><div><strong>Choose your plan</strong><p>$39.90 monthly or $418.80 yearly.</p></div></article>
+              <article><b>2</b><div><strong>Create your studio</strong><p>Add your email, studio name and basic setup.</p></div></article>
+              <article><b>3</b><div><strong>Start using StudioTasker</strong><p>Import members, add your logo and begin managing the studio.</p></div></article>
+            </div>
+            <div className="ed-start-simple-actions"><Link href="/start" className="ed-start-buy">BUY / START STUDIOTASKER <ArrowUpRight size={21}/></Link><Link href="/app-demo" className="ed-start-demo">TRY DEMO FIRST <ArrowRight size={20}/></Link></div>
+          </div>
         </section>
 
         <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b>✳</b><span>YOGA</span><b>✳</b><span>BARRE</span><b>✳</b><span>BOUTIQUE FITNESS</span><b>✳</b><span>GROUP CLASSES</span><b>✳</b></div></section>
@@ -153,7 +172,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>One studio, one straightforward subscription. Pay monthly at $39.90, or save with annual billing at $34.90/month. Member payments stay completely outside StudioTasker.</p></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p><strong>Annual option: $34.90/month</strong> · billed annually at $418.80/year. Your subscription covers StudioTasker software; what your studio charges members remains entirely separate.</p><Link href="/workspace">GET STARTED <ArrowUpRight size={19}/></Link></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p><strong>Annual option: $34.90/month</strong> · billed annually at $418.80/year. Your subscription covers StudioTasker software; what your studio charges members remains entirely separate.</p><div className="ed-price-actions"><Link href="/start?plan=monthly">BUY MONTHLY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BUY ANNUAL · $418.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Revenue Rescue opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Member payments, card details and merchant settlement remain with your studio&apos;s own payment method.</div></div>
             </div>
           </div>
@@ -171,9 +190,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">NOW, BACK TO WHAT MATTERS</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>See how simple the day could look.</p><Link href="/today" className="ed-last-link"><span>START WITH TODAY</span><ArrowUpRight size={22}/></Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
+        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">READY WHEN YOU ARE</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>Choose a plan and create your StudioTasker workspace.</p><Link href="/start" className="ed-last-link"><span>BUY / START STUDIOTASKER</span><ArrowUpRight size={22}/></Link><Link href="/app-demo" className="ed-last-demo-link">Or try the demo first →</Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><a href="#features">Features</a><Link href="/workspace">Customer sign in</Link><Link href="/app-demo">Interactive demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/app-demo">CRM demo</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · STUDIO MANAGEMENT SOFTWARE</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><Link href="/start">Buy StudioTasker</Link><a href="#features">Features</a><Link href="/workspace">Customer sign in</Link><Link href="/app-demo">Interactive demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · STUDIO MANAGEMENT SOFTWARE</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
     </div>
   );
 }
