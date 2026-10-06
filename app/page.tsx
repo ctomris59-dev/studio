@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3,
-  CreditCard, MoveRight, Plus, ShieldCheck, Users, Waves
+  CreditCard, Globe2, MoveRight, Plus, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
 import { StudioTaskerMark } from "../components/studio-tasker-mark";
@@ -55,7 +55,7 @@ function MiniSchedule({ compact = false }: { compact?: boolean }) {
 export default function HomePage() {
   return (
     <div className="editorial">
-      <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>DESIGNED FOR INDEPENDENT STUDIOS <span className="ed-star">✳</span> 2026</span></div></div>
+      <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>INDEPENDENT STUDIOS · USA · CANADA · UK · EUROPE · WORLDWIDE <span className="ed-star">✳</span></span></div></div>
       <header className="ed-header">
         <div className="ed-container ed-nav">
           <Identity/>
@@ -70,18 +70,18 @@ export default function HomePage() {
             <div className="ed-hero-copy">
               <div className="ed-hero-brand">
                 <span className="ed-hero-brand-icon"><StudioTaskerMark/></span>
-                <div><strong>StudioTasker</strong><small>ALL-IN-ONE STUDIO MANAGEMENT</small></div>
+                <div><strong>StudioTasker</strong><small>GLOBAL STUDIO MANAGEMENT SOFTWARE</small></div>
               </div>
-              <div className="ed-index"><span className="ed-index-line"/> PILATES · YOGA · BARRE · BOUTIQUE STUDIOS</div>
+              <div className="ed-index"><span className="ed-index-line"/> PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
-                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — then tells your team what needs attention next.</p>
+                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — for independent studios in the USA, Canada, UK, Europe and beyond.</p>
                 <div className="ed-hero-action-stack">
                   <div className="ed-hero-actions">
                     <Link className="ed-buy-cta" href="/start"><span>START STUDIOTASKER</span><strong>$39.90 / month</strong><ArrowUpRight size={22}/></Link>
                     <Link className="ed-demo-cta" href="/app-demo"><span>TRY THE DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
                   </div>
-                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>Annual billing: $34.90/month · $418.80/year</span></div>
+                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>USD billing · $39.90 monthly · $418.80 yearly · use your own studio timezone</span></div>
                   <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
                 </div>
               </div>
@@ -107,6 +107,22 @@ export default function HomePage() {
               <article><b>3</b><div><strong>Start using StudioTasker</strong><p>Import members, add your logo and begin managing the studio.</p></div></article>
             </div>
             <div className="ed-start-simple-actions"><Link href="/start" className="ed-start-buy">BUY / START STUDIOTASKER <ArrowUpRight size={21}/></Link><Link href="/app-demo" className="ed-start-demo">TRY DEMO FIRST <ArrowRight size={20}/></Link></div>
+          </div>
+        </section>
+
+        <section className="ed-global" aria-labelledby="global-title">
+          <div className="ed-container">
+            <div className="ed-global-head">
+              <div><span className="ed-overline">BUILT TO TRAVEL</span><h2 id="global-title">One studio system.<br/><em>Wherever you run it.</em></h2></div>
+              <p>StudioTasker is English-first software for independent studios across the United States, Canada, the United Kingdom, Europe and beyond. Your operating setup stays local to your studio.</p>
+            </div>
+            <div className="ed-global-regions" aria-label="Primary StudioTasker markets"><span>USA</span><span>CANADA</span><span>UK</span><span>EUROPE</span><span>WORLDWIDE</span></div>
+            <div className="ed-global-grid">
+              <article><span>01</span><Globe2 size={24}/><h3>Your location.</h3><p>Choose your studio timezone and run the workspace around your own local day.</p></article>
+              <article><span>02</span><Clock3 size={24}/><h3>Your clock.</h3><p>Use 12-hour or 24-hour time, and choose Monday or Sunday as the start of your week.</p></article>
+              <article><span>03</span><CreditCard size={24}/><h3>Your payments.</h3><p>Keep Stripe, Square, bank transfer or any other member-payment method outside StudioTasker.</p></article>
+              <article><span>04</span><ShieldCheck size={24}/><h3>One clear price.</h3><p>$39.90 USD per studio each month. No per-member pricing and no country-specific software tier.</p></article>
+            </div>
           </div>
         </section>
 
@@ -170,7 +186,7 @@ export default function HomePage() {
 
         <section className="ed-pricing" id="pricing">
           <div className="ed-container">
-            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>One studio, one straightforward subscription. Pay monthly at $39.90, or save with annual billing at $34.90/month. Member payments stay completely outside StudioTasker.</p></div>
+            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Good software.<br/><em>Clear numbers.</em></h2><p>One studio, one global subscription. Prices are shown in USD: $39.90 monthly, or $34.90/month with annual billing. Member payments stay completely outside StudioTasker.</p></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p><strong>Annual option: $34.90/month</strong> · billed annually at $418.80/year. Your subscription covers StudioTasker software; what your studio charges members remains entirely separate.</p><div className="ed-price-actions"><Link href="/start?plan=monthly">BUY MONTHLY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BUY ANNUAL · $418.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Revenue Rescue opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Member payments, card details and merchant settlement remain with your studio&apos;s own payment method.</div></div>
@@ -182,7 +198,7 @@ export default function HomePage() {
           <div className="ed-container ed-faq-grid">
             <div><span className="ed-overline">05 / GOOD TO KNOW</span><h2 id="faq-heading">Clear answers.<br/><em>No fine print tricks.</em></h2><p>StudioTasker is subscription-based studio management software. You can explore the interactive demo first, then use your own private workspace for day-to-day studio operations.</p></div>
             <div className="ed-faq-list">
-              <details><summary>What kinds of studios is StudioTasker for?</summary><p>StudioTasker is designed for independent Pilates, yoga, barre, dance, gym, boutique fitness and other class-based studios. Studio name, logo, colors, terminology, class defaults and operating rules can be customized to fit the way your studio works.</p></details>
+              <details><summary>What kinds of studios is StudioTasker for?</summary><p>StudioTasker is designed for independent Pilates, yoga, barre, dance, gym, boutique fitness and other class-based studios. Studio name, logo, colors, terminology, class defaults and operating rules can be customized to fit the way your studio works.</p></details><details><summary>Where is StudioTasker available?</summary><p>StudioTasker is designed for independent studios in the United States, Canada, the United Kingdom, Europe and other international markets. The interface is English-first, pricing is shown in USD, and each studio can choose its own timezone, 12/24-hour clock and week-start preference.</p></details>
               <details><summary>Can I use it for real customer bookings today?</summary><p>Yes. Your private StudioTasker workspace is built for real studio operations: customer records, classes, studio-managed bookings, attendance, package entitlements and follow-ups. The public demo remains a separate sandbox so you can explore safely without changing your live studio data.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
               <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $34.90/month, billed as $418.80 for the year. Your studio&apos;s own memberships, class packs and customer payments are completely separate from the StudioTasker subscription.</p></details>
@@ -192,7 +208,7 @@ export default function HomePage() {
         </section>
         <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">READY WHEN YOU ARE</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>Choose a plan and create your StudioTasker workspace.</p><Link href="/start" className="ed-last-link"><span>BUY / START STUDIOTASKER</span><ArrowUpRight size={22}/></Link><Link href="/app-demo" className="ed-last-demo-link">Or try the demo first →</Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software.</p></div><div className="ed-footer-nav"><Link href="/start">Buy StudioTasker</Link><a href="#features">Features</a><Link href="/workspace">Customer sign in</Link><Link href="/app-demo">Interactive demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/legal">Legal & Trust</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/dpa">DPA</Link><Link href="/legal/cookies">Cookies</Link><Link href="/legal/subprocessors">Subprocessors</Link><Link href="/legal/security">Security</Link><Link href="/legal/cancellation">Cancellation</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · STUDIO MANAGEMENT SOFTWARE</span><span>BUILT FOR THE PEOPLE BEHIND THE PRACTICE. ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software for independent studios worldwide.</p></div><div className="ed-footer-nav"><Link href="/start">Buy StudioTasker</Link><a href="#features">Features</a><Link href="/workspace">Customer sign in</Link><Link href="/app-demo">Interactive demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/legal">Legal & Trust</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/dpa">DPA</Link><Link href="/legal/cookies">Cookies</Link><Link href="/legal/subprocessors">Subprocessors</Link><Link href="/legal/security">Security</Link><Link href="/legal/cancellation">Cancellation</Link></div></div><div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · GLOBAL STUDIO MANAGEMENT SOFTWARE</span><span>USA · CANADA · UK · EUROPE · WORLDWIDE ✳</span></div></footer>
     </div>
   );
 }
