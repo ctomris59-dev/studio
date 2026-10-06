@@ -24,6 +24,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
      <span><b>1</b> Choose plan</span><i/><span><b>2</b> Create studio</span><i/><span><b>3</b> Start using it</span>
     </div>
    </div>
+   <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · Worldwide</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
 
    <div className="st-start-plans" aria-label="StudioTasker plans">
     <article className={selected==="monthly"?"selected":""}>
