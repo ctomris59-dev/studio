@@ -52,6 +52,8 @@ assert(!/interactive product prototype|not a live paid service|launch target|EAR
 assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.includes("management concept"),"Public metadata must describe the live service and permit indexing.");
 assert(subscriptionRoute.includes('plan==="annual"?41880:3990')&&subscriptionRoute.includes("$39.90/month or $418.80/year"),"Checkout verification must match the published $39.90 monthly and $418.80 annual prices.");
 assert(editorialCss.includes(".ed-faq-list details p{font-size:16.5px")&&editorialCss.includes(".ed-topline{font-size:10.5px"),"Homepage FAQ and micro-copy must remain readable on laptop/tablet.");
+assert(editorialCss.includes("max-height:calc(100svh - 110px)")&&editorialCss.includes("font-size:clamp(68px,6.45vw,118px)"),"Desktop hero must fit within the first viewport.");
+assert(editorialCss.includes(".ed-buy-cta span")&&editorialCss.includes("color:#17203c!important"),"Lime purchase CTAs must use dark high-contrast text.");
 assert(!client.includes("production infrastructure is configured")&&!onboarding.includes("legal launch checks")&&!workspacePage.includes("Secure backend not configured")&&!workspacePage.includes("subscription infrastructure are configured"),"Customer workspace must not expose development-stage infrastructure wording.");
 assert(client.includes("pendingPlan")&&client.includes('requestedMode==="register"')&&client.includes("Complete your"),"Workspace auth must preserve plan intent from the purchase flow.");
 assert(operation.includes("Monthly · $39.90")&&operation.includes("Annual · $418.80/year"),"Workspace subscription controls must show the published prices.");
