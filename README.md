@@ -26,7 +26,7 @@ StudioTasker **does not**:
 
 How a studio collects money from its own members stays entirely outside StudioTasker. Package status inside StudioTasker means **studio-confirmed entitlement**, not verified payment.
 
-## Live development previews
+## Product routes and demos
 
 - Marketing website: `/`
 - Owner-only app login sandbox: `/app-demo`
@@ -41,11 +41,10 @@ Owner demo credentials:
 
 The app demo is fictional and browser-only. Do not enter real personal information.
 
-## Proposed StudioTasker pricing
+## StudioTasker pricing
 
-Launch hypothesis:
-- **$49/month per studio**
-- **$468/year** ($39/month equivalent when prepaid annually)
+- **$39.90/month per studio**
+- **$418.80/year** ($34.90/month equivalent when prepaid annually)
 
 This fee is for StudioTasker software. It has no relationship to what the studio charges its members.
 
@@ -94,7 +93,7 @@ The database migration directory is authoritative for new installations. Histori
 
 ## StudioTasker subscription billing
 
-The code contains a Lemon Squeezy integration for **StudioTasker's own B2B SaaS subscription only**. The proposed provider variants are $49/month and $468/year, and the backend rejects mismatched configured prices.
+The code contains a Lemon Squeezy integration for **StudioTasker's own B2B SaaS subscription only**. The provider variants must be $39.90/month and $418.80/year, and the backend rejects mismatched configured prices.
 
 This is separate from studio-member commerce, which is outside the product.
 
