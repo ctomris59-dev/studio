@@ -51,7 +51,7 @@ Paddle is the Merchant of Record for StudioTasker subscription orders.
 
 ## Currency
 
-Marketing prices are currently USD ($39.90 monthly / $418.80 annual). Paddle may display/collect localized amounts and taxes. The amount eventually paid to the StudioTasker operator may differ from gross buyer sales because of taxes handled by Paddle, Paddle fees, refunds/disputes, payout currency conversion and bank charges.
+Marketing prices are currently USD ($39.90 monthly / $406.80 annual, equivalent to $33.90/month and about 15% lower than paying monthly for twelve months). Paddle may display/collect localized amounts and taxes. The amount eventually paid to the StudioTasker operator may differ from gross buyer sales because of taxes handled by Paddle, Paddle fees, refunds/disputes, payout currency conversion and bank charges.
 
 Use the accountant-approved exchange-rate/bookkeeping method consistently.
 
