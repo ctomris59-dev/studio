@@ -525,3 +525,24 @@
 }
 
 .ed-footer-nav{flex-wrap:wrap;row-gap:12px;justify-content:flex-end}
+
+
+/* Global market positioning */
+.ed-global{background:#17203c;color:#fff;padding:96px 0 100px;border-top:1px solid #0e1529;border-bottom:1px solid #0e1529}
+.ed-global .ed-overline{color:#e7f982}
+.ed-global-head{display:grid;grid-template-columns:1.1fr .9fr;gap:70px;align-items:end}
+.ed-global-head h2{font-size:clamp(52px,6vw,88px);line-height:1.01;letter-spacing:-.055em;margin-top:22px}
+.ed-global-head h2 em{color:#e7f982}
+.ed-global-head>p{font-size:16px;line-height:1.75;color:#c4cce0;max-width:540px}
+.ed-global-regions{display:flex;flex-wrap:wrap;gap:10px;margin:38px 0 26px}
+.ed-global-regions span{border:1px solid #65718d;padding:8px 11px;font:700 10px "IBM Plex Mono",monospace;letter-spacing:.06em;color:#f3f5fb;background:#202a45}
+.ed-global-regions span:last-child{background:#e7f982;color:#17203c;border-color:#e7f982}
+.ed-global-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #596681}
+.ed-global-grid article{position:relative;min-height:255px;padding:22px 20px 24px;background:#1d2742}
+.ed-global-grid article+article{border-left:1px solid #596681}
+.ed-global-grid article>span{font:700 10px "IBM Plex Mono",monospace;color:#8fa1d5}
+.ed-global-grid article>svg{display:block;color:#e7f982;margin:34px 0 18px}
+.ed-global-grid h3{font-size:31px;line-height:1;letter-spacing:-.03em}
+.ed-global-grid p{font-size:13px;line-height:1.65;color:#bfc8dc;margin-top:15px}
+@media(max-width:980px){.ed-global-head{grid-template-columns:1fr;gap:25px}.ed-global-grid{grid-template-columns:repeat(2,1fr)}.ed-global-grid article:nth-child(3){border-left:0;border-top:1px solid #596681}.ed-global-grid article:nth-child(4){border-top:1px solid #596681}}
+@media(max-width:560px){.ed-global{padding:70px 0 75px}.ed-global-head h2{font-size:52px}.ed-global-grid{grid-template-columns:1fr}.ed-global-grid article+article,.ed-global-grid article:nth-child(3){border-left:0;border-top:1px solid #596681}.ed-global-grid article{min-height:auto}.ed-global-regions{gap:7px}.ed-global-regions span{font-size:9px}}
