@@ -53,6 +53,7 @@ async function main(){
  let studioA,studioB,ownerA,ownerB,instructor;
  try{
   await waitForBoot(server,logs);
+  for(const legalPath of ["/legal","/legal/terms","/legal/privacy","/legal/dpa","/legal/cookies","/legal/subprocessors","/legal/security","/legal/cancellation"]){const page=await call(legalPath);assert.equal(page.status,200,legalPath+" must render.");}
   const startPage=await call("/start?plan=annual");
   assert.equal(startPage.status,200,"Purchase start page must render.");
   assert((startPage.headers.get("content-type")||"").includes("text/html"));
