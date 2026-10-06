@@ -1,11 +1,11 @@
 export const LEGAL_VERSIONS={
- terms:"2026-10-06",
- dpa:"2026-10-06",
- privacy:"2026-10-06",
+ terms:"2026-10-06.2",
+ dpa:"2026-10-06.2",
+ privacy:"2026-10-06.2",
  cookies:"2026-10-06",
- security:"2026-10-06",
+ security:"2026-10-06.2",
  cancellation:"2026-10-06",
- subprocessors:"2026-10-06"
+ subprocessors:"2026-10-06.2"
 } as const;
 
 export const LEGAL_ACCEPTANCE_TEXT=

@@ -105,7 +105,7 @@ Do not enable public studio registration or production personal data until the s
 - verified studio-account email sender;
 - StudioTasker subscription billing configuration;
 - encrypted off-server backups and a successful restore drill;
-- GDPR/privacy/retention/erasure documentation;
+- GDPR/privacy/retention/erasure documentation and individual-operator legal identity;
 - monitoring and incident-response procedures;
 - manual mobile/accessibility testing;
 - security review and pilot-studio usability testing.
@@ -124,4 +124,4 @@ Public legal routes:
 - `/legal/security` — technical and organisational measures
 - `/legal/cancellation` — cancellation/refund rules
 
-Commercial registration is fail-closed until operator identity, legal contact, governing-law/jurisdiction, hosting/email provider names and `LEGAL_AUDIT_HASH_KEY` are configured. Registration and plan-specific checkout store versioned legal clickwrap evidence in `legal_acceptances`; raw IP addresses are not stored there, only HMAC evidence.
+StudioTasker currently supports an **independent individual operator** model; the application does not require a company name, company number, MERSIS number or VAT registration field. Paid registration is fail-closed until the individual operator’s legal name/address/contact, governing-law/jurisdiction, hosting region/provider, email provider and `LEGAL_AUDIT_HASH_KEY` are configured. The selected production architecture is intended for an EU-hosted server; configure the exact provider/country when the purchased EU server becomes the production host. Registration and plan-specific checkout store versioned legal clickwrap evidence in `legal_acceptances`; raw IP addresses are not stored there, only HMAC evidence.
