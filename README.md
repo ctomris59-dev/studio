@@ -12,7 +12,7 @@ StudioTasker **does**:
 - provide a lightweight studio-branded self-service booking link that uses confirmed class credits without taking payment;
 - define internal class-package templates (credits + validity);
 - let staff confirm package entitlements and make audited credit corrections;
-- surface StudioTasker Today / Revenue Rescue signals such as trial follow-up, low credits, expiry, inactivity, package-status review and open seats;
+- surface StudioTasker Today / follow-up opportunity signals such as trial follow-up, low credits, expiry, inactivity, package-status review and open seats;
 - provide CSV migration, JSON export, tasks and operational insights;
 - bill the **studio** for the StudioTasker software subscription.
 
@@ -63,8 +63,8 @@ Current signal families:
 
 One-click actions can record contact, create a task or snooze a signal. No member message is sent automatically.
 
-### Revenue Rescue
-Revenue Rescue is an operational opportunity layer, not a financial claim. It highlights studio follow-up situations that may affect retention or utilization without claiming that StudioTasker “recovered” money.
+### Follow-up opportunities
+StudioTasker surfaces operational follow-up situations such as trials, low credits, inactivity, package review and open class capacity. These are staff-review signals, not guaranteed financial outcomes.
 
 ## Self-service studio onboarding
 
