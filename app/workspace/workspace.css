@@ -174,3 +174,5 @@
 .rd-live-accent,.rd-priority,.rd-rescue-title small,.rd-today-stats small{font-size:11.5px}
 .rd-action-item small,.rd-contact-list small,.rd-ops-section small,.rd-onboarding small{font-size:12px}
 .rd-form label,.rd-auth label{font-size:13px}
+
+.rd-purchase-intent{border:2px solid #17203c;background:#e7f982;padding:14px 16px;margin-bottom:16px;color:#17203c}.rd-purchase-intent b,.rd-purchase-intent span{display:block}.rd-purchase-intent b{font:800 13px "IBM Plex Mono",monospace;letter-spacing:.02em}.rd-purchase-intent span{font-size:14px;line-height:1.55;margin-top:5px}
