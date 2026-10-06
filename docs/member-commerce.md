@@ -25,8 +25,8 @@ The studio remains responsible for how, where and whether it collects money from
 ## What StudioTasker bills
 
 StudioTasker may charge the **studio** for use of the SaaS:
-- proposed $49/month;
-- proposed $468/year.
+- $39.90/month;
+- $418.80/year ($34.90/month equivalent when prepaid annually).
 
 That B2B subscription can be handled by the configured StudioTasker billing provider. It is unrelated to member class-pack money.
 
