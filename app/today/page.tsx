@@ -60,8 +60,8 @@ export default function TodayPreview(){
    </div>
 
    <section className="std-rescue" aria-labelledby="revenue-rescue">
-    <div className="std-rescue-head"><div><span>REVENUE RESCUE</span><h2 id="revenue-rescue">{items.length} opportunities to review</h2></div>
-     <p>Operational signals only. StudioTasker does not process member payments or claim speculative “revenue saved.”</p></div>
+    <div className="std-rescue-head"><div><span>FOLLOW-UP OPPORTUNITIES</span><h2 id="revenue-rescue">{items.length} opportunities to review</h2></div>
+     <p>Operational signals only. Studio staff decide whether and how to follow up.</p></div>
     <div className="std-rescue-cards">
      <button onClick={()=>setFilter(filter==="trial"?"all":"trial")} className={filter==="trial"?"active":""}><b>{counts.trials}</b><span>Trial follow-ups</span></button>
      <button onClick={()=>setFilter(filter==="renewal"?"all":"renewal")} className={filter==="renewal"?"active":""}><b>{counts.renewals}</b><span>Renewals</span></button>
