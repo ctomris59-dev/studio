@@ -1,7 +1,7 @@
 export const LEGAL_VERSIONS={
  terms:"2026-10-06.3",
  dpa:"2026-10-06.3",
- privacy:"2026-10-06.3",
+ privacy:"2026-10-06.4",
  cookies:"2026-10-06.2",
  security:"2026-10-06.2",
  cancellation:"2026-10-06.2",
