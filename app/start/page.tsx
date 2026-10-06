@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {ArrowLeft,ArrowRight,ArrowUpRight,Check,ShieldCheck} from "lucide-react";
+import {ArrowLeft,ArrowRight,ArrowUpRight,Check,Globe2,ShieldCheck} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import "./start.css";
 
@@ -17,9 +17,9 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
   <section className="st-start-hero">
    <div className="st-start-intro">
     <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>
-    <span className="st-start-kicker">START STUDIOTASKER</span>
+    <span className="st-start-kicker">START STUDIOTASKER · GLOBAL</span>
     <h1>Choose a plan.<br/><em>Create your studio.</em></h1>
-    <p>There is no complicated sales process. Pick monthly or annual billing, create your private studio workspace, then complete setup with your own logo, members and classes.</p>
+    <p>There is no complicated sales process. Pick monthly or annual billing in USD, create your private studio workspace, then set your own timezone, logo, members and classes.</p>
     <div className="st-start-steps">
      <span><b>1</b> Choose plan</span><i/><span><b>2</b> Create studio</span><i/><span><b>3</b> Start using it</span>
     </div>
@@ -28,7 +28,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
    <div className="st-start-plans" aria-label="StudioTasker plans">
     <article className={selected==="monthly"?"selected":""}>
      <div className="st-plan-head"><span>MONTHLY</span>{selected==="monthly"&&<strong>SELECTED</strong>}</div>
-     <div className="st-plan-price"><sup>$</sup>39<em>.90</em><small>/ month</small></div>
+     <div className="st-plan-price"><sup>$</sup>39<em>.90</em><small>/ month · USD</small></div>
      <p>Pay month to month. One StudioTasker workspace for one studio.</p>
      <ul><li><Check size={18}/> Full StudioTasker workspace</li><li><Check size={18}/> StudioTasker Today priorities</li><li><Check size={18}/> CRM, classes, bookings and credits</li><li><Check size={18}/> Studio branding and customization</li></ul>
      <Link href="/workspace?mode=register&plan=monthly" className="st-plan-buy">START MONTHLY · $39.90 <ArrowUpRight size={20}/></Link>
@@ -36,8 +36,8 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
 
     <article className={"annual "+(selected==="annual"?"selected":"")}>
      <div className="st-plan-head"><span>ANNUAL · BEST VALUE</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
-     <div className="st-plan-price"><sup>$</sup>34<em>.90</em><small>/ month</small></div>
-     <p>Billed once per year at <b>$418.80</b>. Save $60 compared with monthly billing.</p>
+     <div className="st-plan-price"><sup>$</sup>34<em>.90</em><small>/ month · USD</small></div>
+     <p>Billed once per year at <b>$418.80 USD</b>. Save $60 compared with monthly billing.</p>
      <ul><li><Check size={18}/> Everything in the monthly plan</li><li><Check size={18}/> One annual payment</li><li><Check size={18}/> Same full workspace</li><li><Check size={18}/> Lower effective monthly price</li></ul>
      <Link href="/workspace?mode=register&plan=annual" className="st-plan-buy">START ANNUAL · $418.80/YEAR <ArrowUpRight size={20}/></Link>
     </article>
