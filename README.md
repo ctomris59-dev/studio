@@ -44,7 +44,7 @@ The app demo is fictional and browser-only. Do not enter real personal informati
 ## StudioTasker pricing
 
 - **$39.90/month per studio**
-- **$418.80/year** ($34.90/month equivalent when prepaid annually)
+- **$406.80/year** ($33.90/month equivalent when prepaid annually)
 
 This fee is for StudioTasker software. It has no relationship to what the studio charges its members.
 
@@ -93,7 +93,7 @@ The database migration directory is authoritative for new installations. Histori
 
 ## StudioTasker subscription billing
 
-StudioTasker uses **Paddle as authorised reseller and Merchant of Record** for StudioTasker's own B2B SaaS subscription only. The configured Paddle prices must be exactly $39.90/month and $418.80/year; the server verifies catalog price, currency and billing interval before creating a checkout transaction. The browser never chooses the tenant or Paddle price ID. Signed Paddle webhooks activate, update or cancel access, and Paddle Customer Portal handles billing management.
+StudioTasker uses **Paddle as authorised reseller and Merchant of Record** for StudioTasker's own B2B SaaS subscription only. The configured Paddle prices must be exactly $39.90/month and $406.80/year; the server verifies catalog price, currency and billing interval before creating a checkout transaction. The browser never chooses the tenant or Paddle price ID. Signed Paddle webhooks activate, update or cancel access, and Paddle Customer Portal handles billing management.
 
 This is separate from studio-member commerce, which is outside the product.
 
