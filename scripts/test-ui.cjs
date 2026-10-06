@@ -13,6 +13,8 @@ const subscriptionRoute=fs.readFileSync("app/api/studio/subscription/route.ts","
 const appDemo=fs.readFileSync("app/app-demo/page.tsx","utf8");
 const appDemoCss=fs.readFileSync("app/app-demo/app-demo.css","utf8");
 const bookingPreview=fs.readFileSync("app/book/preview/page.tsx","utf8");
+const startPage=fs.readFileSync("app/start/page.tsx","utf8");
+const startCss=fs.readFileSync("app/start/start.css","utf8");
 const demoAuth=fs.readFileSync("lib/demo-auth.ts","utf8");
 const legacyDemo=fs.readFileSync("app/demo/page.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
@@ -27,7 +29,11 @@ assert(client.includes("memberTerm")&&client.includes("classTerm")&&client.inclu
 assert(css.includes("--studio-accent")&&css.includes(".rd-live-sidebar"),"Real workspace must use tenant accent color in the owner-app shell.");
 assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Finish setup"),"Studio-owner onboarding and CSV preview must remain available.");
 assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today.includes("Mark contacted")&&today.includes("StudioTasker does not process member payments"),"StudioTasker Today preview must expose studio-only action-first differentiation.");
-assert(home.includes("what needs attention")&&home.includes("/today")&&home.includes("/app-demo")&&!home.includes("/book/preview"),"Homepage must lead with Today differentiation and the owner-only app demo.");
+assert(home.includes("what needs attention")&&home.includes("/today")&&home.includes("/app-demo")&&!home.includes("/book/preview"),"Homepage must retain Today differentiation and the owner-only app demo.");
+assert(home.includes("START STUDIOTASKER")&&home.includes("TRY THE DEMO")&&home.includes('href="/start"'),"First-fold homepage must expose obvious purchase and demo actions.");
+assert(home.includes("Three steps.")&&home.includes("Choose your plan")&&home.includes("Create your studio"),"Homepage must explain the buying/onboarding path in plain language.");
+assert(startPage.includes("START MONTHLY · $39.90")&&startPage.includes("START ANNUAL · $418.80/YEAR")&&startPage.includes("/workspace?mode=register&plan=monthly")&&startPage.includes("/workspace?mode=register&plan=annual"),"Purchase page must expose both plans and continue into account creation.");
+assert(startCss.includes("font-size:19px")&&startCss.includes("min-height:60px"),"Purchase page must keep large, older-user-friendly text and targets.");
 assert(demoAuth.includes("owner@demo.studiotasker.com")&&!demoAuth.includes("member@demo.studiotasker.com"),"App demo must expose only the studio-owner sandbox account.");
 assert(appDemo.includes("STUDIOTASKER TODAY")&&appDemo.includes("OWNER WORKSPACE")&&appDemo.includes("Sign in to StudioTasker"),"Owner app demo must include login and studio workspace.");
 assert(["Today","Leads / CRM","Members","Classes","Follow-ups","Insights","Settings"].every(label=>appDemo.includes(label)),"Canonical owner app must expose the complete unified navigation.");
@@ -47,5 +53,6 @@ assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.
 assert(subscriptionRoute.includes('plan==="annual"?41880:3990')&&subscriptionRoute.includes("$39.90/month or $418.80/year"),"Checkout verification must match the published $39.90 monthly and $418.80 annual prices.");
 assert(editorialCss.includes(".ed-faq-list details p{font-size:16.5px")&&editorialCss.includes(".ed-topline{font-size:10.5px"),"Homepage FAQ and micro-copy must remain readable on laptop/tablet.");
 assert(!client.includes("production infrastructure is configured")&&!onboarding.includes("legal launch checks")&&!workspacePage.includes("Secure backend not configured")&&!workspacePage.includes("subscription infrastructure are configured"),"Customer workspace must not expose development-stage infrastructure wording.");
+assert(client.includes("pendingPlan")&&client.includes('requestedMode==="register"')&&client.includes("Complete your"),"Workspace auth must preserve plan intent from the purchase flow.");
 assert(operation.includes("Monthly · $39.90")&&operation.includes("Annual · $418.80/year"),"Workspace subscription controls must show the published prices.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
