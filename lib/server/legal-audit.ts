@@ -18,7 +18,7 @@ export function legalEvidence(request:NextRequest){
  const ipHash=createHmac("sha256",auditKey()).update(clientIp(request)).digest("hex");
  const userAgent=(request.headers.get("user-agent")||"").slice(0,512);
  const acceptanceTextHash=createHash("sha256").update(
-  LEGAL_ACCEPTANCE_TEXT+"|"+LEGAL_VERSIONS.terms+"|"+LEGAL_VERSIONS.dpa+"|"+LEGAL_VERSIONS.privacy+"|"+LEGAL_VERSIONS.cancellation
+  LEGAL_ACCEPTANCE_TEXT+"|"+LEGAL_VERSIONS.terms+"|"+LEGAL_VERSIONS.dpa+"|"+LEGAL_VERSIONS.cancellation
  ).digest("hex");
  return {ipHash,userAgent,acceptanceTextHash};
 }
@@ -43,9 +43,9 @@ export async function recordLegalAcceptance(client:PoolClient,args:{
 }
 export async function hasCurrentLegalAcceptance(client:PoolClient,studioId:string,userId:string,plan:LegalPlan){
  const result=await client.query(`SELECT 1 FROM legal_acceptances
-  WHERE studio_id=$1 AND user_id=$2 AND terms_version=$3 AND dpa_version=$4 AND privacy_version=$5
-   AND cancellation_version=$6 AND plan=$7 AND price_cents=$8 LIMIT 1`,[
-  studioId,userId,LEGAL_VERSIONS.terms,LEGAL_VERSIONS.dpa,LEGAL_VERSIONS.privacy,LEGAL_VERSIONS.cancellation,plan,LEGAL_PLAN_PRICE_CENTS[plan]
+  WHERE studio_id=$1 AND user_id=$2 AND terms_version=$3 AND dpa_version=$4
+   AND cancellation_version=$5 AND plan=$6 AND price_cents=$7 LIMIT 1`,[
+  studioId,userId,LEGAL_VERSIONS.terms,LEGAL_VERSIONS.dpa,LEGAL_VERSIONS.cancellation,plan,LEGAL_PLAN_PRICE_CENTS[plan]
  ]);
  return Boolean(result.rowCount);
 }
