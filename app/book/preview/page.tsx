@@ -7,8 +7,8 @@ import "./booking-preview.css";
 
 type DemoClass={id:string;day:string;date:string;time:string;title:string;coach:string;duration:string;spots:number;capacity:number};
 type Stage="choose"|"details"|"confirmed";
-type BookingBrand={name:string;focus:string;accentColor:string;memberTerm:string;classTerm:string;creditTerm:string};
-const defaultBrand:BookingBrand={name:"Willow Studio",focus:"Pilates · Yoga · Barre",accentColor:"#334BDD",memberTerm:"Members",classTerm:"Classes",creditTerm:"Credits"};
+type BookingBrand={name:string;focus:string;accentColor:string;memberTerm:string;classTerm:string;creditTerm:string;privacyPolicyUrl:string};
+const defaultBrand:BookingBrand={name:"Willow Studio",focus:"Pilates · Yoga · Barre",accentColor:"#334BDD",memberTerm:"Members",classTerm:"Classes",creditTerm:"Credits",privacyPolicyUrl:"https://willow.example/privacy"};
 const singular=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 
 const classes:DemoClass[]=[
@@ -100,7 +100,7 @@ export default function BookingPreview(){
       <div className="sbp-credit-check"><span><CheckCircle2 size={19}/><span><b>1 {singular(brand.creditTerm).toLowerCase()} will be used</b><small>{credits} demo {brand.creditTerm.toLowerCase()} currently available · {3-demoBookings} demo bookings left</small></span></span><strong>1 {singular(brand.creditTerm).toUpperCase()}</strong></div>
       <button type="submit" disabled={demoBookings>=3||credits<1}>{demoBookings>=3?"Demo booking limit reached":"Confirm demo booking"} <ArrowRight size={18}/></button>
      </form>
-     <p className="sbp-fineprint">No card details are requested. StudioTasker does not process member payments in this flow.</p>
+     <div className="sbp-privacy-note"><ShieldCheck size={17}/><p><strong>Privacy:</strong> {brand.name} is responsible for the personal information you enter for this booking. StudioTasker processes that information on the studio&apos;s behalf. {brand.privacyPolicyUrl&&<a href={brand.privacyPolicyUrl} target="_blank" rel="noreferrer">Read the studio&apos;s Privacy Policy.</a>}</p></div><p className="sbp-fineprint">No card details are requested. StudioTasker does not process member payments in this flow.</p>
     </>}
 
     {stage==="confirmed"&&selected&&<div className="sbp-confirmed">
