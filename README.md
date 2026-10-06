@@ -93,7 +93,7 @@ The database migration directory is authoritative for new installations. Histori
 
 ## StudioTasker subscription billing
 
-The code contains a Lemon Squeezy integration for **StudioTasker's own B2B SaaS subscription only**. The provider variants must be $39.90/month and $418.80/year, and the backend rejects mismatched configured prices.
+StudioTasker uses **Paddle as authorised reseller and Merchant of Record** for StudioTasker's own B2B SaaS subscription only. The configured Paddle prices must be exactly $39.90/month and $418.80/year; the server verifies catalog price, currency and billing interval before creating a checkout transaction. The browser never chooses the tenant or Paddle price ID. Signed Paddle webhooks activate, update or cancel access, and Paddle Customer Portal handles billing management.
 
 This is separate from studio-member commerce, which is outside the product.
 
@@ -105,7 +105,7 @@ Do not enable public studio registration or production personal data until the s
 - verified studio-account email sender;
 - StudioTasker subscription billing configuration;
 - encrypted off-server backups and a successful restore drill;
-- GDPR/privacy/retention/erasure documentation and individual-operator legal identity;
+- GDPR/privacy/retention/erasure documentation, individual-operator legal identity, Paddle live account/domain approval and confirmed Turkish legal/tax treatment of Paddle payouts;
 - monitoring and incident-response procedures;
 - manual mobile/accessibility testing;
 - security review and pilot-studio usability testing.
