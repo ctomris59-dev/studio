@@ -1,7 +1,7 @@
 "use client";
-const singularTerm=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 import {useCallback,useEffect,useState,type FormEvent} from "react";
 import {localDateTimeToUTC} from "../../lib/studio-timezone";
+const singularTerm=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 
 export type WorkspaceSection="today"|"classes"|"members"|"followups"|"insights"|"settings";
 export type WorkspacePreferences={
