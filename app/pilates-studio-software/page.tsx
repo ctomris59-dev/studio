@@ -6,7 +6,7 @@ import "../marketing-landing.css";
 
 export const metadata:Metadata={
  title:"Pilates Studio Software — StudioTasker",
- description:"Simple Pilates and Reformer studio management software for independent studios worldwide. Manage members, classes, bookings, credits, attendance and follow-ups for $39.90 USD/month."
+ description:"Simple Pilates and Reformer studio management software for independent studios in supported international markets. Manage members, classes, bookings, credits, attendance and follow-ups for $39.90 USD/month."
 };
 
 const faqs=[
@@ -46,6 +46,6 @@ export default function PilatesStudioSoftware(){
 
   <section className="mk-section"><div className="mk-shell mk-faq"><div><span className="mk-kicker">PILATES SOFTWARE FAQ</span><h2>Before you start.</h2></div><div className="mk-faq-list">{faqs.map(([q,a])=><details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div></div></section>
   <section className="mk-last"><div className="mk-shell"><h2>Less admin.<br/>More studio.</h2><div><p>See the owner workspace with sample data first, or create your StudioTasker account when you are ready.</p><div className="mk-actions"><Link className="mk-primary" href="/start">START · $39.90 <ArrowUpRight size={19}/></Link><Link className="mk-secondary" href="/app-demo">EXPLORE DEMO <ArrowRight size={19}/></Link></div></div></div></section>
-  <footer className="mk-footer"><div className="mk-shell"><p>StudioTasker · studio management software for independent studios worldwide.</p><nav><Link href="/">Home</Link><Link href="/compare">VS. others</Link><Link href="/legal">Legal & Trust</Link><Link href="/start">Pricing</Link></nav></div></footer>
+  <footer className="mk-footer"><div className="mk-shell"><p>StudioTasker · studio management software for independent studios in supported international markets.</p><nav><Link href="/">Home</Link><Link href="/compare">VS. others</Link><Link href="/legal">Legal & Trust</Link><Link href="/start">Pricing</Link></nav></div></footer>
  </main>
 }
