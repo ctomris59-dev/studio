@@ -3,8 +3,11 @@ import {authenticated} from "@/lib/server/auth";
 import {errorResponse,successResponse,backendError,sameOrigin,jsonObject,stringField} from "@/lib/server/responses";
 import {entitlement} from "@/lib/server/billing";
 import {hasCurrentLegalAcceptance,legalPayloadIsCurrent,recordLegalAcceptance} from "@/lib/server/legal-audit";
-import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS,type LegalPlan} from "@/lib/legal-versions";
+import {LEGAL_ACCEPTANCE_TEXT,LEGAL_PLAN_PRICE_CENTS,LEGAL_VERSIONS,type LegalPlan} from "@/lib/legal-versions";
+import {paddleCheckoutConfigured,paddleClient,paddleEnvironment} from "@/lib/server/paddle";
+
 export const runtime="nodejs";
+
 export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
@@ -13,56 +16,63 @@ export async function GET(request:NextRequest){
     hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly"),
     hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual")
    ]);
-   return {subscription,legal:{accepted:{monthly,annual},versions:LEGAL_VERSIONS,acceptanceText:LEGAL_ACCEPTANCE_TEXT}};
+   const provider=await client.query<{provider:string|null;provider_subscription_id:string|null;provider_customer_id:string|null}>(
+    "SELECT provider,provider_subscription_id,provider_customer_id FROM subscriptions WHERE studio_id=$1",[auth.studioId]
+   );
+   return {subscription,provider:provider.rows[0]||null,legal:{accepted:{monthly,annual},versions:LEGAL_VERSIONS,acceptanceText:LEGAL_ACCEPTANCE_TEXT}};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
-  return successResponse({...result.value,checkoutConfigured:Boolean(process.env.LEMON_API_KEY&&process.env.LEMON_STORE_ID&&process.env.LEMON_MONTHLY_VARIANT_ID&&process.env.LEMON_ANNUAL_VARIANT_ID&&process.env.LEMON_WEBHOOK_SECRET)});
+  return successResponse({...result.value,checkoutConfigured:paddleCheckoutConfigured(),billingProvider:"Paddle"});
  }catch{return backendError()}
 }
+
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const data=await jsonObject(request),plan=(data?stringField(data,"plan",12):null) as LegalPlan|null;
  if(!plan||!["monthly","annual"].includes(plan))return errorResponse(400,"Select monthly or annual plan.");
- const key=process.env.LEMON_API_KEY,store=process.env.LEMON_STORE_ID;
- const variant=plan==="annual"?process.env.LEMON_ANNUAL_VARIANT_ID:process.env.LEMON_MONTHLY_VARIANT_ID;
- if(!key||!store||!variant||!process.env.LEMON_WEBHOOK_SECRET)return errorResponse(503,"Secure checkout is not configured.");
- // Live pricing and card details belong to Lemon Squeezy, never our database.
+ if(!paddleCheckoutConfigured())return errorResponse(503,"Secure Paddle checkout is not configured.");
+ const priceId=plan==="annual"?process.env.PADDLE_ANNUAL_PRICE_ID:process.env.PADDLE_MONTHLY_PRICE_ID;
+ const clientToken=(process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN||"").trim();
+ if(!priceId||!clientToken)return errorResponse(503,"Secure Paddle checkout is not configured.");
  try{
-  // Fail closed on stale Lemon Squeezy variants: published price must match our $39.90/$418.80 offer.
-  // Lemon's variant.price is kept for backward compatibility in its API.
   const result=await authenticated(request,["owner"],async(client,auth)=>{
+   const access=await entitlement(client,auth.studioId);
+   if(access.enabled)return {alreadyActive:true as const,subscription:access};
    const alreadyAccepted=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,plan);
    if(!alreadyAccepted){
     if(!data||!legalPayloadIsCurrent(data))return {legalRequired:true as const};
     await recordLegalAcceptance(client,{request,studioId:auth.studioId,userId:auth.userId,plan,source:"checkout"});
    }
-  const verify=await fetch("https://api.lemonsqueezy.com/v1/variants/"+encodeURIComponent(variant!),{
-   headers:{Accept:"application/vnd.api+json",Authorization:"Bearer "+key},cache:"no-store",signal:AbortSignal.timeout(8000)
-  });
-  if(!verify.ok)throw new Error("StudioTasker plan price could not be verified.");
-  const config=await verify.json() as {data?:{attributes?:{price?:number;is_subscription?:boolean;interval?:string;interval_count?:number}}};
-  const advertised=plan==="annual"?41880:3990;
-  if(config.data?.attributes?.price!==advertised||
-   config.data?.attributes?.is_subscription!==true||
-   config.data?.attributes?.interval!==(plan==="annual"?"year":"month")||
-   config.data?.attributes?.interval_count!==1)
-   throw new Error("Checkout price does not match $39.90/month or $418.80/year. Update provider pricing first.");
-   const body={data:{type:"checkouts",attributes:{
-    checkout_data:{email:auth.email,custom:{studio_id:auth.studioId}},
-    checkout_options:{embed:false},product_options:{enabled_variants:[Number(variant)]}
-   },relationships:{store:{data:{type:"stores",id:store}},variant:{data:{type:"variants",id:variant}}}}};
-   const res=await fetch("https://api.lemonsqueezy.com/v1/checkouts",{
-    method:"POST",headers:{Accept:"application/vnd.api+json","Content-Type":"application/vnd.api+json",
-      Authorization:"Bearer "+key},body:JSON.stringify(body),signal:AbortSignal.timeout(8000)
+
+   const paddle=paddleClient();
+   const price=await paddle.prices.get(priceId);
+   const expected=String(LEGAL_PLAN_PRICE_CENTS[plan]);
+   const cycle=price.billingCycle;
+   if(price.status!=="active"||price.unitPrice.amount!==expected||price.unitPrice.currencyCode!=="USD"||
+    !cycle||cycle.interval!==(plan==="annual"?"year":"month")||cycle.frequency!==1)
+    throw new Error("Paddle catalog price does not match the published StudioTasker plan.");
+
+   // Price and tenant binding are created server-side. The browser receives only the resulting transaction id.
+   const transaction=await paddle.transactions.create({
+    items:[{priceId,quantity:1}],
+    customData:{
+     studio_id:auth.studioId,
+     plan,
+     legal_terms_version:LEGAL_VERSIONS.terms,
+     legal_dpa_version:LEGAL_VERSIONS.dpa,
+     legal_privacy_version:LEGAL_VERSIONS.privacy,
+     legal_cancellation_version:LEGAL_VERSIONS.cancellation
+    }
    });
-   if(!res.ok)throw new Error("Payment provider checkout unavailable");
-   const payload=await res.json() as {data?:{attributes?:{url?:string}}};
-   const url=payload.data?.attributes?.url;
-   if(!url||!/^https:\/\/[^/]+\.lemonsqueezy\.com\//i.test(url))throw new Error("Unexpected checkout URL");
-   return {checkoutUrl:url};
+   if(!/^txn_[a-z\d]{26}$/.test(transaction.id))throw new Error("Unexpected Paddle transaction id.");
+   return {transactionId:transaction.id,clientToken,environment:paddleEnvironment(),plan};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
-  if(result.value&&"legalRequired" in result.value)return errorResponse(409,"Accept the current Terms of Service and DPA before checkout.");
+  if(result.value&&"legalRequired" in result.value)return errorResponse(409,"Accept the current Terms, Cancellation & Refund Policy and DPA before checkout.");
+  if(result.value&&"alreadyActive" in result.value)return errorResponse(409,"This studio already has paid access. Use Manage billing for subscription changes.");
   return successResponse(result.value);
- }catch{return backendError()}
+ }catch(error){
+  console.error("Paddle checkout creation failed:",error instanceof Error?error.message:"unknown error");
+  return backendError();
+ }
 }
