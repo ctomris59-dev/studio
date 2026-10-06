@@ -88,7 +88,7 @@ Never store production secrets, database dumps or customer data in the code repo
 - private VPS;
 - production PostgreSQL;
 - SMTP/domain verification;
-- StudioTasker $49/$468 subscription provider setup;
+- StudioTasker $39.90/$418.80 subscription provider setup;
 - off-site backup and successful clean restore;
 - monitoring/log policy;
 - GDPR/terms/privacy/retention/erasure review;
