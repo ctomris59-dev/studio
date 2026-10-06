@@ -2,18 +2,27 @@ import {NextRequest} from "next/server";
 import {authenticated} from "@/lib/server/auth";
 import {errorResponse,successResponse,backendError,sameOrigin,jsonObject,stringField} from "@/lib/server/responses";
 import {entitlement} from "@/lib/server/billing";
+import {hasCurrentLegalAcceptance,legalPayloadIsCurrent,recordLegalAcceptance} from "@/lib/server/legal-audit";
+import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS,type LegalPlan} from "@/lib/legal-versions";
 export const runtime="nodejs";
 export async function GET(request:NextRequest){
  try{
-  const result=await authenticated(request,["owner","manager"],async(client,auth)=>entitlement(client,auth.studioId));
+  const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
+   const subscription=await entitlement(client,auth.studioId);
+   const [monthly,annual]=await Promise.all([
+    hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly"),
+    hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual")
+   ]);
+   return {subscription,legal:{accepted:{monthly,annual},versions:LEGAL_VERSIONS,acceptanceText:LEGAL_ACCEPTANCE_TEXT}};
+  });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
-  return successResponse({subscription:result.value,checkoutConfigured:Boolean(process.env.LEMON_API_KEY&&process.env.LEMON_STORE_ID&&process.env.LEMON_MONTHLY_VARIANT_ID&&process.env.LEMON_ANNUAL_VARIANT_ID&&process.env.LEMON_WEBHOOK_SECRET)});
+  return successResponse({...result.value,checkoutConfigured:Boolean(process.env.LEMON_API_KEY&&process.env.LEMON_STORE_ID&&process.env.LEMON_MONTHLY_VARIANT_ID&&process.env.LEMON_ANNUAL_VARIANT_ID&&process.env.LEMON_WEBHOOK_SECRET)});
  }catch{return backendError()}
 }
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
- const data=await jsonObject(request),plan=data?stringField(data,"plan",12):null;
- if(!["monthly","annual"].includes(plan||""))return errorResponse(400,"Select monthly or annual plan.");
+ const data=await jsonObject(request),plan=(data?stringField(data,"plan",12):null) as LegalPlan|null;
+ if(!plan||!["monthly","annual"].includes(plan))return errorResponse(400,"Select monthly or annual plan.");
  const key=process.env.LEMON_API_KEY,store=process.env.LEMON_STORE_ID;
  const variant=plan==="annual"?process.env.LEMON_ANNUAL_VARIANT_ID:process.env.LEMON_MONTHLY_VARIANT_ID;
  if(!key||!store||!variant||!process.env.LEMON_WEBHOOK_SECRET)return errorResponse(503,"Secure checkout is not configured.");
@@ -21,7 +30,12 @@ export async function POST(request:NextRequest){
  try{
   // Fail closed on stale Lemon Squeezy variants: published price must match our $39.90/$418.80 offer.
   // Lemon's variant.price is kept for backward compatibility in its API.
-  const result=await authenticated(request,["owner"],async(_client,auth)=>{
+  const result=await authenticated(request,["owner"],async(client,auth)=>{
+   const alreadyAccepted=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,plan);
+   if(!alreadyAccepted){
+    if(!data||!legalPayloadIsCurrent(data))return {legalRequired:true as const};
+    await recordLegalAcceptance(client,{request,studioId:auth.studioId,userId:auth.userId,plan,source:"checkout"});
+   }
   const verify=await fetch("https://api.lemonsqueezy.com/v1/variants/"+encodeURIComponent(variant!),{
    headers:{Accept:"application/vnd.api+json",Authorization:"Bearer "+key},cache:"no-store",signal:AbortSignal.timeout(8000)
   });
@@ -48,6 +62,7 @@ export async function POST(request:NextRequest){
    return {checkoutUrl:url};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
+  if(result.value&&"legalRequired" in result.value)return errorResponse(409,"Accept the current Terms of Service and DPA before checkout.");
   return successResponse(result.value);
  }catch{return backendError()}
 }

@@ -1,9 +1,11 @@
 "use client";
+import Link from "next/link";
 import {useEffect,useRef,useState,type CSSProperties,type FormEvent} from "react";
 import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Settings2,Target,Trash2,Users} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "./studio-operations";
 import {OnboardingPanel} from "./onboarding-panel";
+import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS} from "../../lib/legal-versions";
 
 type User={id:string;email:string;role:string};
 type Studio={id:string;name:string};
@@ -14,17 +16,17 @@ type StudioSettings={
  name:string;focus:string;timezone:string;accentColor:string;memberTerm:string;classTerm:string;creditTerm:string;weekStarts:"monday"|"sunday";
  timeFormat:"24h"|"12h";defaultView:OwnerView;defaultClassDuration:number;defaultClassCapacity:number;defaultRoom:string;
  inactiveDays:number;lowCreditsThreshold:number;renewalWindowDays:number;trialFollowupHours:number;packageReviewHours:number;openSeatsThreshold:number;
- onboardingCompleted:boolean;hasLogo:boolean;
+ privacyPolicyUrl:string;onboardingCompleted:boolean;hasLogo:boolean;
 };
 const defaultSettings:StudioSettings={name:"",focus:"Pilates",timezone:"UTC",accentColor:"#334BDD",memberTerm:"Members",classTerm:"Classes",creditTerm:"Credits",
  weekStarts:"monday",timeFormat:"24h",defaultView:"today",defaultClassDuration:50,defaultClassCapacity:8,defaultRoom:"Main studio",
- inactiveDays:21,lowCreditsThreshold:2,renewalWindowDays:14,trialFollowupHours:18,packageReviewHours:24,openSeatsThreshold:2,onboardingCompleted:false,hasLogo:false};
+ inactiveDays:21,lowCreditsThreshold:2,renewalWindowDays:14,trialFollowupHours:18,packageReviewHours:24,openSeatsThreshold:2,privacyPolicyUrl:"",onboardingCompleted:false,hasLogo:false};
 const singularTerm=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 const modes:{mode:AuthMode;name:string}[]=[{mode:"login",name:"Sign in"},{mode:"forgot",name:"Forgot password"}];
 
 export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boolean}){
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
- const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null);
+ const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null),[registrationLegalAccepted,setRegistrationLegalAccepted]=useState(false);
  const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates",timezone:"UTC"}),[person,setPerson]=useState({kind:"lead",name:"",email:"",phone:""});
  const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New"});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
@@ -46,7 +48,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  }
  useEffect(()=>{
   const detected=Intl.DateTimeFormat().resolvedOptions().timeZone;if(detected)setForm(prev=>({...prev,timezone:detected}));
-  const search=new URLSearchParams(window.location.search),requestedPlan=search.get("plan"),requestedMode=search.get("mode");if(requestedPlan==="monthly"||requestedPlan==="annual")setPendingPlan(requestedPlan);if(requestedMode==="register"&&registrationEnabled)setMode("register");
+  const search=new URLSearchParams(window.location.search),requestedPlan=search.get("plan"),requestedMode=search.get("mode");if(requestedPlan==="monthly"||requestedPlan==="annual")setPendingPlan(requestedPlan);if(requestedMode==="register"&&registrationEnabled){setMode("register");if(requestedPlan!=="monthly"&&requestedPlan!=="annual")setPendingPlan("monthly")}
   const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));if(window.location.hash)window.history.replaceState(null,"",window.location.pathname+window.location.search);
   for(const name of ["verify","reset"] as const){const found=qs.get(name);if(found){setMode(name);setToken(found);break}}
   void load().catch(()=>setNote("Could not check your workspace session."));
@@ -56,12 +58,12 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   event.preventDefault();setBusy(true);setNote("");
   try{
    const target={login:"/api/auth/login",register:"/api/auth/register",verify:"/api/auth/verify",reset:"/api/auth/password/reset",forgot:"/api/auth/password/forgot"}[mode];
-   const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:mode==="forgot"?{email:form.email}:form;
+   const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:mode==="forgot"?{email:form.email}:mode==="register"?{...form,plan:pendingPlan||"monthly",legalAccepted:registrationLegalAccepted,termsVersion:LEGAL_VERSIONS.terms,dpaVersion:LEGAL_VERSIONS.dpa,privacyVersion:LEGAL_VERSIONS.privacy}:form;
    const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)}),body=await res.json();
    if(!res.ok){setNote(body.error||"Unable to complete your request.");return}
    setForm(prev=>({...prev,password:""}));
    if(mode==="login"){initializedView.current=false;await load();if(pendingPlan)setView("settings");setNote(pendingPlan?"Signed in. Complete your "+pendingPlan+" StudioTasker subscription below.":"Signed in successfully.")}
-   else{setNote(body.notice||"Request accepted.");if(["verify","reset"].includes(mode)){setMode("login");setToken("");window.history.replaceState(null,"","/workspace")}if(mode==="register")setMode("login")}
+   else{setNote(body.notice||"Request accepted.");if(["verify","reset"].includes(mode)){setMode("login");setToken("");window.history.replaceState(null,"","/workspace")}if(mode==="register"){setRegistrationLegalAccepted(false);setMode("login")}}
   }catch{setNote("Request failed. Please try again in a moment.")}finally{setBusy(false)}
  }
  async function addPerson(event:FormEvent<HTMLFormElement>){
@@ -105,14 +107,14 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  if(!user)return <section className="rd-workspace-card rd-auth-card">
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $418.80/YEAR":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
-  <div className="rd-tab-buttons">{modes.map(({mode:next,name})=><button key={next} type="button" className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&<button type="button" className={mode==="register"?"active":""} onClick={()=>setMode("register")}>Create studio</button>}</div>
+  <div className="rd-tab-buttons">{modes.map(({mode:next,name})=><button key={next} type="button" className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&<button type="button" className={mode==="register"?"active":""} onClick={()=>{setMode("register");setPendingPlan(p=>p||"monthly");setNote("")}}>Create studio</button>}</div>
   <form className="rd-form" onSubmit={submitAuth}>
    {["verify","reset"].includes(mode)&&<p className="rd-tiny">{mode==="verify"?"Verify your email to activate your account.":"Choose a new password. Existing sessions will be revoked."}</p>}
    {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label><label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(f=><option key={f}>{f}</option>)}</select></label></>}
    {["login","register","forgot"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
    {["login","register","reset"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
-   {mode==="register"&&<label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label>}
-   <button className="rd-primary" disabled={busy}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions"}[mode]}</button>
+   {mode==="register"&&<><label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label><label>Subscription plan<select value={pendingPlan||"monthly"} onChange={e=>setPendingPlan(e.target.value as "monthly"|"annual")}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $418.80/year</option></select></label><label className="rd-legal-consent"><input type="checkbox" required checked={registrationLegalAccepted} onChange={e=>setRegistrationLegalAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms of Service</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link> · <Link href="/legal/privacy" target="_blank">Privacy Policy</Link></span></label></>}
+   <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions"}[mode]}</button>
   </form>
   {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}
  </section>;
@@ -161,7 +163,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     <form className="rd-settings-grid" onSubmit={saveSettings}>
      <section><h3>Identity</h3><label>Studio name<input required minLength={2} maxLength={100} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label><label>Studio type<select value={settings.focus} onChange={e=>setSettings({...settings,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(x=><option key={x}>{x}</option>)}</select></label><label>IANA timezone<input required maxLength={80} value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})}/></label>
       <label>Primary brand color<div className="rd-color-row"><input type="color" value={settings.accentColor} onChange={e=>setSettings({...settings,accentColor:e.target.value.toUpperCase()})}/><input pattern="^#[0-9A-Fa-f]{6}$" maxLength={7} value={settings.accentColor} onChange={e=>setSettings({...settings,accentColor:e.target.value})}/></div></label>
-      <label>Studio logo (PNG/JPEG/WebP, max 200 KB)<input type="file" accept="image/png,image/jpeg,image/webp" disabled={!canEdit||busy} onChange={e=>{const file=e.target.files?.[0];if(file)void uploadLogo(file);e.currentTarget.value=""}}/></label>{settings.hasLogo&&canEdit&&<button type="button" className="rd-subtle-action" disabled={busy} onClick={()=>void removeLogo()}><Trash2 size={15}/> Remove logo</button>}
+      <label>Studio logo (PNG/JPEG/WebP, max 200 KB)<input type="file" accept="image/png,image/jpeg,image/webp" disabled={!canEdit||busy} onChange={e=>{const file=e.target.files?.[0];if(file)void uploadLogo(file);e.currentTarget.value=""}}/></label>{settings.hasLogo&&canEdit&&<button type="button" className="rd-subtle-action" disabled={busy} onClick={()=>void removeLogo()}><Trash2 size={15}/> Remove logo</button>}<label>Studio Privacy Policy URL<input type="url" maxLength={500} placeholder="https://yourstudio.com/privacy" value={settings.privacyPolicyUrl} onChange={e=>setSettings({...settings,privacyPolicyUrl:e.target.value})}/><small>Shown to customers in member-facing booking/privacy notices when applicable.</small></label>
      </section>
      <section><h3>Terminology & display</h3><label>People label<select value={settings.memberTerm} onChange={e=>setSettings({...settings,memberTerm:e.target.value})}>{["Members","Clients","Students","Customers"].map(x=><option key={x}>{x}</option>)}</select></label><label>Class label<select value={settings.classTerm} onChange={e=>setSettings({...settings,classTerm:e.target.value})}>{["Classes","Sessions","Lessons"].map(x=><option key={x}>{x}</option>)}</select></label><label>Credit label<select value={settings.creditTerm} onChange={e=>setSettings({...settings,creditTerm:e.target.value})}>{["Credits","Visits","Sessions"].map(x=><option key={x}>{x}</option>)}</select></label><label>Default landing page<select value={settings.defaultView} onChange={e=>setSettings({...settings,defaultView:e.target.value as OwnerView})}>{["today","leads","members","classes","followups","insights","settings"].map(x=><option key={x} value={x}>{x.charAt(0).toUpperCase()+x.slice(1)}</option>)}</select></label><label>Week starts<select value={settings.weekStarts} onChange={e=>setSettings({...settings,weekStarts:e.target.value as "monday"|"sunday"})}><option value="monday">Monday</option><option value="sunday">Sunday</option></select></label><label>Time format<select value={settings.timeFormat} onChange={e=>setSettings({...settings,timeFormat:e.target.value as "24h"|"12h"})}><option value="24h">24-hour</option><option value="12h">12-hour</option></select></label></section>
      <section><h3>{settings.classTerm} defaults</h3><label>Default duration (minutes)<input type="number" min={15} max={240} value={settings.defaultClassDuration} onChange={e=>setSettings({...settings,defaultClassDuration:Number(e.target.value)})}/></label><label>Default capacity<input type="number" min={1} max={100} value={settings.defaultClassCapacity} onChange={e=>setSettings({...settings,defaultClassCapacity:Number(e.target.value)})}/></label><label>Default room<input minLength={1} maxLength={80} value={settings.defaultRoom} onChange={e=>setSettings({...settings,defaultRoom:e.target.value})}/></label><p className="rd-tiny">These become the starting values when staff create a new {singularTerm(settings.classTerm).toLowerCase()}.</p></section>

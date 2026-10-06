@@ -43,6 +43,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
     </article>
    </div>
 
+   <div className="st-start-legal"><ShieldCheck size={18}/><span>Before creating a paid studio, review our <Link href="/legal/terms">Terms</Link>, <Link href="/legal/dpa">DPA</Link> and <Link href="/legal/privacy">Privacy Policy</Link>. Acceptance is recorded when you create or update your subscription.</span></div>
    <div className="st-start-help">
     <ShieldCheck size={22}/>
     <div><b>Not ready to buy yet?</b><span>Try the full owner demo with sample data first. No account is required.</span></div>

@@ -111,3 +111,17 @@ Do not enable public studio registration or production personal data until the s
 - security review and pilot-studio usability testing.
 
 See `docs/launch-readiness.md` and `docs/backend-foundation.md`.
+
+
+## Legal and GDPR layer
+
+Public legal routes:
+- `/legal/terms` — SaaS Terms of Service
+- `/legal/privacy` — Privacy Policy
+- `/legal/dpa` — Data Processing Agreement and international-transfer/SCC workflow
+- `/legal/cookies` — Cookie Policy
+- `/legal/subprocessors` — production subprocessor disclosure
+- `/legal/security` — technical and organisational measures
+- `/legal/cancellation` — cancellation/refund rules
+
+Commercial registration is fail-closed until operator identity, legal contact, governing-law/jurisdiction, hosting/email provider names and `LEGAL_AUDIT_HASH_KEY` are configured. Registration and plan-specific checkout store versioned legal clickwrap evidence in `legal_acceptances`; raw IP addresses are not stored there, only HMAC evidence.

@@ -10,7 +10,7 @@ export async function GET(request:NextRequest){
     ORDER BY archived_at DESC LIMIT 100`,[auth.studioId]);
    const audit=await client.query(`SELECT created_at,reason FROM data_export_audits
     WHERE studio_id=$1 ORDER BY created_at DESC LIMIT 30`,[auth.studioId]);
-   return {archivedRecords:q.rows,exportHistory:audit.rows,notice:"Archiving is not erasure. Regulated retention and verified data-deletion workflows remain pending legal review."};
+   return {archivedRecords:q.rows,exportHistory:audit.rows,notice:"Archiving is not erasure. Verified deletion or retention requests are handled under the StudioTasker Privacy Policy and DPA."};
   });
   if(!res.access.ok)return errorResponse(res.access.status,res.access.message);
   return successResponse(res.value);
