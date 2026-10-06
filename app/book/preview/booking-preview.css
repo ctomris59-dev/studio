@@ -13,3 +13,15 @@
 .sbp-page button:focus-visible,.sbp-page a:focus-visible,.sbp-page input:focus-visible{outline:3px solid var(--sbp-orange);outline-offset:3px}.sbp-action-row button:not(:disabled):hover,.sbp-form>button:hover{background:#dff064}.sbp-owner-link:hover,.sbp-back:hover{color:#253ac4}.sbp-confirm-actions a:hover{background:#253ac4}
 
 .sbp-studio-mark.has-logo{background:#fff;padding:7px}.sbp-studio-mark.has-logo img{width:100%;height:100%;object-fit:contain;border-radius:50%}.sbp-form>button:disabled,.sbp-confirm-actions button:disabled{opacity:.42;cursor:not-allowed}.sbp-confirm-actions button:disabled:hover{background:#fff}
+
+
+/* Booking preview readability pass. */
+.sbp-page{font-size:16px}
+.sbp-demo-pill,.sbp-kicker,.sbp-heading>span{font-size:11.5px}
+.sbp-studio-card dt{font-size:10.5px}
+.sbp-note{font-size:12.5px}
+.sbp-days small,.sbp-days span{font-size:10.5px}
+.sbp-class-main small,.sbp-spots small{font-size:11.5px}
+.sbp-summary small,.sbp-ticket small{font-size:10.5px}
+.sbp-form label{font-size:12.5px}
+.sbp-credit-check small,.sbp-credit-check>strong,.sbp-fineprint{font-size:11.5px}
