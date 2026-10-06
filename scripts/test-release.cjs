@@ -7,7 +7,8 @@ const gate=compiled.exports.commercialRegistrationReady;
 const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT",
  "DATABASE_URL","SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD","LEMON_API_KEY","LEMON_STORE_ID",
  "LEMON_MONTHLY_VARIANT_ID","LEMON_ANNUAL_VARIANT_ID","LEMON_WEBHOOK_SECRET","BACKUP_DATABASE_URL",
- "BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR"];
+ "BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR","LEGAL_OPERATOR_NAME","LEGAL_OPERATOR_ADDRESS","LEGAL_OPERATOR_COUNTRY",
+ "LEGAL_CONTACT_EMAIL","LEGAL_GOVERNING_LAW","LEGAL_JURISDICTION","LEGAL_HOSTING_PROVIDER","LEGAL_EMAIL_PROVIDER","LEGAL_AUDIT_HASH_KEY"];
 const old=Object.fromEntries(names.map(k=>[k,process.env[k]]));
 try{
  for(const k of names)delete process.env[k];
@@ -26,5 +27,7 @@ try{
  assert.equal(gate(),true,"Fully set commercial configuration may proceed to manual launch checks");
  delete process.env.SMTP_PASSWORD;
  assert.equal(gate(),false,"Missing mail credentials must block signup");
+ process.env.SMTP_PASSWORD="test-placeholder";delete process.env.LEGAL_OPERATOR_NAME;
+ assert.equal(gate(),false,"Missing legal operator identity must block signup");
  console.log("Commercial registration fail-closed checks passed.");
 }finally{for(const k of names){if(old[k]===undefined)delete process.env[k];else process.env[k]=old[k]}}
