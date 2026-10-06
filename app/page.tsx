@@ -83,7 +83,7 @@ export default function HomePage() {
                     <Link className="ed-buy-cta" href="/start"><span>START STUDIOTASKER</span><strong>$39.90 / month</strong><ArrowUpRight size={22}/></Link>
                     <Link className="ed-demo-cta" href="/app-demo"><span>TRY THE DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
                   </div>
-                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>USD billing · $39.90 monthly · $406.80 yearly · use your own studio timezone</span></div>
+                  <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>USD billing · $39.90 monthly · $33.90/month annually · SAVE 15%</span></div>
                   <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
                 </div>
               </div>
@@ -104,7 +104,7 @@ export default function HomePage() {
           <div className="ed-container ed-start-simple-grid">
             <div className="ed-start-simple-head"><span className="ed-overline">START HERE</span><h2 id="start-simple-title">Three steps.<br/><em>Then you&apos;re in.</em></h2></div>
             <div className="ed-start-steps">
-              <article><b>1</b><div><strong>Choose your plan</strong><p>$39.90 monthly or $406.80 yearly.</p></div></article>
+              <article><b>1</b><div><strong>Choose your plan</strong><p>$39.90 monthly or $406.80 yearly ($33.90/month · save 15%).</p></div></article>
               <article><b>2</b><div><strong>Create your studio</strong><p>Add your email, studio name and basic setup.</p></div></article>
               <article><b>3</b><div><strong>Start using StudioTasker</strong><p>Import members, add your logo and begin managing the studio.</p></div></article>
             </div>
