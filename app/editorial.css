@@ -309,3 +309,42 @@
   .ed-hero-card .ed-sch-tablehead span{display:none}
   .ed-hero-card .ed-sch-foot{display:none}
 }
+
+
+/* 2026-10 launch readability pass: keep editorial character without micro-text. */
+.editorial{font-size:16px}
+.ed-topline{font-size:10.5px}
+.ed-nav nav a{font-size:13px}
+.ed-nav-cta,.ed-customer-login{font-size:11.5px}
+.ed-overline,.ed-index,.ed-canvas-meta,.ed-canvas-bottom,.ed-hero-end,.ed-window-label,.ed-window-edition,.ed-price-top,.ed-price-include,.ed-footer-bottom,.ed-text-link,.ed-last-link{font-size:11.5px}
+.ed-hero-brand small{font-size:11px}
+.ed-primary-cta{font-size:12px}
+.ed-price-dark p{font-size:14px;max-width:410px}
+.ed-price-dark p strong{color:#fff;font-weight:700}
+.ed-price-number sup{font-size:.34em;line-height:1;letter-spacing:-.03em;align-self:flex-start;margin-top:.22em;margin-left:.06em}
+.ed-price-disclaimer{font-size:12.5px}
+.ed-price-item{font-size:14px}
+.ed-faq-list summary{font-size:20px}
+.ed-faq-list details p{font-size:16.5px;line-height:1.8;max-width:650px}
+.ed-faq-grid>div:first-child>p{font-size:16px}
+.ed-footer-main p,.ed-footer-nav{font-size:13px}
+.ed-sch-identity strong{font-size:13px}
+.ed-sch-identity small{font-size:10.5px}
+.ed-sch-week,.ed-sch-greeting span,.ed-sch-metrics small,.ed-sch-tablehead strong,.ed-sch-tablehead span,.ed-sch-cap b,.ed-sch-foot{font-size:10.5px}
+.ed-sch-time{font-size:11.5px}
+.ed-sch-class b{font-size:11.5px}
+.ed-sch-class small{font-size:10.5px}
+.ed-sch-status{font-size:9.5px;font-weight:700}
+.ed-today-story-card>div>span{font-size:11px}
+.ed-today-story-card>div>small{font-size:12px}
+.ed-today-story-card article>span{font-size:10.5px}
+.ed-today-story-card article b{font-size:14px}
+.ed-today-story-card article small{font-size:11.5px}
+.ed-today-story-card>p{font-size:10.5px}
+@media(max-width:760px){
+ .ed-topline{font-size:9.5px}
+ .ed-overline,.ed-index,.ed-canvas-meta,.ed-canvas-bottom,.ed-hero-end,.ed-window-label,.ed-window-edition,.ed-price-top,.ed-price-include,.ed-footer-bottom,.ed-text-link,.ed-last-link{font-size:10.5px}
+ .ed-faq-list summary{font-size:18px}
+ .ed-faq-list details p{font-size:15.5px}
+ .ed-sch-class b{font-size:10.5px}.ed-sch-class small,.ed-sch-time,.ed-sch-foot{font-size:9.5px}
+}
