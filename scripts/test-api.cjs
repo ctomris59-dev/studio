@@ -4,6 +4,7 @@ const {once}=require("node:events");
 const {randomUUID,randomBytes,scryptSync,createHmac}=require("node:crypto");
 const {Pool}=require("pg");
 const HOST="http://127.0.0.1:3187";
+const LEGAL={termsVersion:"2026-10-06",dpaVersion:"2026-10-06",privacyVersion:"2026-10-06",legalAccepted:true,plan:"monthly"};
 function cookieFrom(response){
  const raw=response.headers.get("set-cookie")||"";
  return raw.split(";")[0];
@@ -66,7 +67,7 @@ async function main(){
   const password="Test Password 34! "+unique.slice(0,5);
   async function register(prefix){
    const email=prefix+"-"+unique+"@example.com";
-   const res=await call("/api/auth/register",{method:"POST",body:{email,password,studioName:prefix+" Studio",focus:"Pilates"}});
+   const res=await call("/api/auth/register",{method:"POST",body:{email,password,studioName:prefix+" Studio",focus:"Pilates",...LEGAL}});
    assert.equal(res.status,202,JSON.stringify(res.data));
    assert.equal((await call("/api/auth/login",{method:"POST",body:{email,password}})).status,401,"Unverified users cannot sign in.");
    const emailRow=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='verify_email' ORDER BY created_at DESC LIMIT 1",[email]);
@@ -83,11 +84,13 @@ async function main(){
    assert.equal(account.status,200);
    assert.equal(account.data.user.email,email);
    assert.equal(account.data.user.role,"owner");
+   const acceptance=await admin.query("SELECT terms_version,dpa_version,privacy_version,plan,price_cents,ip_hash FROM legal_acceptances WHERE studio_id=$1 AND user_id=$2",[account.data.studio.id,account.data.user.id]);
+   assert.equal(acceptance.rowCount,1,"Registration must record legal clickwrap evidence.");assert.equal(acceptance.rows[0].plan,"monthly");assert.equal(acceptance.rows[0].price_cents,3990);assert.equal(acceptance.rows[0].ip_hash.length,64);
    return {email,cookie:login.cookie,studioId:account.data.studio.id,userId:account.data.user.id};
   }
   const a=await register("alpine");const b=await register("bluebird");
   studioA=a.studioId;studioB=b.studioId;ownerA=a.userId;ownerB=b.userId;
-  const duplicate=await call("/api/auth/register",{method:"POST",body:{email:a.email,password,studioName:"Duplicate Studio",focus:"Pilates"}});
+  const duplicate=await call("/api/auth/register",{method:"POST",body:{email:a.email,password,studioName:"Duplicate Studio",focus:"Pilates",...LEGAL}});
   assert.equal(duplicate.status,409);
   const create=async(account,name)=>call("/api/studio/people",{method:"POST",cookie:account.cookie,body:{kind:"lead",name,email:name.toLowerCase().replace(/ /g,".")+"-"+unique+"@example.com",phone:""}});
   const pa=await create(a,"Alice Client");assert.equal(pa.status,201,JSON.stringify(pa.data));
@@ -138,13 +141,15 @@ async function main(){
   const customized=await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{
    name:"Alpine Studio",focus:"Pilates",timezone:"UTC",accentColor:"#7C3AED",memberTerm:"Clients",classTerm:"Sessions",creditTerm:"Visits",
    weekStarts:"sunday",timeFormat:"12h",defaultView:"members",defaultClassDuration:60,defaultClassCapacity:12,defaultRoom:"Purple Room",
-   inactiveDays:7,lowCreditsThreshold:5,renewalWindowDays:30,trialFollowupHours:1,packageReviewHours:1,openSeatsThreshold:1
+   inactiveDays:7,lowCreditsThreshold:5,renewalWindowDays:30,trialFollowupHours:1,packageReviewHours:1,openSeatsThreshold:1,privacyPolicyUrl:"https://alpine.example/privacy"
   }});
   assert.equal(customized.status,200,JSON.stringify(customized.data));
   assert.equal(customized.data.studio.accentColor,"#7C3AED");assert.equal(customized.data.studio.memberTerm,"Clients");
   assert.equal(customized.data.studio.classTerm,"Sessions");assert.equal(customized.data.studio.creditTerm,"Visits");
-  assert.equal(customized.data.studio.defaultClassDuration,60);assert.equal(customized.data.studio.inactiveDays,7);
+  assert.equal(customized.data.studio.defaultClassDuration,60);assert.equal(customized.data.studio.inactiveDays,7);assert.equal(customized.data.studio.privacyPolicyUrl,"https://alpine.example/privacy");
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{accentColor:"purple"}})).status,400);
+  assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{privacyPolicyUrl:"javascript:alert(1)"}})).status,400);
+  const legalStatus=await call("/api/legal/status",{cookie:a.cookie});assert.equal(legalStatus.status,200);assert.equal(legalStatus.data.legal.accepted.monthly,true);assert.equal(legalStatus.data.legal.accepted.annual,false);
   const tinyPng=Uint8Array.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]);
   const logoUp=await callLogo("/api/studio/logo",{cookie:a.cookie,bytes:tinyPng});assert.equal(logoUp.status,200);
   const logoA=await callLogo("/api/studio/logo",{method:"GET",cookie:a.cookie});assert.equal(logoA.status,200);assert.equal(logoA.contentType,"image/png");
