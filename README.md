@@ -2,13 +2,14 @@
 
 StudioTasker is an English-first B2B SaaS for independent Pilates, yoga, barre, dance and boutique fitness studios.
 
-The product is intentionally **studio-facing only**. It helps studio owners and staff manage members, class schedules, studio-managed bookings, attendance, class-package entitlements, follow-ups and daily operational priorities.
+The product is intentionally **studio-centered**. It helps studio owners and staff manage members, class schedules, bookings, attendance, class-package entitlements, follow-ups and daily operational priorities, while offering a lightweight studio-branded self-service booking link for members.
 
 ## Product boundary
 
 StudioTasker **does**:
 - maintain lead/member CRM records;
 - track classes, capacity, attendance and studio-managed bookings;
+- provide a lightweight studio-branded self-service booking link that uses confirmed class credits without taking payment;
 - define internal class-package templates (credits + validity);
 - let staff confirm package entitlements and make audited credit corrections;
 - surface StudioTasker Today / Revenue Rescue signals such as trial follow-up, low credits, expiry, inactivity, package-status review and open seats;
@@ -17,7 +18,7 @@ StudioTasker **does**:
 
 StudioTasker **does not**:
 - provide member logins or a member portal;
-- provide a public consumer booking marketplace/page;
+- operate a public booking marketplace or process member commerce;
 - process, store or verify member card payments;
 - collect money on behalf of studios;
 - send automatic marketing or transactional messages to studio members;
@@ -30,7 +31,7 @@ How a studio collects money from its own members stays entirely outside StudioTa
 - Marketing website: `/`
 - Owner-only app login sandbox: `/app-demo`
 - StudioTasker Today interactive preview: `/today`
-- Legacy `/book/preview` permanently redirects to the owner app demo because StudioTasker no longer exposes a member-facing public booking page.
+- Self-service booking experience: `/book/preview` (fictional browser-only preview; no payment).
 - Legacy `/demo` URL redirects to the canonical owner app sandbox at `/app-demo`.
 - PostgreSQL workspace: `/workspace` (disabled when the secure backend is not configured)
 
