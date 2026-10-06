@@ -5,6 +5,7 @@ import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Sett
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "./studio-operations";
 import {OnboardingPanel} from "./onboarding-panel";
+import {BillingPanel} from "./billing-panel";
 import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS} from "../../lib/legal-versions";
 
 type User={id:string;email:string;role:string};
@@ -58,7 +59,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   event.preventDefault();setBusy(true);setNote("");
   try{
    const target={login:"/api/auth/login",register:"/api/auth/register",verify:"/api/auth/verify",reset:"/api/auth/password/reset",forgot:"/api/auth/password/forgot"}[mode];
-   const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:mode==="forgot"?{email:form.email}:mode==="register"?{...form,plan:pendingPlan||"monthly",legalAccepted:registrationLegalAccepted,termsVersion:LEGAL_VERSIONS.terms,dpaVersion:LEGAL_VERSIONS.dpa,privacyVersion:LEGAL_VERSIONS.privacy}:form;
+   const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:mode==="forgot"?{email:form.email}:mode==="register"?{...form,plan:pendingPlan||"monthly",legalAccepted:registrationLegalAccepted,termsVersion:LEGAL_VERSIONS.terms,dpaVersion:LEGAL_VERSIONS.dpa,privacyVersion:LEGAL_VERSIONS.privacy,cancellationVersion:LEGAL_VERSIONS.cancellation}:form;
    const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)}),body=await res.json();
    if(!res.ok){setNote(body.error||"Unable to complete your request.");return}
    setForm(prev=>({...prev,password:""}));
@@ -113,7 +114,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label><label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].map(f=><option key={f}>{f}</option>)}</select></label></>}
    {["login","register","forgot"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
    {["login","register","reset"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
-   {mode==="register"&&<><label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label><label>Subscription plan<select value={pendingPlan||"monthly"} onChange={e=>setPendingPlan(e.target.value as "monthly"|"annual")}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $418.80/year</option></select></label><label className="rd-legal-consent"><input type="checkbox" required checked={registrationLegalAccepted} onChange={e=>setRegistrationLegalAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms of Service</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link> · <Link href="/legal/privacy" target="_blank">Privacy Policy</Link></span></label></>}
+   {mode==="register"&&<><label>Studio timezone (IANA)<input required maxLength={80} value={form.timezone} onChange={e=>setForm({...form,timezone:e.target.value})} placeholder="Europe/London"/></label><label>Subscription plan<select value={pendingPlan||"monthly"} onChange={e=>setPendingPlan(e.target.value as "monthly"|"annual")}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $418.80/year</option></select></label><label className="rd-legal-consent"><input type="checkbox" required checked={registrationLegalAccepted} onChange={e=>setRegistrationLegalAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms of Service</Link> · <Link href="/legal/cancellation" target="_blank">Cancellation & Refund</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link></span></label><p className="rd-tiny">Before account creation, please read the <Link href="/legal/privacy" target="_blank">Privacy Policy</Link> and, where Turkish Law No. 6698 applies, the <Link href="/legal/turkiye-privacy" target="_blank">Türkiye Privacy Notice (KVKK)</Link>. These notices are provided for transparency and are not a request for consent to core service processing.</p></>}
    <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions"}[mode]}</button>
   </form>
   {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}
@@ -157,6 +158,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {view==="insights"&&<StudioOperations role={user.role} section="insights" preferences={prefs}/>}
 
    {view==="settings"&&<section className="rd-live-section">
+    {user.role==="owner"&&<BillingPanel initialPlan={pendingPlan}/>} 
     <OnboardingPanel role={user.role} onDataChange={()=>void load()}/>
     <div className="rd-customize-head"><div><p className="rd-eyebrow">MAKE STUDIOTASKER YOURS</p><h2>Studio identity & workflow</h2><p>Controlled customization: enough to feel like your studio without creating a fragile one-off software fork.</p></div>
      <div className="rd-brand-preview" style={{borderColor:settings.accentColor}}>{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,2).toUpperCase()}</span>}<div><b>{settings.name||"Your Studio"}</b><small>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</small></div></div></div>

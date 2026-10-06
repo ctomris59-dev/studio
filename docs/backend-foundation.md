@@ -67,7 +67,7 @@ StudioTasker does not process or verify studio-member payments.
 
 ## StudioTasker SaaS billing
 
-The separate B2B subscription layer can gate a studio's use of StudioTasker. Signed provider webhooks and idempotency are tested locally. Commercial launch still requires provider approval and live acceptance testing.
+The separate B2B subscription layer gates a studio's use of StudioTasker. Paddle transactions are created server-side so the browser cannot choose a tenant or price ID. Signed Paddle webhooks are idempotent, past-due access has a finite recovery grace, and billing management is delegated to Paddle Customer Portal. Commercial launch remains fail-closed until Paddle approval, real-environment acceptance testing and legal/tax review attestations are complete.
 
 ## Hosting portability
 
@@ -88,7 +88,7 @@ Never store production secrets, database dumps or customer data in the code repo
 - private VPS;
 - production PostgreSQL;
 - SMTP/domain verification;
-- StudioTasker $39.90/$418.80 subscription provider setup;
+- Paddle live account/domain approval and exact StudioTasker $39.90/$418.80 price setup;
 - off-site backup and successful clean restore;
 - monitoring/log policy;
 - GDPR/terms/privacy/retention/erasure review;

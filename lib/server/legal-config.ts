@@ -8,6 +8,7 @@ export type LegalOperator={
  address:string;
  country:string;
  email:string;
+ phone:string;
  governingLaw:string;
  jurisdiction:string;
  hostingProvider:string;
@@ -25,15 +26,16 @@ export function legalOperator():LegalOperator{
   address:(process.env.LEGAL_OPERATOR_ADDRESS||"").trim(),
   country:(process.env.LEGAL_OPERATOR_COUNTRY||"Türkiye").trim(),
   email:(process.env.LEGAL_CONTACT_EMAIL||"").trim(),
+  phone:(process.env.LEGAL_SUPPORT_PHONE||"").trim(),
   governingLaw:(process.env.LEGAL_GOVERNING_LAW||"").trim(),
   jurisdiction:(process.env.LEGAL_JURISDICTION||"").trim(),
   hostingProvider:(process.env.LEGAL_HOSTING_PROVIDER||"").trim(),
   hostingRegion:(process.env.LEGAL_HOSTING_REGION||"").trim(),
   emailProvider:(process.env.LEGAL_EMAIL_PROVIDER||"").trim(),
-  billingProvider:(process.env.LEGAL_BILLING_PROVIDER||"Lemon Squeezy").trim()
+  billingProvider:(process.env.LEGAL_BILLING_PROVIDER||"Paddle").trim()
  };
  const configured=Boolean(
-  values.name&&values.address&&values.country&&values.email&&values.governingLaw&&values.jurisdiction&&
+  values.name&&values.address&&values.country&&values.email&&values.phone&&values.governingLaw&&values.jurisdiction&&
   values.hostingProvider&&values.hostingRegion&&values.emailProvider
  );
  return {
@@ -42,6 +44,7 @@ export function legalOperator():LegalOperator{
   address:values.address,
   country:values.country,
   email:values.email,
+  phone:values.phone,
   governingLaw:values.governingLaw,
   jurisdiction:values.jurisdiction,
   hostingProvider:values.hostingProvider,

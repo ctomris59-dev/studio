@@ -5,9 +5,10 @@ export const metadata={title:"Legal & Trust — StudioTasker"};
 const docs=[
  ["Terms of Service","The contract governing StudioTasker subscriptions, acceptable use, liability and account rules.","/legal/terms"],
  ["Privacy Policy","How StudioTasker uses account, billing, security and service data.","/legal/privacy"],
+ ["Türkiye Privacy Notice (KVKK)","Operator transparency notice where Turkish Law No. 6698 applies.","/legal/turkiye-privacy"],
  ["Data Processing Agreement","Controller–processor terms for studio member data processed through StudioTasker.","/legal/dpa"],
  ["Cookie Policy","The cookies and browser storage used by StudioTasker.","/legal/cookies"],
- ["Subprocessors","Production vendors that may process data to provide StudioTasker.","/legal/subprocessors"],
+ ["Subprocessors & Independent Controllers","Production processors plus Paddle's separate Merchant-of-Record role.","/legal/subprocessors"],
  ["Security","Technical and organisational safeguards used by the service.","/legal/security"],
  ["Cancellation & Refunds","How monthly and annual subscriptions renew, cancel and end.","/legal/cancellation"]
 ] as const;

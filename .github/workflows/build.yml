@@ -26,10 +26,12 @@ jobs:
       DATABASE_URL: postgresql://reformdesk_app:reformdesk_dev_only@127.0.0.1:5432/reformdesk
       AUTH_ALLOW_REGISTRATION: 'false'
       PUBLIC_APP_ORIGIN: http://127.0.0.1:3187
-      LEMON_WEBHOOK_SECRET: ci_only_mock_secret_not_for_production
-      LEMON_STORE_ID: '101'
-      LEMON_MONTHLY_VARIANT_ID: '501'
-      LEMON_ANNUAL_VARIANT_ID: '502'
+      PADDLE_ENV: sandbox
+      PADDLE_API_KEY: ci_only_mock_paddle_key
+      NEXT_PUBLIC_PADDLE_CLIENT_TOKEN: test_ci_only_token_123456
+      PADDLE_MONTHLY_PRICE_ID: pri_aaaaaaaaaaaaaaaaaaaaaaaaaa
+      PADDLE_ANNUAL_PRICE_ID: pri_bbbbbbbbbbbbbbbbbbbbbbbbbb
+      PADDLE_WEBHOOK_SECRET: ci_only_mock_webhook_secret_not_for_production
       BILLING_ALLOW_LOCAL_TEST: 'true'
     timeout-minutes: 15
     steps:
