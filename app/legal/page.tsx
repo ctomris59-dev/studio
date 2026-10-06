@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {legalOperator} from "../../lib/server/legal-config";
-import "./legal.css";
 
 export const metadata={title:"Legal & Trust — StudioTasker"};
 const docs=[
