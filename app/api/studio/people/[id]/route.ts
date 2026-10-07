@@ -8,7 +8,7 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const {id}=await params;if(!validUUID(id))return errorResponse(400,"Invalid contact identifier.");
  const data=await jsonObject(request);if(!data)return errorResponse(400,"Invalid update.");
- const fields=["name","email","phone","notes","stage","nextContact","source","consent","status","startDate","expiryDate"];
+ const fields=["name","email","phone","notes","stage","nextContact","source","consent","status","startDate","expiryDate","tags","waiverStatus"];
  if(!Object.keys(data).length||Object.keys(data).some(k=>!fields.includes(k)))return errorResponse(400,"Unsupported fields.");
  const name=data.name===undefined?undefined:stringField(data,"name",80);
  const email=data.email===undefined?undefined:stringField(data,"email",160);
@@ -20,6 +20,9 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  const nextContact=data.nextContact===undefined?undefined:stringField(data,"nextContact",10);
  const startDate=data.startDate===undefined?undefined:stringField(data,"startDate",10);
  const expiryDate=data.expiryDate===undefined?undefined:stringField(data,"expiryDate",10);
+ const tags=data.tags===undefined?undefined:Array.isArray(data.tags)&&data.tags.length<=12&&data.tags.every(x=>typeof x==="string"&&x.trim().length>=1&&x.trim().length<=30)
+  ?Array.from(new Set((data.tags as string[]).map(x=>x.trim()))):null;
+ const waiverStatus=data.waiverStatus===undefined?undefined:stringField(data,"waiverStatus",20);
  const dateValid=(str:string|undefined|null)=>{
   if(str===undefined||str===null||str==="")return true;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(str))return false;
@@ -28,10 +31,11 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  };
  if(name===null||name!==undefined&&name.length<2||email===null||email!==undefined&&email!==""&&!emailIsValid(normalizeEmail(email))||
  phone===null||phone!==undefined&&phone!==""&&!/^\+?[0-9]{7,15}$/.test(phone.replace(/[\s().-]/g,""))||
- notes===null||stage===null||source===null||status===null||
+ notes===null||stage===null||source===null||status===null||tags===null||waiverStatus===null||
  nextContact===null||startDate===null||expiryDate===null||!dateValid(nextContact)||!dateValid(startDate)||!dateValid(expiryDate)||
  (stage!==undefined&&!["New","Contacted","Trial booked","Trial attended","Won","Lost"].includes(stage))||
  (status!==undefined&&!["Active","Paused"].includes(status))||
+ (waiverStatus!==undefined&&!["not_required","pending","signed","expired"].includes(waiverStatus))||
  (data.consent!==undefined&&typeof data.consent!=="boolean"))
  return errorResponse(400,"Invalid contact fields.");
  try{
@@ -40,20 +44,22 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
    const old=await client.query<{id:string;kind:string;email:string;phone:string}>(`
     SELECT id,kind,email,phone FROM people WHERE id=$1 AND studio_id=$2 AND archived_at IS NULL FOR UPDATE`,[id,auth.studioId]);
    if(!old.rowCount)throw new StudioOperationError(404,"Contact not found.");
-   if(stage!==undefined&&old.rows[0].kind!=="lead"||status!==undefined&&old.rows[0].kind!=="member")
+   if(stage!==undefined&&old.rows[0].kind!=="lead"||(status!==undefined||waiverStatus!==undefined)&&old.rows[0].kind!=="member")
     throw new StudioOperationError(400,"Field is not applicable to this contact type.");
    const columns:string[]=[],values:unknown[]=[auth.studioId,id];
    const append=(key:string,value:unknown)=>{if(value!==undefined){values.push(value);columns.push(key+"=$"+values.length)}};
    append("full_name",name);append("email",email===undefined?undefined:normalizeEmail(email));
    append("phone",phone===undefined?undefined:phone.replace(/[\s().-]/g,""));
    append("notes",notes);append("lead_stage",stage);append("source",source);
-   append("member_status",status);append("next_contact",nextContact===undefined?undefined:nextContact||null);
+   append("member_status",status);append("tags",tags);append("waiver_status",waiverStatus);
+   if(waiverStatus!==undefined){values.push(new Date().toISOString());columns.push("waiver_updated_at=$"+values.length)}
+   append("next_contact",nextContact===undefined?undefined:nextContact||null);
    append("start_date",startDate===undefined?undefined:startDate||null);
    append("expiry_date",expiryDate===undefined?undefined:expiryDate||null);
    append("email_consent",data.consent);
    if(!columns.length)throw new StudioOperationError(400,"No editable fields provided.");
    const changed=await client.query(`UPDATE people SET ${columns.join(",")},updated_at=now()
-     WHERE studio_id=$1 AND id=$2 RETURNING id,kind,full_name,email,phone,notes,lead_stage,member_status,start_date,expiry_date`,values);
+     WHERE studio_id=$1 AND id=$2 RETURNING id,kind,full_name,email,phone,notes,lead_stage,member_status,start_date,expiry_date,tags,waiver_status,waiver_updated_at`,values);
    await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,'contact.updated',jsonb_build_object('fields',$4::text[]))",[auth.studioId,id,auth.userId,columns.map(x=>x.split("=")[0])]);
    return changed.rows[0];
   });
