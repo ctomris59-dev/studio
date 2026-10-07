@@ -20,13 +20,13 @@ const notFound=read("app/not-found.tsx");
 
 assert(!layout.includes("alternates:"),"Root layout must not force one canonical URL onto child pages.");
 assert(home.includes('alternates:{canonical:"/"}'),"Homepage must self-canonicalize.");
-assert(robots.includes('userAgent:"OAI-SearchBot"')&&robots.includes('userAgent:"PerplexityBot"')&&robots.includes('userAgent:"Google-Extended"'),"Search/AI crawler policy must be explicit.");
+assert(["OAI-SearchBot","ChatGPT-User","GPTBot","PerplexityBot","Google-Extended"].every(x=>robots.includes('userAgent:"'+x+'"')),"Search/AI crawler policy must be explicit.");
 assert(!robots.includes("/_next"),"Rendering assets must remain crawlable.");
 assert(robots.includes('disallow:["/api/"]'),"API endpoints should not consume crawler traffic.");
 for(const p of ["/app-demo","/workspace","/checkout","/book/preview","/legal/terms","/legal/privacy","/legal/dpa","/legal/cookies","/legal/subprocessors","/legal/cancellation","/legal/turkiye-privacy"]){
  assert(!sitemap.includes('"'+p+'"'),"Noindex/technical route must stay out of sitemap: "+p);
 }
-for(const p of ["/pilates-studio-software","/yoga-studio-software","/barre-studio-software","/dance-studio-software","/indoor-cycling-software","/fitness-gym-software","/boutique-fitness-software","/compare","/start","/contact","/legal","/legal/security"]){
+for(const p of ["/about","/pilates-studio-software","/yoga-studio-software","/barre-studio-software","/dance-studio-software","/indoor-cycling-software","/fitness-gym-software","/boutique-fitness-software","/compare","/start","/contact","/legal","/legal/security"]){
  assert(sitemap.includes('"'+p+'"'),"Canonical public route missing from sitemap: "+p);
 }
 assert(next.includes('permanent:true')&&next.includes('value:"studiotasker.com"')&&next.includes("https://www.studiotasker.com/:path*"),"Canonical hostname must permanently redirect to www.");
@@ -36,9 +36,11 @@ assert(demoLayout.includes("index:false")&&bookingLayout.includes("index:false")
 assert(legalLayout.includes("index:false")&&legalHub.includes("index:true")&&security.includes("index:true"),"Legal detail documents must be noindex while trust hub/security remain indexable.");
 assert(!home.startsWith('"use client"')&&!landing.startsWith('"use client"'),"Critical acquisition content must be server-rendered in initial HTML.");
 assert(home.includes("<JsonLd")&&landing.includes("<JsonLd")&&landing.includes("breadcrumbJsonLd"),"Structured data must be server-rendered.");
+assert(read("lib/seo.ts").includes('"@type":"Organization"')&&read("lib/seo.ts").includes('"@type":"Service"')&&!read("lib/seo.ts").includes('"@type":"AggregateRating"'),"Entity schema must identify the organization/service without invented reviews.");
 assert(landing.includes("studioTypeLinks.filter")&&home.includes("/yoga-studio-software"),"Vertical pages must have crawlable internal links and must be discoverable from home.");
 assert(llms.includes("# StudioTasker")&&llms.includes("sitemap.xml"),"AI-readable product summary must expose canonical facts and discovery URLs.");
 assert(notFound.includes("404 / PAGE NOT FOUND"),"Unknown URLs must have a dedicated real 404 experience.");
+assert(home.includes('href="/about"'),"About/entity page must be linked from the public site.");
 
 const verticals=[
  ["app/pilates-studio-software/page.tsx","/pilates-studio-software"],
