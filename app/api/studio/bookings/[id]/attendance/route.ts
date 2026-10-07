@@ -7,7 +7,11 @@ export async function POST(request:NextRequest,context:{params:Promise<{id:strin
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const {id}=await context.params;
  try{
-  const result=await authenticated(request,["owner","manager","receptionist"],(client,auth)=>setClassAttendance(client,auth,id,true));
+  const result=await authenticated(request,["owner","manager","receptionist"],async(client,auth)=>{
+   const state=await client.query<{no_show_at:Date|null}>("SELECT no_show_at FROM bookings WHERE studio_id=$1 AND id=$2",[auth.studioId,id]);
+   if(state.rows[0]?.no_show_at)throw new StudioOperationError(409,"Clear the no-show before checking this member in.");
+   return setClassAttendance(client,auth,id,true);
+  });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
   return successResponse({attendance:result.value});
  }catch(e){return e instanceof StudioOperationError?errorResponse(e.status,e.message):backendError()}
