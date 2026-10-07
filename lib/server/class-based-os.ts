@@ -27,10 +27,12 @@ export async function resolveClassMetadata(client:PoolClient,studioId:string,bod
  const spotBookingEnabledValue=body.spotBookingEnabled===undefined?defaults.spot_booking_enabled:body.spotBookingEnabled;
  if(typeof spotBookingEnabledValue!=="boolean")fail(400,"Invalid spot-booking setting.");
  const spotBookingEnabled=spotBookingEnabledValue as boolean;
- const spotLabel=body.spotLabel===undefined?defaults.equipment_label:text(body.spotLabel,40);
- const spotCount=spotBookingEnabled?integer(body.spotCount===undefined?defaults.default_spot_count:body.spotCount,1,100):null;
- if(!spotLabel||spotLabel.length<2||spotBookingEnabled&&(spotCount===null||spotCount<capacity))
+ const spotLabelValue=body.spotLabel===undefined?defaults.equipment_label:text(body.spotLabel,40);
+ const spotCountValue=spotBookingEnabled?integer(body.spotCount===undefined?defaults.default_spot_count:body.spotCount,1,100):null;
+ if(!spotLabelValue||spotLabelValue.length<2||spotBookingEnabled&&(spotCountValue===null||spotCountValue<capacity))
   fail(400,"Equipment spots must have a label and at least as many spots as class capacity.");
+ const spotLabel=spotLabelValue as string;
+ const spotCount=spotBookingEnabled?spotCountValue as number:null;
  const rawStaff=body.staffId,rawSub=body.substituteStaffId;
  const staffId=rawStaff===undefined||rawStaff===null||rawStaff===""?null:String(rawStaff);
  const substituteStaffId=rawSub===undefined||rawSub===null||rawSub===""?null:String(rawSub);
