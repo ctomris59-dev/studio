@@ -130,3 +130,14 @@ assert(appDemoCss.includes("sad-demo-expired")&&appDemoCss.includes("sad-expired
 
 assert(startPage.includes('className="st-start-intro-meta"'),"Start page back link and kicker must share a deliberate meta row.");
 assert(startCss.includes(".st-start-intro-meta{display:flex")&&startCss.includes("padding:38px 0 76px")&&!startCss.includes("margin:-20px 0 28px"),"Start page hero spacing and global band must avoid overlap and negative margins.");
+
+const classOs=fs.readFileSync("app/workspace/class-based-operations.tsx","utf8");
+const classEngine=fs.readFileSync("lib/server/class-based-os.ts","utf8");
+const classMigration=fs.readFileSync("db/migrations/015_class_based_os.sql","utf8");
+const staffApi=fs.readFileSync("app/api/studio/staff/route.ts","utf8");
+const insightsApi=fs.readFileSync("app/api/studio/insights/route.ts","utf8");
+assert(classMigration.includes("Indoor cycling")&&classMigration.includes("Fitness & Gym")&&classMigration.includes("studio_staff")&&classMigration.includes("spot_number")&&classMigration.includes("cancellation_type")&&classMigration.includes("waiver_status"),"Class-based OS migration must cover verticals, staff, spots, cancellations and waivers.");
+assert(classEngine.includes("assignSpotToBooking")&&classEngine.includes("cancelBookingWithRules")&&classEngine.includes("setBookingNoShow")&&classEngine.includes("booking.promoted"),"Booking engine must integrate spot assignment, waitlist promotion, late cancellation and no-show.");
+assert(classOs.includes("Repeat weekly")&&classOs.includes("Join waitlist")&&classOs.includes("No-show")&&classOs.includes("Numbered equipment / spot booking")&&classOs.includes("Staff & instructor roster"),"Workspace must expose the core class-based studio workflows.");
+assert(classOs.includes("30-day operational insights")&&insightsApi.includes("no_show")&&insightsApi.includes("late_cancels")&&insightsApi.includes("trialConversion"),"Insights must report utilization, attendance, no-shows, late cancels and trial conversion.");
+assert(staffApi.includes("studio_staff")&&workspaceClient.includes("waiverStatus")&&workspaceClient.includes("tags:editForm.tags"),"Workspace must integrate staff roster plus member tags and waiver state.");
