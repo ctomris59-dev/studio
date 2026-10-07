@@ -27,7 +27,10 @@
     "backup:verify": "node scripts/verify-backup.cjs",
     "backup:restore": "node scripts/restore-backup.cjs",
     "jobs:cleanup": "node scripts/clean-expired-links.cjs",
-    "paddle:seed:sandbox": "node scripts/seed-paddle-catalog.mjs"
+    "paddle:seed:sandbox": "node scripts/seed-paddle-catalog.mjs",
+    "test:seo": "node scripts/test-seo.cjs",
+    "test:seo:http": "node scripts/test-seo-http.cjs",
+    "seo:logs": "node scripts/analyze-crawl-log.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
