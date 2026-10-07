@@ -146,3 +146,8 @@ assert(client.includes("Parent / guardian contact")&&client.includes("Related / 
 
 assert(["PILATES / REFORMER","YOGA","BARRE","DANCE","INDOOR CYCLING","FITNESS & GYM","BOUTIQUE FITNESS"].every(x=>home.includes(x)),"Homepage Studio types must cover all seven supported class-based verticals.");
 assert(["Indoor cycling","Fitness &amp; Gym","Boutique fitness"].every(x=>appDemo.includes(x))&&appDemo.includes("EQUIPMENT SPOTS")&&appDemo.includes("NO-SHOW"),"Owner demo must reflect the expanded studio presets and class operations.");
+
+assert(client.includes("ACTIVE PRESET")&&client.includes("studioPresetProfile(settings.focus)")&&client.includes("Recommended formats:"),"Workspace Settings must explain the active vertical preset and recommended class formats.");
+assert(client.includes("Parent / guardian contact")&&client.includes("Operational tags")&&client.includes("Waiver status"),"Member creation must capture class-based studio context at first entry.");
+assert(classOs.includes("Popular time slots")&&classOs.includes("editingStaff")&&classOs.includes("Staff details updated."),"Class-based operations must expose time-slot reporting and editable staff roster.");
+assert(insightsApi.includes("time_slot")&&insightsApi.includes("timeSlots:timeSlots.rows"),"Insights API must include popular class time slots.");
