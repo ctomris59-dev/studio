@@ -16,11 +16,13 @@ const timetable = [
 ];
 
 const studioTypes = [
-  {name:"PILATES",copy:"Reformer schedules, packages, credits and attendance.",Icon:Activity},
-  {name:"YOGA",copy:"Recurring classes, member records and simple follow-up.",Icon:HeartPulse},
-  {name:"BARRE",copy:"Capacity, attendance and package usage in one workspace.",Icon:Waves},
-  {name:"BOUTIQUE FITNESS",copy:"Classes, leads and member follow-up without extra admin.",Icon:Dumbbell},
-  {name:"GYM / GROUP CLASSES",copy:"Class operations and member context for instructor-led sessions.",Icon:Users}
+  {name:"PILATES / REFORMER",copy:"Reformer spots, recurring schedules, private and semi-private formats, packages, credits and attendance.",Icon:Activity},
+  {name:"YOGA",copy:"Recurring classes, workshops or courses, privates, room capacity, member records and follow-up.",Icon:HeartPulse},
+  {name:"BARRE",copy:"Recurring classes, capacity, attendance, waitlists and package usage in one workspace.",Icon:Waves},
+  {name:"DANCE",copy:"Lessons, levels, course or term labels, student records and optional parent or guardian contact.",Icon:Users},
+  {name:"INDOOR CYCLING",copy:"Bike spots, capacity, waitlists, check-in and recurring class schedules.",Icon:Activity},
+  {name:"FITNESS & GYM",copy:"Group classes, personal training, open-gym formats, check-in and member context.",Icon:Dumbbell},
+  {name:"BOUTIQUE FITNESS",copy:"Classes, leads, packages, credits, staff and follow-up without enterprise overhead.",Icon:Waves}
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
