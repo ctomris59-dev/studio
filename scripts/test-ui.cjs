@@ -83,7 +83,7 @@ assert(!home.includes("See what StudioTasker tells you to do today"),"Hero purch
 assert(["USA","CANADA","UK","EUROPE","INTERNATIONAL"].every(x=>home.includes(x))&&home.includes("Where is StudioTasker available?"),"Homepage must communicate global availability across North America and Europe.");
 assert(!home.includes("One studio system.")&&!home.includes("BUILT TO TRAVEL"),"Homepage must not render the removed global positioning section.");
 assert(startPage.includes("USA · Canada · UK · Europe · International")&&startPage.includes("/ month · USD"),"Purchase page must communicate global availability and USD billing.");
-assert(layout.includes("Global studio management software")&&layout.includes("USA, Canada, UK, Europe and beyond"),"Public metadata must be global-first.");
+assert(layout.includes("Studio Management Software")&&layout.includes("Pilates, yoga, barre, dance, indoor cycling, fitness and boutique studios"),"Public metadata must remain global, multi-vertical and software-focused.");
 assert(compareLanding.includes("STUDIOTASKER · VS. BROADER PLATFORMS"),"Neutral comparison page must remain available without cluttering the homepage navigation.");
 assert(pilatesLanding.includes("PILATES / REFORMER STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("Reformer spots")&&pilatesLanding.includes("StudioTypeLanding"),"Pilates landing page must use the shared vertical template with Reformer-specific operations.");
 assert(compareLanding.includes("STUDIOTASKER · VS. BROADER PLATFORMS")&&compareLanding.includes("Broader platforms may")&&compareLanding.includes("does not make feature claims about any named competitor"),"Neutral comparison page must stay concise and compare approaches without naming competitors.");
