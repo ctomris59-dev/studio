@@ -88,9 +88,9 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
     <button type="button" className="rd-primary" disabled={busy} onClick={()=>void manageBilling()}>{busy?"Opening…":"Manage billing in Paddle"}</button>
     <button type="button" disabled={busy} onClick={()=>void load().catch(e=>setNote(e instanceof Error?e.message:"Refresh failed"))}>Refresh subscription status</button>
    </div>:<>
-    <label>Choose plan<select value={plan} onChange={e=>setPlan(e.target.value as LegalPlan)}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $418.80/year</option></select></label>
+    <label>Choose plan<select value={plan} onChange={e=>setPlan(e.target.value as LegalPlan)}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $406.80/year · save 15%</option></select></label>
     {!currentAccepted&&<><label className="rd-legal-consent"><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms</Link> · <Link href="/legal/cancellation" target="_blank">Cancellation & Refund</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link></span></label><p className="rd-tiny">Privacy information is provided separately in the <Link href="/legal/privacy" target="_blank">Privacy Policy</Link> and <Link href="/legal/turkiye-privacy" target="_blank">Türkiye Privacy Notice (KVKK)</Link>; checkout does not request consent for core contractual processing.</p></>}
-    <button type="button" className="rd-primary" disabled={busy||!state.checkoutConfigured||(!currentAccepted&&!accepted)} onClick={()=>void startCheckout()}>{busy?"Preparing secure checkout…":plan==="annual"?"Continue to Paddle · $418.80/year":"Continue to Paddle · $39.90/month"}</button>
+    <button type="button" className="rd-primary" disabled={busy||!state.checkoutConfigured||(!currentAccepted&&!accepted)} onClick={()=>void startCheckout()}>{busy?"Preparing secure checkout…":plan==="annual"?"Continue to Paddle · $406.80/year":"Continue to Paddle · $39.90/month"}</button>
     {!state.checkoutConfigured&&<p className="rd-tiny">Live payment is intentionally disabled until Paddle credentials, approved prices and the webhook secret are configured.</p>}
    </>}
   </>}

@@ -12,7 +12,7 @@ StudioTasker **does**:
 - provide a lightweight studio-branded self-service booking link that uses confirmed class credits without taking payment;
 - define internal class-package templates (credits + validity);
 - let staff confirm package entitlements and make audited credit corrections;
-- surface StudioTasker Today / Revenue Rescue signals such as trial follow-up, low credits, expiry, inactivity, package-status review and open seats;
+- surface StudioTasker Today / follow-up opportunity signals such as trial follow-up, low credits, expiry, inactivity, package-status review and open seats;
 - provide CSV migration, JSON export, tasks and operational insights;
 - bill the **studio** for the StudioTasker software subscription.
 
@@ -44,7 +44,7 @@ The app demo is fictional and browser-only. Do not enter real personal informati
 ## StudioTasker pricing
 
 - **$39.90/month per studio**
-- **$418.80/year** ($34.90/month equivalent when prepaid annually)
+- **$406.80/year** ($33.90/month equivalent; about 15% lower than paying monthly for twelve months)
 
 This fee is for StudioTasker software. It has no relationship to what the studio charges its members.
 
@@ -63,8 +63,8 @@ Current signal families:
 
 One-click actions can record contact, create a task or snooze a signal. No member message is sent automatically.
 
-### Revenue Rescue
-Revenue Rescue is an operational opportunity layer, not a financial claim. It highlights studio follow-up situations that may affect retention or utilization without claiming that StudioTasker “recovered” money.
+### Follow-up opportunities
+StudioTasker surfaces operational follow-up situations such as trials, low credits, inactivity, package review and open class capacity. These are staff-review signals, not guaranteed financial outcomes.
 
 ## Self-service studio onboarding
 
@@ -93,7 +93,7 @@ The database migration directory is authoritative for new installations. Histori
 
 ## StudioTasker subscription billing
 
-StudioTasker uses **Paddle as authorised reseller and Merchant of Record** for StudioTasker's own B2B SaaS subscription only. The configured Paddle prices must be exactly $39.90/month and $418.80/year; the server verifies catalog price, currency and billing interval before creating a checkout transaction. The browser never chooses the tenant or Paddle price ID. Signed Paddle webhooks activate, update or cancel access, and Paddle Customer Portal handles billing management.
+StudioTasker uses **Paddle as authorised reseller and Merchant of Record** for StudioTasker's own B2B SaaS subscription only. The configured Paddle prices must be exactly $39.90/month and $406.80/year; the server verifies catalog price, currency and billing interval before creating a checkout transaction. The browser never chooses the tenant or Paddle price ID. Signed Paddle webhooks activate, update or cancel access, and Paddle Customer Portal handles billing management.
 
 This is separate from studio-member commerce, which is outside the product.
 

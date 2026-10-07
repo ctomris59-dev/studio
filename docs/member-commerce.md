@@ -6,7 +6,7 @@ This document replaces the earlier member-commerce experiment.
 
 StudioTasker is a **studio-facing B2B operations product**. StudioTasker does not act as a payment platform, merchant intermediary, consumer booking product or member account system.
 
-The prior experimental Stripe Connect/member checkout/member portal implementation has been removed from the application and database model by migration `011_studio_only.sql`.
+The prior experimental member checkout/member portal implementation has been removed from the application and database model by migration `011_studio_only.sql`.
 
 ## What an internal package means
 
@@ -26,13 +26,13 @@ The studio remains responsible for how, where and whether it collects money from
 
 StudioTasker may charge the **studio** for use of the SaaS:
 - $39.90/month;
-- $418.80/year ($34.90/month equivalent when prepaid annually).
+- $406.80/year ($33.90/month equivalent; about 15% lower than paying monthly for twelve months).
 
 That B2B subscription can be handled by the configured StudioTasker billing provider. It is unrelated to member class-pack money.
 
 ## Explicitly out of scope
 
-- Stripe Connect or equivalent member-payment orchestration
+- member-payment orchestration by StudioTasker
 - member card checkout
 - member wallet/payment history
 - refunds/chargebacks

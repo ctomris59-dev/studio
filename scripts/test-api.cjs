@@ -4,7 +4,7 @@ const {once}=require("node:events");
 const {randomUUID,randomBytes,scryptSync,createHmac}=require("node:crypto");
 const {Pool}=require("pg");
 const HOST="http://127.0.0.1:3187";
-const LEGAL={termsVersion:"2026-10-06.3",dpaVersion:"2026-10-06.3",privacyVersion:"2026-10-06.4",cancellationVersion:"2026-10-06.2",legalAccepted:true,plan:"monthly"};
+const LEGAL={termsVersion:"2026-10-06.4",dpaVersion:"2026-10-06.3",privacyVersion:"2026-10-06.4",cancellationVersion:"2026-10-06.3",legalAccepted:true,plan:"monthly"};
 function cookieFrom(response){
  const raw=response.headers.get("set-cookie")||"";
  return raw.split(";")[0];
@@ -55,7 +55,7 @@ async function main(){
   await waitForBoot(server,logs);
   for(const legalPath of ["/legal","/legal/terms","/legal/privacy","/legal/dpa","/legal/cookies","/legal/subprocessors","/legal/security","/legal/cancellation"]){const page=await call(legalPath);assert.equal(page.status,200,legalPath+" must render.");}
   const pilatesLanding=await call("/pilates-studio-software");assert.equal(pilatesLanding.status,200,"Pilates acquisition landing page must render.");assert((pilatesLanding.headers.get("content-type")||"").includes("text/html"));
-  const mindbodyLanding=await call("/mindbody-alternative");assert.equal(mindbodyLanding.status,200,"Mindbody alternative landing page must render.");assert((mindbodyLanding.headers.get("content-type")||"").includes("text/html"));
+  const compareLanding=await call("/compare");assert.equal(compareLanding.status,200,"Neutral comparison landing page must render.");assert((compareLanding.headers.get("content-type")||"").includes("text/html"));
   const sitemapPage=await call("/sitemap.xml");assert.equal(sitemapPage.status,200,"Sitemap must render.");
   const startPage=await call("/start?plan=annual");
   assert.equal(startPage.status,200,"Purchase start page must render.");

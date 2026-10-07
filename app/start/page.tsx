@@ -24,7 +24,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
      <span><b>1</b> Choose plan</span><i/><span><b>2</b> Create studio</span><i/><span><b>3</b> Start using it</span>
     </div>
    </div>
-   <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · Worldwide</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
+   <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · International</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
 
    <div className="st-start-plans" aria-label="StudioTasker plans">
     <article className={selected==="monthly"?"selected":""}>
@@ -36,11 +36,11 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
     </article>
 
     <article className={"annual "+(selected==="annual"?"selected":"")}>
-     <div className="st-plan-head"><span>ANNUAL · BEST VALUE</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
-     <div className="st-plan-price"><sup>$</sup>34<em>.90</em><small>/ month · USD</small></div>
-     <p>Billed once per year at <b>$418.80 USD</b>. Save $60 compared with monthly billing.</p>
+     <div className="st-plan-head"><span>ANNUAL · SAVE 15%</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
+     <div className="st-plan-price"><sup>$</sup>33<em>.90</em><small>/ month · USD</small></div>
+     <p>Billed once per year at <b>$406.80 USD</b>. Save 15% compared with paying monthly.</p>
      <ul><li><Check size={18}/> Everything in the monthly plan</li><li><Check size={18}/> One annual payment</li><li><Check size={18}/> Same full workspace</li><li><Check size={18}/> Lower effective monthly price</li></ul>
-     <Link href="/workspace?mode=register&plan=annual" className="st-plan-buy">START ANNUAL · $418.80/YEAR <ArrowUpRight size={20}/></Link>
+     <Link href="/workspace?mode=register&plan=annual" className="st-plan-buy">START ANNUAL · $406.80/YEAR <ArrowUpRight size={20}/></Link>
     </article>
    </div>
 
