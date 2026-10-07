@@ -13,8 +13,9 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const home=await get("/");
  assert.equal(home.status,200);
  assert(canonical(home.text,"https://www.studiotasker.com/")||canonical(home.text,"https://www.studiotasker.com"),"Home raw HTML must contain self-canonical.");
- assert(home.text.includes("SoftwareApplication")&&home.text.includes("application/ld+json"),"Home JSON-LD missing.");
+ assert(home.text.includes('"Organization"')&&home.text.includes('"Service"')&&home.text.includes("application/ld+json"),"Home entity JSON-LD missing.");
  assert(home.text.includes('href="/yoga-studio-software"'),"Server HTML vertical links missing.");
+ const about=await get("/about"); assert.equal(about.status,200); assert(canonical(about.text,"https://www.studiotasker.com/about"),"About canonical missing.");
  const yoga=await get("/yoga-studio-software");
  assert.equal(yoga.status,200);
  assert(canonical(yoga.text,"https://www.studiotasker.com/yoga-studio-software"),"Yoga canonical missing.");
@@ -27,7 +28,7 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const demo=await get("/demo"); assert.equal(demo.status,308); assert((demo.headers.get("location")||"").includes("/app-demo"));
  const missing=await get("/this-url-does-not-exist-seo-test"); assert.equal(missing.status,404);
  const sitemap=await get("/sitemap.xml"); assert.equal(sitemap.status,200); assert(sitemap.text.includes("/yoga-studio-software")); assert(!sitemap.text.includes("/app-demo")&&!sitemap.text.includes("/workspace")&&!sitemap.text.includes("/checkout"));
- const robots=await get("/robots.txt"); assert.equal(robots.status,200); assert(robots.text.includes("OAI-SearchBot")&&robots.text.includes("PerplexityBot")); assert(!robots.text.includes("Disallow: /_next"));
+ const robots=await get("/robots.txt"); assert.equal(robots.status,200); assert(["OAI-SearchBot","ChatGPT-User","GPTBot","PerplexityBot"].every(x=>robots.text.includes(x))); assert(!robots.text.includes("Disallow: /_next"));
  const llms=await get("/llms.txt"); assert.equal(llms.status,200); assert(llms.text.includes("# StudioTasker")&&llms.text.includes("USD 39.90/month"));
  console.log("SEO HTTP regression checks passed.");
 }finally{child.kill("SIGTERM")}})().catch(err=>{console.error(err);child.kill("SIGTERM");process.exit(1)});
