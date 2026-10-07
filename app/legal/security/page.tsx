@@ -1,7 +1,7 @@
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
 import {legalOperator} from "../../../lib/server/legal-config";
-export const metadata={title:"Security — StudioTasker"};
+export const metadata={title:"Security | StudioTasker",description:"StudioTasker's technical and organisational safeguards for authentication, tenant isolation, data access, backups and application security.",alternates:{canonical:"/legal/security"},robots:{index:true,follow:true}};
 export default function Security(){
  const op=legalOperator();
  return <LegalPage title="Security" kicker="TRUST / TECHNICAL & ORGANISATIONAL MEASURES" version={LEGAL_VERSIONS.security}>
