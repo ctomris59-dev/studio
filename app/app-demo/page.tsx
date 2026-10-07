@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useState,type FormEvent} from "react";
 import Link from "next/link";
 import {
- ArrowRight,BarChart3,CalendarDays,Check,CheckCircle2,ChevronRight,LayoutDashboard,LogOut,
+ ArrowRight,BarChart3,CalendarDays,Check,CheckCircle2,ChevronRight,Clock3,LayoutDashboard,LogOut,
  Plus,RefreshCw,Search,Settings2,ShieldCheck,Target,Trash2,Users,X
 } from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
@@ -20,6 +20,10 @@ type StudioSettings={name:string;focus:string;timezone:string;accentColor:string
 const defaultStudioSettings:StudioSettings={name:"Willow Studio",focus:"Pilates · Yoga · Barre",timezone:"Europe/London",accentColor:"#334BDD",memberTerm:"Members",classTerm:"Classes",creditTerm:"Credits",weekStarts:"monday",timeFormat:"24h",defaultView:"today",defaultClassDuration:50,defaultClassCapacity:8,defaultRoom:"Studio One",inactiveDays:21,lowCreditsThreshold:2,renewalWindowDays:14,trialFollowupHours:18,packageReviewHours:24,openSeatsThreshold:2,privacyPolicyUrl:"https://willow.example/privacy"};
 
 const DEMO_ADD_LIMIT=3;
+const DEMO_SESSION_SECONDS=60*60;
+const DEMO_SESSION_START_KEY="studiotasker-demo-session-start";
+const DEMO_SESSION_EXPIRED_KEY="studiotasker-demo-session-expired";
+const demoTimeLabel=(seconds:number)=>Math.floor(Math.max(0,seconds)/60)+":"+String(Math.max(0,seconds)%60).padStart(2,"0");
 const seedSignals:Signal[]=[
  {id:"s1",priority:"high",kind:"trial",title:"Mia Carter · trial needs a next step",reason:"Trial attended yesterday. No member conversion followed.",next:"Ask whether Mia wants to join"},
  {id:"s2",priority:"high",kind:"renewal",title:"Oliver James · renewal opportunity",reason:"1 class credit remaining. Package expires in 3 days.",next:"Discuss renewal with Oliver"},
@@ -78,23 +82,60 @@ export default function AppDemo(){
  const [classForm,setClassForm]=useState({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});
  const [taskForm,setTaskForm]=useState({person:"",title:"",due:"Tomorrow",priority:"NORMAL" as DemoTask["priority"]});
  const [tourActive,setTourActive]=useState(false),[tourElapsed,setTourElapsed]=useState(0);
+ const [demoRemaining,setDemoRemaining]=useState(DEMO_SESSION_SECONDS),[demoExpired,setDemoExpired]=useState(false);
  const tourStepIndex=Math.min(tourSteps.length-1,Math.floor(tourElapsed/TOUR_STEP_SECONDS)),tourStep=tourSteps[tourStepIndex];
- useEffect(()=>{try{if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true);const saved=sessionStorage.getItem("studiotasker-demo-settings");if(saved)setSettings({...defaultStudioSettings,...JSON.parse(saved)});const logo=sessionStorage.getItem("studiotasker-demo-logo");if(logo)setLogoUrl(logo);setCustomizationSaves(Number(sessionStorage.getItem("studiotasker-demo-customization-saves")||"0"));setLogoUploads(Number(sessionStorage.getItem("studiotasker-demo-logo-uploads")||"0"));if(new URLSearchParams(window.location.search).get("tour")==="1"){setSignedIn(true);setTourElapsed(0);setTourActive(true);sessionStorage.setItem("studiotasker-owner-demo","1")}}catch{}},[]);
+
+ function beginDemoSession(){
+  try{
+   if(sessionStorage.getItem(DEMO_SESSION_EXPIRED_KEY)==="1"){setDemoExpired(true);setDemoRemaining(0);return false}
+   const stored=Number(sessionStorage.getItem(DEMO_SESSION_START_KEY)||"0"),now=Date.now(),started=stored>0?stored:now;
+   if(!stored)sessionStorage.setItem(DEMO_SESSION_START_KEY,String(started));
+   const remaining=Math.max(0,DEMO_SESSION_SECONDS-Math.floor((now-started)/1000));
+   setDemoRemaining(remaining);
+   if(remaining<=0){expireDemo();return false}
+  }catch{}
+  return true;
+ }
+ function clearDemoSandbox(){
+  setSignals(seedSignals);setLeads(seedLeads);setMemberList(seedMembers);setClassList(seedClasses);setTasks(seedTasks);
+  setTourActive(false);setSettings(defaultStudioSettings);setLogoUrl(null);setCustomizationSaves(0);setLogoUploads(0);
+  setClassForm({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});
+  setActivity([]);setView("today");setAdding(null);
+  try{["studiotasker-demo-settings","studiotasker-demo-logo","studiotasker-demo-customization-saves","studiotasker-demo-logo-uploads","studiotasker-booking-demo-count","studiotasker-booking-demo-credits"].forEach(k=>sessionStorage.removeItem(k))}catch{}
+ }
+ function expireDemo(){
+  clearDemoSandbox();setSignedIn(false);setDemoExpired(true);setDemoRemaining(0);setEmail("");setPassword("");setMessage("");
+  try{sessionStorage.setItem(DEMO_SESSION_EXPIRED_KEY,"1");sessionStorage.removeItem("studiotasker-owner-demo")}catch{}
+ }
+
+ useEffect(()=>{try{
+  const stored=Number(sessionStorage.getItem(DEMO_SESSION_START_KEY)||"0"),expired=sessionStorage.getItem(DEMO_SESSION_EXPIRED_KEY)==="1";
+  if(expired||(stored>0&&Date.now()-stored>=DEMO_SESSION_SECONDS*1000)){setDemoExpired(true);setDemoRemaining(0);sessionStorage.setItem(DEMO_SESSION_EXPIRED_KEY,"1");sessionStorage.removeItem("studiotasker-owner-demo");return}
+  if(stored>0)setDemoRemaining(Math.max(0,DEMO_SESSION_SECONDS-Math.floor((Date.now()-stored)/1000)));
+  if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true);
+  const saved=sessionStorage.getItem("studiotasker-demo-settings");if(saved)setSettings({...defaultStudioSettings,...JSON.parse(saved)});
+  const logo=sessionStorage.getItem("studiotasker-demo-logo");if(logo)setLogoUrl(logo);
+  setCustomizationSaves(Number(sessionStorage.getItem("studiotasker-demo-customization-saves")||"0"));
+  setLogoUploads(Number(sessionStorage.getItem("studiotasker-demo-logo-uploads")||"0"));
+  if(new URLSearchParams(window.location.search).get("tour")==="1"&&beginDemoSession()){setSignedIn(true);setTourElapsed(0);setTourActive(true);sessionStorage.setItem("studiotasker-owner-demo","1")}
+ }catch{}},[]);
+ useEffect(()=>{if(!signedIn||demoExpired)return;const tick=()=>{try{
+   const started=Number(sessionStorage.getItem(DEMO_SESSION_START_KEY)||"0");if(!started)return;
+   const remaining=Math.max(0,DEMO_SESSION_SECONDS-Math.floor((Date.now()-started)/1000));setDemoRemaining(remaining);if(remaining<=0)expireDemo();
+  }catch{}};tick();const timer=window.setInterval(tick,1000);return()=>window.clearInterval(timer)},[signedIn,demoExpired]);
  useEffect(()=>{if(!tourActive)return;const timer=window.setInterval(()=>setTourElapsed(value=>Math.min(TOUR_SECONDS,value+1)),1000);return()=>window.clearInterval(timer)},[tourActive]);
  useEffect(()=>{if(!tourActive)return;setView(tourStep.view);setAdding(null);setMessage("")},[tourActive,tourStep.view]);
  useEffect(()=>{if(tourActive&&tourElapsed>=TOUR_SECONDS){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}},[tourActive,tourElapsed]);
 
- function startTour(){setSignedIn(true);setTourElapsed(0);setTourActive(true);setView("today");setAdding(null);setMessage("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}}
+ function startTour(){if(!beginDemoSession())return;setSignedIn(true);setTourElapsed(0);setTourActive(true);setView("today");setAdding(null);setMessage("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}}
  function jumpTour(direction:-1|1){const target=Math.max(0,Math.min(tourSteps.length-1,tourStepIndex+direction));setTourElapsed(target*TOUR_STEP_SECONDS)}
  function finishTour(){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}
  function login(e:FormEvent){e.preventDefault();setMessage("");if(!authenticateDemo(email,password)){setMessage("Demo email or password is incorrect.");return}
+  if(!beginDemoSession())return;
   setSignedIn(true);setView(settings.defaultView);setPassword("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}
  }
  function logout(){setTourActive(false);setSignedIn(false);setEmail("");setPassword("");setMessage("");try{sessionStorage.removeItem("studiotasker-owner-demo")}catch{}}
- function reset(){
-  setSignals(seedSignals);setLeads(seedLeads);setMemberList(seedMembers);setClassList(seedClasses);setTasks(seedTasks);
-  setTourActive(false);setSettings(defaultStudioSettings);setLogoUrl(null);setCustomizationSaves(0);setLogoUploads(0);setClassForm({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});try{["studiotasker-demo-settings","studiotasker-demo-logo","studiotasker-demo-customization-saves","studiotasker-demo-logo-uploads","studiotasker-booking-demo-count","studiotasker-booking-demo-credits"].forEach(k=>sessionStorage.removeItem(k))}catch{}setActivity([]);setView("today");setAdding(null);setMessage("Demo restored to its original sample data.");
- }
+ function reset(){clearDemoSandbox();setMessage("Demo restored to its original sample data. The 60-minute session timer continues.")}
  function act(signal:Signal,kind:"contacted"|"task"|"tomorrow"){
   const label=kind==="contacted"?"Contact recorded":kind==="task"?"Follow-up task created":"Hidden until tomorrow";
   if(kind==="task"&&signal.kind!=="seat")setTasks(list=>[{id:newId("task"),priority:signal.priority==="high"?"HIGH":"NORMAL",person:signal.title.split(" · ")[0],title:signal.next,due:"Tomorrow"},...list]);
@@ -137,12 +178,20 @@ export default function AppDemo(){
  const filteredMembers=useMemo(()=>memberList.filter(m=>m.name.toLowerCase().includes(query.toLowerCase())||m.plan.toLowerCase().includes(query.toLowerCase())),[memberList,query]);
  const filteredLeads=useMemo(()=>leads.filter(l=>[l.name,l.source,l.stage,l.interest].some(v=>v.toLowerCase().includes(leadQuery.toLowerCase()))),[leads,leadQuery]);
 
+ if(demoExpired)return <main className="sad-demo-expired">
+  <header className="sad-login-top"><Link href="/" className="sad-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link><Link href="/">Back to website ↗</Link></header>
+  <section className="sad-expired-card"><span className="sad-kicker">60-MINUTE DEMO COMPLETE</span><Clock3 size={42}/><h1>Ready for the<br/><em>real workspace?</em></h1><p>Your demo sandbox has been reset. Choose a StudioTasker plan to keep real studio data, settings and day-to-day operations in a private customer workspace.</p>
+   <div className="sad-expired-actions"><Link href="/start">CHOOSE A PLAN <ArrowRight size={18}/></Link><Link href="/">RETURN TO WEBSITE</Link></div>
+   <small>The interactive demo is temporary and never becomes a free customer workspace.</small>
+  </section>
+ </main>;
+
  if(!signedIn)return <main className="sad-login">
   <header className="sad-login-top"><Link href="/" className="sad-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link><Link href="/">Back to website ↗</Link></header>
   <section className="sad-login-grid">
    <div className="sad-login-story"><span className="sad-kicker">STUDIO OWNER APP / SANDBOX</span><h1>Sign in like a<br/><em>StudioTasker customer.</em></h1>
     <p>One canonical StudioTasker owner workspace: Today, Leads / CRM, Members, Classes, Follow-ups, Insights and Settings.</p>
-    <div className="sad-safety"><ShieldCheck size={20}/><span><b>Safe demo environment.</b> Add, edit the flow and remove fictional records. Everything resets; no real data or payments.</span></div>
+    <div className="sad-safety"><ShieldCheck size={20}/><span><b>Safe 60-minute demo.</b> Add, edit the flow and remove fictional records. The session expires and resets automatically; no real data or payments.</span></div>
     <button className="sad-demo-account" type="button" onClick={()=>{setEmail(DEMO_ACCOUNT.email);setPassword(DEMO_ACCOUNT.password)}}>
      <span>STUDIO OWNER DEMO</span><b>{DEMO_ACCOUNT.email}</b><small>Password: {DEMO_ACCOUNT.password}</small><i>Use demo credentials <ArrowRight size={17}/></i>
     </button>
@@ -170,7 +219,7 @@ export default function AppDemo(){
   </aside>
   <section className="sad-main">
    <header className="sad-app-top"><div><span className="sad-kicker">OWNER WORKSPACE</span><h1>{settings.name}</h1></div><div className="sad-user-chip"><span>S</span><div><b>{DEMO_ACCOUNT.email}</b><small>Owner</small></div></div></header>
-   <div className="sad-demo-strip"><ShieldCheck size={17}/><span>Interactive sandbox — add/remove is limited to 3 new records per section and resets on demand.</span><button type="button" className="sad-tour-start" onClick={startTour}>Watch 90-sec demo <ChevronRight size={16}/></button></div>
+   <div className="sad-demo-strip"><ShieldCheck size={17}/><span>60-minute sandbox · {demoTimeLabel(demoRemaining)} left · max 3 new records per section.</span><button type="button" className="sad-tour-start" onClick={startTour}>Watch 90-sec demo <ChevronRight size={16}/></button></div>
    {tourActive&&<aside className="sad-tour-card" role="dialog" aria-live="polite" aria-label="90-second StudioTasker guided tour">
     <div className="sad-tour-card-top"><span>{tourStep.eyebrow} · GUIDED TOUR</span><button type="button" aria-label="Close guided tour" onClick={()=>setTourActive(false)}><X size={18}/></button></div>
     <div className="sad-tour-progress" aria-hidden="true"><i style={{width:Math.min(100,(tourElapsed/TOUR_SECONDS)*100)+"%"}}/></div>
@@ -275,7 +324,7 @@ export default function AppDemo(){
       <div className="sad-package-row"><div><b>Starter Pack</b><small>5 {settings.classTerm.toLowerCase()} · 30 days</small></div><span>AVAILABLE</span></div>
       <div className="sad-package-row"><div><b>Studio Ten</b><small>10 {settings.classTerm.toLowerCase()} · 60 days</small></div><span>AVAILABLE</span></div>
      </div>
-     <div className="sad-demo-limit-card"><ShieldCheck size={18}/><div><b>DEMO LIMITS</b><span>Customization saves: {customizationSaves}/5 · Logo uploads: {logoUploads}/2 · CRUD additions: max {DEMO_ADD_LIMIT} per section.</span><small>Demo data is temporary to this browser tab and can be reset at any time.</small></div></div>
+     <div className="sad-demo-limit-card"><ShieldCheck size={18}/><div><b>DEMO LIMITS</b><span>Customization saves: {customizationSaves}/5 · Logo uploads: {logoUploads}/2 · CRUD additions: max {DEMO_ADD_LIMIT} per section.</span><small>Demo data is temporary to this browser tab. Resetting data does not restart the 60-minute session.</small></div></div>
      <button className="sad-settings-save" type="submit" disabled={customizationSaves>=5}>{customizationSaves>=5?"Demo customization limit reached":"Save demo customization"}</button>
      <div className="sad-settings-card sad-boundary"><h3>What the customer can customize</h3><ul><li>Studio name, type and timezone</li><li>Logo and primary brand color</li><li>Member / client terminology</li><li>Class / session terminology</li><li>Credit / visit terminology</li><li>Public booking page identity</li><li>Landing page, week start and time format</li><li>Class defaults and Today signal rules</li><li>No member payment processing or card storage</li></ul></div>
     </form>
