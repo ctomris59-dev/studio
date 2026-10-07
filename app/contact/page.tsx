@@ -6,7 +6,9 @@ import "./contact.css";
 
 export const metadata={
   title:"Contact StudioTasker | Support & Questions",
-  description:"Contact StudioTasker support about the product, pricing, account access or studio setup."
+  description:"Contact StudioTasker support about product fit, pricing, account access, billing or studio setup.",
+  alternates:{canonical:"/contact"},
+  robots:{index:true,follow:true}
 };
 
 export default function ContactPage(){
