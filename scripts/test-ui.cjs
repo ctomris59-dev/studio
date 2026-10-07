@@ -49,7 +49,7 @@ assert(client.includes("MAKE STUDIOTASKER YOURS")&&client.includes("Primary bran
 assert(client.includes("memberTerm")&&client.includes("classTerm")&&client.includes("creditTerm")&&client.includes("/api/studio/logo"),"Real workspace must apply terminology and studio logo personalization.");
 assert(css.includes("--studio-accent")&&css.includes(".rd-live-sidebar"),"Real workspace must use tenant accent color in the owner-app shell.");
 assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Finish setup"),"Studio-owner onboarding and CSV preview must remain available.");
-assert(today.includes("Know what your")&&today.includes("FOLLOW-UP OPPORTUNITIES")&&today.includes("Mark contacted")&&today.includes("member payment collection stays with the studio"),"StudioTasker Today preview must expose studio-only action-first differentiation.");
+assert(today.includes('redirect("/app-demo?tour=1")'),"/today must redirect into the guided owner demo instead of duplicating product-tour content.");
 assert(home.includes("Know what needs attention.")&&home.includes("/app-demo")&&!home.includes("/book/preview"),"Homepage must retain action-first differentiation and the owner-only app demo.");
 assert(home.includes("START STUDIOTASKER")&&home.includes("WATCH 90-SEC DEMO")&&home.includes('href="/start"'),"First-fold homepage must expose obvious purchase and demo actions.");
 assert(home.includes("SELF-SERVE ONBOARDING")&&home.includes("Create your studio")&&home.includes("Import by CSV with preview")&&home.includes("Keep your payment setup"),"Homepage must explain self-serve onboarding in plain language.");
@@ -85,11 +85,11 @@ assert(!home.includes("One studio system.")&&!home.includes("BUILT TO TRAVEL"),"
 assert(startPage.includes("USA · Canada · UK · Europe · International")&&startPage.includes("/ month · USD"),"Purchase page must communicate global availability and USD billing.");
 assert(layout.includes("Global studio management software")&&layout.includes("USA, Canada, UK, Europe and beyond"),"Public metadata must be global-first.");
 assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS"),"Neutral comparison page must remain available without cluttering the homepage navigation.");
-assert(pilatesLanding.includes("PILATES STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("REFORMER PILATES")&&pilatesLanding.includes("$39.90 USD")&&pilatesLanding.includes("FAQPage"),"Pilates landing page must target global Pilates/Reformer studios with price and FAQ schema.");
-assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS")&&compareLanding.includes("Other platforms may")&&compareLanding.includes("rather than making claims about any specific company"),"Neutral comparison page must compare product approaches without naming competitors.");
-assert(compareLanding.includes("not a claim about any specific company")||compareLanding.includes("rather than making claims about any specific company"),"Visible comparison content must remain generic and company-neutral.");
+assert(pilatesLanding.includes("PILATES / REFORMER STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("Reformer spots")&&pilatesLanding.includes("StudioTypeLanding"),"Pilates landing page must use the shared vertical template with Reformer-specific operations.");
+assert(compareLanding.includes("STUDIOTASKER · VS. BROADER PLATFORMS")&&compareLanding.includes("Broader platforms may")&&compareLanding.includes("does not make feature claims about any named competitor"),"Neutral comparison page must stay concise and compare approaches without naming competitors.");
+assert(compareLanding.includes("general product approaches only")&&compareLanding.includes("named competitor"),"Visible comparison content must remain generic and company-neutral.");
 assert(marketingCss.includes(".mk-hero-grid")&&marketingCss.includes("@media(max-width:560px)"),"Acquisition landing pages must include desktop and mobile layouts.");
-assert(sitemap.includes("/pilates-studio-software")&&sitemap.includes("/compare"),"Sitemap must include the neutral comparison page.");
+assert(["/pilates-studio-software","/yoga-studio-software","/barre-studio-software","/dance-studio-software","/indoor-cycling-software","/fitness-gym-software","/boutique-fitness-software","/compare"].every(x=>sitemap.includes(x))&&!sitemap.includes('["/today"'),"Sitemap must include all seven vertical SEO pages and exclude the redirected Today route.");
 assert(home.includes("PILATES · YOGA · BARRE · BOUTIQUE FITNESS")&&!home.includes("ed-index-line")&&!home.includes("MADE FOR THE MOVEMENT MAKERS"),"Hero studio-type label must be clean and free of the removed decorative line and vertical copy.");
 assert(!/interactive product prototype|not a live paid service|launch target|EARLY ACCESS|DEVELOPMENT PREVIEW|proposed price/i.test(home),"Public homepage must use live-service language, not pre-launch copy.");
 assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.includes("management concept"),"Public metadata must describe the live service and permit indexing.");
@@ -164,3 +164,9 @@ assert(layout.includes('metadataBase: new URL("https://www.studiotasker.com")')&
 assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params.get("_ptxn")')&&checkoutClient.includes("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN")&&checkoutClient.includes("paddle.Checkout.open"),"Public checkout page must handle Paddle transaction links on the final domain.");
 
 assert(billing.includes("sandboxStaging")&&billing.includes("BILLING_ALLOW_SANDBOX_TEST")&&billing.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&billing.includes('process.env.PADDLE_ENV!=="production"'),"Sandbox entitlements must only work on the explicitly configured non-production test origin.");
+
+const studioLanding=fs.readFileSync("app/studio-type-landing.tsx","utf8");
+const verticalPages=["yoga","barre","dance","indoor-cycling","fitness-gym","boutique-fitness"].map(x=>fs.readFileSync("app/"+x+"-software/page.tsx","utf8"));
+assert(studioLanding.includes("FAQPage")&&studioLanding.includes("STUDIOTASKER TODAY")&&studioLanding.includes("ONE STUDIO · FULL WORKSPACE"),"Shared vertical landing template must include SEO FAQ schema, operational differentiation and pricing.");
+assert(verticalPages.every(x=>x.includes("StudioTypeLanding")&&x.includes("alternates:{canonical:")),"Every new studio-type SEO route must use the shared template and declare its canonical URL.");
+assert(home.includes('href:"/pilates-studio-software"')&&home.includes('href:"/yoga-studio-software"')&&home.includes('href:"/dance-studio-software"')&&home.includes('href:"/fitness-gym-software"'),"Homepage studio-type cards must lead into the dedicated vertical pages.");
