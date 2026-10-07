@@ -151,3 +151,6 @@ assert(client.includes("ACTIVE PRESET")&&client.includes("studioPresetProfile(se
 assert(client.includes("Parent / guardian contact")&&client.includes("Operational tags")&&client.includes("Waiver status"),"Member creation must capture class-based studio context at first entry.");
 assert(classOs.includes("Popular time slots")&&classOs.includes("editingStaff")&&classOs.includes("Staff details updated."),"Class-based operations must expose time-slot reporting and editable staff roster.");
 assert(insightsApi.includes("time_slot")&&insightsApi.includes("timeSlots:timeSlots.rows"),"Insights API must include popular class time slots.");
+
+assert(billingPanel.includes('variant:"one-page"')&&billingPanel.includes('successUrl:"/workspace?billing=success"'),"Paddle checkout must use the one-page overlay and a workspace success URL.");
+assert(paddleWebhook.includes("BILLING_ALLOW_SANDBOX_TEST")&&paddleWebhook.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&paddleWebhook.includes("approvedStaging"),"Paddle sandbox webhooks must support only an explicitly configured staging origin.");
