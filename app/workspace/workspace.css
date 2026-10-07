@@ -214,3 +214,8 @@
 .rd-preset-card>span{font:800 9px "IBM Plex Mono",monospace;letter-spacing:.05em;color:var(--studio-accent)}
 .rd-preset-card>b{font-size:15px}.rd-preset-card>div{display:grid;gap:3px}.rd-preset-card small{font-size:11px;color:#596274}
 .rd-preset-card p{font-size:11px;line-height:1.45;color:#6a7282;margin:3px 0 0}
+
+.rd-staff-actions{display:flex;gap:8px;flex-wrap:wrap}.rd-staff-edit{margin-top:10px;padding-top:10px;border-top:1px solid #e1e4ea}.rd-staff-edit textarea{min-height:72px}
+.rd-os-report-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:1180px){.rd-os-report-grid{grid-template-columns:1fr 1fr}.rd-os-report-grid>section:last-child{grid-column:1/-1}}
+@media(max-width:720px){.rd-os-report-grid{grid-template-columns:1fr}.rd-os-report-grid>section:last-child{grid-column:auto}}
