@@ -3,7 +3,7 @@ import {ArrowLeft,ArrowRight,ArrowUpRight,Check,Globe2,ShieldCheck} from "lucide
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import "./start.css";
 
-export const metadata={title:"Start StudioTasker — Choose your plan"};
+export const metadata={title:"StudioTasker Pricing | Monthly & Annual Plans",description:"StudioTasker costs $39.90/month per studio or $406.80/year. Compare monthly and annual billing for the full studio management workspace.",alternates:{canonical:"/start"},robots:{index:true,follow:true}};
 
 export default async function StartPage({searchParams}:{searchParams:Promise<{plan?:string}>}){
  const params=await searchParams;
