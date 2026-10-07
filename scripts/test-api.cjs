@@ -283,6 +283,8 @@ async function main(){
   await admin.query("UPDATE people SET lead_stage='Trial attended',updated_at=now()-interval '2 days' WHERE studio_id=$1 AND id=$2",[studioA,trialLead.data.record.id]);
   const inactiveMember=await createMember(a,"Inactive Member");
   await confirmMember(inactiveMember);
+  const inactiveCredits=await call("/api/studio/members/"+inactiveMember+"/credits",{method:"POST",cookie:a.cookie,body:{delta:5,reason:"Fixture above low-credit threshold",requestKey:randomUUID()}});
+  assert.equal(inactiveCredits.status,200,JSON.stringify(inactiveCredits.data));
   await admin.query("UPDATE people SET joined=current_date-interval '45 days',start_date=current_date-interval '45 days',last_visit=current_date-interval '30 days',expiry_date=current_date+interval '45 days' WHERE studio_id=$1 AND id=$2",[studioA,inactiveMember]);
   await admin.query("UPDATE people SET updated_at=now()-interval '2 days' WHERE studio_id=$1 AND id=$2",[studioA,member3]);
   const actionA=await call("/api/studio/action-center",{cookie:a.cookie});
