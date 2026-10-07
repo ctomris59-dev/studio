@@ -16,8 +16,10 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
 
   <section className="st-start-hero">
    <div className="st-start-intro">
-    <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>
-    <span className="st-start-kicker">START STUDIOTASKER · GLOBAL</span>
+    <div className="st-start-intro-meta">
+     <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>
+     <span className="st-start-kicker">START STUDIOTASKER · GLOBAL</span>
+    </div>
     <h1>Choose a plan.<br/><em>Create your studio.</em></h1>
     <p>There is no complicated sales process. Pick monthly or annual billing in USD, create your private studio workspace, then set your own timezone, logo, members and classes.</p>
     <div className="st-start-steps">
