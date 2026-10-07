@@ -121,6 +121,17 @@ export default function HomePage() {
           <div className="ed-hero-end ed-container"><span>STUDIOTASKER · KNOW WHAT YOUR STUDIO NEEDS TODAY.</span><a href="#features">SCROLL TO EXPLORE <span>↓</span></a></div>
         </section>
 
+        <section className="ed-pricing" id="pricing">
+          <div className="ed-container">
+            <div className="ed-pricing-title"><span className="ed-overline">01 / PLAIN & SIMPLE</span><h2>Only $39.90.<br/><em>Even better yearly.</em></h2><p>Monthly keeps things flexible at $39.90. If StudioTasker is part of your studio all year, annual billing is the better value: $33.90/month equivalent, $72 less per year and just one yearly renewal.</p></div>
+            <div className="ed-price-grid">
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly — <b>save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
+              <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
+            </div>
+          </div>
+        </section>
+
+
         <section className="ed-start-simple" aria-labelledby="start-simple-title">
           <div className="ed-container ed-start-simple-grid">
             <div className="ed-start-simple-head"><span className="ed-overline">START HERE</span><h2 id="start-simple-title">Three steps.<br/><em>Then you&apos;re in.</em></h2></div>
@@ -137,7 +148,7 @@ export default function HomePage() {
 
         <section className="ed-manifesto" id="features">
           <div className="ed-container ed-manifesto-grid">
-            <div className="ed-overline">01 / WHAT WE BELIEVE</div>
+            <div className="ed-overline">02 / WHAT WE BELIEVE</div>
             <div><h2>You didn&apos;t open a studio<br/>to <em>manage software.</em></h2><p>Classes to plan. People to look after. A dozen things happening at once. The tools behind your studio should make the day feel lighter—not louder.</p></div>
             <div className="ed-manifesto-seal" aria-hidden="true"><span>KEEP IT HUMAN</span><strong><HeartPulse size={48}/></strong><small>KEEP IT MOVING</small></div>
           </div>
@@ -145,7 +156,7 @@ export default function HomePage() {
 
         <section className="ed-features" aria-labelledby="essentials-title">
           <div className="ed-container">
-            <div className="ed-features-top"><div><span className="ed-overline">02 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Member CRM, class operations, package entitlements and follow-ups — without taking over the studio’s customer payments.</p></div>
+            <div className="ed-features-top"><div><span className="ed-overline">03 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Member CRM, class operations, package entitlements and follow-ups — without taking over the studio’s customer payments.</p></div>
             <div className="ed-feature-list">{services.map((item)=><div className="ed-feature-row" key={item.n}>
               <span className="ed-feature-num">{item.n} / 05</span>
               <div className="ed-feature-title"><span>{item.category}</span><h3>{item.title}</h3></div>
@@ -176,7 +187,7 @@ export default function HomePage() {
         <section className="ed-window" id="studio">
           <div className="ed-container ed-window-grid">
             <div className="ed-window-copy">
-              <span className="ed-overline">03 / A LOOK INSIDE</span>
+              <span className="ed-overline">04 / A LOOK INSIDE</span>
               <h2>One place.<br/><em>Every moving</em><br/>part.</h2>
               <p>From a new enquiry to their next class, follow the customer journey in one clear workspace. The everyday admin gets a little easier to act on.</p>
               <div className="ed-window-list"><span><Check size={17}/> Lead-to-member CRM pipeline</span><span><Check size={17}/> Retention and renewal prompts</span><span><Check size={17}/> Studio-managed bookings and attendance</span></div>
@@ -186,16 +197,6 @@ export default function HomePage() {
               <div className="ed-window-label"><span>STUDIOTASKER / INTERACTIVE DEMO</span><span>01 — 04</span></div>
               <div className="ed-window-pulse"><MiniMemberFlow/></div>
               <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong><Dumbbell size={42}/></strong></div>
-            </div>
-          </div>
-        </section>
-
-        <section className="ed-pricing" id="pricing">
-          <div className="ed-container">
-            <div className="ed-pricing-title"><span className="ed-overline">01 / PLAIN & SIMPLE</span><h2>Only $39.90.<br/><em>Even better yearly.</em></h2><p>Monthly keeps things flexible at $39.90. If StudioTasker is part of your studio all year, annual billing is the better value: $33.90/month equivalent, $72 less per year and just one yearly renewal.</p></div>
-            <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly — <b>save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
             </div>
           </div>
         </section>
