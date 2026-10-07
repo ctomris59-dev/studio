@@ -15,8 +15,8 @@ async function run(){
  // Authenticate the full encrypted file BEFORE any SQL is applied.
  const verified=await decryptStream(file,BACKUP_PASSPHRASE);
  console.log("Backup verified, bytes:",verified.bytes);
- const proc=spawn("pg_restore",["--single-transaction","--exit-on-error","--no-owner","--no-privileges"],{
-  env:{...process.env,PGDATABASE:RESTORE_DATABASE_URL},stdio:["pipe","ignore","pipe"]
+ const proc=spawn("pg_restore",["--dbname",RESTORE_DATABASE_URL,"--single-transaction","--exit-on-error","--no-owner","--no-privileges"],{
+  env:process.env,stdio:["pipe","ignore","pipe"]
  });
  let errors="";
  proc.stderr.on("data",data=>{errors+=(data.toString()).slice(0,250)});
