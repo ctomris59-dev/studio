@@ -1,6 +1,6 @@
 import type {MetadataRoute} from "next";
 export default function sitemap():MetadataRoute.Sitemap{
- const base=(process.env.NEXT_PUBLIC_SITE_URL||"https://studio-indol-seven.vercel.app").replace(/\/$/,"");
+ const base=(process.env.NEXT_PUBLIC_SITE_URL||"https://www.studiotasker.com").replace(/\/$/,"");
  const routes=[
   ["",1,"daily"],
   ["/pilates-studio-software",0.9,"weekly"],
