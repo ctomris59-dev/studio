@@ -1,4 +1,5 @@
 const assert=require("node:assert/strict");
+const fs=require("node:fs");
 const {spawn}=require("node:child_process");
 const {once}=require("node:events");
 const {randomUUID,randomBytes,scryptSync,createHmac}=require("node:crypto");
