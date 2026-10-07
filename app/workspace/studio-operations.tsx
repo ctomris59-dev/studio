@@ -8,6 +8,8 @@ export type WorkspacePreferences={
  timezone:string;timeFormat:"24h"|"12h";classTerm:string;memberTerm:string;creditTerm:string;
  defaultClassDuration:number;defaultClassCapacity:number;defaultRoom:string;
  inactiveDays:number;lowCreditsThreshold:number;renewalWindowDays:number;trialFollowupHours:number;packageReviewHours:number;openSeatsThreshold:number;
+ spotBookingEnabled:boolean;equipmentLabel:string;defaultSpotCount:number;defaultClassFormat:string;
+ waiverRequired:boolean;lateCancelRefundCredit:boolean;noShowRefundCredit:boolean;
 };
 type ClassRow={id:string;title:string;instructor:string;room:string;starts_at:string;duration_minutes:number;capacity:number;booked_count:number;waitlist_count:number};
 type MemberRow={id:string;full_name:string;email:string;phone:string;credits:number|null;plan:string|null;package_status:"Pending"|"Confirmed"|null;member_status:string|null;expiry_date:string|null};
