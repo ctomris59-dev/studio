@@ -53,6 +53,29 @@ function MiniSchedule({ compact = false }: { compact?: boolean }) {
   );
 }
 
+function MiniMemberFlow() {
+  const signals=[
+    ["Mia R.","Trial attended yesterday","FOLLOW UP"],
+    ["Oliver K.","1 class credit remaining","RENEW"],
+    ["Emma L.","No visit for 24 days","CHECK IN"],
+    ["Ava P.","Package status needs review","REVIEW"]
+  ];
+  return (
+    <div className="ed-member-pulse">
+      <div className="ed-pulse-head">
+        <div><span className="ed-pulse-icon"><Users size={18}/></span><div><strong>Willow Studio</strong><small>MEMBER PULSE</small></div></div>
+        <span>LIVE WORKSPACE ↗</span>
+      </div>
+      <div className="ed-pulse-intro"><small>TODAY / FOLLOW-UP</small><strong>Know who needs attention.</strong><p>Clear signals from your studio activity — no automatic marketing.</p></div>
+      <div className="ed-pulse-metrics"><div><span>ACTIVE</span><b>118</b></div><div><span>TRIALS</span><b>09</b></div><div><span>FOLLOW-UPS</span><b>05</b></div></div>
+      <div className="ed-pulse-list"><div className="ed-pulse-list-head"><span>NEEDS ATTENTION</span><span>WHY IT APPEARED</span></div>
+        {signals.map(([name,reason,action])=><div className="ed-pulse-row" key={name}><div><b>{name}</b><small>{reason}</small></div><span>{action}</span></div>)}
+      </div>
+      <div className="ed-pulse-foot"><HeartPulse size={14}/><span>Explainable rules · staff-controlled actions</span></div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const op=legalOperator();
   return (
@@ -79,12 +102,11 @@ export default function HomePage() {
               <div className="ed-hero-under">
                 <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — for independent studios in the USA, Canada, UK, Europe and beyond.</p>
                 <div className="ed-hero-action-stack">
-                  <div className="ed-hero-actions">
-                    <Link className="ed-buy-cta" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
-                    <Link className="ed-demo-cta" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
+                  <Link className="ed-buy-cta ed-buy-cta-solo" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
+                  <div className="ed-hero-quick-links">
+                    <Link className="ed-demo-compact" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><small>No sign-up</small><ArrowRight size={16}/></Link>
+                    <Link className="ed-annual-compact" href="/start?plan=annual"><span>ANNUAL · $33.90/MO</span><small>SAVE $72/YEAR</small><ArrowUpRight size={16}/></Link>
                   </div>
-                  <div className="ed-hero-price-note ed-annual-note"><ShieldCheck size={16}/><span><b>BEST VALUE: ANNUAL</b> · $33.90/month · SAVE $72/year · one yearly renewal</span></div>
-                  <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
                 </div>
               </div>
             </div>
@@ -162,7 +184,7 @@ export default function HomePage() {
             </div>
             <div className="ed-window-showcase">
               <div className="ed-window-label"><span>STUDIOTASKER / INTERACTIVE DEMO</span><span>01 — 04</span></div>
-              <div className="ed-window-schedule"><MiniSchedule compact/></div>
+              <div className="ed-window-pulse"><MiniMemberFlow/></div>
               <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong><Dumbbell size={42}/></strong></div>
             </div>
           </div>
@@ -170,7 +192,7 @@ export default function HomePage() {
 
         <section className="ed-pricing" id="pricing">
           <div className="ed-container">
-            <div className="ed-pricing-title"><span className="ed-overline">04 / PLAIN & SIMPLE</span><h2>Only $39.90.<br/><em>Even better yearly.</em></h2><p>Monthly keeps things flexible at $39.90. If StudioTasker is part of your studio all year, annual billing is the better value: $33.90/month equivalent, $72 less per year and just one yearly renewal.</p></div>
+            <div className="ed-pricing-title"><span className="ed-overline">01 / PLAIN & SIMPLE</span><h2>Only $39.90.<br/><em>Even better yearly.</em></h2><p>Monthly keeps things flexible at $39.90. If StudioTasker is part of your studio all year, annual billing is the better value: $33.90/month equivalent, $72 less per year and just one yearly renewal.</p></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly — <b>save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
