@@ -79,3 +79,25 @@
 .sad-stage,.sad-package-row span,.sad-rule-strip b,.sad-demo-limit-card b,.sad-brand-preview small,.sad-display-preview b{font-size:10.5px}
 .sad-settings-hint,.sad-demo-limit-card small,.sad-booking-mini small{font-size:12px!important}
 .sad-row-actions button,.sad-signal-buttons button,.sad-toolbar button{font-size:12px}
+
+
+/* 90-second guided product tour */
+.sad-watch-tour{width:100%;margin-top:12px;border:2px solid #17203c;background:#e7f982;color:#17203c;padding:15px 17px;text-align:left;cursor:pointer;display:grid;gap:4px}
+.sad-watch-tour span{font:800 10px "IBM Plex Mono",monospace;letter-spacing:.06em}
+.sad-watch-tour b{font:700 22px "Barlow Condensed",sans-serif}
+.sad-watch-tour i{font-style:normal;font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px}
+.sad-tour-start{margin-left:auto;border:0;background:transparent;color:#334bdd;font-size:12px;font-weight:900;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sad-tour-card{position:fixed;right:24px;bottom:24px;z-index:80;width:min(430px,calc(100vw - 32px));background:#fffefa;border:2px solid #17203c;box-shadow:10px 10px 0 #17203c;padding:18px;color:#17203c}
+.sad-tour-card-top,.sad-tour-meta,.sad-tour-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sad-tour-card-top>span{font:800 10px "IBM Plex Mono",monospace;letter-spacing:.05em;color:#334bdd}
+.sad-tour-card-top>button{border:0;background:transparent;color:#17203c;cursor:pointer;padding:4px;display:grid;place-items:center}
+.sad-tour-progress{height:6px;background:#dfe3ea;margin:12px 0 8px;overflow:hidden}
+.sad-tour-progress i{display:block;height:100%;background:#334bdd;transition:width .35s linear}
+.sad-tour-meta{font:700 10px "IBM Plex Mono",monospace;color:#747d8e}
+.sad-tour-card h2{font:700 31px "Barlow Condensed",sans-serif;line-height:1.02;margin:15px 0 8px}
+.sad-tour-card p{font-size:14px;line-height:1.55;color:#596579;margin:0}
+.sad-tour-actions{justify-content:flex-end;margin-top:16px}
+.sad-tour-actions button{min-height:40px;padding:8px 13px;border:1px solid #334bdd;background:white;color:#334bdd;font-size:12px;font-weight:900;cursor:pointer;display:flex;align-items:center;gap:6px}
+.sad-tour-actions button:last-child{background:#334bdd;color:white}
+.sad-tour-actions button:disabled{opacity:.4;cursor:default}
+@media(max-width:760px){.sad-tour-start{margin-left:0}.sad-tour-card{right:16px;bottom:16px;box-shadow:6px 6px 0 #17203c}.sad-tour-card h2{font-size:27px}}
