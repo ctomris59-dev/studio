@@ -21,6 +21,7 @@ const terms=fs.readFileSync("app/legal/terms/page.tsx","utf8");
 const privacy=fs.readFileSync("app/legal/privacy/page.tsx","utf8");
 const dpa=fs.readFileSync("app/legal/dpa/page.tsx","utf8");
 const legalVersions=fs.readFileSync("lib/legal-versions.ts","utf8");
+const legalHub=fs.readFileSync("app/legal/page.tsx","utf8");
 const pilatesLanding=fs.readFileSync("app/pilates-studio-software/page.tsx","utf8");
 const compareLanding=fs.readFileSync("app/compare/page.tsx","utf8");
 const marketingCss=fs.readFileSync("app/marketing-landing.css","utf8");
@@ -67,7 +68,7 @@ assert(terms.includes("Liability")&&terms.includes("independent individual opera
 assert(legalVersions.includes('terms:"2026-10-06.4"')&&legalVersions.includes('dpa:"2026-10-06.3"')&&legalVersions.includes('privacy:"2026-10-06.4"')&&legalVersions.includes('cancellation:"2026-10-06.3"')&&legalVersions.includes("LEGAL_ACCEPTANCE_TEXT"),"Legal acceptance must be tied to the current individual-operator document versions.");
 assert(home.includes("$39.90")&&home.includes("$33.90/month")&&home.includes("$406.80")&&home.includes("save 15%"),"Homepage must publish the current monthly and annual StudioTasker prices.");
 assert(["USA","CANADA","UK","EUROPE","INTERNATIONAL"].every(x=>home.includes(x))&&home.includes("Where is StudioTasker available?"),"Homepage must communicate global availability across North America and Europe.");
-assert(home.includes("One studio system.")&&home.includes("Your location.")&&home.includes("Your clock.")&&home.includes("Your payments.")&&home.includes("One clear price."),"Homepage must explain global operational compatibility.");
+assert(!home.includes("One studio system.")&&!home.includes("BUILT TO TRAVEL"),"Homepage must not render the removed global positioning section.");
 assert(startPage.includes("USA · Canada · UK · Europe · International")&&startPage.includes("/ month · USD"),"Purchase page must communicate global availability and USD billing.");
 assert(layout.includes("Global studio management software")&&layout.includes("USA, Canada, UK, Europe and beyond"),"Public metadata must be global-first.");
 assert(home.includes("/compare")&&home.includes("VS. others"),"Homepage must retain the neutral comparison page outside the simplified footer.");
@@ -76,7 +77,7 @@ assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS")&&compareLanding.inc
 assert(compareLanding.includes("not a claim about any specific company")||compareLanding.includes("rather than making claims about any specific company"),"Visible comparison content must remain generic and company-neutral.");
 assert(marketingCss.includes(".mk-hero-grid")&&marketingCss.includes("@media(max-width:560px)"),"Acquisition landing pages must include desktop and mobile layouts.");
 assert(sitemap.includes("/pilates-studio-software")&&sitemap.includes("/compare"),"Sitemap must include the neutral comparison page.");
-assert(editorialCss.includes(".ed-global-grid")&&editorialCss.includes("grid-template-columns:repeat(4,1fr)"),"Global positioning section must have responsive layout styling.");
+assert(home.includes("PILATES · YOGA · BARRE · BOUTIQUE FITNESS")&&!home.includes("ed-index-line")&&!home.includes("MADE FOR THE MOVEMENT MAKERS"),"Hero studio-type label must be clean and free of the removed decorative line and vertical copy.");
 assert(!/interactive product prototype|not a live paid service|launch target|EARLY ACCESS|DEVELOPMENT PREVIEW|proposed price/i.test(home),"Public homepage must use live-service language, not pre-launch copy.");
 assert(layout.includes("index: true")&&layout.includes("follow: true")&&!layout.includes("management concept"),"Public metadata must describe the live service and permit indexing.");
 assert(subscriptionRoute.includes("LEGAL_PLAN_PRICE_CENTS")&&subscriptionRoute.includes("paddle.prices.get")&&subscriptionRoute.includes("paddle.transactions.create")&&subscriptionRoute.includes("customData"),"Checkout must verify the Paddle catalog server-side and bind trusted studio/price metadata before opening checkout.");
@@ -86,4 +87,7 @@ assert(editorialCss.includes(".ed-buy-cta span")&&editorialCss.includes("color:#
 assert(!client.includes("production infrastructure is configured")&&!onboarding.includes("legal launch checks")&&!workspacePage.includes("Secure backend not configured")&&!workspacePage.includes("subscription infrastructure are configured"),"Customer workspace must not expose development-stage infrastructure wording.");
 assert(client.includes("pendingPlan")&&client.includes('requestedMode==="register"')&&client.includes("Complete your"),"Workspace auth must preserve plan intent from the purchase flow.");
 assert(billingPanel.includes("Monthly · $39.90/month")&&billingPanel.includes("Annual · $406.80/year · save 15%")&&billingPanel.includes("Manage billing in Paddle"),"Workspace subscription controls must show the published prices and Paddle portal management.");
+assert(home.includes("STEP INSIDE THE APP")&&home.includes("THE STUDIO EDIT")&&!home.includes("VOL. 01")&&home.includes("ed-window-app-cta"),"Studio edit area must use the large guided-demo CTA without the old volume label.");
+assert(home.includes("<Dumbbell")||home.includes("Dumbbell"),"Homepage source must use studio/fitness iconography instead of decorative star marks.");
+assert(legalHub.includes("KVKK Privacy Notice")&&!legalHub.includes("Türkiye Privacy Notice (KVKK)"),"Legal hub must use the concise KVKK Privacy Notice title.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
