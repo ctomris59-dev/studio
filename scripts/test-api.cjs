@@ -200,12 +200,6 @@ async function main(){
    assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.member.package_status,"Confirmed");
   };
   await confirmMember(member1);await confirmMember(member2);
-  const spotBooking=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member1,spotNumber:1}});
-  assert.equal(spotBooking.status,201,JSON.stringify(spotBooking.data));assert.equal(spotBooking.data.booking.spot_number,1);
-  const occupiedSpot=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member2,spotNumber:1}});
-  assert.equal(occupiedSpot.status,409,"Occupied equipment spot must not be double-booked.");
-  const secondSpot=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member2,spotNumber:2}});
-  assert.equal(secondSpot.status,201,JSON.stringify(secondSpot.data));assert.equal(secondSpot.data.booking.spot_number,2);
   const confirmedState=await admin.query("SELECT package_status,credits FROM people WHERE studio_id=$1 AND id=$2",[studioA,member1]);
   assert.equal(confirmedState.rows[0].package_status,"Confirmed","Package confirmation must persist before credit adjustment.");
   assert.equal(confirmedState.rows[0].credits,5,"Package confirmation must persist numeric credits.");
@@ -238,6 +232,12 @@ async function main(){
   }});
   assert.equal(spotClass.status,201,JSON.stringify(spotClass.data));assert.equal(spotClass.data.class.spot_booking_enabled,true);
   assert.equal(spotClass.data.class.spot_label,"Reformer");assert.equal(spotClass.data.class.class_format,"semi_private");
+  const spotBooking=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member1,spotNumber:1}});
+  assert.equal(spotBooking.status,201,JSON.stringify(spotBooking.data));assert.equal(spotBooking.data.booking.spot_number,1);
+  const occupiedSpot=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member2,spotNumber:1}});
+  assert.equal(occupiedSpot.status,409,"Occupied equipment spot must not be double-booked.");
+  const secondSpot=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member2,spotNumber:2}});
+  assert.equal(secondSpot.status,201,JSON.stringify(secondSpot.data));assert.equal(secondSpot.data.booking.spot_number,2);
   const repeatDate=new Date(Date.now()+6*86400000).toISOString().slice(0,10),repeatUntil=new Date(Date.now()+12*86400000).toISOString().slice(0,10),allDays=[0,1,2,3,4,5,6];
   const weekly=await call("/api/studio/classes/series",{method:"POST",cookie:a.cookie,body:{title:"Morning Class",instructor:"Coach Series",room:"Studio S",durationMinutes:50,capacity:6,startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}});
   assert.equal(weekly.status,201,JSON.stringify(weekly.data));assert.equal(weekly.data.classes.length,7);
