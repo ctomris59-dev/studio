@@ -36,7 +36,7 @@ const legacyDemo=fs.readFileSync("app/demo/page.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
 assert(client.includes('type="email"')&&client.includes('autoComplete="username"'));
 assert(client.includes('type="password"')&&client.includes("new-password"));
-assert(operation.includes("StudioTasker Today")&&operation.includes("REVENUE RESCUE")&&operation.includes("Mark contacted")&&operation.includes("Make task"),"Today dashboard and one-click actions must remain visible.");
+assert(operation.includes("StudioTasker Today")&&operation.includes("FOLLOW-UP OPPORTUNITIES")&&operation.includes("Mark contacted")&&operation.includes("Make task"),"Today dashboard and one-click actions must remain visible.");
 assert(css.includes("@media(max-width:720px)")&&css.includes("@media(max-width:600px)"),"Phone layouts should be explicitly accounted for.");
 assert(css.includes(":focus-visible"),"Keyboard focus should be styled.");
 assert(css.includes("font-size:16px"),"Forms must avoid sub-16px input text on phones.");
