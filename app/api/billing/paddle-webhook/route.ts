@@ -22,10 +22,18 @@ export async function POST(request:NextRequest){
   // A verified event we do not consume must be acknowledged so Paddle does not retry forever.
   return successResponse({ok:true,processed:false,reason:"ignored"});
  }
- if(event.isTestMode&&process.env.BILLING_ALLOW_LOCAL_TEST!=="true")
-  return errorResponse(422,"Sandbox transactions cannot activate a live subscription.");
- if(event.isTestMode&&!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(process.env.PUBLIC_APP_ORIGIN||""))
-  return errorResponse(422,"Sandbox events are only accepted in explicit localhost test mode.");
+ if(event.isTestMode){
+  if(process.env.PADDLE_ENV==="production")
+   return errorResponse(422,"Sandbox transactions cannot activate a live subscription.");
+  const enabled=process.env.BILLING_ALLOW_SANDBOX_TEST==="true"||process.env.BILLING_ALLOW_LOCAL_TEST==="true";
+  if(!enabled)return errorResponse(422,"Sandbox billing test mode is disabled.");
+  const appOrigin=(process.env.PUBLIC_APP_ORIGIN||"").trim();
+  const stagingOrigin=(process.env.PADDLE_SANDBOX_ALLOWED_ORIGIN||"").trim();
+  const localhost=/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(appOrigin);
+  const approvedStaging=Boolean(stagingOrigin&&appOrigin===stagingOrigin&&/^https:\/\//.test(stagingOrigin));
+  if(!localhost&&!approvedStaging)
+   return errorResponse(422,"Sandbox events are only accepted for the explicitly configured test origin.");
+ }
  try{
   const result=await inTransaction(async client=>{
    await client.query("SELECT set_config('app.studio_id',$1,true)",[event.studioId]);
