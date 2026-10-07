@@ -26,20 +26,36 @@ export async function POST(request:NextRequest){
  const name=stringField(body,"name",80),kind=stringField(body,"kind",12);
  const email=body.email===undefined?"":stringField(body,"email",160);
  const phone=body.phone===undefined?"":stringField(body,"phone",30);
- if(!name||name.length<2||!["lead","member"].includes(kind||"")||email===null||phone===null||
-    (!email&&!phone)||email&& !emailIsValid(normalizeEmail(email))||
-    phone&&!/^\+?[0-9]{7,15}$/.test(phone.replace(/[\s().-]/g,"")))
-    return errorResponse(400,"Provide a name and valid email or phone.");
+ const notes=body.notes===undefined?"":stringField(body,"notes",1600);
+ const tags=body.tags===undefined?[]:Array.isArray(body.tags)&&body.tags.length<=12&&body.tags.every(x=>typeof x==="string"&&x.trim().length>=1&&x.trim().length<=30)
+  ?Array.from(new Set((body.tags as string[]).map(x=>x.trim()))):null;
+ const waiverStatus=body.waiverStatus===undefined?"not_required":stringField(body,"waiverStatus",20);
+ const relatedContactName=body.relatedContactName===undefined?"":stringField(body,"relatedContactName",100);
+ const relatedContactRole=body.relatedContactRole===undefined?"":stringField(body,"relatedContactRole",40);
+ const relatedContactEmail=body.relatedContactEmail===undefined?"":stringField(body,"relatedContactEmail",160);
+ const relatedContactPhone=body.relatedContactPhone===undefined?"":stringField(body,"relatedContactPhone",30);
+ if(!name||name.length<2||!["lead","member"].includes(kind||"")||email===null||phone===null||notes===null||tags===null||waiverStatus===null||
+    relatedContactName===null||relatedContactRole===null||relatedContactEmail===null||relatedContactPhone===null||
+    (!email&&!phone)||email&&!emailIsValid(normalizeEmail(email))||
+    phone&&!/^\+?[0-9]{7,15}$/.test(phone.replace(/[\s().-]/g,""))||
+    relatedContactEmail&&!emailIsValid(normalizeEmail(relatedContactEmail))||
+    relatedContactPhone&&!/^\+?[0-9]{7,15}$/.test(relatedContactPhone.replace(/[\s().-]/g,""))||
+    !["not_required","pending","signed","expired"].includes(waiverStatus))
+    return errorResponse(400,"Provide valid contact, member tag and waiver details.");
  try{
   const r=await authenticated(request,staffRoles,async(client,auth)=>{
    const normalizedPhone=(phone||"").replace(/[\s().-]/g,"");
+   const isMember=kind==="member";
    const record=await client.query(`INSERT INTO people
-      (studio_id,kind,full_name,email,phone,lead_stage,member_status,package_status,credits)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      RETURNING id,kind,full_name,email,phone,created_at`,[
+      (studio_id,kind,full_name,email,phone,lead_stage,member_status,package_status,credits,notes,tags,waiver_status,waiver_updated_at,
+       related_contact_name,related_contact_role,related_contact_email,related_contact_phone)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+      RETURNING id,kind,full_name,email,phone,notes,tags,waiver_status,related_contact_name,related_contact_role,related_contact_email,related_contact_phone,created_at`,[
        auth.studioId,kind,name,normalizeEmail(email||""),normalizedPhone,
-       kind==="lead"?"New":null,kind==="member"?"Active":null,
-       kind==="member"?"Pending":null,kind==="member"?0:null
+       kind==="lead"?"New":null,isMember?"Active":null,isMember?"Pending":null,isMember?0:null,
+       notes||"",isMember?tags:[],isMember?waiverStatus:"not_required",isMember&&waiverStatus!=="not_required"?new Date().toISOString():null,
+       isMember?relatedContactName:"",isMember?relatedContactRole:"",isMember?normalizeEmail(relatedContactEmail||""):"",
+       isMember?(relatedContactPhone||"").replace(/[\s().-]/g,""):""
       ]);
    await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
       VALUES($1,$2,$3,'person.created')`,[auth.studioId,record.rows[0].id,auth.userId]);
