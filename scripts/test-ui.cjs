@@ -44,7 +44,7 @@ assert(client.includes("MAKE STUDIOTASKER YOURS")&&client.includes("Primary bran
 assert(client.includes("memberTerm")&&client.includes("classTerm")&&client.includes("creditTerm")&&client.includes("/api/studio/logo"),"Real workspace must apply terminology and studio logo personalization.");
 assert(css.includes("--studio-accent")&&css.includes(".rd-live-sidebar"),"Real workspace must use tenant accent color in the owner-app shell.");
 assert(onboarding.includes("5-step quick start")&&onboarding.includes("mode=preview")&&onboarding.includes("Finish setup"),"Studio-owner onboarding and CSV preview must remain available.");
-assert(today.includes("Know what your")&&today.includes("REVENUE RESCUE")&&today.includes("Mark contacted")&&today.includes("StudioTasker does not process member payments"),"StudioTasker Today preview must expose studio-only action-first differentiation.");
+assert(today.includes("Know what your")&&today.includes("FOLLOW-UP OPPORTUNITIES")&&today.includes("Mark contacted")&&today.includes("member payment collection stays with the studio"),"StudioTasker Today preview must expose studio-only action-first differentiation.");
 assert(home.includes("Know what needs attention.")&&home.includes("/app-demo")&&!home.includes("/book/preview"),"Homepage must retain action-first differentiation and the owner-only app demo.");
 assert(home.includes("START STUDIOTASKER")&&home.includes("TRY THE DEMO")&&home.includes('href="/start"'),"First-fold homepage must expose obvious purchase and demo actions.");
 assert(home.includes("SELF-SERVE ONBOARDING")&&home.includes("Create your studio")&&home.includes("Import by CSV with preview")&&home.includes("Keep your payment setup"),"Homepage must explain self-serve onboarding in plain language.");
