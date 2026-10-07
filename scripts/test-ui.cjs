@@ -26,6 +26,7 @@ const legalHub=fs.readFileSync("app/legal/page.tsx","utf8");
 const pilatesLanding=fs.readFileSync("app/pilates-studio-software/page.tsx","utf8");
 const compareLanding=fs.readFileSync("app/compare/page.tsx","utf8");
 const marketingCss=fs.readFileSync("app/marketing-landing.css","utf8");
+const robots=fs.readFileSync("app/robots.ts","utf8");
 const sitemap=fs.readFileSync("app/sitemap.ts","utf8");
 const contactPage=fs.readFileSync("app/contact/page.tsx","utf8");
 const contactForm=fs.readFileSync("app/contact/contact-form.tsx","utf8");
