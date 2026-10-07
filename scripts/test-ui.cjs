@@ -98,7 +98,7 @@ assert(billingPanel.includes("Monthly · $39.90/month")&&billingPanel.includes("
 assert(productTour.includes("WATCH THE 90-SEC DEMO")&&home.includes("03 / PRODUCT TOUR"),"Product tour must lead directly into the guided demo.");
 assert(home.includes("<Dumbbell")||home.includes("Dumbbell"),"Homepage source must use studio/fitness iconography instead of decorative star marks.");
 assert(legalHub.includes('["KVKK Privacy Notice","","/legal/turkiye-privacy"]')&&!legalHub.includes("Türkiye Privacy Notice (KVKK)"),"Legal hub must show only the concise KVKK Privacy Notice title on that card.");
-assert(["PILATES","YOGA","BARRE","BOUTIQUE FITNESS","GYM / GROUP CLASSES"].every(label=>home.includes(label)),"Homepage must show the supported studio-type cards.");
+assert(["PILATES / REFORMER","YOGA","BARRE","DANCE","INDOOR CYCLING","FITNESS & GYM","BOUTIQUE FITNESS"].every(label=>home.includes(label)),"Homepage must show all seven supported studio-type cards.");
 assert(home.includes("BUILT FOR INDEPENDENT STUDIOS WORLDWIDE")&&home.includes("no fake customer-logo wall"),"Homepage trust layer must avoid invented customer proof.");
 assert(home.includes("No sales call required to see the price.")&&home.includes("without requiring an implementation consultant"),"Why StudioTasker must emphasize low-friction buying and operation.");
 assert(home.includes("Start without")&&home.includes("booking a setup call.")&&home.includes("The first setup is designed to take minutes"),"Homepage must emphasize self-serve onboarding.");
