@@ -115,3 +115,9 @@ assert(contactForm.includes('fetch("/api/contact"')&&!contactForm.includes('wind
 assert(contactForm.includes("SEND MESSAGE")&&contactForm.includes("Message sent."),"Contact form must expose real sending and success states.");
 assert(contactRoute.includes("nodemailer")&&contactRoute.includes("SMTP_HOST")&&contactRoute.includes("replyTo:email")&&contactRoute.includes("support@studiotasker.com"),"Contact API must deliver enquiries through configured SMTP to StudioTasker support.");
 assert(contactCss.includes("@media(min-width:901px)")&&contactCss.includes("min-height:100svh")&&contactCss.includes("max-height:760px"),"Contact page must use a compact single-viewport desktop layout.");
+
+
+assert(appDemo.includes("DEMO_SESSION_SECONDS=60*60")&&appDemo.includes("studiotasker-demo-session-start")&&appDemo.includes("studiotasker-demo-session-expired"),"Demo must enforce a persistent 60-minute per-tab session.");
+assert(appDemo.includes("60-MINUTE DEMO COMPLETE")&&appDemo.includes("CHOOSE A PLAN")&&appDemo.includes("expireDemo()"),"Expired demo must reset and end at a plan-selection screen.");
+assert(appDemo.includes("Resetting data does not restart the 60-minute session.")&&appDemo.includes("demoTimeLabel(demoRemaining)"),"Demo must disclose that resets do not extend the session and show time remaining.");
+assert(appDemoCss.includes("sad-demo-expired")&&appDemoCss.includes("sad-expired-card"),"Timed demo expiry screen must be styled.");
