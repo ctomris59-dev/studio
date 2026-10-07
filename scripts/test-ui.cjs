@@ -81,7 +81,7 @@ assert(startPage.includes("USA · Canada · UK · Europe · International")&&sta
 assert(layout.includes("Global studio management software")&&layout.includes("USA, Canada, UK, Europe and beyond"),"Public metadata must be global-first.");
 assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS"),"Neutral comparison page must remain available without cluttering the homepage navigation.");
 assert(pilatesLanding.includes("PILATES STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("REFORMER PILATES")&&pilatesLanding.includes("$39.90 USD")&&pilatesLanding.includes("FAQPage"),"Pilates landing page must target global Pilates/Reformer studios with price and FAQ schema.");
-assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS")&&compareLanding.includes("Other platforms may")&&compareLanding.includes("not a claim about any specific company"),"Neutral comparison page must compare product approaches without naming competitors.");
+assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS")&&compareLanding.includes("Other platforms may")&&compareLanding.includes("rather than making claims about any specific company"),"Neutral comparison page must compare product approaches without naming competitors.");
 assert(compareLanding.includes("not a claim about any specific company")||compareLanding.includes("rather than making claims about any specific company"),"Visible comparison content must remain generic and company-neutral.");
 assert(marketingCss.includes(".mk-hero-grid")&&marketingCss.includes("@media(max-width:560px)"),"Acquisition landing pages must include desktop and mobile layouts.");
 assert(sitemap.includes("/pilates-studio-software")&&sitemap.includes("/compare"),"Sitemap must include the neutral comparison page.");
