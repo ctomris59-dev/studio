@@ -104,6 +104,12 @@ assert(contactPage.includes("support@studiotasker.com")&&contactForm.includes('S
 assert(contactForm.includes('name="name"')&&contactForm.includes('name="email"')&&contactForm.includes('name="studio"')&&contactForm.includes('name="topic"')&&contactForm.includes('name="message"')&&contactForm.includes("mailto:"),"Contact form must collect core enquiry fields and prepare an email message.");
 assert(sitemap.includes('"/contact"'),"Sitemap must include the Contact page.");
 assert(editorialCss.includes(".ed-pricing{padding:82px 0 92px}")&&editorialCss.includes(".ed-manifesto{padding:80px 0 86px}")&&editorialCss.includes(".ed-features{padding:82px 0 92px}")&&editorialCss.includes(".ed-today-story{padding:76px 0}")&&editorialCss.includes(".ed-faq{padding:76px 0 84px}"),"Desktop homepage sections must use the tighter vertical rhythm.");
+assert(home.includes("StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide."),"Homepage hero must use the simplified worldwide positioning copy.");
+assert(home.includes("Classes to plan. People to look after. A dozen things happening at once. The tools behind your studio should make the day feel lighter, not louder."),"Manifesto copy must use plain punctuation without dash styling.");
+assert(home.includes("Member CRM, class operations, package entitlements and follow-ups; without taking over the studio’s customer payments."),"Essentials copy must use the requested semicolon wording.");
+assert(home.includes('className="ed-pricing-kicker"')&&!home.includes("Even better yearly.")&&!home.includes("Monthly keeps things flexible at $39.90."),"Pricing must go directly from the 01 kicker into the price cards without the large intro block.");
+assert(!contactPage.includes("feedback — send us")&&contactPage.includes("feedback. Send us a message"),"Contact marketing copy must avoid long dash punctuation.");
+
 
 assert(contactForm.includes('fetch("/api/contact"')&&!contactForm.includes('window.location.href="mailto:'),"Contact form must submit to the server API instead of opening the visitor's email app.");
 assert(contactForm.includes("SEND MESSAGE")&&contactForm.includes("Message sent."),"Contact form must expose real sending and success states.");
