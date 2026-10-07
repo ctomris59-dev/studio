@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
-  ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3,
-  CreditCard, Globe2, MoveRight, Plus, ShieldCheck, Users, Waves
+  Activity, ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3,
+  CreditCard, Dumbbell, HeartPulse, MoveRight, Plus, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
 import { StudioTaskerMark } from "../components/studio-tasker-mark";
@@ -57,7 +57,7 @@ export default function HomePage() {
   const op=legalOperator();
   return (
     <div className="editorial">
-      <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>INDEPENDENT STUDIOS · USA · CANADA · UK · EUROPE · INTERNATIONAL <span className="ed-star">✳</span></span></div></div>
+      <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>INDEPENDENT STUDIOS · USA · CANADA · UK · EUROPE · INTERNATIONAL <span className="ed-star"><Activity size={12}/></span></span></div></div>
       <header className="ed-header">
         <div className="ed-container ed-nav">
           <Identity/>
@@ -74,7 +74,7 @@ export default function HomePage() {
                 <span className="ed-hero-brand-icon"><StudioTaskerMark/></span>
                 <div><strong>StudioTasker</strong><small>GLOBAL STUDIO MANAGEMENT SOFTWARE</small></div>
               </div>
-              <div className="ed-index"><span className="ed-index-line"/> PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
+              <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
                 <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — for independent studios in the USA, Canada, UK, Europe and beyond.</p>
@@ -87,13 +87,12 @@ export default function HomePage() {
                   <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
                 </div>
               </div>
-              <div className="ed-hero-sideword" aria-hidden="true">MADE FOR THE MOVEMENT MAKERS · MADE FOR THE MOVEMENT MAKERS</div>
             </div>
             <div className="ed-hero-canvas">
               <div className="ed-canvas-meta"><span>STUDIOTASKER / PRODUCT PREVIEW</span><span>EXPLORE WITH SAMPLE DATA · NO SIGN-UP NEEDED</span></div>
               <div className="ed-hero-disc" aria-hidden="true"><span>YOUR<br/>STUDIO<br/>IN SYNC.</span><i>↗</i></div>
               <div className="ed-hero-card"><MiniSchedule/></div>
-              <div className="ed-hero-sticker"><span className="ed-sticker-cross">✳</span><span>MORE ROOM<br/>TO DO YOUR<br/>THING.</span></div>
+              <div className="ed-hero-sticker"><span className="ed-sticker-cross"><Dumbbell size={36}/></span><span>MORE ROOM<br/>TO DO YOUR<br/>THING.</span></div>
               <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
             </div>
           </div>
@@ -112,29 +111,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="ed-global" aria-labelledby="global-title">
-          <div className="ed-container">
-            <div className="ed-global-head">
-              <div><span className="ed-overline">BUILT TO TRAVEL</span><h2 id="global-title">One studio system.<br/><em>Wherever you run it.</em></h2></div>
-              <p>StudioTasker is English-first software for independent studios across the United States, Canada, the United Kingdom, Europe and beyond. Your workspace follows your studio’s own operating preferences.</p>
-            </div>
-            <div className="ed-global-regions" aria-label="Primary StudioTasker markets"><span>USA</span><span>CANADA</span><span>UK</span><span>EUROPE</span><span>INTERNATIONAL</span></div>
-            <div className="ed-global-grid">
-              <article><span>01</span><Globe2 size={24}/><h3>Your location.</h3><p>Choose your studio timezone and run the workspace around your own local day.</p></article>
-              <article><span>02</span><Clock3 size={24}/><h3>Your clock.</h3><p>Use 12-hour or 24-hour time, and choose Monday or Sunday as the start of your week.</p></article>
-              <article><span>03</span><CreditCard size={24}/><h3>Your payments.</h3><p>Keep your existing card processor, bank transfer or any other member-payment method outside StudioTasker.</p></article>
-              <article><span>04</span><ShieldCheck size={24}/><h3>One clear price.</h3><p>Current pricing is $39.90 USD/month or $406.80 USD/year for one studio.</p></article>
-            </div>
-          </div>
-        </section>
-
-        <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b>✳</b><span>YOGA</span><b>✳</b><span>BARRE</span><b>✳</b><span>BOUTIQUE FITNESS</span><b>✳</b><span>GROUP CLASSES</span><b>✳</b></div></section>
+        <section className="ed-tape" aria-label="Supported studio types"><div className="ed-tape-track"><span>PILATES</span><b><Activity size={18}/></b><span>YOGA</span><b><HeartPulse size={18}/></b><span>BARRE</span><b><Dumbbell size={18}/></b><span>BOUTIQUE FITNESS</span><b><Activity size={18}/></b><span>GROUP CLASSES</span><b><Dumbbell size={18}/></b></div></section>
 
         <section className="ed-manifesto" id="features">
           <div className="ed-container ed-manifesto-grid">
             <div className="ed-overline">01 / WHAT WE BELIEVE</div>
             <div><h2>You didn&apos;t open a studio<br/>to <em>manage software.</em></h2><p>Classes to plan. People to look after. A dozen things happening at once. The tools behind your studio should make the day feel lighter—not louder.</p></div>
-            <div className="ed-manifesto-seal" aria-hidden="true"><span>KEEP IT HUMAN</span><strong>✳</strong><small>KEEP IT MOVING</small></div>
+            <div className="ed-manifesto-seal" aria-hidden="true"><span>KEEP IT HUMAN</span><strong><HeartPulse size={48}/></strong><small>KEEP IT MOVING</small></div>
           </div>
         </section>
 
@@ -175,13 +158,12 @@ export default function HomePage() {
               <h2>One place.<br/><em>Every moving</em><br/>part.</h2>
               <p>From a new enquiry to their next class, follow the customer journey in one clear workspace. The everyday admin gets a little easier to act on.</p>
               <div className="ed-window-list"><span><Check size={17}/> Lead-to-member CRM pipeline</span><span><Check size={17}/> Retention and renewal prompts</span><span><Check size={17}/> Studio-managed bookings and attendance</span></div>
-              <Link className="ed-text-link" href="/app-demo">STEP INSIDE THE APP <ArrowUpRight size={18}/></Link>
-              <div className="ed-window-edition">THE STUDIO EDIT <span>VOL. 01</span></div>
+              <Link className="ed-window-app-cta" href="/app-demo?tour=1"><span><b>STEP INSIDE THE APP</b><small>THE STUDIO EDIT</small></span><ArrowUpRight size={28}/></Link>
             </div>
             <div className="ed-window-showcase">
               <div className="ed-window-label"><span>STUDIOTASKER / INTERACTIVE DEMO</span><span>01 — 04</span></div>
               <div className="ed-window-schedule"><MiniSchedule compact/></div>
-              <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong>✳</strong></div>
+              <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong><Dumbbell size={42}/></strong></div>
             </div>
           </div>
         </section>
@@ -208,9 +190,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">READY WHEN YOU ARE</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>Choose a plan and create your StudioTasker workspace.</p><Link href="/start" className="ed-last-link"><span>BUY / START STUDIOTASKER</span><ArrowUpRight size={22}/></Link><Link href="/app-demo" className="ed-last-demo-link">Or try the demo first →</Link></div><span className="ed-last-asterisk" aria-hidden="true">✳</span></div></section>
+        <section className="ed-last"><div className="ed-container ed-last-grid"><div><span className="ed-overline">READY WHEN YOU ARE</span><h2>Less admin.<br/><em>More studio.</em></h2></div><div><p>Choose a plan and create your StudioTasker workspace.</p><Link href="/start" className="ed-last-link"><span>BUY / START STUDIOTASKER</span><ArrowUpRight size={22}/></Link><Link href="/app-demo" className="ed-last-demo-link">Or try the demo first →</Link></div><span className="ed-last-asterisk" aria-hidden="true"><Activity size={92}/></span></div></section>
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software for independent studios across supported international markets.</p></div><div className="ed-footer-nav"><Link href="/start">Buy StudioTasker</Link><a href="#features">Features</a><Link href="/app-demo?tour=1">90-sec Demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/workspace">Customer sign in</Link><Link href="/legal">Legal & Trust</Link></div></div>{op.configured&&<div className="ed-container"><p className="ed-price-disclaimer"><strong>Legal operator:</strong> {op.name} · {op.address}, {op.country} · {op.email} · {op.phone}. StudioTasker subscription orders are processed by Paddle as Merchant of Record.</p></div>}<div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · GLOBAL STUDIO MANAGEMENT SOFTWARE</span><span>USA · CANADA · UK · EUROPE · INTERNATIONAL ✳</span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software for independent studios across supported international markets.</p></div><div className="ed-footer-nav"><Link href="/start">Buy StudioTasker</Link><a href="#features">Features</a><Link href="/app-demo?tour=1">90-sec Demo</Link><Link href="/today">StudioTasker Today</Link><a href="#pricing">Pricing</a><Link href="/workspace">Customer sign in</Link><Link href="/legal">Legal & Trust</Link></div></div>{op.configured&&<div className="ed-container"><p className="ed-price-disclaimer"><strong>Legal operator:</strong> {op.name} · {op.address}, {op.country} · {op.email} · {op.phone}. StudioTasker subscription orders are processed by Paddle as Merchant of Record.</p></div>}<div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · GLOBAL STUDIO MANAGEMENT SOFTWARE</span><span>USA · CANADA · UK · EUROPE · INTERNATIONAL <Activity className="ed-inline-sport" size={12}/></span></div></footer>
     </div>
   );
 }
