@@ -8,7 +8,7 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const {id}=await params;if(!validUUID(id))return errorResponse(400,"Invalid contact identifier.");
  const data=await jsonObject(request);if(!data)return errorResponse(400,"Invalid update.");
- const fields=["name","email","phone","notes","stage","nextContact","source","consent","status","startDate","expiryDate","tags","waiverStatus"];
+ const fields=["name","email","phone","notes","stage","nextContact","source","consent","status","startDate","expiryDate","tags","waiverStatus","relatedContactName","relatedContactRole","relatedContactEmail","relatedContactPhone"];
  if(!Object.keys(data).length||Object.keys(data).some(k=>!fields.includes(k)))return errorResponse(400,"Unsupported fields.");
  const name=data.name===undefined?undefined:stringField(data,"name",80);
  const email=data.email===undefined?undefined:stringField(data,"email",160);
@@ -23,6 +23,10 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  const tags=data.tags===undefined?undefined:Array.isArray(data.tags)&&data.tags.length<=12&&data.tags.every(x=>typeof x==="string"&&x.trim().length>=1&&x.trim().length<=30)
   ?Array.from(new Set((data.tags as string[]).map(x=>x.trim()))):null;
  const waiverStatus=data.waiverStatus===undefined?undefined:stringField(data,"waiverStatus",20);
+ const relatedContactName=data.relatedContactName===undefined?undefined:stringField(data,"relatedContactName",100);
+ const relatedContactRole=data.relatedContactRole===undefined?undefined:stringField(data,"relatedContactRole",40);
+ const relatedContactEmail=data.relatedContactEmail===undefined?undefined:stringField(data,"relatedContactEmail",160);
+ const relatedContactPhone=data.relatedContactPhone===undefined?undefined:stringField(data,"relatedContactPhone",30);
  const dateValid=(str:string|undefined|null)=>{
   if(str===undefined||str===null||str==="")return true;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(str))return false;
@@ -31,7 +35,9 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
  };
  if(name===null||name!==undefined&&name.length<2||email===null||email!==undefined&&email!==""&&!emailIsValid(normalizeEmail(email))||
  phone===null||phone!==undefined&&phone!==""&&!/^\+?[0-9]{7,15}$/.test(phone.replace(/[\s().-]/g,""))||
- notes===null||stage===null||source===null||status===null||tags===null||waiverStatus===null||
+ notes===null||stage===null||source===null||status===null||tags===null||waiverStatus===null||relatedContactName===null||relatedContactRole===null||relatedContactEmail===null||relatedContactPhone===null||
+ (relatedContactEmail!==undefined&&relatedContactEmail!==""&&!emailIsValid(normalizeEmail(relatedContactEmail)))||
+ (relatedContactPhone!==undefined&&relatedContactPhone!==""&&!/^\+?[0-9]{7,15}$/.test(relatedContactPhone.replace(/[\s().-]/g,"")))||
  nextContact===null||startDate===null||expiryDate===null||!dateValid(nextContact)||!dateValid(startDate)||!dateValid(expiryDate)||
  (stage!==undefined&&!["New","Contacted","Trial booked","Trial attended","Won","Lost"].includes(stage))||
  (status!==undefined&&!["Active","Paused"].includes(status))||
@@ -52,6 +58,9 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
    append("phone",phone===undefined?undefined:phone.replace(/[\s().-]/g,""));
    append("notes",notes);append("lead_stage",stage);append("source",source);
    append("member_status",status);append("tags",tags);append("waiver_status",waiverStatus);
+   append("related_contact_name",relatedContactName);append("related_contact_role",relatedContactRole);
+   append("related_contact_email",relatedContactEmail===undefined?undefined:normalizeEmail(relatedContactEmail));
+   append("related_contact_phone",relatedContactPhone===undefined?undefined:relatedContactPhone.replace(/[\s().-]/g,""));
    if(waiverStatus!==undefined){values.push(new Date().toISOString());columns.push("waiver_updated_at=$"+values.length)}
    append("next_contact",nextContact===undefined?undefined:nextContact||null);
    append("start_date",startDate===undefined?undefined:startDate||null);
@@ -59,7 +68,7 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
    append("email_consent",data.consent);
    if(!columns.length)throw new StudioOperationError(400,"No editable fields provided.");
    const changed=await client.query(`UPDATE people SET ${columns.join(",")},updated_at=now()
-     WHERE studio_id=$1 AND id=$2 RETURNING id,kind,full_name,email,phone,notes,lead_stage,member_status,start_date,expiry_date,tags,waiver_status,waiver_updated_at`,values);
+     WHERE studio_id=$1 AND id=$2 RETURNING id,kind,full_name,email,phone,notes,lead_stage,member_status,start_date,expiry_date,tags,waiver_status,waiver_updated_at,related_contact_name,related_contact_role,related_contact_email,related_contact_phone`,values);
    await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,'contact.updated',jsonb_build_object('fields',$4::text[]))",[auth.studioId,id,auth.userId,columns.map(x=>x.split("=")[0])]);
    return changed.rows[0];
   });
