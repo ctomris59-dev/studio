@@ -81,7 +81,7 @@ export default function HomePage() {
                 <div className="ed-hero-action-stack">
                   <div className="ed-hero-actions">
                     <Link className="ed-buy-cta" href="/start"><span>START STUDIOTASKER</span><strong>$39.90 / month</strong><ArrowUpRight size={22}/></Link>
-                    <Link className="ed-demo-cta" href="/app-demo"><span>TRY THE DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
+                    <Link className="ed-demo-cta" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><strong>No sign-up needed</strong><ArrowUpRight size={22}/></Link>
                   </div>
                   <div className="ed-hero-price-note"><ShieldCheck size={16}/><span>USD billing · $39.90 monthly · $33.90/month annually · SAVE 15%</span></div>
                   <Link className="ed-hero-today-link" href="/today">See what StudioTasker tells you to do today <ArrowRight size={17}/></Link>
