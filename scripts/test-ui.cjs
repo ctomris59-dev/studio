@@ -28,6 +28,8 @@ const marketingCss=fs.readFileSync("app/marketing-landing.css","utf8");
 const sitemap=fs.readFileSync("app/sitemap.ts","utf8");
 const contactPage=fs.readFileSync("app/contact/page.tsx","utf8");
 const contactForm=fs.readFileSync("app/contact/contact-form.tsx","utf8");
+const contactRoute=fs.readFileSync("app/api/contact/route.ts","utf8");
+const contactCss=fs.readFileSync("app/contact/contact.css","utf8");
 const demoAuth=fs.readFileSync("lib/demo-auth.ts","utf8");
 const legacyDemo=fs.readFileSync("app/demo/page.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
@@ -102,3 +104,8 @@ assert(contactPage.includes("support@studiotasker.com")&&contactForm.includes('S
 assert(contactForm.includes('name="name"')&&contactForm.includes('name="email"')&&contactForm.includes('name="studio"')&&contactForm.includes('name="topic"')&&contactForm.includes('name="message"')&&contactForm.includes("mailto:"),"Contact form must collect core enquiry fields and prepare an email message.");
 assert(sitemap.includes('"/contact"'),"Sitemap must include the Contact page.");
 assert(editorialCss.includes(".ed-pricing{padding:82px 0 92px}")&&editorialCss.includes(".ed-manifesto{padding:80px 0 86px}")&&editorialCss.includes(".ed-features{padding:82px 0 92px}")&&editorialCss.includes(".ed-today-story{padding:76px 0}")&&editorialCss.includes(".ed-faq{padding:76px 0 84px}"),"Desktop homepage sections must use the tighter vertical rhythm.");
+
+assert(contactForm.includes('fetch("/api/contact"')&&!contactForm.includes('window.location.href="mailto:'),"Contact form must submit to the server API instead of opening the visitor's email app.");
+assert(contactForm.includes("SEND MESSAGE")&&contactForm.includes("Message sent."),"Contact form must expose real sending and success states.");
+assert(contactRoute.includes("nodemailer")&&contactRoute.includes("SMTP_HOST")&&contactRoute.includes("replyTo:email")&&contactRoute.includes("support@studiotasker.com"),"Contact API must deliver enquiries through configured SMTP to StudioTasker support.");
+assert(contactCss.includes("@media(min-width:901px)")&&contactCss.includes("min-height:100svh")&&contactCss.includes("max-height:760px"),"Contact page must use a compact single-viewport desktop layout.");
