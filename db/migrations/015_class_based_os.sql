@@ -66,8 +66,5 @@ ALTER TABLE people ADD COLUMN waiver_status text NOT NULL DEFAULT 'not_required'
 ALTER TABLE people ADD COLUMN waiver_updated_at timestamptz;
 CREATE INDEX people_tags_idx ON people USING gin(tags);
 
-CREATE UNIQUE INDEX credit_ledger_single_no_show_refund
- ON credit_ledger(studio_id,booking_id) WHERE reason='no_show_refund';
-
 -- Existing Gym records remain valid; new UI uses Fitness & Gym.
 UPDATE studios SET focus='Fitness & Gym' WHERE focus='Gym';
