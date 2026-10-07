@@ -160,4 +160,4 @@ assert(billingPanel.includes('variant:"one-page"')&&billingPanel.includes('succe
 assert(paddleWebhook.includes("BILLING_ALLOW_SANDBOX_TEST")&&paddleWebhook.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&paddleWebhook.includes("approvedStaging"),"Paddle sandbox webhooks must support only an explicitly configured staging origin.");
 
 assert(layout.includes('metadataBase: new URL("https://www.studiotasker.com")')&&robots.includes("https://www.studiotasker.com")&&sitemap.includes("https://www.studiotasker.com"),"StudioTasker canonical URLs must use the final www.studiotasker.com domain.");
-assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params.get("_ptxn")')&&checkoutClient.includes("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN")&&checkoutClient.includes("Paddle.Checkout.open"),"Public checkout page must handle Paddle transaction links on the final domain.");
+assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params.get("_ptxn")')&&checkoutClient.includes("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN")&&checkoutClient.includes("paddle.Checkout.open"),"Public checkout page must handle Paddle transaction links on the final domain.");
