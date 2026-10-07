@@ -28,7 +28,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
 
    <div className="st-start-plans" aria-label="StudioTasker plans">
     <article className={selected==="monthly"?"selected":""}>
-     <div className="st-plan-head"><span>MONTHLY</span>{selected==="monthly"&&<strong>SELECTED</strong>}</div>
+     <div className="st-plan-head"><span>MONTHLY · FLEXIBLE</span>{selected==="monthly"&&<strong>SELECTED</strong>}</div>
      <div className="st-plan-price"><sup>$</sup>39<em>.90</em><small>/ month · USD</small></div>
      <p>Pay month to month. One StudioTasker workspace for one studio.</p>
      <ul><li><Check size={18}/> Full StudioTasker workspace</li><li><Check size={18}/> StudioTasker Today priorities</li><li><Check size={18}/> CRM, classes, bookings and credits</li><li><Check size={18}/> Studio branding and customization</li></ul>
@@ -36,10 +36,10 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
     </article>
 
     <article className={"annual "+(selected==="annual"?"selected":"")}>
-     <div className="st-plan-head"><span>ANNUAL · SAVE 15%</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
+     <div className="st-plan-head"><span>ANNUAL · BEST VALUE · SAVE $72/YEAR</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
      <div className="st-plan-price"><sup>$</sup>33<em>.90</em><small>/ month · USD</small></div>
-     <p>Billed once per year at <b>$406.80 USD</b>. Save 15% compared with paying monthly.</p>
-     <ul><li><Check size={18}/> Everything in the monthly plan</li><li><Check size={18}/> One annual payment</li><li><Check size={18}/> Same full workspace</li><li><Check size={18}/> Lower effective monthly price</li></ul>
+     <p>Billed once per year at <b>$406.80 USD</b> — $72 less than twelve monthly payments. Best for studios planning to use StudioTasker as an everyday operating system throughout the year.</p>
+     <ul><li><Check size={18}/> Everything in the monthly plan</li><li><Check size={18}/> $72/year lower total price</li><li><Check size={18}/> One yearly renewal instead of monthly billing</li><li><Check size={18}/> Lower effective monthly price: $33.90</li></ul>
      <Link href="/workspace?mode=register&plan=annual" className="st-plan-buy">START ANNUAL · $406.80/YEAR <ArrowUpRight size={20}/></Link>
     </article>
    </div>
