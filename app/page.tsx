@@ -1,3 +1,4 @@
+import type {Metadata} from "next";
 import Link from "next/link";
 import {
   Activity, ArrowRight, ArrowUpRight, Check, Clock3,
@@ -6,7 +7,17 @@ import {
 import "./editorial.css";
 import { StudioTaskerMark } from "../components/studio-tasker-mark";
 import ProductTourTabs from "../components/product-tour-tabs";
+import {JsonLd} from "../components/json-ld";
+import {websiteJsonLd} from "../lib/seo";
 import { legalOperator } from "../lib/server/legal-config";
+
+export const metadata:Metadata={
+ title:"StudioTasker | Studio Management Software for Independent Studios",
+ description:"Manage recurring classes, waitlists, bookings, members, credits, attendance, staff and follow-up with StudioTasker. Built for independent class-based studios worldwide.",
+ alternates:{canonical:"/"},
+ openGraph:{type:"website",url:"/",siteName:"StudioTasker",title:"StudioTasker | Studio Management Software",description:"Focused studio management software for independent class-based studios.",images:["/opengraph-image"]},
+ twitter:{card:"summary_large_image",title:"StudioTasker | Studio Management Software",description:"Focused studio management software for independent class-based studios.",images:["/opengraph-image"]}
+};
 
 const timetable = [
   { time: "07:30", title: "Morning Flow", coach: "Sophie M.", spots: "6 / 8", state: "OPEN", value: 75 },
@@ -60,6 +71,7 @@ export default function HomePage() {
   const op=legalOperator();
   return (
     <div className="editorial">
+      <JsonLd data={websiteJsonLd()}/>
       <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>INDEPENDENT STUDIOS · USA · CANADA · UK · EUROPE · INTERNATIONAL <span className="ed-star"><Activity size={12}/></span></span></div></div>
       <header className="ed-header">
         <div className="ed-container ed-nav">
