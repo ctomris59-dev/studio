@@ -7,6 +7,8 @@ export const metadata:Metadata={
  alternates:{canonical:"/pilates-studio-software"}
 };
 const config:StudioLandingConfig={
+ path:"/pilates-studio-software",
+ seoName:"Pilates & Reformer Studio Software",
  kicker:"PILATES / REFORMER STUDIO SOFTWARE · GLOBAL",
  heroLine:"Run the studio.",heroEm:"Not the software.",
  lede:"StudioTasker gives independent Pilates and Reformer studios one clear operating workspace for recurring classes, numbered Reformer spots, waitlists, packages, credits, attendance, staff and follow-up.",
