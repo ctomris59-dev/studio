@@ -17,8 +17,9 @@ export async function resolveClassMetadata(client:PoolClient,studioId:string,bod
  const studio=await client.query<{default_class_format:string;spot_booking_enabled:boolean;equipment_label:string;default_spot_count:number}>(
   "SELECT default_class_format,spot_booking_enabled,equipment_label,default_spot_count FROM studios WHERE id=$1",[studioId]);
  if(!studio.rowCount)fail(404,"Studio not found.");
- const defaults=studio.rows[0],capacity=integer(body.capacity,1,100);
- if(capacity===null)fail(400,"Choose a valid class capacity.");
+ const defaults=studio.rows[0],capacityValue=integer(body.capacity,1,100);
+ if(capacityValue===null)fail(400,"Choose a valid class capacity.");
+ const capacity:number=capacityValue;
  const classFormat=typeof body.classFormat==="string"?body.classFormat:defaults.default_class_format;
  if(!formats.includes(classFormat as typeof formats[number]))fail(400,"Choose a valid class format.");
  const level=body.level===undefined?"":text(body.level,60),programLabel=body.programLabel===undefined?"":text(body.programLabel,80);
