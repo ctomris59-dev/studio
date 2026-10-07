@@ -412,3 +412,6 @@ async function main(){
  }
 }
 main().catch(e=>{console.error(e);process.exitCode=1});
+
+assert(fs.readFileSync("db/migrations/016_related_contact.sql","utf8").includes("related_contact_name"),"Class-based studio schema must include optional related contact fields for Dance/family workflows.");
+assert(fs.readFileSync("app/api/studio/people/[id]/route.ts","utf8").includes("relatedContactEmail")&&fs.readFileSync("app/api/studio/people/route.ts","utf8").includes("related_contact_role"),"People APIs must expose and validate related contacts.");
