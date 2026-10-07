@@ -66,7 +66,7 @@ function MiniMemberFlow() {
         <div><span className="ed-pulse-icon"><Users size={18}/></span><div><strong>Willow Studio</strong><small>MEMBER PULSE</small></div></div>
         <span>LIVE WORKSPACE ↗</span>
       </div>
-      <div className="ed-pulse-intro"><small>TODAY / FOLLOW-UP</small><strong>Know who needs attention.</strong><p>Clear signals from your studio activity — no automatic marketing.</p></div>
+      <div className="ed-pulse-intro"><small>TODAY / FOLLOW-UP</small><strong>Know who needs attention.</strong><p>Clear signals from your studio activity. No automatic marketing.</p></div>
       <div className="ed-pulse-metrics"><div><span>ACTIVE</span><b>118</b></div><div><span>TRIALS</span><b>09</b></div><div><span>FOLLOW-UPS</span><b>05</b></div></div>
       <div className="ed-pulse-list"><div className="ed-pulse-list-head"><span>NEEDS ATTENTION</span><span>WHY IT APPEARED</span></div>
         {signals.map(([name,reason,action])=><div className="ed-pulse-row" key={name}><div><b>{name}</b><small>{reason}</small></div><span>{action}</span></div>)}
@@ -100,7 +100,7 @@ export default function HomePage() {
               <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
               <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
               <div className="ed-hero-under">
-                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place — for independent studios in the USA, Canada, UK, Europe and beyond.</p>
+                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide.</p>
                 <div className="ed-hero-action-stack">
                   <Link className="ed-buy-cta ed-buy-cta-solo" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
                   <div className="ed-hero-quick-links">
@@ -123,9 +123,9 @@ export default function HomePage() {
 
         <section className="ed-pricing" id="pricing">
           <div className="ed-container">
-            <div className="ed-pricing-title"><span className="ed-overline">01 / PLAIN & SIMPLE</span><h2>Only $39.90.<br/><em>Even better yearly.</em></h2><p>Monthly keeps things flexible at $39.90. If StudioTasker is part of your studio all year, annual billing is the better value: $33.90/month equivalent, $72 less per year and just one yearly renewal.</p></div>
+            <div className="ed-pricing-kicker"><span className="ed-overline">01 / PLAIN & SIMPLE</span></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly — <b>save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly. <b>Save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
               <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}<div className="ed-price-disclaimer"><ShieldCheck size={19}/> StudioTasker bills your studio only for the software subscription. Subscription checkout is handled by Paddle as Merchant of Record; member payments remain entirely outside StudioTasker.</div></div>
             </div>
           </div>
@@ -149,14 +149,14 @@ export default function HomePage() {
         <section className="ed-manifesto" id="features">
           <div className="ed-container ed-manifesto-grid">
             <div className="ed-overline">02 / WHAT WE BELIEVE</div>
-            <div><h2>You didn&apos;t open a studio<br/>to <em>manage software.</em></h2><p>Classes to plan. People to look after. A dozen things happening at once. The tools behind your studio should make the day feel lighter—not louder.</p></div>
+            <div><h2>You didn&apos;t open a studio<br/>to <em>manage software.</em></h2><p>Classes to plan. People to look after. A dozen things happening at once. The tools behind your studio should make the day feel lighter, not louder.</p></div>
             <div className="ed-manifesto-seal" aria-hidden="true"><span>KEEP IT HUMAN</span><strong><HeartPulse size={48}/></strong><small>KEEP IT MOVING</small></div>
           </div>
         </section>
 
         <section className="ed-features" aria-labelledby="essentials-title">
           <div className="ed-container">
-            <div className="ed-features-top"><div><span className="ed-overline">03 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Member CRM, class operations, package entitlements and follow-ups — without taking over the studio’s customer payments.</p></div>
+            <div className="ed-features-top"><div><span className="ed-overline">03 / THE ESSENTIALS</span><h2 id="essentials-title">The good stuff.<br/><em>Without the clutter.</em></h2></div><p>Member CRM, class operations, package entitlements and follow-ups; without taking over the studio’s customer payments.</p></div>
             <div className="ed-feature-list">{services.map((item)=><div className="ed-feature-row" key={item.n}>
               <span className="ed-feature-num">{item.n} / 05</span>
               <div className="ed-feature-title"><span>{item.category}</span><h3>{item.title}</h3></div>
@@ -194,7 +194,7 @@ export default function HomePage() {
               <Link className="ed-window-app-cta" href="/app-demo?tour=1"><span><b>STEP INSIDE THE APP</b><small>THE STUDIO EDIT</small></span><ArrowUpRight size={28}/></Link>
             </div>
             <div className="ed-window-showcase">
-              <div className="ed-window-label"><span>STUDIOTASKER / INTERACTIVE DEMO</span><span>01 — 04</span></div>
+              <div className="ed-window-label"><span>STUDIOTASKER / INTERACTIVE DEMO</span><span>01 / 04</span></div>
               <div className="ed-window-pulse"><MiniMemberFlow/></div>
               <div className="ed-window-ticket"><span>JUST ENOUGH<br/>OF EVERYTHING.</span><strong><Dumbbell size={42}/></strong></div>
             </div>
@@ -208,7 +208,7 @@ export default function HomePage() {
               <details><summary>What kinds of studios is StudioTasker for?</summary><p>StudioTasker is designed for independent Pilates, yoga, barre, dance, gym, boutique fitness and other class-based studios. Studio name, logo, colors, terminology, class defaults and operating rules can be customized to fit the way your studio works.</p></details><details><summary>Where is StudioTasker available?</summary><p>StudioTasker is designed for independent studios in the United States, Canada, the United Kingdom, Europe and other supported international markets. Checkout availability is subject to applicable law and Paddle-supported markets. The interface is English-first, pricing is shown in USD, and each studio can choose its own timezone, 12/24-hour clock and week-start preference.</p></details>
               <details><summary>Can I use it for real customer bookings today?</summary><p>Yes. Your private StudioTasker workspace is built for real studio operations: customer records, classes, studio-managed bookings, attendance, package entitlements and follow-ups. The public demo remains a separate sandbox so you can explore safely without changing your live studio data.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
-              <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $33.90/month, billed as $406.80 for the year — about 15% less than paying monthly for 12 months. Paddle acts as Merchant of Record for StudioTasker subscription checkout, applicable transaction taxes, buyer billing documents and refunds. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
+              <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $33.90/month, billed as $406.80 for the year, about 15% less than paying monthly for 12 months. Paddle acts as Merchant of Record for StudioTasker subscription checkout, applicable transaction taxes, buyer billing documents and refunds. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
             </div>
           </div>
