@@ -166,7 +166,7 @@ assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params
 assert(billing.includes("sandboxStaging")&&billing.includes("BILLING_ALLOW_SANDBOX_TEST")&&billing.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&billing.includes('process.env.PADDLE_ENV!=="production"'),"Sandbox entitlements must only work on the explicitly configured non-production test origin.");
 
 const studioLanding=fs.readFileSync("app/studio-type-landing.tsx","utf8");
-const verticalPages=["yoga","barre","dance","indoor-cycling","fitness-gym","boutique-fitness"].map(x=>fs.readFileSync("app/"+x+"-software/page.tsx","utf8"));
+const verticalPages=["yoga-studio-software","barre-studio-software","dance-studio-software","indoor-cycling-software","fitness-gym-software","boutique-fitness-software"].map(x=>fs.readFileSync("app/"+x+"/page.tsx","utf8"));
 assert(studioLanding.includes("FAQPage")&&studioLanding.includes("STUDIOTASKER TODAY")&&studioLanding.includes("ONE STUDIO · FULL WORKSPACE"),"Shared vertical landing template must include SEO FAQ schema, operational differentiation and pricing.");
 assert(verticalPages.every(x=>x.includes("StudioTypeLanding")&&x.includes("alternates:{canonical:")),"Every new studio-type SEO route must use the shared template and declare its canonical URL.");
 assert(home.includes('href:"/pilates-studio-software"')&&home.includes('href:"/yoga-studio-software"')&&home.includes('href:"/dance-studio-software"')&&home.includes('href:"/fitness-gym-software"'),"Homepage studio-type cards must lead into the dedicated vertical pages.");
