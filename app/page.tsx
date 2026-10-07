@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
-  Activity, ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3,
-  CreditCard, Dumbbell, HeartPulse, MoveRight, Plus, ShieldCheck, Users, Waves
+  Activity, ArrowRight, ArrowUpRight, Check, Clock3,
+  CreditCard, Dumbbell, HeartPulse, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
 import { StudioTaskerMark } from "../components/studio-tasker-mark";
@@ -15,12 +15,12 @@ const timetable = [
   { time: "17:30", title: "Evening Reset", coach: "Sophie M.", spots: "7 / 8", state: "OPEN", value: 88 },
 ];
 
-const services = [
-  { n: "01", title: "Plan every class.", category: "SCHEDULING", description: "Organize instructors, class schedules and available places in a clear studio calendar.", icon: CalendarDays },
-  { n: "02", title: "Keep bookings flowing.", category: "RESERVATIONS", description: "Manage class reservations, package credits and waitlist changes without a paper register.", icon: Check },
-  { n: "03", title: "Know your members.", category: "MEMBERSHIP / CRM", description: "Keep member information, trials and membership status in one organized place.", icon: Users },
-  { n: "04", title: "Never miss a follow-up.", category: "TASKS / RENEWALS", description: "Review explainable reminders for expiring packs, unanswered leads and low class credits.", icon: Clock3 },
-  { n: "05", title: "See what needs attention.", category: "INSIGHTS", description: "Review occupancy, member activity and customer-journey trends without misleading revenue estimates.", icon: CreditCard },
+const studioTypes = [
+  {name:"PILATES",copy:"Reformer schedules, packages, credits and attendance.",Icon:Activity},
+  {name:"YOGA",copy:"Recurring classes, member records and simple follow-up.",Icon:HeartPulse},
+  {name:"BARRE",copy:"Capacity, attendance and package usage in one workspace.",Icon:Waves},
+  {name:"BOUTIQUE FITNESS",copy:"Classes, leads and member follow-up without extra admin.",Icon:Dumbbell},
+  {name:"GYM / GROUP CLASSES",copy:"Class operations and member context for instructor-led sessions.",Icon:Users}
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
@@ -50,29 +50,6 @@ function MiniSchedule({ compact = false }: { compact?: boolean }) {
           <span className={"ed-sch-status" + (c.state==="FULL" ? " is-full" : "")}>{c.state}</span>
         </div>)}</div>
       <div className="ed-sch-foot"><span><i/> Your studio, in sync.</span><span>VIEW DEMO <ArrowRight size={12}/></span></div>
-    </div>
-  );
-}
-
-function MiniMemberFlow() {
-  const signals=[
-    ["Mia R.","Trial attended yesterday","FOLLOW UP"],
-    ["Oliver K.","1 class credit remaining","RENEW"],
-    ["Emma L.","No visit for 24 days","CHECK IN"],
-    ["Ava P.","Package status needs review","REVIEW"]
-  ];
-  return (
-    <div className="ed-member-pulse">
-      <div className="ed-pulse-head">
-        <div><span className="ed-pulse-icon"><Users size={18}/></span><div><strong>Willow Studio</strong><small>MEMBER PULSE</small></div></div>
-        <span>LIVE WORKSPACE ↗</span>
-      </div>
-      <div className="ed-pulse-intro"><small>TODAY / FOLLOW-UP</small><strong>Know who needs attention.</strong><p>Clear signals from your studio activity. No automatic marketing.</p></div>
-      <div className="ed-pulse-metrics"><div><span>ACTIVE</span><b>118</b></div><div><span>TRIALS</span><b>09</b></div><div><span>FOLLOW-UPS</span><b>05</b></div></div>
-      <div className="ed-pulse-list"><div className="ed-pulse-list-head"><span>NEEDS ATTENTION</span><span>WHY IT APPEARED</span></div>
-        {signals.map(([name,reason,action])=><div className="ed-pulse-row" key={name}><div><b>{name}</b><small>{reason}</small></div><span>{action}</span></div>)}
-      </div>
-      <div className="ed-pulse-foot"><HeartPulse size={14}/><span>Explainable rules · staff-controlled actions</span></div>
     </div>
   );
 }
@@ -141,13 +118,7 @@ export default function HomePage() {
               <p>StudioTasker is designed for independent class-based businesses that need clear scheduling, member context, package entitlements and follow-up without an enterprise sales process.</p>
             </div>
             <div className="ed-studio-type-grid">
-              {[
-                ["PILATES","Reformer schedules, packages, credits and attendance.",Activity],
-                ["YOGA","Recurring classes, member records and simple follow-up.",HeartPulse],
-                ["BARRE","Capacity, attendance and package usage in one workspace.",Waves],
-                ["BOUTIQUE FITNESS","Classes, leads and member follow-up without extra admin.",Dumbbell],
-                ["GYM / GROUP CLASSES","Class operations and member context for instructor-led sessions.",Users]
-              ].map(([name,copy,Icon])=><article key={String(name)}><span><Icon size={25}/></span><h3>{String(name)}</h3><p>{String(copy)}</p><Link href="/app-demo?tour=1">SEE IT IN THE DEMO <ArrowRight size={15}/></Link></article>)}
+              {studioTypes.map(({name,copy,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href="/app-demo?tour=1">SEE IT IN THE DEMO <ArrowRight size={15}/></Link></article>)}
             </div>
             <div className="ed-proof-strip"><strong>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</strong><span>USA · CANADA · UK · EUROPE · INTERNATIONAL</span><span>English-first · transparent pricing · no fake customer-logo wall</span></div>
           </div>
