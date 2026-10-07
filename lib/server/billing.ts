@@ -8,9 +8,13 @@ export async function entitlement(client:PoolClient,studioId:string):Promise<Ent
  if(!r.rowCount)return {enabled:false,status:"inactive",plan:"none",periodEnd:null,graceEndsAt:null};
  const row=r.rows[0],end=row.current_period_end,updated=row.provider_updated_at;
  const periodEnd=end?end.toISOString():null;
- const allowTest=process.env.BILLING_ALLOW_LOCAL_TEST==="true"&&
-  /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(process.env.PUBLIC_APP_ORIGIN||"");
- const testAllowed=!row.is_test_mode||allowTest;
+ const appOrigin=(process.env.PUBLIC_APP_ORIGIN||"").trim();
+ const localhostTest=process.env.BILLING_ALLOW_LOCAL_TEST==="true"&&
+  /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(appOrigin);
+ const stagingOrigin=(process.env.PADDLE_SANDBOX_ALLOWED_ORIGIN||"").trim();
+ const sandboxStaging=process.env.PADDLE_ENV!=="production"&&process.env.BILLING_ALLOW_SANDBOX_TEST==="true"&&
+  !!stagingOrigin&&/^https:\/\//.test(stagingOrigin)&&appOrigin===stagingOrigin;
+ const testAllowed=!row.is_test_mode||localhostTest||sandboxStaging;
  const periodValid=!!end&&end.getTime()>Date.now();
  const graceMs=72*60*60*1000;
  const graceEnd=updated?new Date(updated.getTime()+graceMs):null;
