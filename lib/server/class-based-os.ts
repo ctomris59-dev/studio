@@ -61,7 +61,7 @@ export async function listClassesExtended(client:PoolClient,studioId:string){
  return records.rows;
 }
 
-export async function assignSpotToBooking(client:PoolClient,studioId:string,sessionId:string,booking:{id:string;status:string},spotNumber:unknown){
+export async function assignSpotToBooking<T extends {id:string;status:string}>(client:PoolClient,studioId:string,sessionId:string,booking:T,spotNumber:unknown):Promise<T&{spot_number:number|null}>{
  if(booking.status!=="booked")return {...booking,spot_number:null};
  const session=await client.query<{spot_booking_enabled:boolean;spot_label:string;spot_count:number|null}>(
   "SELECT spot_booking_enabled,spot_label,spot_count FROM class_sessions WHERE studio_id=$1 AND id=$2 FOR UPDATE",[studioId,sessionId]);
