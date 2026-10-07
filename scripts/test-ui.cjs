@@ -10,6 +10,7 @@ const home=fs.readFileSync("app/page.tsx","utf8");
 const editorialCss=fs.readFileSync("app/editorial.css","utf8");
 const layout=fs.readFileSync("app/layout.tsx","utf8");
 const subscriptionRoute=fs.readFileSync("app/api/studio/subscription/route.ts","utf8");
+const billing=fs.readFileSync("lib/server/billing.ts","utf8");
 const billingPanel=fs.readFileSync("app/workspace/billing-panel.tsx","utf8");
 const paddleWebhook=fs.readFileSync("app/api/billing/paddle-webhook/route.ts","utf8");
 const turkiyePrivacy=fs.readFileSync("app/legal/turkiye-privacy/page.tsx","utf8");
@@ -161,3 +162,5 @@ assert(paddleWebhook.includes("BILLING_ALLOW_SANDBOX_TEST")&&paddleWebhook.inclu
 
 assert(layout.includes('metadataBase: new URL("https://www.studiotasker.com")')&&robots.includes("https://www.studiotasker.com")&&sitemap.includes("https://www.studiotasker.com"),"StudioTasker canonical URLs must use the final www.studiotasker.com domain.");
 assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params.get("_ptxn")')&&checkoutClient.includes("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN")&&checkoutClient.includes("paddle.Checkout.open"),"Public checkout page must handle Paddle transaction links on the final domain.");
+
+assert(billing.includes("sandboxStaging")&&billing.includes("BILLING_ALLOW_SANDBOX_TEST")&&billing.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&billing.includes('process.env.PADDLE_ENV!=="production"'),"Sandbox entitlements must only work on the explicitly configured non-production test origin.");
