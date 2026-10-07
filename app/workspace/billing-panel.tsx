@@ -56,7 +56,7 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
    if(!paddle)throw new Error("Paddle checkout could not be initialized.");
    paddle.Checkout.open({
     transactionId:body.transactionId,
-    settings:{displayMode:"overlay",theme:"light",locale:"en"}
+    settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:"/workspace?billing=success"}
    });
    setNote("Secure checkout opened with Paddle. Access activates only after a verified Paddle webhook confirms the subscription.");
   }catch(e){setNote(e instanceof Error?e.message:"Could not start checkout.")}
