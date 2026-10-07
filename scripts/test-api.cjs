@@ -255,12 +255,12 @@ async function main(){
   assert.equal((await bookMember(a,member1)).data.booking.alreadyExists,true);
   assert.equal((await call("/api/studio/bookings?sessionId="+classId,{cookie:b.cookie})).data.bookings.length,0);
   const firstBalance=(await call("/api/studio/members",{cookie:a.cookie})).data.members.find(x=>x.id===member1);
-  assert.equal(firstBalance.credits,6);
+  assert.equal(firstBalance.credits,5);
   const cancel=await call("/api/studio/bookings/"+first.data.booking.id,{method:"DELETE",cookie:a.cookie});
   assert.equal(cancel.status,200);assert.equal(cancel.data.booking.promoted.id,second.data.booking.id);
   const afterCancel=await call("/api/studio/members",{cookie:a.cookie});
-  assert.equal(afterCancel.data.members.find(x=>x.id===member1).credits,7);
-  assert.equal(afterCancel.data.members.find(x=>x.id===member2).credits,4);
+  assert.equal(afterCancel.data.members.find(x=>x.id===member1).credits,6);
+  assert.equal(afterCancel.data.members.find(x=>x.id===member2).credits,3);
   assert.equal((await call("/api/studio/bookings/"+first.data.booking.id,{method:"DELETE",cookie:a.cookie})).data.booking.alreadyCancelled,true);
 
   const secondClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{...classInput,title:"Concurrent test",room:"Room B",instructor:"Coach B",startsAt:future(4,15)}});
