@@ -143,3 +143,6 @@ assert(classOs.includes("30-day operational insights")&&insightsApi.includes("no
 assert(staffApi.includes("studio_staff")&&client.includes("waiverStatus")&&client.includes("tags:editForm.tags"),"Workspace must integrate staff roster plus member tags and waiver state.");
 
 assert(client.includes("Parent / guardian contact")&&client.includes("Related / emergency contact")&&client.includes("relatedContactName")&&client.includes("relatedContactRole"),"Dance and other studios must support an optional related contact on member records.");
+
+assert(["PILATES / REFORMER","YOGA","BARRE","DANCE","INDOOR CYCLING","FITNESS & GYM","BOUTIQUE FITNESS"].every(x=>home.includes(x)),"Homepage Studio types must cover all seven supported class-based verticals.");
+assert(["Indoor cycling","Fitness &amp; Gym","Boutique fitness"].every(x=>appDemo.includes(x))&&appDemo.includes("EQUIPMENT SPOTS")&&appDemo.includes("NO-SHOW"),"Owner demo must reflect the expanded studio presets and class operations.");
