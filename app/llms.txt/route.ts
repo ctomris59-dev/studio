@@ -27,6 +27,7 @@ export function GET(){
   "- Home: "+SITE_URL+"/",
   "- Pricing: "+SITE_URL+"/start",
   "- Product comparison approach: "+SITE_URL+"/compare",
+  "- About: "+SITE_URL+"/about",
   "- Contact: "+SITE_URL+"/contact",
   "- Legal & Trust: "+SITE_URL+"/legal",
   "- Security: "+SITE_URL+"/legal/security",
