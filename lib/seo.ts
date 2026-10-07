@@ -19,49 +19,41 @@ export function websiteJsonLd(){
   "@context":"https://schema.org",
   "@graph":[
    {
+    "@type":"Organization",
+    "@id":SITE_URL+"/#organization",
+    name:"StudioTasker",
+    url:SITE_URL+"/",
+    logo:SITE_URL+"/icon.svg",
+    email:"support@studiotasker.com",
+    contactPoint:{
+     "@type":"ContactPoint",
+     contactType:"customer support",
+     email:"support@studiotasker.com",
+     availableLanguage:["English"]
+    }
+   },
+   {
     "@type":"WebSite",
     "@id":SITE_URL+"/#website",
     url:SITE_URL+"/",
     name:"StudioTasker",
     description:"Studio management software for independent class-based studios.",
-    inLanguage:"en"
+    inLanguage:"en",
+    publisher:{"@id":SITE_URL+"/#organization"}
    },
    {
-    "@type":"SoftwareApplication",
-    "@id":SITE_URL+"/#software",
+    "@type":"Service",
+    "@id":SITE_URL+"/#service",
     name:"StudioTasker",
     url:SITE_URL+"/",
-    applicationCategory:"BusinessApplication",
-    applicationSubCategory:"Studio management software",
-    operatingSystem:"Web",
+    serviceType:"Studio management software",
+    provider:{"@id":SITE_URL+"/#organization"},
+    audience:{"@type":"BusinessAudience","audienceType":"Independent class-based studios"},
+    areaServed:"International",
     description:"StudioTasker helps independent class-based studios manage members, recurring classes, bookings, waitlists, credits, attendance, staff, follow-up and operational insights.",
-    featureList:[
-     "Lead and member CRM",
-     "Recurring class schedules",
-     "Waitlists and promotion",
-     "Check-in, cancellation and no-show workflows",
-     "Packages and credits",
-     "Staff roster",
-     "Operational insights",
-     "CSV migration"
-    ],
     offers:[
-     {
-      "@type":"Offer",
-      name:"StudioTasker Monthly",
-      url:SITE_URL+"/start?plan=monthly",
-      price:"39.90",
-      priceCurrency:"USD",
-      category:"subscription"
-     },
-     {
-      "@type":"Offer",
-      name:"StudioTasker Annual",
-      url:SITE_URL+"/start?plan=annual",
-      price:"406.80",
-      priceCurrency:"USD",
-      category:"subscription"
-     }
+     {"@type":"Offer","name":"StudioTasker Monthly","url":SITE_URL+"/start?plan=monthly","price":"39.90","priceCurrency":"USD","category":"subscription"},
+     {"@type":"Offer","name":"StudioTasker Annual","url":SITE_URL+"/start?plan=annual","price":"406.80","priceCurrency":"USD","category":"subscription"}
     ]
    }
   ]
