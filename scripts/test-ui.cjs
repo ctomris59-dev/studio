@@ -57,7 +57,7 @@ assert(bookingPreview.includes("studiotasker-demo-settings")&&bookingPreview.inc
 assert(legacyDemo.includes('redirect("/app-demo")'),"Legacy /demo must redirect to the canonical owner app.");
 assert(appDemo.includes("sessionStorage")&&appDemoCss.includes(":focus-visible")&&appDemoCss.includes("font-size:16px"),"App demo must persist only a browser-session role and remain keyboard/mobile friendly.");
 assert(home.includes("/app-demo"),"Homepage must link directly to the role-based app login demo.");
-assert(["/legal/terms","/legal/privacy","/legal/turkiye-privacy","/legal/dpa","/legal/security","/legal/cancellation"].every(path=>home.includes(path)),"Homepage footer must expose core legal and trust documents.");
+assert(home.includes('href="/legal"')&&home.includes("Legal & Trust")&&!home.includes('href="/legal/terms"')&&!home.includes('href="/legal/privacy"'),"Homepage footer must keep legal navigation concise and route detailed documents through the Legal & Trust hub.");
 assert(!terms.includes("Commercial legal identity not configured")&&!privacy.includes("Commercial legal identity not configured"),"Public legal documents must not expose internal setup warnings.");
 assert(client.includes("registrationLegalAccepted")&&client.includes("LEGAL_ACCEPTANCE_TEXT")&&client.includes("/legal/terms")&&client.includes("/legal/dpa"),"Studio registration must use explicit legal clickwrap.");
 assert(client.includes("privacyPolicyUrl")&&client.includes("Studio Privacy Policy URL"),"Real workspace must let the studio set its own Privacy Policy URL.");
@@ -70,7 +70,7 @@ assert(["USA","CANADA","UK","EUROPE","INTERNATIONAL"].every(x=>home.includes(x))
 assert(home.includes("One studio system.")&&home.includes("Your location.")&&home.includes("Your clock.")&&home.includes("Your payments.")&&home.includes("One clear price."),"Homepage must explain global operational compatibility.");
 assert(startPage.includes("USA · Canada · UK · Europe · International")&&startPage.includes("/ month · USD"),"Purchase page must communicate global availability and USD billing.");
 assert(layout.includes("Global studio management software")&&layout.includes("USA, Canada, UK, Europe and beyond"),"Public metadata must be global-first.");
-assert(home.includes("Studio software")&&home.includes("/compare")&&home.includes("VS. others"),"Homepage must position StudioTasker broadly and link to the neutral comparison page.");
+assert(home.includes("/compare")&&home.includes("VS. others"),"Homepage must retain the neutral comparison page outside the simplified footer.");
 assert(pilatesLanding.includes("PILATES STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("REFORMER PILATES")&&pilatesLanding.includes("$39.90 USD")&&pilatesLanding.includes("FAQPage"),"Pilates landing page must target global Pilates/Reformer studios with price and FAQ schema.");
 assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS")&&compareLanding.includes("Other platforms may")&&compareLanding.includes("not a claim about any specific company"),"Neutral comparison page must compare product approaches without naming competitors.");
 assert(compareLanding.includes("not a claim about any specific company")||compareLanding.includes("rather than making claims about any specific company"),"Visible comparison content must remain generic and company-neutral.");
