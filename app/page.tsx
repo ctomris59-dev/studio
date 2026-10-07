@@ -16,13 +16,13 @@ const timetable = [
 ];
 
 const studioTypes = [
-  {name:"PILATES / REFORMER",copy:"Reformer spots, recurring schedules, private and semi-private formats, packages, credits and attendance.",Icon:Activity},
-  {name:"YOGA",copy:"Recurring classes, workshops or courses, privates, room capacity, member records and follow-up.",Icon:HeartPulse},
-  {name:"BARRE",copy:"Recurring classes, capacity, attendance, waitlists and package usage in one workspace.",Icon:Waves},
-  {name:"DANCE",copy:"Lessons, levels, course or term labels, student records and optional parent or guardian contact.",Icon:Users},
-  {name:"INDOOR CYCLING",copy:"Bike spots, capacity, waitlists, check-in and recurring class schedules.",Icon:Activity},
-  {name:"FITNESS & GYM",copy:"Group classes, personal training, open-gym formats, check-in and member context.",Icon:Dumbbell},
-  {name:"BOUTIQUE FITNESS",copy:"Classes, leads, packages, credits, staff and follow-up without enterprise overhead.",Icon:Waves}
+  {name:"PILATES / REFORMER",copy:"Reformer spots, recurring schedules, private and semi-private formats, packages, credits and attendance.",href:"/pilates-studio-software",Icon:Activity},
+  {name:"YOGA",copy:"Recurring classes, workshops or courses, privates, room capacity, member records and follow-up.",href:"/yoga-studio-software",Icon:HeartPulse},
+  {name:"BARRE",copy:"Recurring classes, capacity, attendance, waitlists and package usage in one workspace.",href:"/barre-studio-software",Icon:Waves},
+  {name:"DANCE",copy:"Lessons, levels, course or term labels, student records and optional parent or guardian contact.",href:"/dance-studio-software",Icon:Users},
+  {name:"INDOOR CYCLING",copy:"Bike spots, capacity, waitlists, check-in and recurring class schedules.",href:"/indoor-cycling-software",Icon:Activity},
+  {name:"FITNESS & GYM",copy:"Group classes, personal training, open-gym formats, check-in and member context.",href:"/fitness-gym-software",Icon:Dumbbell},
+  {name:"BOUTIQUE FITNESS",copy:"Classes, leads, packages, credits, staff and follow-up without enterprise overhead.",href:"/boutique-fitness-software",Icon:Waves}
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
@@ -120,7 +120,7 @@ export default function HomePage() {
               <p>StudioTasker is designed for independent class-based businesses that need clear scheduling, member context, package entitlements and follow-up without an enterprise sales process.</p>
             </div>
             <div className="ed-studio-type-grid">
-              {studioTypes.map(({name,copy,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href="/app-demo?tour=1">SEE IT IN THE DEMO <ArrowRight size={15}/></Link></article>)}
+              {studioTypes.map(({name,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href}>EXPLORE {name.replace(" / REFORMER","")} SOFTWARE <ArrowRight size={15}/></Link></article>)}
             </div>
             <div className="ed-proof-strip"><strong>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</strong><span>USA · CANADA · UK · EUROPE · INTERNATIONAL</span><span>English-first · transparent pricing · no fake customer-logo wall</span></div>
           </div>
