@@ -29,8 +29,10 @@ export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:str
    return {staff:row.rows[0]};
   });
   if(!r.access.ok)return errorResponse(r.access.status,r.access.message);
-  if("missing" in r.value)return errorResponse(404,"Staff record not found.");
-  if("missingUpdate" in r.value)return errorResponse(400,"No editable staff fields supplied.");
-  return successResponse(r.value);
+  const value=r.value;
+  if(!value)return errorResponse(500,"Staff update returned no result.");
+  if("missing" in value)return errorResponse(404,"Staff record not found.");
+  if("missingUpdate" in value)return errorResponse(400,"No editable staff fields supplied.");
+  return successResponse(value);
  }catch{return backendError()}
 }
