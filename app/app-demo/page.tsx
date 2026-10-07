@@ -57,6 +57,15 @@ const pLabel=(p:Signal["priority"])=>p==="high"?"HIGH":p==="medium"?"MEDIUM":"LO
 const isCreated=(id:string)=>id.startsWith("u-");
 const newId=(kind:string)=>"u-"+kind+"-"+Date.now().toString(36);
 const singular=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
+const TOUR_SECONDS=90,TOUR_STEP_SECONDS=15;
+const tourSteps:{view:OwnerView;eyebrow:string;title:string;text:string}[]=[
+ {view:"today",eyebrow:"00–15 SEC",title:"Start with what needs attention.",text:"StudioTasker Today brings trials, renewals, inactive members, package gaps and open seats into one action list — so the owner knows what to do next."},
+ {view:"leads",eyebrow:"15–30 SEC",title:"Turn enquiries into members.",text:"See every lead, where it came from, its current stage and the next contact. Move a lead forward without building a complicated sales pipeline."},
+ {view:"members",eyebrow:"30–45 SEC",title:"Keep member context in one place.",text:"Track packages, class credits, status and recent attendance. StudioTasker manages the operational record; member payments stay outside the software."},
+ {view:"classes",eyebrow:"45–60 SEC",title:"Run the schedule without spreadsheet drift.",text:"Classes show coach, room, capacity and booked places at a glance. Add a class with the studio defaults already applied."},
+ {view:"followups",eyebrow:"60–75 SEC",title:"Make follow-up visible.",text:"Trials, renewals and inactive members become concrete follow-up tasks instead of notes that disappear into inboxes or memory."},
+ {view:"settings",eyebrow:"75–90 SEC",title:"Make it feel like your studio.",text:"Change the studio name, logo, accent color, terminology, class defaults and Today rules. The same workspace adapts to Pilates, yoga, barre, gym and other class-based studios."}
+];
 
 export default function AppDemo(){
  const [signedIn,setSignedIn]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[message,setMessage]=useState("");
@@ -68,15 +77,23 @@ export default function AppDemo(){
  const [memberForm,setMemberForm]=useState({name:"",plan:"10 Class Pack",credits:10});
  const [classForm,setClassForm]=useState({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});
  const [taskForm,setTaskForm]=useState({person:"",title:"",due:"Tomorrow",priority:"NORMAL" as DemoTask["priority"]});
- useEffect(()=>{try{if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true);const saved=sessionStorage.getItem("studiotasker-demo-settings");if(saved)setSettings({...defaultStudioSettings,...JSON.parse(saved)});const logo=sessionStorage.getItem("studiotasker-demo-logo");if(logo)setLogoUrl(logo);setCustomizationSaves(Number(sessionStorage.getItem("studiotasker-demo-customization-saves")||"0"));setLogoUploads(Number(sessionStorage.getItem("studiotasker-demo-logo-uploads")||"0"))}catch{}},[]);
+ const [tourActive,setTourActive]=useState(false),[tourElapsed,setTourElapsed]=useState(0);
+ const tourStepIndex=Math.min(tourSteps.length-1,Math.floor(tourElapsed/TOUR_STEP_SECONDS)),tourStep=tourSteps[tourStepIndex];
+ useEffect(()=>{try{if(sessionStorage.getItem("studiotasker-owner-demo")==="1")setSignedIn(true);const saved=sessionStorage.getItem("studiotasker-demo-settings");if(saved)setSettings({...defaultStudioSettings,...JSON.parse(saved)});const logo=sessionStorage.getItem("studiotasker-demo-logo");if(logo)setLogoUrl(logo);setCustomizationSaves(Number(sessionStorage.getItem("studiotasker-demo-customization-saves")||"0"));setLogoUploads(Number(sessionStorage.getItem("studiotasker-demo-logo-uploads")||"0"));if(new URLSearchParams(window.location.search).get("tour")==="1"){setSignedIn(true);setTourElapsed(0);setTourActive(true);sessionStorage.setItem("studiotasker-owner-demo","1")}}catch{}},[]);
+ useEffect(()=>{if(!tourActive)return;const timer=window.setInterval(()=>setTourElapsed(value=>Math.min(TOUR_SECONDS,value+1)),1000);return()=>window.clearInterval(timer)},[tourActive]);
+ useEffect(()=>{if(!tourActive)return;setView(tourStep.view);setAdding(null);setMessage("")},[tourActive,tourStep.view]);
+ useEffect(()=>{if(tourActive&&tourElapsed>=TOUR_SECONDS){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}},[tourActive,tourElapsed]);
 
+ function startTour(){setSignedIn(true);setTourElapsed(0);setTourActive(true);setView("today");setAdding(null);setMessage("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}}
+ function jumpTour(direction:-1|1){const target=Math.max(0,Math.min(tourSteps.length-1,tourStepIndex+direction));setTourElapsed(target*TOUR_STEP_SECONDS)}
+ function finishTour(){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}
  function login(e:FormEvent){e.preventDefault();setMessage("");if(!authenticateDemo(email,password)){setMessage("Demo email or password is incorrect.");return}
   setSignedIn(true);setView(settings.defaultView);setPassword("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}
  }
- function logout(){setSignedIn(false);setEmail("");setPassword("");setMessage("");try{sessionStorage.removeItem("studiotasker-owner-demo")}catch{}}
+ function logout(){setTourActive(false);setSignedIn(false);setEmail("");setPassword("");setMessage("");try{sessionStorage.removeItem("studiotasker-owner-demo")}catch{}}
  function reset(){
   setSignals(seedSignals);setLeads(seedLeads);setMemberList(seedMembers);setClassList(seedClasses);setTasks(seedTasks);
-  setSettings(defaultStudioSettings);setLogoUrl(null);setCustomizationSaves(0);setLogoUploads(0);setClassForm({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});try{["studiotasker-demo-settings","studiotasker-demo-logo","studiotasker-demo-customization-saves","studiotasker-demo-logo-uploads","studiotasker-booking-demo-count","studiotasker-booking-demo-credits"].forEach(k=>sessionStorage.removeItem(k))}catch{}setActivity([]);setView("today");setAdding(null);setMessage("Demo restored to its original sample data.");
+  setTourActive(false);setSettings(defaultStudioSettings);setLogoUrl(null);setCustomizationSaves(0);setLogoUploads(0);setClassForm({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});try{["studiotasker-demo-settings","studiotasker-demo-logo","studiotasker-demo-customization-saves","studiotasker-demo-logo-uploads","studiotasker-booking-demo-count","studiotasker-booking-demo-credits"].forEach(k=>sessionStorage.removeItem(k))}catch{}setActivity([]);setView("today");setAdding(null);setMessage("Demo restored to its original sample data.");
  }
  function act(signal:Signal,kind:"contacted"|"task"|"tomorrow"){
   const label=kind==="contacted"?"Contact recorded":kind==="task"?"Follow-up task created":"Hidden until tomorrow";
@@ -129,6 +146,7 @@ export default function AppDemo(){
     <button className="sad-demo-account" type="button" onClick={()=>{setEmail(DEMO_ACCOUNT.email);setPassword(DEMO_ACCOUNT.password)}}>
      <span>STUDIO OWNER DEMO</span><b>{DEMO_ACCOUNT.email}</b><small>Password: {DEMO_ACCOUNT.password}</small><i>Use demo credentials <ArrowRight size={17}/></i>
     </button>
+    <button className="sad-watch-tour" type="button" onClick={startTour}><span>90-SECOND GUIDED TOUR</span><b>Watch StudioTasker run a studio</b><i>No sign-in · starts instantly <ArrowRight size={17}/></i></button>
    </div>
    <div className="sad-login-card"><div><StudioTaskerMark/><span>STUDIOTASKER APP</span></div><h2>Welcome back.</h2><p>Sign in to the owner workspace sandbox.</p>
     {message&&<div className="sad-error" role="status">{message}</div>}
@@ -147,12 +165,19 @@ export default function AppDemo(){
  return <main className="sad-app">
   <aside className="sad-sidebar"><Link href="/" className="sad-brand sad-sidebar-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
    <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{background:settings.accentColor}}>{settings.name.split(/\\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
-   <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
+   <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setTourActive(false);setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
   <section className="sad-main">
    <header className="sad-app-top"><div><span className="sad-kicker">OWNER WORKSPACE</span><h1>{settings.name}</h1></div><div className="sad-user-chip"><span>S</span><div><b>{DEMO_ACCOUNT.email}</b><small>Owner</small></div></div></header>
-   <div className="sad-demo-strip"><ShieldCheck size={17}/><span>Interactive sandbox — add/remove is limited to 3 new records per section and resets on demand.</span><Link href="/today">View Today product tour <ChevronRight size={16}/></Link></div>
+   <div className="sad-demo-strip"><ShieldCheck size={17}/><span>Interactive sandbox — add/remove is limited to 3 new records per section and resets on demand.</span><button type="button" className="sad-tour-start" onClick={startTour}>Watch 90-sec demo <ChevronRight size={16}/></button></div>
+   {tourActive&&<aside className="sad-tour-card" role="dialog" aria-live="polite" aria-label="90-second StudioTasker guided tour">
+    <div className="sad-tour-card-top"><span>{tourStep.eyebrow} · GUIDED TOUR</span><button type="button" aria-label="Close guided tour" onClick={()=>setTourActive(false)}><X size={18}/></button></div>
+    <div className="sad-tour-progress" aria-hidden="true"><i style={{width:Math.min(100,(tourElapsed/TOUR_SECONDS)*100)+"%"}}/></div>
+    <div className="sad-tour-meta"><span>STEP {tourStepIndex+1} / {tourSteps.length}</span><span>{tourElapsed}s / {TOUR_SECONDS}s</span></div>
+    <h2>{tourStep.title}</h2><p>{tourStep.text}</p>
+    <div className="sad-tour-actions"><button type="button" disabled={tourStepIndex===0} onClick={()=>jumpTour(-1)}>Back</button><button type="button" onClick={()=>tourStepIndex===tourSteps.length-1?finishTour():jumpTour(1)}>{tourStepIndex===tourSteps.length-1?"Finish":"Next"} <ArrowRight size={16}/></button></div>
+   </aside>}
    {message&&signedIn&&<p className="sad-app-message" role="status">{message}</p>}
 
    {view==="today"&&<OwnerToday signals={signals} activity={activity} settings={settings} onAction={act}/>}
