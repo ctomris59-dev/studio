@@ -11,6 +11,7 @@ const editorialCss=fs.readFileSync("app/editorial.css","utf8");
 const layout=fs.readFileSync("app/layout.tsx","utf8");
 const subscriptionRoute=fs.readFileSync("app/api/studio/subscription/route.ts","utf8");
 const billingPanel=fs.readFileSync("app/workspace/billing-panel.tsx","utf8");
+const paddleWebhook=fs.readFileSync("app/api/billing/paddle-webhook/route.ts","utf8");
 const turkiyePrivacy=fs.readFileSync("app/legal/turkiye-privacy/page.tsx","utf8");
 const appDemo=fs.readFileSync("app/app-demo/page.tsx","utf8");
 const appDemoCss=fs.readFileSync("app/app-demo/app-demo.css","utf8");
