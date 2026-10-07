@@ -84,7 +84,7 @@ assert(["USA","CANADA","UK","EUROPE","INTERNATIONAL"].every(x=>home.includes(x))
 assert(!home.includes("One studio system.")&&!home.includes("BUILT TO TRAVEL"),"Homepage must not render the removed global positioning section.");
 assert(startPage.includes("USA · Canada · UK · Europe · International")&&startPage.includes("/ month · USD"),"Purchase page must communicate global availability and USD billing.");
 assert(layout.includes("Global studio management software")&&layout.includes("USA, Canada, UK, Europe and beyond"),"Public metadata must be global-first.");
-assert(compareLanding.includes("STUDIOTASKER · VS. OTHERS"),"Neutral comparison page must remain available without cluttering the homepage navigation.");
+assert(compareLanding.includes("STUDIOTASKER · VS. BROADER PLATFORMS"),"Neutral comparison page must remain available without cluttering the homepage navigation.");
 assert(pilatesLanding.includes("PILATES / REFORMER STUDIO SOFTWARE · GLOBAL")&&pilatesLanding.includes("Reformer spots")&&pilatesLanding.includes("StudioTypeLanding"),"Pilates landing page must use the shared vertical template with Reformer-specific operations.");
 assert(compareLanding.includes("STUDIOTASKER · VS. BROADER PLATFORMS")&&compareLanding.includes("Broader platforms may")&&compareLanding.includes("does not make feature claims about any named competitor"),"Neutral comparison page must stay concise and compare approaches without naming competitors.");
 assert(compareLanding.includes("general product approaches only")&&compareLanding.includes("named competitor"),"Visible comparison content must remain generic and company-neutral.");
