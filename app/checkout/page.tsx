@@ -1,5 +1,6 @@
 import type {Metadata} from "next";
 import Link from "next/link";
+import {Suspense} from "react";
 import CheckoutClient from "./checkout-client";
 import "./checkout.css";
 
@@ -15,7 +16,7 @@ export default function CheckoutPage(){
   <header className="st-pay-top"><Link href="/" className="st-pay-brand">studio<b>tasker</b><i>.</i></Link><Link href="/start">Plans</Link></header>
   <section className="st-pay-shell">
    <div className="st-pay-copy"><span>SECURE CHECKOUT</span><h1>StudioTasker<br/><em>subscription.</em></h1><p>Payment details, taxes, invoices and eligible payment methods are handled securely by Paddle as Merchant of Record.</p></div>
-   <CheckoutClient/>
+   <Suspense fallback={<div className="st-pay-card"><strong>Loading secure checkout…</strong></div>}><CheckoutClient/></Suspense>
   </section>
  </main>
 }
