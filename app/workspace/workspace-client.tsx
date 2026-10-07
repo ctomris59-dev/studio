@@ -4,6 +4,7 @@ import {useEffect,useRef,useState,type CSSProperties,type FormEvent} from "react
 import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Settings2,Target,Trash2,Users} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "./studio-operations";
+import {ClassBasedOperations} from "./class-based-operations";
 import {OnboardingPanel} from "./onboarding-panel";
 import {BillingPanel} from "./billing-panel";
 import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS} from "../../lib/legal-versions";
@@ -11,7 +12,7 @@ import {CLASS_FORMATS,STUDIO_FOCUSES,studioPreset} from "../../lib/studio-preset
 
 type User={id:string;email:string;role:string};
 type Studio={id:string;name:string};
-type Person={id:string;kind:"lead"|"member";full_name:string;email:string;phone:string;created_at:string;lead_stage:string|null;notes:string;member_status:string|null};
+type Person={id:string;kind:"lead"|"member";full_name:string;email:string;phone:string;created_at:string;lead_stage:string|null;notes:string;member_status:string|null;tags:string[];waiver_status:"not_required"|"pending"|"signed"|"expired";waiver_updated_at:string|null};
 type AuthMode="login"|"register"|"forgot"|"reset"|"verify";
 type OwnerView="today"|"leads"|"members"|"classes"|"followups"|"insights"|"settings";
 type StudioSettings={
@@ -33,7 +34,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
  const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null),[registrationLegalAccepted,setRegistrationLegalAccepted]=useState(false);
  const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates",timezone:"UTC"}),[person,setPerson]=useState({kind:"lead",name:"",email:"",phone:""});
- const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New"});
+ const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New",tags:"",waiverStatus:"not_required"});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
  const initializedView=useRef(false);
 
@@ -79,7 +80,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  }
  async function savePerson(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!editing)return;setBusy(true);setNote("");
-  try{const current=people.find(x=>x.id===editing),payload=current?.kind==="lead"?{name:editForm.name,notes:editForm.notes,stage:editForm.stage}:{name:editForm.name,notes:editForm.notes};
+  try{const current=people.find(x=>x.id===editing),payload=current?.kind==="lead"?{name:editForm.name,notes:editForm.notes,stage:editForm.stage}:{name:editForm.name,notes:editForm.notes,tags:editForm.tags.split(",").map(x=>x.trim()).filter(Boolean),waiverStatus:editForm.waiverStatus};
    const res=await fetch("/api/studio/people/"+editing,{method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),body=await res.json();
    if(!res.ok){setNote(body.error||"Unable to update contact.");return}setEditing(null);await load();setNote("Contact updated.")
   }catch{setNote("Update failed.")}finally{setBusy(false)}
@@ -151,17 +152,17 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
 
    {view==="leads"||view==="members"?canContacts?<section className="rd-live-section">
     <div className="rd-section-head"><div><h2>{view==="leads"?"Lead pipeline":settings.memberTerm}</h2><p>{view==="leads"?"Track enquiries, trial progress and next actions.":"Your studio's internal member records. Payments remain outside StudioTasker."}</p></div></div>
-    <div className="rd-contact-list">{currentPeople.length?currentPeople.map(p=><div key={p.id}><b>{p.full_name}</b><small>{p.kind}{p.lead_stage?" · "+p.lead_stage:""} · {p.email||p.phone}</small><div className="rd-contact-actions"><button disabled={busy} onClick={()=>{setEditing(p.id);setEditForm({name:p.full_name,notes:p.notes||"",stage:p.lead_stage||"New"})}}>Edit</button>{canEdit&&<button disabled={busy} onClick={()=>void archivePerson(p)}>Archive</button>}</div>
-     {editing===p.id&&<form className="rd-form rd-contact-edit" onSubmit={savePerson}><label>Name<input value={editForm.name} minLength={2} maxLength={80} required onChange={e=>setEditForm({...editForm,name:e.target.value})}/></label>{p.kind==="lead"&&<label>Stage<select value={editForm.stage} onChange={e=>setEditForm({...editForm,stage:e.target.value})}>{["New","Contacted","Trial booked","Trial attended","Won","Lost"].map(v=><option key={v}>{v}</option>)}</select></label>}<label>Notes<textarea rows={3} maxLength={1600} value={editForm.notes} onChange={e=>setEditForm({...editForm,notes:e.target.value})}/></label><div className="rd-contact-actions"><button className="rd-primary" disabled={busy}>Save</button><button type="button" onClick={()=>setEditing(null)}>Cancel</button></div></form>}
+    <div className="rd-contact-list">{currentPeople.length?currentPeople.map(p=><div key={p.id}><b>{p.full_name}</b><small>{p.kind}{p.lead_stage?" · "+p.lead_stage:""} · {p.email||p.phone}{p.kind==="member"&&p.tags?.length?" · "+p.tags.join(" · "):""}{p.kind==="member"?" · waiver: "+(p.waiver_status||"not_required").replace("_"," "):""}</small><div className="rd-contact-actions"><button disabled={busy} onClick={()=>{setEditing(p.id);setEditForm({name:p.full_name,notes:p.notes||"",stage:p.lead_stage||"New",tags:(p.tags||[]).join(", "),waiverStatus:p.waiver_status||"not_required"})}}>Edit</button>{canEdit&&<button disabled={busy} onClick={()=>void archivePerson(p)}>Archive</button>}</div>
+     {editing===p.id&&<form className="rd-form rd-contact-edit" onSubmit={savePerson}><label>Name<input value={editForm.name} minLength={2} maxLength={80} required onChange={e=>setEditForm({...editForm,name:e.target.value})}/></label>{p.kind==="lead"&&<label>Stage<select value={editForm.stage} onChange={e=>setEditForm({...editForm,stage:e.target.value})}>{["New","Contacted","Trial booked","Trial attended","Won","Lost"].map(v=><option key={v}>{v}</option>)}</select></label>}{p.kind==="member"&&<><label>Tags<input maxLength={240} placeholder="trial, reformer, evening" value={editForm.tags} onChange={e=>setEditForm({...editForm,tags:e.target.value})}/><small>Up to 12 comma-separated operational tags.</small></label><label>Waiver status<select value={editForm.waiverStatus} onChange={e=>setEditForm({...editForm,waiverStatus:e.target.value})}><option value="not_required">Not required</option><option value="pending">Pending</option><option value="signed">Signed</option><option value="expired">Expired</option></select></label></>}<label>Notes<textarea rows={3} maxLength={1600} value={editForm.notes} onChange={e=>setEditForm({...editForm,notes:e.target.value})}/></label><div className="rd-contact-actions"><button className="rd-primary" disabled={busy}>Save</button><button type="button" onClick={()=>setEditing(null)}>Cancel</button></div></form>}
     </div>):<p className="rd-empty">No {view==="leads"?"leads":settings.memberTerm.toLowerCase()} yet.</p>}</div>
     <details className="rd-ops-details"><summary>+ Add {view==="leads"?"lead":singularTerm(settings.memberTerm).toLowerCase()}</summary><form onSubmit={addPerson} className="rd-form rd-add-contact"><label>Name<input required minLength={2} maxLength={80} value={person.name} onChange={e=>setPerson({...person,name:e.target.value,kind:view==="leads"?"lead":"member"})}/></label><label>Email<input type="email" value={person.email} onChange={e=>setPerson({...person,email:e.target.value})}/></label><label>Phone<input type="tel" value={person.phone} onChange={e=>setPerson({...person,phone:e.target.value})}/></label><button className="rd-primary" disabled={busy}>Add</button></form></details>
     {view==="members"&&<StudioOperations role={user.role} section="members" preferences={prefs}/>}
    </section>:<p className="rd-feedback">Your role does not have access to studio contacts.</p>:null}
 
    {view==="today"&&<StudioOperations role={user.role} section="today" preferences={prefs}/>}
-   {view==="classes"&&<StudioOperations role={user.role} section="classes" preferences={prefs}/>}
+   {view==="classes"&&<ClassBasedOperations role={user.role} section="classes" preferences={prefs}/>}
    {view==="followups"&&<StudioOperations role={user.role} section="followups" preferences={prefs}/>}
-   {view==="insights"&&<StudioOperations role={user.role} section="insights" preferences={prefs}/>}
+   {view==="insights"&&<ClassBasedOperations role={user.role} section="insights" preferences={prefs}/>}
 
    {view==="settings"&&<section className="rd-live-section">
     {user.role==="owner"&&<BillingPanel initialPlan={pendingPlan}/>} 
@@ -180,6 +181,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     </form>
     <p className="rd-tiny">Timezone cannot change after classes exist. StudioTasker keeps one product codebase; customization changes this studio's tenant settings, not the software for other customers.</p>
     {user.role==="owner"&&<div className="rd-privacy-actions"><button disabled={busy} onClick={()=>void exportData()}><Download size={16}/> Export studio data (JSON)</button><p className="rd-tiny">Keep exports private and encrypted.</p></div>}
+    <ClassBasedOperations role={user.role} section="settings" preferences={prefs}/>
     <StudioOperations role={user.role} section="settings" preferences={prefs}/>
    </section>}
   </main>
