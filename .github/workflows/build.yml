@@ -65,11 +65,15 @@ jobs:
         run: npm run test:backup
       - name: Test basic accessibility and mobile layout guards
         run: npm run test:ui
+      - name: Test technical SEO invariants
+        run: npm run test:seo
       - name: Test IANA timezone and DST handling
         run: npm run test:timezone
       - name: Test commercial registration release gate
         run: npm run test:release
       - name: Compile production build
         run: npm run build
+      - name: Test production HTML and SEO HTTP behavior
+        run: npm run test:seo:http
       - name: Test live HTTP auth and tenant access
         run: npm run test:api
