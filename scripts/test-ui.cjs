@@ -121,3 +121,6 @@ assert(appDemo.includes("DEMO_SESSION_SECONDS=60*60")&&appDemo.includes("studiot
 assert(appDemo.includes("60-MINUTE DEMO COMPLETE")&&appDemo.includes("CHOOSE A PLAN")&&appDemo.includes("expireDemo()"),"Expired demo must reset and end at a plan-selection screen.");
 assert(appDemo.includes("Resetting data does not restart the 60-minute session.")&&appDemo.includes("demoTimeLabel(demoRemaining)"),"Demo must disclose that resets do not extend the session and show time remaining.");
 assert(appDemoCss.includes("sad-demo-expired")&&appDemoCss.includes("sad-expired-card"),"Timed demo expiry screen must be styled.");
+
+assert(startPage.includes('className="st-start-intro-meta"'),"Start page back link and kicker must share a deliberate meta row.");
+assert(startCss.includes(".st-start-intro-meta{display:flex")&&startCss.includes("padding:38px 0 76px")&&!startCss.includes("margin:-20px 0 28px"),"Start page hero spacing and global band must avoid overlap and negative margins.");
