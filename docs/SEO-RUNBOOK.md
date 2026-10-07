@@ -42,7 +42,7 @@ Suggested future research clusters:
 Each market gets its own SERP and competitor analysis.
 
 ## Structured data
-Home: WebSite + SoftwareApplication.
+Home: Organization + WebSite + Service. Do not add SoftwareApplication rich-result markup until genuine review/rating data exists, because Google requires a review or aggregate rating for SoftwareApplication rich-result eligibility.
 Vertical pages: FAQPage + BreadcrumbList.
 Never invent customer reviews, aggregate ratings, inventory, discounts or availability. Add review/rating schema only after genuine attributable customer reviews exist.
 StudioTasker is SaaS, not a physical catalog. Merchant Center feeds, product variants, shipping schema and inventory feeds are not added unless the business model materially changes.
@@ -51,7 +51,7 @@ StudioTasker is SaaS, not a physical catalog. Merchant Center feeds, product var
 Home links to all seven vertical pages in server HTML. Every vertical links to the other studio categories, pricing, demo and comparison. Keep descriptive anchor text. Prevent orphan pages by requiring every indexable page to have at least one crawlable internal href from another indexable page.
 
 ## AI answer/search engines
-robots.txt explicitly permits OAI-SearchBot, PerplexityBot and Google-Extended while keeping API routes out of crawl.
+robots.txt explicitly permits OAI-SearchBot, ChatGPT-User, GPTBot, PerplexityBot and Google-Extended while keeping API routes out of crawl. OAI-SearchBot is the important OpenAI crawler for ChatGPT Search discovery; crawler access does not guarantee citation or ranking.
 llms.txt provides concise canonical facts and primary URLs. It is supplemental, not a guaranteed ranking standard.
 Factual claims such as price, supported verticals and payment boundaries should remain consistent across visible copy, JSON-LD and llms.txt.
 Do not create fake "AI optimized" content or synthetic reviews.
@@ -89,3 +89,23 @@ After www.studiotasker.com is live:
 Weekly during launch month: index coverage, crawl errors, redirects, Core Web Vitals, query impressions and log crawl patterns.
 Monthly: country/device/query intent, pages with impressions but weak CTR, orphan/broken links, stale claims and structured-data validation.
 Quarterly: competitor SERPs by target country, content gaps, backlink/referring-domain quality, localization decisions and AI-search citations.
+
+
+## Nginx crawler-log format
+Use a dedicated tab-delimited log so the bundled analyzer can measure crawl -> status -> latency without parsing application logs:
+
+```nginx
+log_format studiotasker_seo '$time_iso8601\t$remote_addr\t$host\t$request_method\t$uri\t$args\t$status\t$body_bytes_sent\t$http_user_agent\t$request_time\t$sent_http_location';
+map $http_user_agent $is_seo_bot {
+ default 0;
+ ~*googlebot 1;
+ ~*bingbot 1;
+ ~*OAI-SearchBot 1;
+ ~*GPTBot 1;
+ ~*ChatGPT-User 1;
+ ~*PerplexityBot 1;
+}
+access_log /var/log/nginx/studiotasker-seo.log studiotasker_seo if=$is_seo_bot;
+```
+
+At this site size, "crawl budget optimization" means preventing crawl traps, not artificially reducing useful crawling. There is no public faceted navigation today, so do not add robots rules for hypothetical filters. If filters are introduced later, measure log demand first and decide indexability facet by facet.
