@@ -141,3 +141,5 @@ assert(classEngine.includes("assignSpotToBooking")&&classEngine.includes("cancel
 assert(classOs.includes("Repeat weekly")&&classOs.includes("Join waitlist")&&classOs.includes("No-show")&&classOs.includes("Numbered equipment / spot booking")&&classOs.includes("Staff & instructor roster"),"Workspace must expose the core class-based studio workflows.");
 assert(classOs.includes("30-day operational insights")&&insightsApi.includes("no_show")&&insightsApi.includes("late_cancels")&&insightsApi.includes("trialConversion"),"Insights must report utilization, attendance, no-shows, late cancels and trial conversion.");
 assert(staffApi.includes("studio_staff")&&client.includes("waiverStatus")&&client.includes("tags:editForm.tags"),"Workspace must integrate staff roster plus member tags and waiver state.");
+
+assert(client.includes("Parent / guardian contact")&&client.includes("Related / emergency contact")&&client.includes("relatedContactName")&&client.includes("relatedContactRole"),"Dance and other studios must support an optional related contact on member records.");
