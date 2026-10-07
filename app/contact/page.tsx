@@ -5,7 +5,7 @@ import ContactForm from "./contact-form";
 import "./contact.css";
 
 export const metadata={
-  title:"Contact StudioTasker — Support & Questions",
+  title:"Contact StudioTasker | Support & Questions",
   description:"Contact StudioTasker support about the product, pricing, account access or studio setup."
 };
 
@@ -20,7 +20,7 @@ export default function ContactPage(){
       <div className="ct-intro">
         <span className="ct-kicker">CONTACT / STUDIOTASKER</span>
         <h1>Questions?<br/><em>Talk to us.</em></h1>
-        <p>Product questions, account help, billing questions or feedback — send us a message and we&apos;ll pick it up at StudioTasker support.</p>
+        <p>Product questions, account help, billing questions or feedback. Send us a message and we&apos;ll pick it up at StudioTasker support.</p>
         <a className="ct-email" href="mailto:support@studiotasker.com"><Mail size={20}/><span><small>EMAIL US DIRECTLY</small><b>support@studiotasker.com</b></span><ArrowUpRight size={18}/></a>
         <div className="ct-notes">
           <div><MessageSquare size={18}/><span><b>Product & sales</b><small>Features, plans, demo and suitability for your studio.</small></span></div>
