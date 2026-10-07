@@ -11,6 +11,7 @@ export default function sitemap():MetadataRoute.Sitemap{
   "/fitness-gym-software",
   "/boutique-fitness-software",
   "/compare",
+  "/about",
   "/start",
   "/contact",
   "/legal",
