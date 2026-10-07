@@ -591,3 +591,25 @@
  .ed-demo-compact,.ed-annual-compact{min-height:52px}
  .ed-member-pulse{transform:none;box-shadow:8px 9px 0 #12278a}
 }
+
+
+/* Tighter desktop rhythm: keep the editorial feel without oversized transition gaps. */
+@media(min-width:761px){
+ .ed-pricing{padding:82px 0 92px}
+ .ed-pricing-title{margin-bottom:42px}
+ .ed-start-simple{padding:44px 0}
+ .ed-manifesto{padding:80px 0 86px}
+ .ed-manifesto-seal{margin-top:62px}
+ .ed-features{padding:82px 0 92px}
+ .ed-features-top{margin-bottom:52px}
+ .ed-feature-row{padding:30px 0 34px}
+ .ed-member-commerce{padding:72px 0 78px}
+ .ed-today-story{padding:76px 0}
+ .ed-window-grid{min-height:690px}
+ .ed-window-copy{padding:76px 40px 48px 0}
+ .ed-window h2{margin:40px 0 27px}
+ .ed-window-list{margin:27px 0}
+ .ed-faq{padding:76px 0 84px}
+ .ed-last{padding:78px 0 86px}
+ .ed-footer{padding-top:58px}
+}
