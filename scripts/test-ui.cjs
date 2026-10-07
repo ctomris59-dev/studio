@@ -89,5 +89,5 @@ assert(client.includes("pendingPlan")&&client.includes('requestedMode==="registe
 assert(billingPanel.includes("Monthly · $39.90/month")&&billingPanel.includes("Annual · $406.80/year · save 15%")&&billingPanel.includes("Manage billing in Paddle"),"Workspace subscription controls must show the published prices and Paddle portal management.");
 assert(home.includes("STEP INSIDE THE APP")&&home.includes("THE STUDIO EDIT")&&!home.includes("VOL. 01")&&home.includes("ed-window-app-cta"),"Studio edit area must use the large guided-demo CTA without the old volume label.");
 assert(home.includes("<Dumbbell")||home.includes("Dumbbell"),"Homepage source must use studio/fitness iconography instead of decorative star marks.");
-assert(legalHub.includes("KVKK Privacy Notice")&&!legalHub.includes("Türkiye Privacy Notice (KVKK)"),"Legal hub must use the concise KVKK Privacy Notice title.");
+assert(legalHub.includes('["KVKK Privacy Notice","","/legal/turkiye-privacy"]')&&!legalHub.includes("Türkiye Privacy Notice (KVKK)"),"Legal hub must show only the concise KVKK Privacy Notice title on that card.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
