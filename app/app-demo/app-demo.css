@@ -117,3 +117,6 @@
 .sad-expired-actions a:last-child{background:#fff}
 .sad-expired-card>small{font-size:12px;color:#727887}
 @media(max-width:600px){.sad-expired-card{padding:35px 26px;box-shadow:7px 7px 0 #334bdd}.sad-expired-card h1{font-size:57px}.sad-expired-actions{display:grid}.sad-expired-actions a{justify-content:space-between}}
+
+.sad-class-os-strip{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.sad-class-os-strip span{border:1px solid #334bdd;background:#eef0ff;color:#2339c4;padding:6px 8px;font:800 9px "IBM Plex Mono",monospace;letter-spacing:.05em}
