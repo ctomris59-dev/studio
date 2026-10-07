@@ -613,3 +613,6 @@
  .ed-last{padding:78px 0 86px}
  .ed-footer{padding-top:58px}
 }
+
+.ed-pricing-kicker{margin-bottom:26px}
+@media(max-width:760px){.ed-pricing-kicker{margin-bottom:20px}}
