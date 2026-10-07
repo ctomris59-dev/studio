@@ -26,6 +26,8 @@ const pilatesLanding=fs.readFileSync("app/pilates-studio-software/page.tsx","utf
 const compareLanding=fs.readFileSync("app/compare/page.tsx","utf8");
 const marketingCss=fs.readFileSync("app/marketing-landing.css","utf8");
 const sitemap=fs.readFileSync("app/sitemap.ts","utf8");
+const contactPage=fs.readFileSync("app/contact/page.tsx","utf8");
+const contactForm=fs.readFileSync("app/contact/contact-form.tsx","utf8");
 const demoAuth=fs.readFileSync("lib/demo-auth.ts","utf8");
 const legacyDemo=fs.readFileSync("app/demo/page.tsx","utf8");
 assert(client.includes('role="status"'),"Async status messages must be exposed to assistive tech.");
@@ -94,3 +96,8 @@ assert(home.includes("STEP INSIDE THE APP")&&home.includes("THE STUDIO EDIT")&&!
 assert(home.includes("<Dumbbell")||home.includes("Dumbbell"),"Homepage source must use studio/fitness iconography instead of decorative star marks.");
 assert(legalHub.includes('["KVKK Privacy Notice","","/legal/turkiye-privacy"]')&&!legalHub.includes("Türkiye Privacy Notice (KVKK)"),"Legal hub must show only the concise KVKK Privacy Notice title on that card.");
 console.log("UI smoke checks passed: labels, status messages, keyboard focus, confirmation and responsive rules.");
+
+assert(home.includes('href="/contact"')&&home.includes(">Contact<"),"Homepage top and footer navigation must expose Contact.");
+assert(contactPage.includes("support@studiotasker.com")&&contactForm.includes('SUPPORT_EMAIL="support@studiotasker.com"'),"Contact page and form must use the published StudioTasker support address.");
+assert(contactForm.includes('name="name"')&&contactForm.includes('name="email"')&&contactForm.includes('name="studio"')&&contactForm.includes('name="topic"')&&contactForm.includes('name="message"')&&contactForm.includes("mailto:"),"Contact form must collect core enquiry fields and prepare an email message.");
+assert(sitemap.includes('"/contact"'),"Sitemap must include the Contact page.");
