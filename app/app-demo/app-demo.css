@@ -101,3 +101,19 @@
 .sad-tour-actions button:last-child{background:#334bdd;color:white}
 .sad-tour-actions button:disabled{opacity:.4;cursor:default}
 @media(max-width:760px){.sad-tour-start{margin-left:0}.sad-tour-card{right:16px;bottom:16px;box-shadow:6px 6px 0 #17203c}.sad-tour-card h2{font-size:27px}}
+
+
+/* Timed demo expiry */
+.sad-demo-expired{min-height:100vh;background:#f4f0e7;color:#17203c;display:flex;flex-direction:column}
+.sad-demo-expired .sad-login-top{flex:0 0 auto}
+.sad-expired-card{width:min(760px,calc(100% - 40px));margin:auto;padding:54px 58px;background:#fffefa;border:2px solid #17203c;box-shadow:12px 12px 0 #334bdd;text-align:left}
+.sad-expired-card>svg{color:#ff8360;margin:25px 0 8px}
+.sad-expired-card h1{font:700 clamp(56px,7vw,88px)/.92 "Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:-.045em;margin:8px 0 22px}
+.sad-expired-card h1 em{color:#334bdd}
+.sad-expired-card>p{font-size:16px;line-height:1.65;color:#5e6677;max-width:620px}
+.sad-expired-actions{display:flex;gap:12px;flex-wrap:wrap;margin:29px 0 20px}
+.sad-expired-actions a{min-height:52px;padding:13px 17px;border:2px solid #17203c;display:inline-flex;align-items:center;gap:13px;font:800 12px "IBM Plex Mono",monospace;text-decoration:none}
+.sad-expired-actions a:first-child{background:#e7f982;box-shadow:4px 4px 0 #17203c}
+.sad-expired-actions a:last-child{background:#fff}
+.sad-expired-card>small{font-size:12px;color:#727887}
+@media(max-width:600px){.sad-expired-card{padding:35px 26px;box-shadow:7px 7px 0 #334bdd}.sad-expired-card h1{font-size:57px}.sad-expired-actions{display:grid}.sad-expired-actions a{justify-content:space-between}}
