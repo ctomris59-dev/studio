@@ -142,7 +142,7 @@ async function main(){
   }
   const config=await call("/api/studio/settings",{cookie:a.cookie});
   assert.equal(config.status,200);assert.equal(config.data.studio.timezone,"UTC");
-  assert(["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"].includes(config.data.studio.focus));
+  assert(["Pilates","Yoga","Barre","Dance","Indoor cycling","Fitness & Gym","Boutique fitness"].includes(config.data.studio.focus));
   const customized=await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{
    name:"Alpine Studio",focus:"Pilates",timezone:"UTC",accentColor:"#7C3AED",memberTerm:"Clients",classTerm:"Sessions",creditTerm:"Visits",
    weekStarts:"sunday",timeFormat:"12h",defaultView:"members",defaultClassDuration:60,defaultClassCapacity:12,defaultRoom:"Purple Room",
@@ -181,6 +181,13 @@ async function main(){
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{name:"Alpine Studio",focus:"Pilates",timezone:"Not/A_Zone"}})).status,400);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:coachLogin.cookie,body:{name:"Forbidden",focus:"Yoga",timezone:"UTC"}})).status,403);
 
+  const detailedMember=await call("/api/studio/people",{method:"POST",cookie:a.cookie,body:{
+   kind:"member",name:"Dance Student",email:"dance-student-"+unique+"@example.com",tags:["beginner","evening"],waiverStatus:"pending",
+   relatedContactName:"Taylor Parent",relatedContactRole:"Parent",relatedContactEmail:"parent-"+unique+"@example.com",notes:"Term student"
+  }});
+  assert.equal(detailedMember.status,201,JSON.stringify(detailedMember.data));
+  assert.deepEqual(detailedMember.data.record.tags,["beginner","evening"]);assert.equal(detailedMember.data.record.waiver_status,"pending");
+  assert.equal(detailedMember.data.record.related_contact_role,"Parent");
   const member1=await createMember(a,"Member One"),member2=await createMember(a,"Member Two"),member3=await createMember(a,"Member Pending");
   assert.equal((await call("/api/studio/members",{cookie:coachLogin.cookie})).status,403);
   const pack=await call("/api/studio/packages",{method:"POST",cookie:a.cookie,body:{name:"5 Class Pack",description:"Internal entitlement template",credits:5,validDays:30}});
@@ -193,6 +200,12 @@ async function main(){
    assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.member.package_status,"Confirmed");
   };
   await confirmMember(member1);await confirmMember(member2);
+  const spotBooking=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member1,spotNumber:1}});
+  assert.equal(spotBooking.status,201,JSON.stringify(spotBooking.data));assert.equal(spotBooking.data.booking.spot_number,1);
+  const occupiedSpot=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member2,spotNumber:1}});
+  assert.equal(occupiedSpot.status,409,"Occupied equipment spot must not be double-booked.");
+  const secondSpot=await call("/api/studio/bookings",{method:"POST",cookie:a.cookie,body:{sessionId:spotClass.data.class.id,memberId:member2,spotNumber:2}});
+  assert.equal(secondSpot.status,201,JSON.stringify(secondSpot.data));assert.equal(secondSpot.data.booking.spot_number,2);
   const confirmedState=await admin.query("SELECT package_status,credits FROM people WHERE studio_id=$1 AND id=$2",[studioA,member1]);
   assert.equal(confirmedState.rows[0].package_status,"Confirmed","Package confirmation must persist before credit adjustment.");
   assert.equal(confirmedState.rows[0].credits,5,"Package confirmation must persist numeric credits.");
@@ -206,7 +219,7 @@ async function main(){
   assert.equal((await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:a.cookie,body:{delta:-20,reason:"Should not overdraw",requestKey:randomUUID()}})).status,409);
   assert.equal((await call("/api/studio/members/"+member1+"/credits",{method:"POST",cookie:coachLogin.cookie,body:{delta:1,reason:"Forbidden instructor update",requestKey:randomUUID()}})).status,403);
 
-  const start=future(3,15),classInput={title:"Reformer Test",instructor:"Coach A",room:"Room A",startsAt:start,durationMinutes:50,capacity:1};
+  const start=future(3,15),classInput={title:"Reformer Test",instructor:"Coach A",room:"Room A",startsAt:start,durationMinutes:50,capacity:1,spotBookingEnabled:false};
   const createdClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:classInput});
   assert.equal(createdClass.status,201,JSON.stringify(createdClass.data));const classId=createdClass.data.class.id;
   const crossClass=await call("/api/studio/classes",{method:"POST",cookie:b.cookie,body:classInput});
@@ -214,6 +227,17 @@ async function main(){
   const conflict=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{...classInput,title:"Overlap",room:"Other room",startsAt:new Date(Date.parse(start)+15*60000).toISOString()}});
   assert.equal(conflict.status,409,JSON.stringify(conflict.data));
   assert.equal((await call("/api/studio/classes",{method:"POST",cookie:coachLogin.cookie,body:classInput})).status,403);
+  const staffCreated=await call("/api/studio/staff",{method:"POST",cookie:a.cookie,body:{displayName:"Maya Coach",role:"Instructor",availabilityNotes:"Weekday mornings"}});
+  assert.equal(staffCreated.status,201,JSON.stringify(staffCreated.data));const staffId=staffCreated.data.staff.id;
+  const staffEdited=await call("/api/studio/staff/"+staffId,{method:"PATCH",cookie:a.cookie,body:{role:"Coach",availabilityNotes:"Mon–Thu mornings"}});
+  assert.equal(staffEdited.status,200,JSON.stringify(staffEdited.data));assert.equal(staffEdited.data.staff.role,"Coach");
+  const staffList=await call("/api/studio/staff",{cookie:a.cookie});assert(staffList.data.staff.some(x=>x.id===staffId&&x.role==="Coach"));
+  const spotClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
+   title:"Reformer Spots",instructor:"Maya Coach",staffId,room:"Reformer Room",startsAt:future(5,11),durationMinutes:50,capacity:2,
+   classFormat:"semi_private",spotBookingEnabled:true,spotLabel:"Reformer",spotCount:2
+  }});
+  assert.equal(spotClass.status,201,JSON.stringify(spotClass.data));assert.equal(spotClass.data.class.spot_booking_enabled,true);
+  assert.equal(spotClass.data.class.spot_label,"Reformer");assert.equal(spotClass.data.class.class_format,"semi_private");
   const repeatDate=new Date(Date.now()+6*86400000).toISOString().slice(0,10),repeatUntil=new Date(Date.now()+12*86400000).toISOString().slice(0,10),allDays=[0,1,2,3,4,5,6];
   const weekly=await call("/api/studio/classes/series",{method:"POST",cookie:a.cookie,body:{title:"Morning Class",instructor:"Coach Series",room:"Studio S",durationMinutes:50,capacity:6,startDate:repeatDate,endDate:repeatUntil,time:"08:00",weekdays:allDays}});
   assert.equal(weekly.status,201,JSON.stringify(weekly.data));assert.equal(weekly.data.classes.length,7);
@@ -248,6 +272,10 @@ async function main(){
   await admin.query("UPDATE class_sessions SET starts_at=now()-interval '30 minutes' WHERE id=$1 AND studio_id=$2",[secondClass.data.class.id,studioA]);
   assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"POST",cookie:a.cookie})).status,200);
   assert.equal((await call("/api/studio/bookings/"+checkedBooking.id+"/attendance",{method:"DELETE",cookie:a.cookie,body:{reason:"Incorrect check in"}})).status,200);
+  const noShowSet=await call("/api/studio/bookings/"+checkedBooking.id+"/status",{method:"POST",cookie:a.cookie,body:{noShow:true}});
+  assert.equal(noShowSet.status,200,JSON.stringify(noShowSet.data));
+  const noShowClear=await call("/api/studio/bookings/"+checkedBooking.id+"/status",{method:"POST",cookie:a.cookie,body:{noShow:false,reason:"Member arrived late"}});
+  assert.equal(noShowClear.status,200,JSON.stringify(noShowClear.data));
 
   const thirdClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{...classInput,title:"Underfilled",room:"Room C",instructor:"Coach C",startsAt:future(1,12),capacity:5}});
   await admin.query("UPDATE people SET next_contact=current_date-interval '3 days' WHERE id=$1 AND studio_id=$2",[pa.data.record.id,studioA]);
@@ -275,6 +303,9 @@ async function main(){
   const actionB=await call("/api/studio/action-center",{cookie:b.cookie});
   assert(!actionB.data.items.some(x=>x.personId===pa.data.record.id));
 
+  const insights=await call("/api/studio/insights",{cookie:a.cookie});
+  assert.equal(insights.status,200,JSON.stringify(insights.data));assert(Array.isArray(insights.data.topClasses));assert(Array.isArray(insights.data.timeSlots));assert(Array.isArray(insights.data.instructors));
+  assert(["occupancy","attendanceRate","noShowRate","trialConversion"].every(k=>k in insights.data.summary));
   const finishSetup=await call("/api/studio/onboarding",{method:"POST",cookie:a.cookie,body:{operation:"complete_setup"}});
   assert.equal(finishSetup.status,200,JSON.stringify(finishSetup.data));assert.equal(finishSetup.data.finished,true);
   const followup={personId:pa.data.record.id,title:"Follow up with lead",dueAt:future(1,10),category:"Call",priority:"High"};
@@ -283,7 +314,7 @@ async function main(){
   assert.equal((await call("/api/studio/tasks",{method:"POST",cookie:b.cookie,body:followup})).status,404);
   const finished=await call("/api/studio/tasks/"+task.data.task.id,{method:"PATCH",cookie:a.cookie,body:{outcome:"Contacted"}});
   assert.equal(finished.status,200);
-  console.log("Studio-only operations passed: internal entitlements, credits, capacity, attendance, tenant isolation, Today signals and onboarding.");
+  console.log("Class-based OS passed: vertical presets, recurring series, waitlist, equipment spots, attendance/no-show, staff, member context, Insights, tenant isolation and onboarding.");
 
   // Verified, idempotent Paddle sandbox webhooks.
   const secret=process.env.PADDLE_WEBHOOK_SECRET;
