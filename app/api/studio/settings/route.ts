@@ -2,15 +2,17 @@ import {NextRequest} from "next/server";
 import {authenticated} from "@/lib/server/auth";
 import {errorResponse,successResponse,backendError,sameOrigin,jsonObject,stringField} from "@/lib/server/responses";
 import {validStudioTimezone} from "@/lib/studio-timezone";
+import {STUDIO_FOCUSES,CLASS_FORMATS} from "@/lib/studio-presets";
 export const runtime="nodejs";
 
-const focuses=["Pilates","Yoga","Barre","Dance","Boutique fitness","Gym"];
+const focuses=[...STUDIO_FOCUSES];
 const memberTerms=["Members","Clients","Students","Customers"];
 const classTerms=["Classes","Sessions","Lessons"];
 const creditTerms=["Credits","Visits","Sessions"];
 const weekStarts=["monday","sunday"];
 const timeFormats=["24h","12h"];
 const defaultViews=["today","leads","members","classes","followups","insights","settings"];
+const classFormats=CLASS_FORMATS.map(([value])=>value);
 
 function intValue(body:Record<string,unknown>,key:string,current:number,min:number,max:number){
  const raw=body[key];if(raw===undefined)return current;
@@ -24,12 +26,19 @@ function textValue(body:Record<string,unknown>,key:string,current:string,max:num
  if(body[key]===undefined)return current;
  const value=stringField(body,key,max);return value!==null&&value.length>=min?value:null;
 }
+function boolValue(body:Record<string,unknown>,key:string,current:boolean){
+ const raw=body[key];if(raw===undefined)return current;
+ return typeof raw==="boolean"?raw:null;
+}
 const selectSettings=`SELECT s.name,s.focus,s.timezone,
  s.accent_color AS "accentColor",s.member_term AS "memberTerm",s.class_term AS "classTerm",s.credit_term AS "creditTerm",
  s.week_starts AS "weekStarts",s.time_format AS "timeFormat",s.default_view AS "defaultView",
  s.default_class_duration AS "defaultClassDuration",s.default_class_capacity AS "defaultClassCapacity",s.default_room AS "defaultRoom",
  s.inactive_days AS "inactiveDays",s.low_credits_threshold AS "lowCreditsThreshold",s.renewal_window_days AS "renewalWindowDays",
  s.trial_followup_hours AS "trialFollowupHours",s.package_review_hours AS "packageReviewHours",s.open_seats_threshold AS "openSeatsThreshold",
+ s.spot_booking_enabled AS "spotBookingEnabled",s.equipment_label AS "equipmentLabel",s.default_spot_count AS "defaultSpotCount",
+ s.default_class_format AS "defaultClassFormat",s.waiver_required AS "waiverRequired",
+ s.late_cancel_refund_credit AS "lateCancelRefundCredit",s.no_show_refund_credit AS "noShowRefundCredit",
  COALESCE(s.privacy_policy_url,'') AS "privacyPolicyUrl",
  (s.onboarding_completed_at IS NOT NULL) AS "onboardingCompleted",
  EXISTS(SELECT 1 FROM studio_brand_assets a WHERE a.studio_id=s.id) AS "hasLogo"
@@ -51,7 +60,8 @@ export async function PATCH(request:NextRequest){
   const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
    const currentResult=await client.query(`SELECT name,focus,timezone,accent_color,member_term,class_term,credit_term,week_starts,time_format,default_view,
     default_class_duration,default_class_capacity,default_room,inactive_days,low_credits_threshold,renewal_window_days,trial_followup_hours,
-    package_review_hours,open_seats_threshold,privacy_policy_url FROM studios WHERE id=$1 FOR UPDATE`,[auth.studioId]);
+    package_review_hours,open_seats_threshold,spot_booking_enabled,equipment_label,default_spot_count,default_class_format,waiver_required,
+    late_cancel_refund_credit,no_show_refund_credit,privacy_policy_url FROM studios WHERE id=$1 FOR UPDATE`,[auth.studioId]);
    const c=currentResult.rows[0];if(!c)return {missing:true};
    const name=textValue(body,"name",c.name,100,2),focus=choiceValue(body,"focus",c.focus,focuses),timezone=textValue(body,"timezone",c.timezone,80,1);
    const accentColor=textValue(body,"accentColor",c.accent_color,7,7);
@@ -64,11 +74,17 @@ export async function PATCH(request:NextRequest){
    const inactiveDays=intValue(body,"inactiveDays",c.inactive_days,7,90),lowCreditsThreshold=intValue(body,"lowCreditsThreshold",c.low_credits_threshold,0,10);
    const renewalWindowDays=intValue(body,"renewalWindowDays",c.renewal_window_days,1,60),trialFollowupHours=intValue(body,"trialFollowupHours",c.trial_followup_hours,1,168);
    const packageReviewHours=intValue(body,"packageReviewHours",c.package_review_hours,1,168),openSeatsThreshold=intValue(body,"openSeatsThreshold",c.open_seats_threshold,1,50);
+   const spotBookingEnabled=boolValue(body,"spotBookingEnabled",c.spot_booking_enabled),equipmentLabel=textValue(body,"equipmentLabel",c.equipment_label,40,2);
+   const defaultSpotCount=intValue(body,"defaultSpotCount",c.default_spot_count,1,100),defaultClassFormat=choiceValue(body,"defaultClassFormat",c.default_class_format,classFormats);
+   const waiverRequired=boolValue(body,"waiverRequired",c.waiver_required),lateCancelRefundCredit=boolValue(body,"lateCancelRefundCredit",c.late_cancel_refund_credit);
+   const noShowRefundCredit=boolValue(body,"noShowRefundCredit",c.no_show_refund_credit);
    const privacyPolicyUrl=textValue(body,"privacyPolicyUrl",c.privacy_policy_url||"",500,0);
    let validPrivacyUrl=true;if(privacyPolicyUrl){try{const parsed=new URL(privacyPolicyUrl);validPrivacyUrl=["http:","https:"].includes(parsed.protocol)}catch{validPrivacyUrl=false}}
    if(!name||!focus||!timezone||!validStudioTimezone(timezone)||!accentColor||!/^#[0-9A-Fa-f]{6}$/.test(accentColor)||
     !memberTerm||!classTerm||!creditTerm||!weekStart||!timeFormat||!defaultView||defaultClassDuration===null||defaultClassCapacity===null||
-    !defaultRoom||inactiveDays===null||lowCreditsThreshold===null||renewalWindowDays===null||trialFollowupHours===null||packageReviewHours===null||openSeatsThreshold===null||privacyPolicyUrl===null||!validPrivacyUrl)
+    !defaultRoom||inactiveDays===null||lowCreditsThreshold===null||renewalWindowDays===null||trialFollowupHours===null||packageReviewHours===null||openSeatsThreshold===null||
+    spotBookingEnabled===null||!equipmentLabel||defaultSpotCount===null||!defaultClassFormat||waiverRequired===null||lateCancelRefundCredit===null||noShowRefundCredit===null||
+    privacyPolicyUrl===null||!validPrivacyUrl)
     return {invalid:true};
    if(c.timezone!==timezone){
     const exists=await client.query("SELECT 1 FROM class_sessions WHERE studio_id=$1 LIMIT 1",[auth.studioId]);
@@ -76,9 +92,12 @@ export async function PATCH(request:NextRequest){
    }
    await client.query(`UPDATE studios SET name=$2,focus=$3,timezone=$4,accent_color=$5,member_term=$6,class_term=$7,credit_term=$8,
     week_starts=$9,time_format=$10,default_view=$11,default_class_duration=$12,default_class_capacity=$13,default_room=$14,
-    inactive_days=$15,low_credits_threshold=$16,renewal_window_days=$17,trial_followup_hours=$18,package_review_hours=$19,open_seats_threshold=$20,privacy_policy_url=$21
+    inactive_days=$15,low_credits_threshold=$16,renewal_window_days=$17,trial_followup_hours=$18,package_review_hours=$19,open_seats_threshold=$20,
+    spot_booking_enabled=$21,equipment_label=$22,default_spot_count=$23,default_class_format=$24,waiver_required=$25,
+    late_cancel_refund_credit=$26,no_show_refund_credit=$27,privacy_policy_url=$28
     WHERE id=$1`,[auth.studioId,name,focus,timezone,accentColor.toUpperCase(),memberTerm,classTerm,creditTerm,weekStart,timeFormat,defaultView,
-     defaultClassDuration,defaultClassCapacity,defaultRoom,inactiveDays,lowCreditsThreshold,renewalWindowDays,trialFollowupHours,packageReviewHours,openSeatsThreshold,privacyPolicyUrl||null]);
+     defaultClassDuration,defaultClassCapacity,defaultRoom,inactiveDays,lowCreditsThreshold,renewalWindowDays,trialFollowupHours,packageReviewHours,openSeatsThreshold,
+     spotBookingEnabled,equipmentLabel,defaultSpotCount,defaultClassFormat,waiverRequired,lateCancelRefundCredit,noShowRefundCredit,privacyPolicyUrl||null]);
    const updated=await client.query(selectSettings,[auth.studioId]);return {studio:updated.rows[0]};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
