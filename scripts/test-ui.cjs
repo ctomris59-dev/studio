@@ -160,7 +160,7 @@ assert(insightsApi.includes("time_slot")&&insightsApi.includes("timeSlots:timeSl
 assert(billingPanel.includes('variant:"one-page"')&&billingPanel.includes('successUrl:"/workspace?billing=success"'),"Paddle checkout must use the one-page overlay and a workspace success URL.");
 assert(paddleWebhook.includes("BILLING_ALLOW_SANDBOX_TEST")&&paddleWebhook.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&paddleWebhook.includes("approvedStaging"),"Paddle sandbox webhooks must support only an explicitly configured staging origin.");
 
-assert(layout.includes('metadataBase: new URL("https://www.studiotasker.com")')&&robots.includes("https://www.studiotasker.com")&&sitemap.includes("https://www.studiotasker.com"),"StudioTasker canonical URLs must use the final www.studiotasker.com domain.");
+assert(/metadataBase\s*:\s*new URL\("https:\/\/www\.studiotasker\.com"\)/.test(layout)&&robots.includes("https://www.studiotasker.com")&&sitemap.includes("https://www.studiotasker.com"),"StudioTasker canonical URLs must use the final www.studiotasker.com domain.");
 assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params.get("_ptxn")')&&checkoutClient.includes("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN")&&checkoutClient.includes("paddle.Checkout.open"),"Public checkout page must handle Paddle transaction links on the final domain.");
 
 assert(billing.includes("sandboxStaging")&&billing.includes("BILLING_ALLOW_SANDBOX_TEST")&&billing.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&billing.includes('process.env.PADDLE_ENV!=="production"'),"Sandbox entitlements must only work on the explicitly configured non-production test origin.");
