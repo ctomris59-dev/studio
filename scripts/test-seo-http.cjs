@@ -7,7 +7,7 @@ let logs=""; child.stdout.on("data",d=>logs+=d); child.stderr.on("data",d=>logs+
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function wait(){for(let i=0;i<50;i++){try{const r=await fetch(base+"/",{redirect:"manual"});if(r.status===200)return}catch{} await sleep(300)} throw new Error("SEO HTTP test server did not start.\n"+logs)}
 async function get(path){const r=await fetch(base+path,{redirect:"manual"});return {status:r.status,headers:r.headers,text:await r.text()}}
-function canonical(html,url){const tags=html.match(/<link\\b[^>]*>/gi)||[];return tags.some(tag=>/\\brel="canonical"/i.test(tag)&&tag.includes('href="'+url+'"'))}
+function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return tags.some(tag=>/\brel="canonical"/i.test(tag)&&tag.includes('href="'+url+'"'))}
 (async()=>{try{
  await wait();
  const home=await get("/");
