@@ -8,6 +8,7 @@ export default function sitemap():MetadataRoute.Sitemap{
   ["/start",0.8,"weekly"],
   ["/today",0.8,"weekly"],
   ["/app-demo",0.7,"weekly"],
+  ["/contact",0.6,"monthly"],
   ["/legal",0.4,"monthly"],
   ["/legal/terms",0.3,"monthly"],
   ["/legal/privacy",0.3,"monthly"],
