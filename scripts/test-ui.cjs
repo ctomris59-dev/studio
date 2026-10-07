@@ -31,6 +31,8 @@ const contactPage=fs.readFileSync("app/contact/page.tsx","utf8");
 const contactForm=fs.readFileSync("app/contact/contact-form.tsx","utf8");
 const contactRoute=fs.readFileSync("app/api/contact/route.ts","utf8");
 const contactCss=fs.readFileSync("app/contact/contact.css","utf8");
+const checkoutPage=fs.readFileSync("app/checkout/page.tsx","utf8");
+const checkoutClient=fs.readFileSync("app/checkout/checkout-client.tsx","utf8");
 const productTour=fs.readFileSync("components/product-tour-tabs.tsx","utf8");
 const demoAuth=fs.readFileSync("lib/demo-auth.ts","utf8");
 const legacyDemo=fs.readFileSync("app/demo/page.tsx","utf8");
@@ -155,3 +157,6 @@ assert(insightsApi.includes("time_slot")&&insightsApi.includes("timeSlots:timeSl
 
 assert(billingPanel.includes('variant:"one-page"')&&billingPanel.includes('successUrl:"/workspace?billing=success"'),"Paddle checkout must use the one-page overlay and a workspace success URL.");
 assert(paddleWebhook.includes("BILLING_ALLOW_SANDBOX_TEST")&&paddleWebhook.includes("PADDLE_SANDBOX_ALLOWED_ORIGIN")&&paddleWebhook.includes("approvedStaging"),"Paddle sandbox webhooks must support only an explicitly configured staging origin.");
+
+assert(layout.includes('metadataBase: new URL("https://www.studiotasker.com")')&&robots.includes("https://www.studiotasker.com")&&sitemap.includes("https://www.studiotasker.com"),"StudioTasker canonical URLs must use the final www.studiotasker.com domain.");
+assert(checkoutPage.includes("Secure checkout")&&checkoutClient.includes('params.get("_ptxn")')&&checkoutClient.includes("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN")&&checkoutClient.includes("Paddle.Checkout.open"),"Public checkout page must handle Paddle transaction links on the final domain.");
