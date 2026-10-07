@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 
-export const metadata={title:"Legal & Trust — StudioTasker"};
+export const metadata={title:"Legal & Trust | StudioTasker",description:"StudioTasker legal, privacy, data-processing, security and subscription documents.",alternates:{canonical:"/legal"},robots:{index:true,follow:true}};
 const docs=[
  ["Terms of Service","The contract governing StudioTasker subscriptions, acceptable use, liability and account rules.","/legal/terms"],
  ["Privacy Policy","How StudioTasker uses account, billing, security and service data.","/legal/privacy"],
