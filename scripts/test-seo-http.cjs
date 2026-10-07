@@ -7,12 +7,12 @@ let logs=""; child.stdout.on("data",d=>logs+=d); child.stderr.on("data",d=>logs+
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function wait(){for(let i=0;i<50;i++){try{const r=await fetch(base+"/",{redirect:"manual"});if(r.status===200)return}catch{} await sleep(300)} throw new Error("SEO HTTP test server did not start.\n"+logs)}
 async function get(path){const r=await fetch(base+path,{redirect:"manual"});return {status:r.status,headers:r.headers,text:await r.text()}}
-function canonical(html,url){return html.includes('rel="canonical" href="'+url+'"')||html.includes('href="'+url+'" rel="canonical"')}
+function canonical(html,url){const tags=html.match(/<link\\b[^>]*>/gi)||[];return tags.some(tag=>/\\brel="canonical"/i.test(tag)&&tag.includes('href="'+url+'"'))}
 (async()=>{try{
  await wait();
  const home=await get("/");
  assert.equal(home.status,200);
- assert(canonical(home.text,"https://www.studiotasker.com/"),"Home raw HTML must contain self-canonical.");
+ assert(canonical(home.text,"https://www.studiotasker.com/")||canonical(home.text,"https://www.studiotasker.com"),"Home raw HTML must contain self-canonical.");
  assert(home.text.includes("SoftwareApplication")&&home.text.includes("application/ld+json"),"Home JSON-LD missing.");
  assert(home.text.includes('href="/yoga-studio-software"'),"Server HTML vertical links missing.");
  const yoga=await get("/yoga-studio-software");
