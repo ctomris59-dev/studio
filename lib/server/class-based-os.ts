@@ -24,8 +24,9 @@ export async function resolveClassMetadata(client:PoolClient,studioId:string,bod
  if(!formats.includes(classFormat as typeof formats[number]))fail(400,"Choose a valid class format.");
  const level=body.level===undefined?"":text(body.level,60),programLabel=body.programLabel===undefined?"":text(body.programLabel,80);
  if(level===null||programLabel===null)fail(400,"Class level or programme label is too long.");
- const spotBookingEnabled=body.spotBookingEnabled===undefined?defaults.spot_booking_enabled:body.spotBookingEnabled;
- if(typeof spotBookingEnabled!=="boolean")fail(400,"Invalid spot-booking setting.");
+ const spotBookingEnabledValue=body.spotBookingEnabled===undefined?defaults.spot_booking_enabled:body.spotBookingEnabled;
+ if(typeof spotBookingEnabledValue!=="boolean")fail(400,"Invalid spot-booking setting.");
+ const spotBookingEnabled=spotBookingEnabledValue as boolean;
  const spotLabel=body.spotLabel===undefined?defaults.equipment_label:text(body.spotLabel,40);
  const spotCount=spotBookingEnabled?integer(body.spotCount===undefined?defaults.default_spot_count:body.spotCount,1,100):null;
  if(!spotLabel||spotLabel.length<2||spotBookingEnabled&&(spotCount===null||spotCount<capacity))
