@@ -2,6 +2,8 @@ import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
 export const metadata:Metadata={title:"Indoor Cycling Studio Software — StudioTasker",description:"Indoor cycling studio software for numbered bike spots, recurring rides, waitlists, check-in, attendance, instructors and credits.",alternates:{canonical:"/indoor-cycling-software"}};
 const config:StudioLandingConfig={
+ path:"/indoor-cycling-software",
+ seoName:"Indoor Cycling Studio Software",
  kicker:"INDOOR CYCLING STUDIO SOFTWARE · GLOBAL",heroLine:"Fill the bikes.",heroEm:"Keep the front desk clear.",
  lede:"StudioTasker helps independent indoor cycling studios manage numbered bike spots, recurring rides, capacity, waitlists, check-in, instructors, packages and follow-up.",
  boardName:"Willow Cycle Studio",strip:["BIKE SPOTS","RIDE SCHEDULES","WAITLISTS","CHECK-IN","PACKS & CREDITS"],
