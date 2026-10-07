@@ -2,6 +2,8 @@ import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
 export const metadata:Metadata={title:"Boutique Fitness Studio Software — StudioTasker",description:"Boutique fitness software for classes, leads, members, staff, waitlists, credits, attendance, insights and follow-up.",alternates:{canonical:"/boutique-fitness-software"}};
 const config:StudioLandingConfig={
+ path:"/boutique-fitness-software",
+ seoName:"Boutique Fitness Studio Software",
  kicker:"BOUTIQUE FITNESS SOFTWARE · GLOBAL",heroLine:"Keep the studio focused.",heroEm:"Keep the software lighter.",
  lede:"StudioTasker gives independent boutique fitness studios one focused workspace for leads, members, recurring classes, staff, waitlists, credits, attendance, insights and follow-up.",
  boardName:"Willow Movement Studio",strip:["BOUTIQUE FITNESS","SMALL TEAMS","CLASS PACKS","FOLLOW-UP","SELF-SERVE"],
