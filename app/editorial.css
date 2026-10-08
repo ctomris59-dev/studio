@@ -1326,3 +1326,32 @@
   .ed-hero-content{gap:20px;padding-block:20px 8px}
   .ed-hero-content > h1{font-size:clamp(53px,13.5vw,64px);line-height:.94}
 }
+
+
+/* Persistent marketing navigation: visible at every scroll position. */
+/* Overflow clipping, unlike overflow hidden, doesn't disable sticky positioning. */
+.editorial{overflow-x:clip;overflow-y:visible}
+.editorial > .ed-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:var(--ed-paper);
+}
+.editorial #pricing,
+.editorial #studio-types,
+.editorial #product-tour,
+.editorial #why,
+.editorial #onboarding,
+.editorial #faq{
+  scroll-margin-top:100px;
+}
+@media(max-width:760px){
+  .editorial #pricing,
+  .editorial #studio-types,
+  .editorial #product-tour,
+  .editorial #why,
+  .editorial #onboarding,
+  .editorial #faq{
+    scroll-margin-top:84px;
+  }
+}
