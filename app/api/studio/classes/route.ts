@@ -10,7 +10,8 @@ export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner","manager","receptionist","instructor"],(client,auth)=>listClassesExtended(client,auth.studioId,search,offset));
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
-  return successResponse({classes:result.value.slice(0,120),hasMore:result.value.length>120,nextOffset:offset+Math.min(result.value.length,120)});
+  const rows=result.value??[];
+  return successResponse({classes:rows.slice(0,120),hasMore:rows.length>120,nextOffset:offset+Math.min(rows.length,120)});
  }catch{return backendError()}
 }
 export async function POST(request:NextRequest){
