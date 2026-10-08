@@ -106,11 +106,20 @@ export default function HomePage() {
                 fetchPriority="high"
                 decoding="async"
               />
-              <Link href="/start?plan=monthly" className="ed-impact-price-badge" aria-label="StudioTasker monthly plan, $39.90 per month">
-                <span>MONTHLY PLAN</span>
-                <strong>$39.90 / MONTH</strong>
-                <ArrowUpRight size={18}/>
-              </Link>
+              <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">
+                <Link href="/start?plan=monthly" className="ed-impact-price-option ed-impact-price-monthly" aria-label="Choose monthly plan, $39.90 per month">
+                  <span>MONTHLY PLAN</span>
+                  <strong>$39.90 / MONTH</strong>
+                  <small>PAY MONTH TO MONTH</small>
+                  <ArrowUpRight size={18} aria-hidden="true"/>
+                </Link>
+                <Link href="/start?plan=annual" className="ed-impact-price-option ed-impact-price-annual" aria-label="Choose yearly plan, $33.90 per month equivalent, billed $406.80 annually">
+                  <span>YEARLY PLAN · SAVE 15%</span>
+                  <strong>$33.90 / MONTH</strong>
+                  <small>$406.80 BILLED YEARLY</small>
+                  <ArrowUpRight size={18} aria-hidden="true"/>
+                </Link>
+              </div>
               <div className="ed-impact-overlay">
                 <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
                 <h2 id="impact-band-title">Less admin.<br/><em>More movement.</em></h2>

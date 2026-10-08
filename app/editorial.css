@@ -1162,57 +1162,84 @@
 }
 
 
-/* First-screen sports hero: visible subscription price before any scrolling. */
+/* First-screen pricing: accessible monthly and yearly purchase actions. */
 .ed-impact-band-first{padding:13px 0 16px}
 .ed-impact-card{position:relative}
-.ed-impact-price-badge{
+.ed-impact-price-options{
   position:absolute;
   z-index:4;
-  top:18px;
-  right:19px;
+  top:16px;
+  right:17px;
   display:grid;
-  grid-template-columns:1fr auto;
-  grid-template-rows:auto auto;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  width:min(440px,calc(100% - 34px));
+}
+.editorial .ed-impact-price-option{
+  display:grid;
+  position:relative;
+  min-width:0;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto auto;
+  align-content:center;
   align-items:center;
-  gap:2px 12px;
-  min-width:216px;
-  padding:11px 13px;
-  background:var(--ed-lime);
+  gap:2px 6px;
+  min-height:78px;
+  padding:10px 11px;
   border:2px solid #17203c;
   color:#17203c;
-  box-shadow:4px 4px 0 #17203c;
+  background:var(--ed-lime);
+  box-shadow:3px 4px 0 #17203c;
   text-decoration:none;
 }
-.ed-impact-price-badge span{
+.editorial .ed-impact-price-annual{background:#ff9a7c}
+.ed-impact-price-option span,.ed-impact-price-option strong,.ed-impact-price-option small{
   grid-column:1;
-  font:700 10px/1.3 "IBM Plex Mono",monospace;
-  letter-spacing:.035em;
+  min-width:0;
+  color:inherit;
+  text-shadow:none;
 }
-.ed-impact-price-badge strong{
-  grid-column:1;
-  font:800 16px/1.2 "IBM Plex Mono",monospace;
-  letter-spacing:-.035em;
+.ed-impact-price-option span{
+  font:800 10px/1.25 "IBM Plex Mono",monospace;
+  letter-spacing:.015em;
+}
+.ed-impact-price-option strong{
+  font:800 15px/1.2 "IBM Plex Mono",monospace;
   white-space:nowrap;
+  letter-spacing:-.035em;
 }
-.ed-impact-price-badge svg{grid-column:2;grid-row:1/3}
-.ed-impact-price-badge:hover,.ed-impact-price-badge:focus-visible{
-  background:#fff;
+.ed-impact-price-option small{
+  font:700 9px/1.25 "IBM Plex Mono",monospace;
+  letter-spacing:0;
 }
-.ed-impact-price-badge:focus-visible{
+.ed-impact-price-option svg{grid-column:2;grid-row:1/4;align-self:center;color:inherit}
+.editorial .ed-impact-price-option:hover{background:#fffefa}
+.editorial .ed-impact-price-option:focus-visible{
   outline:3px solid #fff;
   outline-offset:5px;
 }
 @media(max-width:850px){
   .ed-impact-band-first{padding:11px 0 14px}
-  .ed-impact-price-badge{top:14px;right:14px;min-width:185px;padding:9px 10px}
-  .ed-impact-price-badge strong{font-size:14px}
+  .ed-impact-price-options{top:13px;right:13px;gap:7px;width:min(390px,calc(100% - 26px))}
+  .editorial .ed-impact-price-option{padding:8px;min-height:72px}
+  .ed-impact-price-option strong{font-size:13px}
+  .ed-impact-price-option span{font-size:9px}
+  .ed-impact-price-option small{font-size:8.5px}
 }
 @media(max-width:540px){
   .ed-impact-band-first{padding:8px 0 12px}
-  .ed-impact-price-badge{top:11px;right:11px;min-width:0;max-width:calc(100% - 24px);padding:8px 9px;gap:2px 7px}
-  .ed-impact-price-badge span{font-size:9px}
-  .ed-impact-price-badge strong{font-size:12px}
-  .ed-impact-price-badge svg{width:15px;height:15px}
+  .ed-impact-price-options{
+    width:min(186px,calc(100% - 20px));
+    top:9px;
+    right:9px;
+    grid-template-columns:minmax(0,1fr);
+    gap:6px;
+  }
+  .editorial .ed-impact-price-option{min-height:55px;padding:6px 8px;gap:1px 5px;box-shadow:2px 3px 0 #17203c}
+  .ed-impact-price-option span{font-size:8px}
+  .ed-impact-price-option strong{font-size:12px}
+  .ed-impact-price-option small{font-size:7.5px}
+  .ed-impact-price-option svg{width:14px;height:14px}
   .ed-impact-overlay{padding-bottom:22px}
   .ed-impact-overlay h2{font-size:clamp(41px,11vw,56px)}
   .ed-impact-overlay p{margin-bottom:15px}
