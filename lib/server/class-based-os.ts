@@ -119,6 +119,9 @@ async function promoteWaitlist(client:PoolClient,auth:Authenticated,session:{id:
    [auth.studioId,next.member_id,next.id,auth.userId]);
   await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action) VALUES($1,$2,$3,'booking.promoted')",
    [auth.studioId,next.member_id,auth.userId]);
+  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes,source_key)
+   VALUES($1,$2,'Notify member: promoted from waitlist',now(),'General',$3,$4) ON CONFLICT DO NOTHING`,
+   [auth.studioId,next.member_id,"Class "+session.id+" booking "+next.id,"waitlist_promoted:"+next.id]);
   return {id:next.id,memberId:next.member_id,spotNumber:session.spot_booking_enabled?vacatedSpot:null};
  }
  return null;

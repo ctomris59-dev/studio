@@ -229,6 +229,8 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
  let promoted:null|{id:string;memberId:string}=null;
  for(const next of waiting.rows){
   const member=await lockedMember(client,auth.studioId,next.member_id);
+  const settings=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
+  if(settings.rows[0]?.waiver_required&&member.waiver_status!=="signed")continue;
   if(!eligible(member,classDay))continue;
   if(member.credits!==null)await changeCredits(client,auth.studioId,next.member_id,-1);
   await client.query(`
@@ -239,6 +241,9 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
    VALUES($1,$2,$3,-1,'class_booking',$4)`,[auth.studioId,next.member_id,next.id,auth.userId]);
   await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
    VALUES($1,$2,$3,'booking.promoted')`,[auth.studioId,next.member_id,auth.userId]);
+  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes,source_key)
+   VALUES($1,$2,'Notify member: promoted from waitlist',now(),'General',$3,$4) ON CONFLICT DO NOTHING`,
+   [auth.studioId,next.member_id,"Class "+session.id+" booking "+next.id,"waitlist_promoted:"+next.id]);
   promoted={id:next.id,memberId:next.member_id};
   break;
  }
