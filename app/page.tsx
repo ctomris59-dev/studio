@@ -91,6 +91,15 @@ export default function HomePage() {
           <Identity/>
           <nav aria-label="Main navigation"><a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a><a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
           <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">BUY NOW · $39.90 <ArrowUpRight size={16}/></Link></div>
+          <details className="ed-mobile-menu">
+            <summary>Menu</summary>
+            <nav aria-label="Mobile navigation">
+              <a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a>
+              <a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a>
+              <Link href="/contact">Contact</Link><Link href="/workspace">Customer sign in</Link>
+              <Link href="/app-demo">Try demo</Link><Link href="/start">Start StudioTasker</Link>
+            </nav>
+          </details>
         </div>
       </header>
 
@@ -248,7 +257,7 @@ export default function HomePage() {
             <div><span className="ed-overline">06 / GOOD TO KNOW</span><h2 id="faq-heading">Clear answers.<br/><em>No fine print tricks.</em></h2><p>StudioTasker is subscription-based studio management software. You can explore the interactive demo first, then use your own private workspace for day-to-day studio operations.</p></div>
             <div className="ed-faq-list">
               <details><summary>What kinds of studios is StudioTasker for?</summary><p>StudioTasker is designed for independent Pilates, yoga, barre, dance, gym, boutique fitness and other class-based studios. Studio name, logo, colors, terminology, class defaults and operating rules can be customized to fit the way your studio works.</p></details><details><summary>Where is StudioTasker available?</summary><p>StudioTasker is designed for independent studios in all international markets. The interface is English-first, pricing is shown in USD, and each studio can choose its own timezone, 12/24-hour clock and week-start preference.</p></details>
-              <details><summary>Can I use it for real customer bookings today?</summary><p>Yes. Your private StudioTasker workspace is built for real studio operations: customer records, classes, studio-managed bookings, attendance, package entitlements and follow-ups. The public demo remains a separate sandbox so you can explore safely without changing your live studio data.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
+              <details><summary>Can I use it for real customer bookings today?</summary><p>The interactive demo is available now. The private workspace is designed for staff-managed bookings, attendance, packages and follow-ups, but paid production onboarding will open only after operational and security checks are completed. There is no public member booking link or member payment checkout.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
               <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $33.90/month, billed as $406.80 for the year, about 15% less than paying monthly for 12 months. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
