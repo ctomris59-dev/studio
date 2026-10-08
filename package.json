@@ -32,7 +32,8 @@
     "test:seo:http": "node scripts/test-seo-http.cjs",
     "seo:logs": "node scripts/analyze-crawl-log.cjs",
     "test:copy": "node scripts/test-copy.cjs",
-    "test:timezone-select": "node scripts/test-timezone-select.cjs"
+    "test:timezone-select": "node scripts/test-timezone-select.cjs",
+    "test:pg-env": "node scripts/test-pg-connection-env.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

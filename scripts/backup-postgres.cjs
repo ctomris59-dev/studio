@@ -3,6 +3,7 @@ const {randomUUID}=require("node:crypto");
 const {promises:fs}=require("node:fs");
 const path=require("node:path");
 const {encryptStream}=require("./backup-crypto.cjs");
+const {pgConnectionEnv}=require("./pg-connection-env.cjs");
 async function main(){
  const {BACKUP_DATABASE_URL,BACKUP_PASSPHRASE,BACKUP_OUTPUT_DIR}=process.env;
  if(!BACKUP_DATABASE_URL||!BACKUP_PASSPHRASE||!BACKUP_OUTPUT_DIR)throw Error("BACKUP_DATABASE_URL, BACKUP_PASSPHRASE and BACKUP_OUTPUT_DIR required");
@@ -11,7 +12,7 @@ async function main(){
  const filename="studiotasker-"+now+"-"+randomUUID().slice(0,8)+".rdbk";
  const output=path.join(BACKUP_OUTPUT_DIR,filename),partial=output+".partial";
  const proc=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges"],{
-  env:{...process.env,PGDATABASE:BACKUP_DATABASE_URL},stdio:["ignore","pipe","pipe"]
+  env:{...process.env,...pgConnectionEnv(BACKUP_DATABASE_URL)},stdio:["ignore","pipe","pipe"]
  });
  let stderr="";
  proc.stderr.on("data",b=>{stderr+=(b.toString()).slice(0,400)});
