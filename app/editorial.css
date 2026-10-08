@@ -988,7 +988,7 @@
   width:100%;
   height:100%;
   object-fit:cover;
-  object-position:center 34%;
+  object-position:center 22%;
 }
 .ed-impact-card:after{
   content:"";
@@ -1053,7 +1053,7 @@
 }
 @media(max-width:540px){
   .ed-impact-card{min-height:380px;align-items:flex-end}
-  .ed-impact-card>img{object-position:57% center}
+  .ed-impact-card>img{object-position:72% center}
   .ed-impact-card:after{background:linear-gradient(0deg,rgba(12,20,45,.97) 0%,rgba(12,20,45,.82) 50%,rgba(12,20,45,.22) 100%)}
   .ed-impact-overlay{padding:28px 20px}
   .ed-impact-kicker{font-size:10px;letter-spacing:.045em;margin-bottom:12px}
