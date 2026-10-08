@@ -6,6 +6,7 @@ import {
  Plus,RefreshCw,Search,Settings2,ShieldCheck,Target,Trash2,Users,X
 } from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
+import {TimezoneSelect} from "../workspace/timezone-select";
 import {DEMO_ACCOUNT,authenticateDemo} from "../../lib/demo-auth";
 import "./app-demo.css";
 
@@ -296,7 +297,7 @@ export default function AppDemo(){
       <label>People label<select value={settings.memberTerm} onChange={e=>setSettings({...settings,memberTerm:e.target.value})}>{["Members","Clients","Students","Customers"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>Class label<select value={settings.classTerm} onChange={e=>setSettings({...settings,classTerm:e.target.value})}>{["Classes","Sessions","Lessons"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>Credit label<select value={settings.creditTerm} onChange={e=>setSettings({...settings,creditTerm:e.target.value})}>{["Credits","Visits","Sessions"].map(x=><option key={x}>{x}</option>)}</select></label>
-      <label>Timezone<input required value={settings.timezone} onChange={e=>setSettings({...settings,timezone:e.target.value})}/></label>
+      <label>Timezone<TimezoneSelect value={settings.timezone} onChange={timezone=>setSettings(previous=>({...previous,timezone}))}/></label>
      </div>
      <div className="sad-settings-card"><h3>Workspace display</h3><p>These settings control how staff see dates, navigation and the first screen after sign-in.</p>
       <label>Default landing page<select value={settings.defaultView} onChange={e=>setSettings({...settings,defaultView:e.target.value as OwnerView})}>{["today","leads","members","classes","followups","insights","settings"].map(x=><option key={x} value={x}>{x==="members"?settings.memberTerm:x==="classes"?settings.classTerm:x==="leads"?"Leads / CRM":x.charAt(0).toUpperCase()+x.slice(1)}</option>)}</select></label>
