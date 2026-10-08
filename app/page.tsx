@@ -131,8 +131,8 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-impact-card">
               <img
-                src="https://images.pexels.com/photos/8436748/pexels-photo-8436748.jpeg?auto=compress&cs=tinysrgb&w=1800"
-                alt="People practicing yoga together in a bright fitness studio"
+                src="https://images.pexels.com/photos/6339355/pexels-photo-6339355.jpeg?auto=compress&cs=tinysrgb&w=1800"
+                alt="Group fitness class lifting dumbbells together in a bright brick-walled studio"
                 width="1800"
                 height="1200"
                 loading="lazy"
