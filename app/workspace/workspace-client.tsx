@@ -38,6 +38,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New",tags:"",waiverStatus:"not_required",relatedContactName:"",relatedContactRole:"",relatedContactEmail:"",relatedContactPhone:""});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
  const initializedView=useRef(false);
+ const [archivedRecords,setArchivedRecords]=useState<{id:string;full_name:string}[]>([]);
 
  async function load(){
   const res=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
@@ -115,6 +116,20 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   }catch(e){setNote(e instanceof Error?e.message:"Logo upload failed")}finally{setBusy(false)}
  }
  async function removeLogo(){if(!window.confirm("Remove the studio logo?"))return;setBusy(true);try{const response=await fetch("/api/studio/logo",{method:"DELETE",credentials:"same-origin"});if(!response.ok)throw Error("Logo removal failed");setSettings(s=>({...s,hasLogo:false}));setLogoVersion(v=>v+1);setNote("Studio logo removed.")}catch(e){setNote(e instanceof Error?e.message:"Logo removal failed")}finally{setBusy(false)}}
+ async function reviewArchived(){
+  try{const r=await fetch("/api/studio/privacy",{credentials:"same-origin",cache:"no-store"}),d=await r.json();
+   if(!r.ok)throw Error(d.error||"Unable to load archived contacts.");setArchivedRecords(d.archivedRecords||[])
+  }catch(e){setNote(e instanceof Error?e.message:"Unable to load archived contacts.")}
+ }
+ async function anonymizeArchived(id:string){
+  if(window.prompt("Irreversible action. Type ANONYMIZE to remove personal identifiers:")!=="ANONYMIZE")return;
+  setBusy(true);setNote("");
+  try{
+   const r=await fetch("/api/studio/people/"+id+"/anonymize",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({confirm:"ANONYMIZE"})}),d=await r.json();
+   if(!r.ok)throw Error(d.error||"Anonymization failed.");await reviewArchived();
+   setNote("Personal details anonymized; financial and booking audit history retained.");
+  }catch(e){setNote(e instanceof Error?e.message:"Anonymization failed.");}finally{setBusy(false)}
+ }
  async function exportData(){
   setBusy(true);setNote("");try{const response=await fetch("/api/studio/export",{credentials:"same-origin",cache:"no-store"});if(!response.ok){const body=await response.json();throw new Error(body.error||"Export failed")}const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="studiotasker-export-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);setNote("Studio export downloaded.")}
   catch(e){setNote(e instanceof Error?e.message:"Export failed")}finally{setBusy(false)}
@@ -191,7 +206,13 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      {canEdit&&<button className="rd-primary rd-settings-save" disabled={busy}>Save studio customization</button>}
     </form>
     <p className="rd-tiny">Timezone cannot change after classes exist. StudioTasker keeps one product codebase; customization changes this studio's tenant settings, not the software for other customers.</p>
-    {user.role==="owner"&&<div className="rd-privacy-actions"><button disabled={busy} onClick={()=>void exportData()}><Download size={16}/> Export studio data (JSON)</button><p className="rd-tiny">Keep exports private and encrypted.</p></div>}
+    {user.role==="owner"&&<div className="rd-privacy-actions">
+     <button disabled={busy} onClick={()=>void exportData()}><Download size={16}/> Export studio data (JSON)</button>
+     <button disabled={busy} onClick={()=>void reviewArchived()}>Review archived contacts</button>
+     {archivedRecords.filter(p=>!p.full_name.startsWith("Anonymized person")).map(p=><div key={p.id}><span>{p.full_name}</span>
+      <button disabled={busy} onClick={()=>void anonymizeArchived(p.id)}>Anonymize personal data</button></div>)}
+     <p className="rd-tiny">Only archived contacts can be anonymized. Identity removal is irreversible; accounting references and encrypted backups follow retention rules.</p>
+    </div>}
     <ClassBasedOperations role={user.role} section="settings" preferences={prefs}/>
     <StudioOperations role={user.role} section="settings" preferences={prefs}/>
    </section>}
