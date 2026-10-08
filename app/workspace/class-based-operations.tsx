@@ -69,12 +69,21 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
   setClasses(c.classes);setMembers(m.members);setStaff(s.staff);
   setClassHasMore(c.hasMore);setClassOffset(c.nextOffset);
   setMemberHasMore(m.hasMore);setMemberOffset(m.nextOffset);
-  setSelectedClass(v=>v||c.classes[0]?.id||"");setSelectedMember(v=>v||m.members[0]?.id||"");
+  setSelectedClass(v=>c.classes.some(item=>item.id===v)?v:c.classes[0]?.id||"");
+  setSelectedMember(v=>m.members.some(item=>item.id===v)?v:m.members[0]?.id||"");
   if(section==="insights")setInsights(await api<Insights>("/api/studio/insights"));
  },[section,canBook,classSearch,memberSearch]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load operations."))},[refresh]);
  useEffect(()=>{setSchedule(v=>({...v,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity,classFormat:preferences.defaultClassFormat,spotBookingEnabled:preferences.spotBookingEnabled,spotLabel:preferences.equipmentLabel,spotCount:preferences.defaultSpotCount}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity,preferences.defaultClassFormat,preferences.spotBookingEnabled,preferences.equipmentLabel,preferences.defaultSpotCount]);
- useEffect(()=>{if(!selectedClass){setBookings([]);return}void api<{bookings:Booking[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass)).then(x=>setBookings(x.bookings)).catch(()=>setBookings([]))},[selectedClass]);
+ useEffect(()=>{
+  setBookings([]);
+  if(!selectedClass)return;
+  let obsolete=false;
+  void api<{bookings:Booking[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass))
+   .then(x=>{if(!obsolete)setBookings(x.bookings)})
+   .catch(()=>{if(!obsolete)setBookings([])});
+  return ()=>{obsolete=true};
+ },[selectedClass]);
  useEffect(()=>{
   if(!selected?.spot_booking_enabled||isFull){setSelectedSpot("");return}
   const max=selected.spot_count||selected.capacity;

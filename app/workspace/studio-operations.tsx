@@ -54,7 +54,15 @@ export function StudioOperations({role,section,preferences}:{role:string;section
  },[owner,role]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load studio data."))},[refresh]);
  useEffect(()=>{setSchedule(prev=>({...prev,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity]);
- useEffect(()=>{if(!selectedClass){setBookings([]);return}void api<{bookings:BookingRow[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass)).then(d=>setBookings(d.bookings)).catch(()=>setBookings([]))},[selectedClass]);
+ useEffect(()=>{
+  setBookings([]);
+  if(!selectedClass)return;
+  let obsolete=false;
+  void api<{bookings:BookingRow[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass))
+   .then(data=>{if(!obsolete)setBookings(data.bookings)})
+   .catch(()=>{if(!obsolete)setBookings([])});
+  return ()=>{obsolete=true};
+ },[selectedClass]);
 
  async function perform(work:()=>Promise<string>){
   if(busy)return;setBusy(true);setMessage("");
