@@ -27,7 +27,19 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
   if(!res.ok)throw new Error(body.error||"Could not load subscription status.");
   setState(body);
  }
- useEffect(()=>{void load().catch(e=>setNote(e instanceof Error?e.message:"Could not load subscription status."))},[]);
+ useEffect(()=>{
+  const params=new URLSearchParams(window.location.search);
+  if(params.get("billing")!=="success"){void load().catch(e=>setNote(e instanceof Error?e.message:"Could not load subscription status."));return}
+  setNote("Payment submitted. Waiting for confirmed subscription activation.");
+  let attempts=0;let cancelled=false;
+  const refresh=async()=>{
+   if(cancelled)return;
+   try{await load()}catch(e){if(!cancelled)setNote(e instanceof Error?e.message:"Subscription status unavailable.")}
+  };
+  void refresh();
+  const interval=window.setInterval(()=>{if(attempts++>=16){window.clearInterval(interval);return}void refresh()},3000);
+  return ()=>{cancelled=true;window.clearInterval(interval)};
+ },[]);
  useEffect(()=>{setAccepted(false)},[plan]);
 
  async function startCheckout(){

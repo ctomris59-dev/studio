@@ -70,6 +70,12 @@ async function run(){
    [studio1,user1,"c".repeat(64),"d".repeat(64)]));
   assert.equal((await scoped(studio1,client=>client.query("SELECT id FROM legal_acceptances"))).rowCount,2,
    "A new Cancellation/Refund Policy version must permit fresh acceptance evidence even when other contract versions are unchanged.");
+  await scoped(studio1,client=>client.query(`INSERT INTO legal_acceptances(
+   studio_id,user_id,source,terms_version,dpa_version,privacy_version,cancellation_version,plan,price_cents,acceptance_text_hash,ip_hash,user_agent
+   ) VALUES($1,$2,'registration','2026-10-06','2026-10-06','2026-10-06','2026-10-06','annual',40680,$3,$4,'annual-price-check')`,
+   [studio1,user1,"e".repeat(64),"f".repeat(64)]));
+  assert.equal((await scoped(studio1,client=>client.query("SELECT id FROM legal_acceptances WHERE plan='annual' AND price_cents=40680"))).rowCount,1,
+   "Annual sign-up clickwrap must persist the current $406.80 yearly price.");
   assert.equal((await scoped(studio2,client=>client.query("SELECT id FROM legal_acceptances"))).rowCount,0,"Legal acceptance evidence must be tenant-isolated.");
   assert.equal((await runtime.query("SELECT id FROM legal_acceptances")).rowCount,0,"Unscoped legal acceptance reads must be empty.");
   let illegal=false;
