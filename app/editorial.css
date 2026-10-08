@@ -1113,3 +1113,6 @@
   .ed-section-heading{margin-bottom:24px}
   .ed-pricing-kicker{margin-bottom:14px}
 }
+
+/* Justify the homepage StudioTasker intro paragraph. */
+.ed-hero-under p{text-align:justify;text-justify:inter-word}
