@@ -5,10 +5,13 @@ import {createClass,parseClass,StudioOperationError} from "@/lib/server/studio-b
 import {applyClassMetadata,listClassesExtended,resolveClassMetadata} from "@/lib/server/class-based-os";
 export const runtime="nodejs";
 export async function GET(request:NextRequest){
+ const offset=Number(request.nextUrl.searchParams.get("offset")||0),search=request.nextUrl.searchParams.get("search")?.trim()||"";
+ if(!Number.isSafeInteger(offset)||offset<0||offset>10000||search.length>80)return errorResponse(400,"Invalid search or offset.");
  try{
-  const result=await authenticated(request,["owner","manager","receptionist","instructor"],(client,auth)=>listClassesExtended(client,auth.studioId));
+  const result=await authenticated(request,["owner","manager","receptionist","instructor"],(client,auth)=>listClassesExtended(client,auth.studioId,search,offset));
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
-  return successResponse({classes:result.value});
+  const rows=result.value??[];
+  return successResponse({classes:rows.slice(0,120),hasMore:rows.length>120,nextOffset:offset+Math.min(rows.length,120)});
  }catch{return backendError()}
 }
 export async function POST(request:NextRequest){

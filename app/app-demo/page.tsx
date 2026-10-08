@@ -214,7 +214,7 @@ export default function AppDemo(){
  ];
  return <main className="sad-app">
   <aside className="sad-sidebar"><Link href="/" className="sad-brand sad-sidebar-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
-   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{background:settings.accentColor}}>{settings.name.split(/\\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
+   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{background:settings.accentColor}}>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
    <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setTourActive(false);setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
@@ -282,7 +282,7 @@ export default function AppDemo(){
    </section>}
    {view==="settings"&&<section className="sad-view"><ViewHead eyebrow="SETTINGS / CUSTOMIZE" title="Make StudioTasker yours." text="This is where a studio customizes its identity, terminology and booking experience after purchase."/>
     <div className="sad-customize-preview">
-     <div className="sad-brand-preview" style={{borderColor:settings.accentColor}}>{logoUrl?<img src={logoUrl} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.split(/\\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><small>LIVE BRAND PREVIEW</small><b>{settings.name}</b><em>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</em></div></div>
+     <div className="sad-brand-preview" style={{borderColor:settings.accentColor}}>{logoUrl?<img src={logoUrl} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><small>LIVE BRAND PREVIEW</small><b>{settings.name}</b><em>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</em></div></div>
      <div><span className="sad-kicker">CUSTOMER WORKSPACE</span><h3>One product. Their studio identity.</h3><p>Customers do not receive a separate codebase. These settings personalize their own StudioTasker workspace and public booking page.</p></div>
     </div>
     <form className="sad-settings-grid" onSubmit={saveSettings}>
@@ -318,7 +318,7 @@ export default function AppDemo(){
       <label>Package review after (hours)<input type="number" min={1} max={168} value={settings.packageReviewHours} onChange={e=>setSettings({...settings,packageReviewHours:Number(e.target.value)})}/></label>
       <label>Open-seat signal from<input type="number" min={1} max={30} value={settings.openSeatsThreshold} onChange={e=>setSettings({...settings,openSeatsThreshold:Number(e.target.value)})}/></label>
      </div>
-     <div className="sad-settings-card sad-booking-settings"><h3>Public booking page</h3><p>The studio gets its own customer-facing booking link. Logo, studio name and brand color come from these settings; member payments stay outside StudioTasker.</p><label>Studio Privacy Policy URL<input type="url" maxLength={500} value={settings.privacyPolicyUrl} onChange={e=>setSettings({...settings,privacyPolicyUrl:e.target.value})}/><small>Shown in the booking privacy notice.</small></label>
+     <div className="sad-settings-card sad-booking-settings"><h3>Booking preview (demo only)</h3><p>This fictional preview demonstrates studio branding. StudioTasker does not currently provide a public member booking link. Staff manage real reservations inside the private studio workspace.</p><label>Studio Privacy Policy URL<input type="url" maxLength={500} value={settings.privacyPolicyUrl} onChange={e=>setSettings({...settings,privacyPolicyUrl:e.target.value})}/><small>Shown in the booking privacy notice.</small></label>
       <div className="sad-booking-mini" style={{borderColor:settings.accentColor}}><div>{logoUrl?<img src={logoUrl} alt="Booking page logo"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,1).toUpperCase()}</span>}<b>{settings.name}</b></div><small>{settings.focus}</small><strong style={{color:settings.accentColor}}>Book a {singular(settings.classTerm).toLowerCase()}</strong></div>
       <Link className="sad-preview-link" href="/book/preview">Open self-service booking preview <ArrowRight size={16}/></Link>
      </div>

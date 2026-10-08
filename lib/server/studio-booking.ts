@@ -44,7 +44,7 @@ export async function createClass(client:PoolClient,auth:Authenticated,input:Cla
   SELECT id FROM class_sessions
   WHERE studio_id=$1 AND starts_at<$2::timestamptz
     AND starts_at+(duration_minutes*interval '1 minute')>$3::timestamptz
-    AND (lower(instructor)=lower($4) OR lower(room)=lower($5))
+    AND status='scheduled' AND (lower(instructor)=lower($4) OR lower(room)=lower($5))
   LIMIT 1`,[auth.studioId,to.toISOString(),from.toISOString(),input.instructor,input.room]);
  if(conflicts.rowCount)fail(409,"This instructor or room already has an overlapping class.");
  const result=await client.query(`
@@ -78,6 +78,7 @@ export async function createRecurringClasses(client:PoolClient,auth:Authenticate
   if(classes.length>=52)fail(400,"Maximum 52 classes per recurring series.");
   const day=new Date(stamp).toISOString().slice(0,10);
   const startsAt=localDateTimeToUTC(day,time as string,timezone);
+  if(Date.parse(startsAt)<Date.now()+60_000)continue;
   const input=parseClass({...body,startsAt});
   classes.push(await createClass(client,auth,input,seriesId));
  }
@@ -101,13 +102,13 @@ export async function listClasses(client:PoolClient,studioId:string){
 }
 
 type LockedClass={
- id:string;title:string;starts_at:Date;duration_minutes:number;capacity:number;booking_cutoff_hours:number;
+ id:string;title:string;starts_at:Date;duration_minutes:number;capacity:number;booking_cutoff_hours:number;status:string;
  cancel_cutoff_hours:number;timezone:string;
 };
 async function lockClass(client:PoolClient,studioId:string,sessionId:string):Promise<LockedClass>{
  if(!validUUID(sessionId))fail(400,"Invalid class identifier.");
  const found=await client.query<LockedClass>(`
- SELECT c.id,c.title,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,
+ SELECT c.id,c.title,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,c.status,
    st.timezone
  FROM class_sessions c JOIN studios st ON st.id=c.studio_id
  WHERE c.id=$1 AND c.studio_id=$2 FOR UPDATE OF c`,[sessionId,studioId]);
@@ -122,11 +123,11 @@ async function studioDate(client:PoolClient,timezone:string,time:Date){
 }
 type Member={
  id:string;kind:string;credits:number|null;package_status:string|null;member_status:string|null;
- start_date:string|null;expiry_date:string|null;
+ start_date:string|null;expiry_date:string|null;waiver_status:string;
 };
 async function lockedMember(client:PoolClient,studioId:string,memberId:string):Promise<Member>{
  const member=await client.query<Member>(`
- SELECT id,kind,credits,package_status,member_status,start_date::text,expiry_date::text
+ SELECT id,kind,credits,package_status,member_status,start_date::text,expiry_date::text,waiver_status
  FROM people WHERE studio_id=$1 AND id=$2 AND archived_at IS NULL FOR UPDATE`,[studioId,memberId]);
  if(!member.rowCount||member.rows[0].kind!=="member")fail(404,"Member not found in this studio.");
  return member.rows[0];
@@ -147,15 +148,18 @@ async function changeCredits(client:PoolClient,studioId:string,memberId:string,d
 export async function reserveClass(client:PoolClient,auth:Authenticated,sessionId:string,memberId:string){
  if(!validUUID(memberId))fail(400,"Invalid member identifier.");
  const session=await lockClass(client,auth.studioId,sessionId);
+ if(session.status!=="scheduled")fail(409,"This class has been cancelled.");
  if(cutoffPassed(session.starts_at,session.booking_cutoff_hours))fail(409,"Bookings for this class are closed.");
  const member=await lockedMember(client,auth.studioId,memberId);
+ const waiver=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
+ if(waiver.rows[0]?.waiver_required&&member.waiver_status!=="signed")fail(409,"A signed waiver is required before booking.");
  const date=await studioDate(client,session.timezone,session.starts_at);
- if(!eligible(member,date))fail(409,"Member needs an active, confirmed and valid class pass.");
  const existing=await client.query<{id:string;status:string}>(`
  SELECT id,status FROM bookings
  WHERE studio_id=$1 AND session_id=$2 AND member_id=$3 AND status IN('booked','waitlisted')
  LIMIT 1`,[auth.studioId,sessionId,memberId]);
  if(existing.rowCount)return {...existing.rows[0],alreadyExists:true};
+ if(!eligible(member,date))fail(409,"Member needs an active, confirmed and valid class pass.");
  const count=await client.query<{total:number}>(`
  SELECT COUNT(*)::int AS total FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status='booked'`,[auth.studioId,sessionId]);
  const full=count.rows[0].total>=session.capacity;
@@ -225,6 +229,8 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
  let promoted:null|{id:string;memberId:string}=null;
  for(const next of waiting.rows){
   const member=await lockedMember(client,auth.studioId,next.member_id);
+  const settings=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
+  if(settings.rows[0]?.waiver_required&&member.waiver_status!=="signed")continue;
   if(!eligible(member,classDay))continue;
   if(member.credits!==null)await changeCredits(client,auth.studioId,next.member_id,-1);
   await client.query(`
@@ -235,6 +241,9 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
    VALUES($1,$2,$3,-1,'class_booking',$4)`,[auth.studioId,next.member_id,next.id,auth.userId]);
   await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
    VALUES($1,$2,$3,'booking.promoted')`,[auth.studioId,next.member_id,auth.userId]);
+  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes,source_key)
+   VALUES($1,$2,'Notify member: promoted from waitlist',now(),'General',$3,$4) ON CONFLICT DO NOTHING`,
+   [auth.studioId,next.member_id,"Class "+session.id+" booking "+next.id,"waitlist_promoted:"+next.id]);
   promoted={id:next.id,memberId:next.member_id};
   break;
  }

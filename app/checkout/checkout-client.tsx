@@ -13,8 +13,14 @@ export default function CheckoutClient(){
  useEffect(()=>{
   if(!transactionId)return;
   const token=(process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN||"").trim();
-  const environment=(process.env.NEXT_PUBLIC_PADDLE_ENV||"sandbox")==="production"?"production":"sandbox";
-  if(!token){setStatus("Secure checkout is not configured yet.");return}
+  const declaredEnvironment=process.env.NEXT_PUBLIC_PADDLE_ENV;
+  const environment=declaredEnvironment==="production"?"production":"sandbox";
+  if(!token||!["sandbox","production"].includes(declaredEnvironment||"")){
+   setStatus("Secure checkout is not configured yet.");return
+  }
+  if((environment==="production")!==token.startsWith("live_")){
+   setStatus("Secure checkout environment mismatch. Please contact support.");return
+  }
   if(!paddleRef.current){
    paddleRef.current=import("@paddle/paddle-js").then(({initializePaddle})=>initializePaddle({
     token,environment,

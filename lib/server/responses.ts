@@ -26,9 +26,20 @@ export function sameOrigin(request:NextRequest):boolean{
 }
 export async function jsonObject(request:Request):Promise<Record<string,unknown>|null>{
  const length=Number(request.headers.get("content-length")||0);
- if(length>12_000)return null;
+ if(length>12_000||!request.body)return null;
  try{
-  const value:unknown=await request.json();
+  const reader=request.body.getReader(),parts:Uint8Array[]=[];let total=0;
+  try{
+   while(true){
+    const {value,done}=await reader.read();if(done)break;
+    total+=value.byteLength;
+    if(total>12_000){await reader.cancel();return null}
+    parts.push(value);
+   }
+  }finally{reader.releaseLock()}
+  const bytes=new Uint8Array(total);let pos=0;
+  for(const part of parts){bytes.set(part,pos);pos+=part.length}
+  const value:unknown=JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(bytes));
   return value&&typeof value==="object"&&!Array.isArray(value)?value as Record<string,unknown>:null;
  }catch{return null}
 }

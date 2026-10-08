@@ -27,7 +27,19 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
   if(!res.ok)throw new Error(body.error||"Could not load subscription status.");
   setState(body);
  }
- useEffect(()=>{void load().catch(e=>setNote(e instanceof Error?e.message:"Could not load subscription status."))},[]);
+ useEffect(()=>{
+  const params=new URLSearchParams(window.location.search);
+  if(params.get("billing")!=="success"){void load().catch(e=>setNote(e instanceof Error?e.message:"Could not load subscription status."));return}
+  setNote("Payment submitted. Waiting for confirmed subscription activation.");
+  let attempts=0;let cancelled=false;
+  const refresh=async()=>{
+   if(cancelled)return;
+   try{await load()}catch(e){if(!cancelled)setNote(e instanceof Error?e.message:"Subscription status unavailable.")}
+  };
+  void refresh();
+  const interval=window.setInterval(()=>{if(attempts++>=16){window.clearInterval(interval);return}void refresh()},3000);
+  return ()=>{cancelled=true;window.clearInterval(interval)};
+ },[]);
  useEffect(()=>{setAccepted(false)},[plan]);
 
  async function startCheckout(){
@@ -75,6 +87,7 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
 
  const currentAccepted=Boolean(state?.legal.accepted[plan]);
  const hasPaddleSubscription=state?.provider?.provider==="paddle"&&Boolean(state.provider.provider_subscription_id);
+ const canManageExisting=hasPaddleSubscription&&Boolean(state?.subscription.enabled||state?.subscription.status==="past_due"||state?.subscription.status==="trialing");
  return <section className="rd-billing-panel" aria-labelledby="billing-title">
   <div className="rd-section-head"><div><p className="rd-eyebrow">SUBSCRIPTION & BILLING</p><h2 id="billing-title">StudioTasker plan</h2>
    <p>Checkout, payment-card processing, transaction taxes, invoices and refunds are handled by Paddle as Merchant of Record.</p></div></div>
@@ -84,7 +97,7 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
     {state.subscription.periodEnd&&<span>Current period ends: {new Date(state.subscription.periodEnd).toLocaleDateString()}</span>}
     {state.subscription.graceEndsAt&&<span>Payment-recovery grace until: {new Date(state.subscription.graceEndsAt).toLocaleString()}</span>}
    </div>
-   {hasPaddleSubscription?<div className="rd-contact-actions">
+   {canManageExisting?<div className="rd-contact-actions">
     <button type="button" className="rd-primary" disabled={busy} onClick={()=>void manageBilling()}>{busy?"Opening…":"Manage billing in Paddle"}</button>
     <button type="button" disabled={busy} onClick={()=>void load().catch(e=>setNote(e instanceof Error?e.message:"Refresh failed"))}>Refresh subscription status</button>
    </div>:<>

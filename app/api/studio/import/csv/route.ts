@@ -3,6 +3,24 @@ import {authenticated} from "@/lib/server/auth";
 import {errorResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
 import {analyzeCsvImport} from "@/lib/server/csv-import";
 export const runtime="nodejs";
+const MAX_CSV_BYTES=512000;
+async function readCsvBounded(request:Request):Promise<string>{
+ if(!request.body)throw new Error("CSV file is empty.");
+ const reader=request.body.getReader();const parts:Uint8Array[]=[];let total=0;
+ try{
+  while(true){
+   const part=await reader.read();if(part.done)break;
+   total+=part.value.byteLength;
+   if(total>MAX_CSV_BYTES){await reader.cancel();throw new Error("CSV file must be 500 KB or smaller.")}
+   parts.push(part.value);
+  }
+ }finally{reader.releaseLock()}
+ if(total===0)throw new Error("CSV file is empty.");
+ const all=new Uint8Array(total);let offset=0;
+ for(const p of parts){all.set(p,offset);offset+=p.byteLength}
+ try{return new TextDecoder("utf-8",{fatal:true}).decode(all)}
+ catch{return new TextDecoder("windows-1252").decode(all)}
+}
 const safeFilename=(value:string|null)=>{
  const clean=(value||"studio-import.csv").replace(/[^A-Za-z0-9._ -]/g,"_").slice(0,120);
  return clean||"studio-import.csv";
@@ -10,12 +28,12 @@ const safeFilename=(value:string|null)=>{
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const length=Number(request.headers.get("content-length")||0);
- if(length<=0||length>512000)return errorResponse(413,"CSV must be between 1 byte and 500 KB.");
+ if(length>MAX_CSV_BYTES)return errorResponse(413,"CSV file must be 500 KB or smaller.");
  const mode=request.nextUrl.searchParams.get("mode");
  if(mode!=="preview"&&mode!=="commit")return errorResponse(400,"Choose preview or commit.");
- let csv="";try{csv=await request.text()}catch{return errorResponse(400,"Unable to read CSV.");}
  try{
   const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
+   const csv=await readCsvBounded(request);
    const analysis=await analyzeCsvImport(client,auth.studioId,csv);
    if(mode==="preview")return {mode,summary:analysis.summary,rows:analysis.rows.slice(0,30).map(x=>({
     row:x.row,kind:x.kind,name:x.name,email:x.email,phone:x.phone,ready:x.ready,issues:x.issues,warnings:x.warnings
@@ -54,6 +72,7 @@ export async function POST(request:NextRequest){
   return successResponse(result.value,mode==="commit"?201:200);
  }catch(e){
   const message=e instanceof Error?e.message:"";
+  if(message==="CSV file must be 500 KB or smaller.")return errorResponse(413,message);
   if(message.startsWith("CSV ")||message.includes("CSV needs")||message.includes("Name or Full Name"))return errorResponse(400,message);
   return backendError();
  }

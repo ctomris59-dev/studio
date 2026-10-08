@@ -9,8 +9,27 @@ export const runtime="nodejs";
 export async function POST(request:NextRequest){
  const secret=(process.env.PADDLE_WEBHOOK_SECRET||"").trim();
  if(!dbIsReady()||!secret||!process.env.PADDLE_API_KEY)return errorResponse(503,"Billing webhook unavailable.");
- const raw=await request.text();
- if(raw.length>250000)return errorResponse(413,"Payload too large.");
+ // Enforce the limit while streaming; Content-Length is client-controlled and may be absent.
+ const maxBytes=250000;
+ const length=Number(request.headers.get("content-length")||0);
+ if(!Number.isFinite(length)||length>maxBytes)return errorResponse(413,"Payload too large.");
+ if(!request.body)return errorResponse(400,"Missing webhook body.");
+ let raw="";
+ try{
+  const reader=request.body.getReader(),parts:Uint8Array[]=[];let size=0;
+  try{
+   while(true){
+    const {value,done}=await reader.read();
+    if(done)break;
+    size+=value.byteLength;
+    if(size>maxBytes){await reader.cancel();return errorResponse(413,"Payload too large.")}
+    parts.push(value);
+   }
+  }finally{reader.releaseLock()}
+  const bytes=new Uint8Array(size);let pos=0;
+  for(const part of parts){bytes.set(part,pos);pos+=part.length}
+  raw=new TextDecoder("utf-8",{fatal:true}).decode(bytes);
+ }catch{return errorResponse(400,"Invalid webhook encoding.");}
  const signature=request.headers.get("paddle-signature")||"";
  if(!signature)return errorResponse(401,"Missing webhook signature.");
  if(!verifyPaddleWebhookSignature(raw,signature,secret))

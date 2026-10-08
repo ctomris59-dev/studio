@@ -11,4 +11,6 @@ assert.throws(()=>parseCsv('name,email\n\"Broken,jane@example.com'),/unterminate
 assert.throws(()=>parseCsv("name\n"),/header and at least one/);
 const tooMany="name,email\n"+Array.from({length:501},(_,i)=>"Person "+i+",p"+i+"@example.com").join("\n");
 assert.throws(()=>parseCsv(tooMany),/500 data rows/);
-console.log("CSV parser checks passed: BOM, CRLF, quoted commas, escaped quotes, row limits and malformed input.");
+assert.deepEqual(parseCsv("Name;Email;Credits\r\nAnna;anna@example.com;5"),[["Name","Email","Credits"],["Anna","anna@example.com","5"]]);
+assert.deepEqual(parseCsv("Name\tEmail\nAnna\tanna@example.com"),[["Name","Email"],["Anna","anna@example.com"]]);
+console.log("CSV parser checks passed: BOM, regional Excel/TSV, quoting and input limits.");

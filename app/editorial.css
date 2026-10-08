@@ -1355,3 +1355,31 @@
     scroll-margin-top:84px;
   }
 }
+
+
+/* Accessible native mobile navigation. Keep customer sign-in discoverable. */
+.ed-mobile-menu{display:none}
+@media(max-width:760px){
+ .ed-nav{position:relative}
+ .ed-nav-actions{display:none}
+ .ed-mobile-menu{display:block;margin-left:auto;position:relative;z-index:1010}
+ .ed-mobile-menu summary{
+  cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:center;
+  min-height:44px;padding:0 14px;border:2px solid var(--ed-ink);
+  background:var(--ed-lime);color:var(--ed-ink);font-size:14px;font-weight:800;
+ }
+ .ed-mobile-menu summary::-webkit-details-marker{display:none}
+ .ed-nav .ed-mobile-menu nav{
+  display:flex;flex-direction:column;align-items:stretch;gap:0;
+  position:absolute;top:calc(100% + 8px);right:0;
+  width:min(300px,calc(100vw - 38px));padding:7px 0;
+  border:2px solid var(--ed-ink);background:var(--ed-paper);box-shadow:5px 5px 0 var(--ed-ink);
+  max-height:calc(100vh - 90px);overflow-y:auto;
+ }
+ .ed-nav .ed-mobile-menu nav a{
+  display:block;padding:12px 18px;font-size:14px;line-height:1.4;font-weight:700;
+ }
+ .ed-nav .ed-mobile-menu nav a:hover,.ed-nav .ed-mobile-menu nav a:focus-visible{
+  background:var(--ed-lime);color:var(--ed-ink);outline:2px solid var(--ed-ink);outline-offset:-2px
+ }
+}

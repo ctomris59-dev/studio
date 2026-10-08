@@ -1,0 +1,11 @@
+"use strict";
+const assert=require("node:assert/strict");
+const {pgConnectionEnv}=require("./pg-connection-env.cjs");
+const env=pgConnectionEnv("postgresql://studio_user:safe%24pass@127.0.0.1:5432/studiotasker?sslmode=verify-full");
+assert.equal(env.PGHOST,"127.0.0.1");
+assert.equal(env.PGPASSWORD,"safe$pass");
+assert.equal(env.PGUSER,"studio_user");
+assert.equal(env.PGDATABASE,"studiotasker");
+assert.equal(env.PGSSLMODE,"verify-full");
+assert.throws(()=>pgConnectionEnv("https://example.com/no"));
+console.log("pg_dump/pg_restore connection environment checks passed.");

@@ -11,8 +11,11 @@ function auditKey(){
  throw new Error("LEGAL_AUDIT_HASH_KEY_NOT_CONFIGURED");
 }
 function clientIp(request:NextRequest){
- const forwarded=request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
- return forwarded||request.headers.get("x-real-ip")?.trim()||"unknown";
+ // Never hash a client-controlled X-Forwarded-For value.
+ // The reverse proxy must overwrite X-Real-IP with its trusted remote address.
+ if(process.env.TRUST_PROXY_IP_HEADERS!=="true")return "unknown";
+ const trusted=request.headers.get("x-real-ip")?.trim()||"";
+ return /^[a-fA-F0-9:.]+$/.test(trusted)?trusted:"unknown";
 }
 export function legalEvidence(request:NextRequest){
  const ipHash=createHmac("sha256",auditKey()).update(clientIp(request)).digest("hex");
