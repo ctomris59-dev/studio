@@ -1276,11 +1276,14 @@
   padding-right:clamp(17px,1.8vw,27px);
 }
 @media(max-width:1150px){
-  .ed-hero{width:calc(100% - 52px)}
+  .ed-hero{width:calc(100% - 104px)}
   .ed-hero > .ed-hero-grid{grid-template-columns:minmax(0,1fr)}
   .ed-hero-grid > .ed-hero-copy{padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px)}
   .ed-hero-grid > .ed-hero-canvas{padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px)}
   .ed-hero > .ed-hero-end{padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px)}
+}
+@media(max-width:1000px){
+  .ed-hero{width:calc(100% - 52px)}
 }
 @media(max-width:760px){
   .ed-hero{width:100%}
