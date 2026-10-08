@@ -1,6 +1,6 @@
 import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
-export const metadata:Metadata={title:"Yoga Studio Software — StudioTasker",description:"Yoga studio software for recurring classes, courses, workshops, privates, waitlists, attendance, credits and member follow-up.",alternates:{canonical:"/yoga-studio-software"}};
+export const metadata:Metadata={title:"Yoga Studio Software | StudioTasker",description:"Yoga studio software for recurring classes, courses, workshops, privates, waitlists, attendance, credits and member follow-up.",alternates:{canonical:"/yoga-studio-software"}};
 const config:StudioLandingConfig={
  path:"/yoga-studio-software",
  seoName:"Yoga Studio Software",

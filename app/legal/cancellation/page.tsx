@@ -1,6 +1,6 @@
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
-export const metadata={title:"Cancellation & Refund Policy — StudioTasker"};
+export const metadata={title:"Cancellation & Refund Policy | StudioTasker"};
 export default function Cancellation(){
  return <LegalPage title="Cancellation & Refund Policy" kicker="BILLING / PADDLE MERCHANT OF RECORD" version={LEGAL_VERSIONS.cancellation}>
   <LegalSection title="1. Who handles payment and refunds"><p>StudioTasker subscriptions are sold through Paddle, StudioTasker’s authorised reseller and Merchant of Record. Paddle processes the buyer transaction, applicable transaction taxes, buyer billing documents, payment-related support and refunds. StudioTasker does not issue a buyer refund directly outside Paddle for a Paddle transaction.</p></LegalSection>

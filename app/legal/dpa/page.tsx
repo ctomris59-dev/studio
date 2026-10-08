@@ -2,7 +2,7 @@ import Link from "next/link";
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
 import {legalOperator} from "../../../lib/server/legal-config";
-export const metadata={title:"Data Processing Agreement — StudioTasker"};
+export const metadata={title:"Data Processing Agreement | StudioTasker"};
 export default function DPA(){
  const op=legalOperator();
  return <LegalPage title="Data Processing Agreement" kicker="GDPR / CONTROLLER–PROCESSOR TERMS" version={LEGAL_VERSIONS.dpa}>

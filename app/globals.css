@@ -71,7 +71,7 @@ table.data td strong{color:#1b2237}
 @media(max-width:800px){.demo-pagehead h1{font-size:42px}}
 
 
-/* Studio demo / class list legibility pass — 2026-10-02 */
+/* Studio demo / class list legibility pass - 2026-10-02 */
 .panel-heading p{font-size:13px;line-height:1.55;color:#737b86}
 .panel-heading button{font-size:13px;gap:8px;line-height:1.35}
 .demo-class-row{gap:15px;min-height:72px}
@@ -94,7 +94,7 @@ table.data td strong{color:#1b2237}
 }
 
 
-/* Studio demo / overview, community and tables legibility — 2026-10-02 */
+/* Studio demo / overview, community and tables legibility - 2026-10-02 */
 /* Keep existing card dimensions and headings; make working information legible. */
 /* Dashboard counters */
 .stat-card-head{font-size:14px;line-height:1.35;gap:8px}

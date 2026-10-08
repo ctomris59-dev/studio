@@ -58,7 +58,7 @@ export function OnboardingPanel({role,onDataChange}:{role:string;onDataChange:()
     <p>Preview first. Existing emails/phones and invalid rows are skipped. Package status means studio-confirmed entitlement only; StudioTasker does not import or verify payment methods.</p>
     <div className="rd-contact-actions"><button type="button" onClick={template}>Download CSV template</button><label className="rd-file-button">Choose CSV<input type="file" accept=".csv,text/csv" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)void previewCsv(f)}}/></label></div>
     {preview&&<div className="rd-import-preview"><strong>{preview.summary.ready} ready · {preview.summary.skipped} skipped · {preview.summary.warnings} warnings</strong>
-     <div>{preview.rows.slice(0,8).map(row=><p key={row.row} className={row.ready?"ready":"skip"}><b>Row {row.row}: {row.name||"Unnamed"}</b> · {row.kind}{row.issues.length>0&&<span> — {row.issues.join(" ")}</span>}{row.warnings.length>0&&<em> — {row.warnings.join(" ")}</em>}</p>)}</div>
+     <div>{preview.rows.slice(0,8).map(row=><p key={row.row} className={row.ready?"ready":"skip"}><b>Row {row.row}: {row.name||"Unnamed"}</b> · {row.kind}{row.issues.length>0&&<span> · {row.issues.join(" ")}</span>}{row.warnings.length>0&&<em> · {row.warnings.join(" ")}</em>}</p>)}</div>
      <button className="rd-primary" type="button" disabled={busy||preview.summary.ready<1} onClick={()=>void commitCsv()}>Import {preview.summary.ready} valid contacts</button>
     </div>}
    </div></details>

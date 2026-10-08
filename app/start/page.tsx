@@ -40,7 +40,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
     <article className={"annual "+(selected==="annual"?"selected":"")}>
      <div className="st-plan-head"><span>ANNUAL · BEST VALUE · SAVE $72/YEAR</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
      <div className="st-plan-price"><sup>$</sup>33<em>.90</em><small>/ month · USD</small></div>
-     <p>Billed once per year at <b>$406.80 USD</b> — $72 less than twelve monthly payments. Best for studios planning to use StudioTasker as an everyday operating system throughout the year.</p>
+     <p>Billed once per year at <b>$406.80 USD</b>, which is $72 less than twelve monthly payments. Best for studios planning to use StudioTasker as an everyday operating system throughout the year.</p>
      <ul><li><Check size={18}/> Everything in the monthly plan</li><li><Check size={18}/> $72/year lower total price</li><li><Check size={18}/> One yearly renewal instead of monthly billing</li><li><Check size={18}/> Lower effective monthly price: $33.90</li></ul>
      <Link href="/workspace?mode=register&plan=annual" className="st-plan-buy">START ANNUAL · $406.80/YEAR <ArrowUpRight size={20}/></Link>
     </article>

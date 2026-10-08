@@ -3,7 +3,7 @@ import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
 import {legalOperator} from "../../../lib/server/legal-config";
 
-export const metadata={title:"Türkiye Privacy Notice (KVKK) — StudioTasker"};
+export const metadata={title:"Türkiye Privacy Notice (KVKK) | StudioTasker"};
 
 export default function TurkiyePrivacyNotice(){
  const op=legalOperator();

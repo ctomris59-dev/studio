@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
 
 export const metadata:Metadata={
- title:"Pilates & Reformer Studio Software — StudioTasker",
+ title:"Pilates & Reformer Studio Software | StudioTasker",
  description:"Pilates and Reformer studio software for recurring classes, numbered equipment spots, waitlists, credits, attendance, staff and follow-up.",
  alternates:{canonical:"/pilates-studio-software"}
 };

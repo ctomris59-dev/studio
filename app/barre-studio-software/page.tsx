@@ -1,6 +1,6 @@
 import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
-export const metadata:Metadata={title:"Barre Studio Software — StudioTasker",description:"Barre studio software for recurring classes, capacity, waitlists, attendance, packages, credits, instructors and follow-up.",alternates:{canonical:"/barre-studio-software"}};
+export const metadata:Metadata={title:"Barre Studio Software | StudioTasker",description:"Barre studio software for recurring classes, capacity, waitlists, attendance, packages, credits, instructors and follow-up.",alternates:{canonical:"/barre-studio-software"}};
 const config:StudioLandingConfig={
  path:"/barre-studio-software",
  seoName:"Barre Studio Software",

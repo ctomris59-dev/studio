@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run test:copy && next build",
     "start": "next start",
     "test:crm": "node scripts/test-crm.cjs",
     "test:csv": "node scripts/test-csv.cjs",
@@ -30,7 +30,8 @@
     "paddle:seed:sandbox": "node scripts/seed-paddle-catalog.mjs",
     "test:seo": "node scripts/test-seo.cjs",
     "test:seo:http": "node scripts/test-seo-http.cjs",
-    "seo:logs": "node scripts/analyze-crawl-log.cjs"
+    "seo:logs": "node scripts/analyze-crawl-log.cjs",
+    "test:copy": "node scripts/test-copy.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

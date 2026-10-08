@@ -2,7 +2,7 @@ import Link from "next/link";
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
 import {legalOperator} from "../../../lib/server/legal-config";
-export const metadata={title:"Terms of Service — StudioTasker"};
+export const metadata={title:"Terms of Service | StudioTasker"};
 export default function Terms(){
  const op=legalOperator();
  return <LegalPage title="Terms of Service" kicker="STUDIOTASKER / SAAS AGREEMENT" version={LEGAL_VERSIONS.terms}>

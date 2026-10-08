@@ -1,6 +1,6 @@
 import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
-export const metadata:Metadata={title:"Fitness & Gym Software — StudioTasker",description:"Fitness and gym studio software for group classes, personal training, open gym, check-in, attendance, memberships, credits and follow-up.",alternates:{canonical:"/fitness-gym-software"}};
+export const metadata:Metadata={title:"Fitness & Gym Software | StudioTasker",description:"Fitness and gym studio software for group classes, personal training, open gym, check-in, attendance, memberships, credits and follow-up.",alternates:{canonical:"/fitness-gym-software"}};
 const config:StudioLandingConfig={
  path:"/fitness-gym-software",
  seoName:"Fitness & Gym Software",

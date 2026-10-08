@@ -1,6 +1,6 @@
 import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
-export const metadata:Metadata={title:"Dance Studio Software — StudioTasker",description:"Dance studio software for lessons, levels, terms, attendance, waitlists, student records and parent or guardian contact.",alternates:{canonical:"/dance-studio-software"}};
+export const metadata:Metadata={title:"Dance Studio Software | StudioTasker",description:"Dance studio software for lessons, levels, terms, attendance, waitlists, student records and parent or guardian contact.",alternates:{canonical:"/dance-studio-software"}};
 const config:StudioLandingConfig={
  path:"/dance-studio-software",
  seoName:"Dance Studio Software",

@@ -63,7 +63,7 @@ const newId=(kind:string)=>"u-"+kind+"-"+Date.now().toString(36);
 const singular=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 const TOUR_SECONDS=90,TOUR_STEP_SECONDS=15;
 const tourSteps:{view:OwnerView;eyebrow:string;title:string;text:string}[]=[
- {view:"today",eyebrow:"00–15 SEC",title:"Start with what needs attention.",text:"StudioTasker Today brings trials, renewals, inactive members, package gaps and open seats into one action list — so the owner knows what to do next."},
+ {view:"today",eyebrow:"00–15 SEC",title:"Start with what needs attention.",text:"StudioTasker Today brings trials, renewals, inactive members, package gaps and open seats into one action list, so the owner knows what to do next."},
  {view:"leads",eyebrow:"15–30 SEC",title:"Turn enquiries into members.",text:"See every lead, where it came from, its current stage and the next contact. Move a lead forward without building a complicated sales pipeline."},
  {view:"members",eyebrow:"30–45 SEC",title:"Keep member context in one place.",text:"Track packages, class credits, status and recent attendance. StudioTasker manages the operational record; member payments stay outside the software."},
  {view:"classes",eyebrow:"45–60 SEC",title:"Run the schedule without spreadsheet drift.",text:"Classes show coach, room, capacity and booked places at a glance. Add a class with the studio defaults already applied."},
@@ -143,7 +143,7 @@ export default function AppDemo(){
  }
  function advanceLead(lead:DemoLead){
   const index=stageOrder.indexOf(lead.stage),next=stageOrder[Math.min(stageOrder.length-1,index+1)];if(next===lead.stage)return;
-  setLeads(list=>list.map(x=>x.id===lead.id?{...x,stage:next,nextContact:next==="Won"?"—":"Tomorrow"}:x));
+  setLeads(list=>list.map(x=>x.id===lead.id?{...x,stage:next,nextContact:next==="Won"?"Not scheduled":"Tomorrow"}:x));
   setActivity(x=>["Lead moved to "+next+" · "+lead.name,...x].slice(0,6));
  }
  function removeLead(id:string){setLeads(x=>x.filter(v=>v.id!==id));setActivity(x=>["Lead removed in demo",...x].slice(0,6))}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
 import {legalOperator} from "../../../lib/server/legal-config";
-export const metadata={title:"Privacy Policy — StudioTasker"};
+export const metadata={title:"Privacy Policy | StudioTasker"};
 export default function Privacy(){
  const op=legalOperator();
  return <LegalPage title="Privacy Policy" kicker="PRIVACY / ACCOUNT & SERVICE DATA" version={LEGAL_VERSIONS.privacy}>

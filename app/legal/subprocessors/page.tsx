@@ -1,7 +1,7 @@
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
 import {legalOperator} from "../../../lib/server/legal-config";
-export const metadata={title:"Subprocessors & Independent Controllers — StudioTasker"};
+export const metadata={title:"Subprocessors & Independent Controllers | StudioTasker"};
 export default function Subprocessors(){
  const op=legalOperator();
  return <LegalPage title="Subprocessors & Independent Controllers" kicker="TRUST / SERVICE PROVIDERS" version={LEGAL_VERSIONS.subprocessors}>

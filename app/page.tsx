@@ -118,10 +118,10 @@ export default function HomePage() {
               <div className="ed-preview-intro">
                 <span className="ed-preview-eyebrow">STUDIOTASKER / PRODUCT PREVIEW</span>
                 <h2>See your studio in one clear view.</h2>
-                <p>Classes, bookings and capacity — without the daily admin clutter.</p>
+                
               </div>
               <PreviewDashboard/>
-              <p className="ed-preview-note">Illustrative preview · Fictional data · Explore the working demo above</p>
+              
             </div>
           </div>
           <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE · ENGLISH-FIRST · STUDIO-CONTROLLED MEMBER PAYMENTS</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
@@ -141,7 +141,7 @@ export default function HomePage() {
               <div className="ed-impact-overlay">
                 <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
                 <h2 id="impact-band-title">Less admin.<br/><em>More movement.</em></h2>
-                <p>Bookings, packages, check-ins and follow-ups — all in one clear studio system.</p>
+                <p>Bookings, packages, check-ins and follow-ups in one clear studio system.</p>
                 <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
               </div>
             </div>

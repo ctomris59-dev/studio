@@ -1,6 +1,6 @@
 import type {Metadata} from "next";
 import {StudioTypeLanding,type StudioLandingConfig} from "../studio-type-landing";
-export const metadata:Metadata={title:"Boutique Fitness Studio Software — StudioTasker",description:"Boutique fitness software for classes, leads, members, staff, waitlists, credits, attendance, insights and follow-up.",alternates:{canonical:"/boutique-fitness-software"}};
+export const metadata:Metadata={title:"Boutique Fitness Studio Software | StudioTasker",description:"Boutique fitness software for classes, leads, members, staff, waitlists, credits, attendance, insights and follow-up.",alternates:{canonical:"/boutique-fitness-software"}};
 const config:StudioLandingConfig={
  path:"/boutique-fitness-software",
  seoName:"Boutique Fitness Studio Software",

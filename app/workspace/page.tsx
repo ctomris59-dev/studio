@@ -4,7 +4,7 @@ import "./workspace.css";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {commercialRegistrationReady} from "../../lib/server/release-config";
 export const dynamic="force-dynamic";
-export const metadata={title:"StudioTasker — Studio Workspace",robots:{index:false,follow:false}};
+export const metadata={title:"StudioTasker | Studio Workspace",robots:{index:false,follow:false}};
 export default function Workspace(){
  const ready=Boolean(process.env.DATABASE_URL);
  const registration=ready&&process.env.AUTH_ALLOW_REGISTRATION==="true"&&commercialRegistrationReady();

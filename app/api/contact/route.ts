@@ -47,7 +47,7 @@ export async function POST(request:NextRequest){
   socketTimeout:15000
  });
 
- const subject="[StudioTasker contact] "+topic+" — "+(studio==="Not provided"?name:studio);
+ const subject="[StudioTasker contact] "+topic+" | "+(studio==="Not provided"?name:studio);
  const text=[
   "New StudioTasker contact enquiry",
   "",

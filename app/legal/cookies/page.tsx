@@ -1,6 +1,6 @@
 import {LegalPage,LegalSection} from "../../../components/legal-page";
 import {LEGAL_VERSIONS} from "../../../lib/legal-versions";
-export const metadata={title:"Cookie Policy — StudioTasker"};
+export const metadata={title:"Cookie Policy | StudioTasker"};
 export default function Cookies(){
  return <LegalPage title="Cookie Policy" kicker="COOKIES / NECESSARY STORAGE" version={LEGAL_VERSIONS.cookies}>
   <LegalSection title="1. Current approach"><p>StudioTasker is designed to minimise tracking. The core customer workspace uses strictly necessary authentication/session technology so signed-in users can securely access the correct studio workspace.</p></LegalSection>
