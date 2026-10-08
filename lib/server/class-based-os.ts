@@ -1,7 +1,7 @@
 import "server-only";
 import type {PoolClient} from "pg";
 import type {Authenticated} from "./auth";
-import {cancelClassBooking,StudioOperationError,validUUID} from "./studio-booking";
+import {cancelClassBooking,StudioOperationError,validUUID,parseClass} from "./studio-booking";
 
 const fail=(status:number,message:string):never=>{throw new StudioOperationError(status,message)};
 const formats=["group","private","semi_private","course","open_gym","pt"] as const;
@@ -60,7 +60,7 @@ export async function applyClassMetadata(client:PoolClient,studioId:string,class
 
 export async function listClassesExtended(client:PoolClient,studioId:string){
  const records=await client.query(
-  "SELECT c.id,c.title,c.instructor,c.room,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,c.series_id,c.class_format,c.level,c.program_label,c.spot_booking_enabled,c.spot_label,c.spot_count,c.staff_id,c.substitute_staff_id,COUNT(b.id) FILTER(WHERE b.status='booked')::int AS booked_count,COUNT(b.id) FILTER(WHERE b.status='waitlisted')::int AS waitlist_count FROM class_sessions c LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id WHERE c.studio_id=$1 AND c.starts_at>=now()-interval '1 day' AND c.starts_at<now()+interval '90 days' GROUP BY c.id ORDER BY c.starts_at ASC,c.id ASC LIMIT 120",
+  "SELECT c.id,c.title,c.instructor,c.room,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,c.status,c.cancelled_at,c.series_id,c.class_format,c.level,c.program_label,c.spot_booking_enabled,c.spot_label,c.spot_count,c.staff_id,c.substitute_staff_id,COUNT(b.id) FILTER(WHERE b.status='booked')::int AS booked_count,COUNT(b.id) FILTER(WHERE b.status='waitlisted')::int AS waitlist_count FROM class_sessions c LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id WHERE c.studio_id=$1 AND c.starts_at>=now()-interval '1 day' AND c.starts_at<now()+interval '90 days' GROUP BY c.id ORDER BY c.starts_at ASC,c.id ASC LIMIT 120",
   [studioId]);
  return records.rows;
 }
@@ -183,4 +183,75 @@ export async function setBookingNoShow(client:PoolClient,auth:Authenticated,book
  await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,$4,$5::jsonb)",
   [auth.studioId,b.member_id,auth.userId,noShow?"attendance.no_show":"attendance.no_show_corrected",JSON.stringify({bookingId,reason:noShow?"":reason})]);
  return {id:bookingId,noShow,alreadyApplied:false,creditRefunded:b.no_show_refund_credit&&Boolean(debit.rowCount)};
+}
+
+
+export async function reviseClass(client:PoolClient,auth:Authenticated,classId:string,body:Record<string,unknown>){
+ if(!validUUID(classId))fail(400,"Invalid class identifier.");
+ await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1::text,0))",[auth.studioId]);
+ const current=await client.query<{
+  title:string;instructor:string;room:string;starts_at:Date;duration_minutes:number;capacity:number;booking_cutoff_hours:number;cancel_cutoff_hours:number;status:string;
+  class_format:string;level:string;program_label:string;spot_booking_enabled:boolean;spot_label:string;spot_count:number|null;staff_id:string|null;substitute_staff_id:string|null
+ }>("SELECT * FROM class_sessions WHERE studio_id=$1 AND id=$2 FOR UPDATE",[auth.studioId,classId]);
+ if(!current.rowCount)fail(404,"Class not found.");
+ const old=current.rows[0];
+ if(old.status!=="scheduled")fail(409,"Cancelled classes cannot be edited.");
+ if(new Date(old.starts_at).getTime()<=Date.now())fail(409,"Started classes cannot be edited.");
+ const merged:Record<string,unknown>={title:old.title,instructor:old.instructor,room:old.room,startsAt:new Date(old.starts_at).toISOString(),
+  durationMinutes:old.duration_minutes,capacity:old.capacity,bookingCutoffHours:old.booking_cutoff_hours,cancelCutoffHours:old.cancel_cutoff_hours,
+  classFormat:old.class_format,level:old.level,programLabel:old.program_label,spotBookingEnabled:old.spot_booking_enabled,spotLabel:old.spot_label,
+  spotCount:old.spot_count,staffId:old.staff_id,substituteStaffId:old.substitute_staff_id,...body};
+ const meta=await resolveClassMetadata(client,auth.studioId,merged);
+ const parsed=parseClass({...merged,instructor:meta.effectiveInstructor});
+ const booked=await client.query<{count:number;highest:number}>(
+  "SELECT count(*) FILTER(WHERE status='booked')::int AS count, coalesce(max(spot_number) FILTER(WHERE status='booked'),0)::int AS highest FROM bookings WHERE studio_id=$1 AND session_id=$2",[auth.studioId,classId]);
+ if(booked.rows[0].count>parsed.capacity||meta.spotBookingEnabled&&booked.rows[0].highest>(meta.spotCount||0))
+  fail(409,"Capacity or equipment spots cannot be reduced below existing reservations.");
+ const from=new Date(parsed.startsAt),to=new Date(from.getTime()+parsed.durationMinutes*60000);
+ const overlaps=await client.query("SELECT id FROM class_sessions WHERE studio_id=$1 AND id<>$2 AND status='scheduled' AND starts_at<$3::timestamptz AND starts_at+(duration_minutes*interval '1 minute')>$4::timestamptz AND (lower(instructor)=lower($5) OR lower(room)=lower($6)) LIMIT 1",
+  [auth.studioId,classId,to.toISOString(),from.toISOString(),parsed.instructor,parsed.room]);
+ if(overlaps.rowCount)fail(409,"This instructor or room overlaps another class.");
+ await client.query(`UPDATE class_sessions SET title=$3,instructor=$4,room=$5,starts_at=$6,duration_minutes=$7,capacity=$8,
+  booking_cutoff_hours=$9,cancel_cutoff_hours=$10 WHERE studio_id=$1 AND id=$2`,
+  [auth.studioId,classId,parsed.title,parsed.instructor,parsed.room,from.toISOString(),parsed.durationMinutes,parsed.capacity,parsed.bookingCutoffHours,parsed.cancelCutoffHours]);
+ await applyClassMetadata(client,auth.studioId,[classId],meta);
+ if(old.starts_at.getTime()!==from.getTime()||old.room!==parsed.room||old.instructor!==parsed.instructor){
+  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes)
+    SELECT $1,b.member_id,'Notify member: class schedule changed',now(),'General',$3
+    FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2 AND b.status IN('booked','waitlisted')
+    ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId,oldStart:old.starts_at,newStart:from})]);
+ }
+ await client.query("INSERT INTO activity_log(studio_id,actor_id,action,details) VALUES($1,$2,'class.edited',$3::jsonb)",[auth.studioId,auth.userId,JSON.stringify({classId})]);
+ return {id:classId,updated:true};
+}
+
+export async function cancelEntireClass(client:PoolClient,auth:Authenticated,classId:string){
+ if(!validUUID(classId))fail(400,"Invalid class identifier.");
+ const found=await client.query<{id:string;status:string;starts_at:Date}>("SELECT id,status,starts_at FROM class_sessions WHERE id=$1 AND studio_id=$2 FOR UPDATE",[classId,auth.studioId]);
+ if(!found.rowCount)fail(404,"Class not found.");
+ if(found.rows[0].status==="cancelled")return {id:classId,alreadyCancelled:true,affected:0,creditsRefunded:0};
+ if(new Date(found.rows[0].starts_at).getTime()<Date.now())fail(409,"Started classes cannot be cancelled in bulk.");
+ const bookings=await client.query<{id:string;member_id:string;status:string}>(
+  "SELECT id,member_id,status FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status IN('booked','waitlisted') ORDER BY id FOR UPDATE",
+  [auth.studioId,classId]);
+ let refunded=0;
+ for(const b of bookings.rows){
+  if(b.status!=="booked")continue;
+  const charge=await client.query<{id:string}>("SELECT id FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_booking' LIMIT 1",[auth.studioId,b.id]);
+  if(!charge.rowCount)continue;
+  const already=await client.query("SELECT 1 FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_refund' LIMIT 1",[auth.studioId,b.id]);
+  if(already.rowCount)continue;
+  await client.query("UPDATE people SET credits=CASE WHEN credits IS NULL THEN NULL ELSE credits+1 END,updated_at=now() WHERE studio_id=$1 AND id=$2",[auth.studioId,b.member_id]);
+  await client.query("INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,reversal_of,created_by) VALUES($1,$2,$3,1,'class_refund',$4,$5)",
+   [auth.studioId,b.member_id,b.id,charge.rows[0].id,auth.userId]);
+  refunded++;
+ }
+ await client.query("UPDATE bookings SET status='cancelled',cancelled_at=now(),cancellation_type='standard' WHERE studio_id=$1 AND session_id=$2 AND status IN('booked','waitlisted')",[auth.studioId,classId]);
+ await client.query("UPDATE class_sessions SET status='cancelled',cancelled_at=now() WHERE studio_id=$1 AND id=$2",[auth.studioId,classId]);
+ await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes)
+   SELECT $1,b.member_id,'Notify member: class cancelled',now(),'General',$3
+   FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2 AND b.id=ANY($4::uuid[])
+   ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId}),bookings.rows.map(x=>x.id)]);
+ await client.query("INSERT INTO activity_log(studio_id,actor_id,action,details) VALUES($1,$2,'class.cancelled',$3::jsonb)",[auth.studioId,auth.userId,JSON.stringify({classId,affected:bookings.rows.length,creditsRefunded:refunded})]);
+ return {id:classId,alreadyCancelled:false,affected:bookings.rows.length,creditsRefunded:refunded};
 }
