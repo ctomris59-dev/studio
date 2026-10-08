@@ -200,6 +200,12 @@ async function main(){
    assert.equal(result.status,200,JSON.stringify(result.data));assert.equal(result.data.member.package_status,"Confirmed");
   };
   await confirmMember(member1);await confirmMember(member2);
+  // Before booking, the required studio waiver must be signed by each member.
+  const signWaiver=async id=>{
+   const response=await call("/api/studio/people/"+id,{method:"PATCH",cookie:a.cookie,body:{waiverStatus:"signed"}});
+   assert.equal(response.status,200,JSON.stringify(response.data));
+  };
+  await signWaiver(member1);await signWaiver(member2);
   const confirmedState=await admin.query("SELECT package_status,credits FROM people WHERE studio_id=$1 AND id=$2",[studioA,member1]);
   assert.equal(confirmedState.rows[0].package_status,"Confirmed","Package confirmation must persist before credit adjustment.");
   assert.equal(confirmedState.rows[0].credits,5,"Package confirmation must persist numeric credits.");
