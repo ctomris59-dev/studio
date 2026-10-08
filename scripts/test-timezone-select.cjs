@@ -1,0 +1,14 @@
+"use strict";
+const assert=require("node:assert/strict");
+const fs=require("node:fs");
+const component=fs.readFileSync("app/workspace/timezone-select.tsx","utf8");
+const workspace=fs.readFileSync("app/workspace/workspace-client.tsx","utf8");
+const server=fs.readFileSync("app/api/studio/settings/route.ts","utf8");
+assert.equal((workspace.match(/<TimezoneSelect /g)||[]).length,2,"Both registration and settings must use the dropdown");
+assert(!workspace.includes("IANA timezone<input"),"Free-text timezone input must be removed");
+assert(component.includes("Intl.supportedValuesOf"),"The dropdown should enumerate supported IANA zones");
+assert(component.includes('selectedElsewhere&&'),"Existing configured timezones must remain selectable");
+assert(component.includes('"Europe/Istanbul"')&&component.includes('"UTC"'),"Common timezone choices must include Istanbul and UTC");
+assert(server.includes("validStudioTimezone(timezone)"),"Server timezone validation must remain active");
+assert(server.includes("Timezone cannot change after classes exist."),"Preserve the existing class schedule protection");
+console.log("Timezone selection checks passed: registration, settings, IANA choices and backend safeguards.");
