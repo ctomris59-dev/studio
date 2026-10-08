@@ -1119,7 +1119,7 @@
 
 
 /* Pricing panel: finish the tall right column with useful onboarding context. */
-.ed-price-light{display:flex;flex-direction:column;min-width:0}
+.ed-price-light{display:flex;flex-direction:column;min-width:0;gap:20px}
 .ed-price-ready{
   margin-top:auto;
   padding:21px 24px 20px;
@@ -1154,7 +1154,7 @@
 }
 .ed-price-ready a:hover,.ed-price-ready a:focus-visible{text-decoration:underline;text-underline-offset:4px}
 @media(max-width:1000px){
-  .ed-price-ready{margin-top:26px;padding:19px 20px}
+  .ed-price-ready{padding:19px 20px}
 }
 @media(max-width:460px){
   .ed-price-ready{padding:17px 15px}
