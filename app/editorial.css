@@ -1246,7 +1246,12 @@
 }
 
 
-/* Full-width studio overview: eliminate empty blue gutters on wide screens. */
+/* Center the blue studio preview on the same axis as the pricing card. */
+.ed-hero{
+  width:min(1360px,calc(100% - 104px));
+  max-width:1360px;
+  margin-inline:auto;
+}
 .ed-hero > .ed-hero-grid{
   width:100%;
   max-width:none;
@@ -1255,42 +1260,34 @@
 }
 .ed-hero-grid > .ed-hero-copy{
   min-width:0;
-  padding-left:clamp(24px,3.6vw,68px);
-  padding-right:clamp(22px,2.8vw,48px);
+  padding-left:clamp(17px,1.8vw,27px);
+  padding-right:clamp(17px,1.8vw,27px);
 }
 .ed-hero-grid > .ed-hero-canvas{
   min-width:0;
-  padding-left:clamp(24px,3.1vw,56px);
-  padding-right:clamp(24px,3.1vw,56px);
+  padding-left:clamp(18px,2vw,28px);
+  padding-right:clamp(18px,2vw,28px);
 }
 .ed-hero > .ed-hero-end{
   width:100%;
   max-width:none;
   margin-inline:0;
-  padding-left:clamp(24px,3.6vw,68px);
-  padding-right:clamp(24px,3.6vw,68px);
+  padding-left:clamp(17px,1.8vw,27px);
+  padding-right:clamp(17px,1.8vw,27px);
 }
 @media(max-width:1150px){
+  .ed-hero{width:calc(100% - 52px)}
   .ed-hero > .ed-hero-grid{grid-template-columns:minmax(0,1fr)}
-  .ed-hero-grid > .ed-hero-copy{
-    padding-left:clamp(22px,4vw,48px);
-    padding-right:clamp(22px,4vw,48px);
-  }
-  .ed-hero-grid > .ed-hero-canvas{
-    padding-left:clamp(22px,4vw,48px);
-    padding-right:clamp(22px,4vw,48px);
-  }
-  .ed-hero > .ed-hero-end{
-    padding-left:clamp(22px,4vw,48px);
-    padding-right:clamp(22px,4vw,48px);
-  }
+  .ed-hero-grid > .ed-hero-copy{padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px)}
+  .ed-hero-grid > .ed-hero-canvas{padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px)}
+  .ed-hero > .ed-hero-end{padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px)}
 }
 @media(max-width:760px){
+  .ed-hero{width:100%}
   .ed-hero-grid > .ed-hero-copy{padding-left:19px;padding-right:19px}
   .ed-hero-grid > .ed-hero-canvas{padding-left:19px;padding-right:19px}
   .ed-hero > .ed-hero-end{padding-left:19px;padding-right:19px}
 }
-
 
 /* Keep the secondary product preview centered after shortening its headline. */
 .ed-hero-content{
