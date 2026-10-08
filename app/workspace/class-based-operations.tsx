@@ -58,13 +58,13 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const refresh=useCallback(async()=>{
   const [c,m,s]=await Promise.all([
    api<{classes:ClassRow[]}>("/api/studio/classes"),
-   api<{members:Member[]}>("/api/studio/members"),
+   canBook?api<{members:Member[]}>("/api/studio/members"):Promise.resolve({members:[] as Member[]}),
    api<{staff:Staff[]}>("/api/studio/staff")
   ]);
   setClasses(c.classes);setMembers(m.members);setStaff(s.staff);
   setSelectedClass(v=>v||c.classes[0]?.id||"");setSelectedMember(v=>v||m.members[0]?.id||"");
   if(section==="insights")setInsights(await api<Insights>("/api/studio/insights"));
- },[section]);
+ },[section,canBook]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load operations."))},[refresh]);
  useEffect(()=>{setSchedule(v=>({...v,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity,classFormat:preferences.defaultClassFormat,spotBookingEnabled:preferences.spotBookingEnabled,spotLabel:preferences.equipmentLabel,spotCount:preferences.defaultSpotCount}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity,preferences.defaultClassFormat,preferences.spotBookingEnabled,preferences.equipmentLabel,preferences.defaultSpotCount]);
  useEffect(()=>{if(!selectedClass){setBookings([]);return}void api<{bookings:Booking[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass)).then(x=>setBookings(x.bookings)).catch(()=>setBookings([]))},[selectedClass]);

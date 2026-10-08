@@ -68,7 +68,7 @@ export async function analyzeCsvImport(client:PoolClient,studioId:string,csv:str
  const emails=[...new Set(parsed.filter(x=>x.email).map(x=>x.email))],phones=[...new Set(parsed.filter(x=>x.phone).map(x=>x.phone))];
  const existing=await client.query<{email:string;phone:string}>(`
   SELECT lower(email) AS email,phone FROM people
-  WHERE studio_id=$1 AND archived_at IS NULL
+  WHERE studio_id=$1
    AND (($2::text[]<>ARRAY[]::text[] AND lower(email)=ANY($2::text[]))
     OR ($3::text[]<>ARRAY[]::text[] AND phone=ANY($3::text[])))`,[studioId,emails,phones]);
  const existingEmails=new Set(existing.rows.map(x=>x.email).filter(Boolean)),existingPhones=new Set(existing.rows.map(x=>x.phone).filter(Boolean));

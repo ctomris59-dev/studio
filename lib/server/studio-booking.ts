@@ -122,11 +122,11 @@ async function studioDate(client:PoolClient,timezone:string,time:Date){
 }
 type Member={
  id:string;kind:string;credits:number|null;package_status:string|null;member_status:string|null;
- start_date:string|null;expiry_date:string|null;
+ start_date:string|null;expiry_date:string|null;waiver_status:string;
 };
 async function lockedMember(client:PoolClient,studioId:string,memberId:string):Promise<Member>{
  const member=await client.query<Member>(`
- SELECT id,kind,credits,package_status,member_status,start_date::text,expiry_date::text
+ SELECT id,kind,credits,package_status,member_status,start_date::text,expiry_date::text,waiver_status
  FROM people WHERE studio_id=$1 AND id=$2 AND archived_at IS NULL FOR UPDATE`,[studioId,memberId]);
  if(!member.rowCount||member.rows[0].kind!=="member")fail(404,"Member not found in this studio.");
  return member.rows[0];
@@ -149,6 +149,8 @@ export async function reserveClass(client:PoolClient,auth:Authenticated,sessionI
  const session=await lockClass(client,auth.studioId,sessionId);
  if(cutoffPassed(session.starts_at,session.booking_cutoff_hours))fail(409,"Bookings for this class are closed.");
  const member=await lockedMember(client,auth.studioId,memberId);
+ const waiver=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
+ if(waiver.rows[0]?.waiver_required&&member.waiver_status!=="signed")fail(409,"A signed waiver is required before booking.");
  const date=await studioDate(client,session.timezone,session.starts_at);
  if(!eligible(member,date))fail(409,"Member needs an active, confirmed and valid class pass.");
  const existing=await client.query<{id:string;status:string}>(`

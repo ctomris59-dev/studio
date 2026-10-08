@@ -4,6 +4,15 @@ export function parseCsv(text:string):CsvGrid{
  if(text.length>512000)throw new Error("CSV file must be 500 KB or smaller.");
  if(text.includes("\u0000"))throw new Error("CSV contains unsupported null bytes.");
  const source=text.replace(/^\uFEFF/,"");
+
+ // Infer separator from unquoted header delimiters, including Excel's regional exports.
+ const delimiters=[",",";","\t"],counts=[0,0,0];let headerQuoted=false;
+ for(let i=0;i<source.length;i++){
+  const ch=source[i];if(ch==='"'){if(headerQuoted&&source[i+1]==='"'){i++;continue}headerQuoted=!headerQuoted;continue}
+  if(!headerQuoted&&(ch==="\r"||ch==="\n"))break;
+  if(!headerQuoted){const index=delimiters.indexOf(ch);if(index>=0)counts[index]++}
+ }
+ const delimiter=delimiters[counts.indexOf(Math.max(...counts))];
  const rows:string[][]=[];let row:string[]=[],field="",quoted=false;
  for(let i=0;i<source.length;i++){
   const ch=source[i];
@@ -13,7 +22,7 @@ export function parseCsv(text:string):CsvGrid{
    field+=ch;
   }else{
    if(ch==='"'&&field.length===0){quoted=true;continue}
-   if(ch===","){row.push(field);field="";continue}
+   if(ch===delimiter){row.push(field);field="";continue}
    if(ch==="\n"||ch==="\r"){
     if(ch==="\r"&&source[i+1]==="\n")i++;
     row.push(field);field="";

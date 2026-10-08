@@ -99,7 +99,7 @@ async function changeCredits(client:PoolClient,studioId:string,memberId:string,d
 }
 async function eligibleWaitlistMember(client:PoolClient,studioId:string,memberId:string,classDay:string){
  const row=await client.query<{credits:number|null}>(
-  "SELECT credits FROM people WHERE studio_id=$1 AND id=$2 AND kind='member' AND archived_at IS NULL AND member_status='Active' AND package_status='Confirmed' AND (start_date IS NULL OR start_date<=$3::date) AND (expiry_date IS NULL OR expiry_date>=$3::date) AND (credits IS NULL OR credits>0) FOR UPDATE",
+  "SELECT credits FROM people WHERE studio_id=$1 AND id=$2 AND kind='member' AND archived_at IS NULL AND member_status='Active' AND package_status='Confirmed' AND (start_date IS NULL OR start_date<=$3::date) AND (expiry_date IS NULL OR expiry_date>=$3::date) AND (credits IS NULL OR credits>0) AND (NOT (SELECT waiver_required FROM studios WHERE id=$1) OR waiver_status='signed') FOR UPDATE",
   [studioId,memberId,classDay]);
  return row.rows[0]||null;
 }

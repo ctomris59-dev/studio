@@ -43,13 +43,15 @@ export function StudioOperations({role,section,preferences}:{role:string;section
 
  const refresh=useCallback(async()=>{
   const [c,m,a,t]=await Promise.all([
-   api<{classes:ClassRow[]}>("/api/studio/classes"),api<{members:MemberRow[]}>("/api/studio/members"),
-   api<ActionReply>("/api/studio/action-center"),api<{tasks:TaskRow[]}>("/api/studio/tasks")
+   api<{classes:ClassRow[]}>("/api/studio/classes"),
+   role==="instructor"?Promise.resolve({members:[] as MemberRow[]}):api<{members:MemberRow[]}>("/api/studio/members"),
+   role==="instructor"?Promise.resolve({items:[],total:0,rules:"",today:{classes:0,bookings:0,waitlisted:0,capacity:0,occupancy:0},rescue:{total:0,trials:0,inactive:0,renewals:0,pendingPackages:0,openSeats:0}} as ActionReply):api<ActionReply>("/api/studio/action-center"),
+   role==="instructor"?Promise.resolve({tasks:[] as TaskRow[]}):api<{tasks:TaskRow[]}>("/api/studio/tasks")
   ]);
   setClasses(c.classes);setMembers(m.members);setActions(a.items);setToday(a.today);setRescue(a.rescue);setTasks(t.tasks);
   if(owner)void api<{packages:StudioPack[]}>("/api/studio/packages").then(x=>setPacks(x.packages)).catch(()=>{});
   setSelectedClass(old=>old||c.classes[0]?.id||"");setSelectedMember(old=>old||m.members[0]?.id||"");setAdjust(old=>({...old,memberId:old.memberId||m.members[0]?.id||""}));
- },[owner]);
+ },[owner,role]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load studio data."))},[refresh]);
  useEffect(()=>{setSchedule(prev=>({...prev,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity]);
  useEffect(()=>{if(!selectedClass){setBookings([]);return}void api<{bookings:BookingRow[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass)).then(d=>setBookings(d.bookings)).catch(()=>setBookings([]))},[selectedClass]);
