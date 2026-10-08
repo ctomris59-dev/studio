@@ -2,14 +2,14 @@
 
 StudioTasker is an English-first B2B SaaS for independent Pilates, yoga, barre, dance and boutique fitness studios.
 
-The product is intentionally **studio-centered**. It helps studio owners and staff manage members, class schedules, bookings, attendance, class-package entitlements, follow-ups and daily operational priorities, while offering a lightweight studio-branded self-service booking link for members.
+The product is intentionally **studio-centered**. It helps studio owners and staff manage members, class schedules, bookings, attendance, class-package entitlements, follow-ups and daily operational priorities, while keeping bookings inside the private studio workspace for members.
 
 ## Product boundary
 
 StudioTasker **does**:
 - maintain lead/member CRM records;
 - track classes, capacity, attendance and studio-managed bookings;
-- provide a lightweight studio-branded self-service booking link that uses confirmed class credits without taking payment;
+- manage bookings and waitlists from the private studio staff workspace;
 - define internal class-package templates (credits + validity);
 - let staff confirm package entitlements and make audited credit corrections;
 - surface StudioTasker Today / follow-up opportunity signals such as trial follow-up, low credits, expiry, inactivity, package-status review and open seats;
