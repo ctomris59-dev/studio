@@ -922,3 +922,11 @@
   .ed-preview-demo-link{font-size:11px}
   .ed-preview-note{font-size:10px}
 }
+
+
+/* Keep the left hero action area within its column on narrow desktops. */
+@media(min-width:1151px) and (max-width:1330px){
+  .ed-hero-under{grid-template-columns:minmax(0,1fr);gap:14px}
+  .ed-hero-under p{max-width:540px}
+  .ed-hero-action-stack{max-width:510px}
+}
