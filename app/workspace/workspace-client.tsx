@@ -15,6 +15,9 @@ type User={id:string;email:string;role:string};
 type Studio={id:string;name:string};
 type Person={id:string;kind:"lead"|"member";full_name:string;email:string;phone:string;created_at:string;lead_stage:string|null;notes:string;member_status:string|null;tags:string[];waiver_status:"not_required"|"pending"|"signed"|"expired";waiver_updated_at:string|null;related_contact_name:string;related_contact_role:string;related_contact_email:string;related_contact_phone:string};
 type AuthMode="login"|"register"|"forgot"|"reset"|"verify"|"resend";
+type ContactKind="lead"|"member";
+type ContactPage={hasMore:boolean;nextOffset:number};
+const emptyContactPage=():ContactPage=>({hasMore:false,nextOffset:0});
 type OwnerView="today"|"leads"|"members"|"classes"|"followups"|"insights"|"settings";
 type StudioSettings={
  name:string;focus:string;timezone:string;accentColor:string;memberTerm:string;classTerm:string;creditTerm:string;weekStarts:"monday"|"sunday";
@@ -39,6 +42,41 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
  const initializedView=useRef(false);
  const [archivedRecords,setArchivedRecords]=useState<{id:string;full_name:string}[]>([]);
+ const [contactSearch,setContactSearch]=useState(""),[appliedContactSearch,setAppliedContactSearch]=useState("");
+ const [contactPages,setContactPages]=useState<Record<ContactKind,ContactPage>>({lead:emptyContactPage(),member:emptyContactPage()});
+ const [contactsLoading,setContactsLoading]=useState(false);
+
+ async function requestContactPage(kind:ContactKind,query:string,offset=0):Promise<{records:Person[];hasMore:boolean;nextOffset:number}>{
+  const qs=new URLSearchParams({kind,search:query,offset:String(offset)});
+  const response=await fetch("/api/studio/people?"+qs.toString(),{credentials:"same-origin",cache:"no-store"});
+  const json=await response.json();
+  if(!response.ok)throw Error(json.error||"Could not load contacts.");
+  return json;
+ }
+ async function refreshContacts(query=appliedContactSearch){
+  setContactsLoading(true);
+  try{
+   const [leads,members]=await Promise.all([requestContactPage("lead",query),requestContactPage("member",query)]);
+   setPeople([...leads.records,...members.records]);
+   setContactPages({lead:{hasMore:leads.hasMore,nextOffset:leads.nextOffset},
+    member:{hasMore:members.hasMore,nextOffset:members.nextOffset}});
+  }finally{setContactsLoading(false)}
+ }
+ async function loadMoreContacts(kind:ContactKind){
+  const page=contactPages[kind];if(!page.hasMore||contactsLoading)return;
+  setContactsLoading(true);
+  try{
+   const next=await requestContactPage(kind,appliedContactSearch,page.nextOffset);
+   setPeople(prev=>[...prev,...next.records.filter(p=>!prev.some(existing=>existing.id===p.id))]);
+   setContactPages(prev=>({...prev,[kind]:{hasMore:next.hasMore,nextOffset:next.nextOffset}}));
+  }catch(e){setNote(e instanceof Error?e.message:"Could not load more contacts.")}
+  finally{setContactsLoading(false)}
+ }
+ function searchContacts(e:FormEvent<HTMLFormElement>){
+  e.preventDefault();const query=contactSearch.trim();setAppliedContactSearch(query);
+  void refreshContacts(query).catch(e=>setNote(e instanceof Error?e.message:"Could not search contacts."));
+ }
+
 
  async function load(){
   const res=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
@@ -51,8 +89,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    }
   }
   if(["owner","manager","receptionist"].includes(body.user.role)){
-   const list=await fetch("/api/studio/people",{credentials:"same-origin",cache:"no-store"});if(list.ok){const data=await list.json();setPeople(data.records||[])}
-  }else setPeople([]);
+   await refreshContacts();
+  }else{setPeople([]);setContactPages({lead:emptyContactPage(),member:emptyContactPage()})}
  }
  useEffect(()=>{
   const detected=Intl.DateTimeFormat().resolvedOptions().timeZone;if(detected)setForm(prev=>({...prev,timezone:detected}));
@@ -178,9 +216,19 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
 
    {view==="leads"||view==="members"?canContacts?<section className="rd-live-section">
     <div className="rd-section-head"><div><h2>{view==="leads"?"Lead pipeline":settings.memberTerm}</h2><p>{view==="leads"?"Track enquiries, trial progress and next actions.":"Your studio's internal member records. Payments remain outside StudioTasker."}</p></div></div>
+    <form className="rd-form" onSubmit={searchContacts}>
+      <label>Search {view==="leads"?"leads":settings.memberTerm.toLowerCase()}
+       <input type="search" maxLength={80} placeholder="Name, email or phone" value={contactSearch} onChange={e=>setContactSearch(e.target.value)}/>
+      </label>
+      <div className="rd-contact-actions">
+       <button type="submit" disabled={contactsLoading}>{contactsLoading?"Searching…":"Search contacts"}</button>
+       {appliedContactSearch&&<button type="button" disabled={contactsLoading} onClick={()=>{setContactSearch("");setAppliedContactSearch("");void refreshContacts("").catch(e=>setNote(String(e)))}}>Clear search</button>}
+      </div>
+    </form>
     <div className="rd-contact-list">{currentPeople.length?currentPeople.map(p=><div key={p.id}><b>{p.full_name}</b><small>{p.kind}{p.lead_stage?" · "+p.lead_stage:""} · {p.email||p.phone}{p.kind==="member"&&p.tags?.length?" · "+p.tags.join(" · "):""}{p.kind==="member"?" · waiver: "+(p.waiver_status||"not_required").replace("_"," "):""}</small><div className="rd-contact-actions"><button disabled={busy} onClick={()=>{setEditing(p.id);setEditForm({name:p.full_name,notes:p.notes||"",stage:p.lead_stage||"New",tags:(p.tags||[]).join(", "),waiverStatus:p.waiver_status||"not_required",relatedContactName:p.related_contact_name||"",relatedContactRole:p.related_contact_role||"",relatedContactEmail:p.related_contact_email||"",relatedContactPhone:p.related_contact_phone||""})}}>Edit</button>{canEdit&&p.kind==="lead"&&<button disabled={busy} onClick={()=>void convertLead(p)}>Convert to member</button>}{canEdit&&<button disabled={busy} onClick={()=>void archivePerson(p)}>Archive</button>}</div>
      {editing===p.id&&<form className="rd-form rd-contact-edit" onSubmit={savePerson}><label>Name<input value={editForm.name} minLength={2} maxLength={80} required onChange={e=>setEditForm({...editForm,name:e.target.value})}/></label>{p.kind==="lead"&&<label>Stage<select value={editForm.stage} onChange={e=>setEditForm({...editForm,stage:e.target.value})}>{["New","Contacted","Trial booked","Trial attended","Won","Lost"].map(v=><option key={v}>{v}</option>)}</select></label>}{p.kind==="member"&&<><label>Tags<input maxLength={240} placeholder="trial, reformer, evening" value={editForm.tags} onChange={e=>setEditForm({...editForm,tags:e.target.value})}/><small>Up to 12 comma-separated operational tags.</small></label><label>Waiver status<select value={editForm.waiverStatus} onChange={e=>setEditForm({...editForm,waiverStatus:e.target.value})}><option value="not_required">Not required</option><option value="pending">Pending</option><option value="signed">Signed</option><option value="expired">Expired</option></select></label><fieldset className="rd-related-contact"><legend>{settings.focus==="Dance"?"Parent / guardian contact":"Related / emergency contact"} <small>optional</small></legend><div className="rd-ops-pair"><label>Name<input maxLength={100} value={editForm.relatedContactName} onChange={e=>setEditForm({...editForm,relatedContactName:e.target.value})}/></label><label>Relationship<input maxLength={40} placeholder={settings.focus==="Dance"?"Parent / guardian":"Partner, parent, guardian"} value={editForm.relatedContactRole} onChange={e=>setEditForm({...editForm,relatedContactRole:e.target.value})}/></label></div><div className="rd-ops-pair"><label>Email<input type="email" maxLength={160} value={editForm.relatedContactEmail} onChange={e=>setEditForm({...editForm,relatedContactEmail:e.target.value})}/></label><label>Phone<input type="tel" maxLength={30} value={editForm.relatedContactPhone} onChange={e=>setEditForm({...editForm,relatedContactPhone:e.target.value})}/></label></div><small>Store only the contact details your studio actually needs.</small></fieldset></>}<label>Notes<textarea rows={3} maxLength={1600} value={editForm.notes} onChange={e=>setEditForm({...editForm,notes:e.target.value})}/></label><div className="rd-contact-actions"><button className="rd-primary" disabled={busy}>Save</button><button type="button" onClick={()=>setEditing(null)}>Cancel</button></div></form>}
-    </div>):<p className="rd-empty">No {view==="leads"?"leads":settings.memberTerm.toLowerCase()} yet.</p>}</div>
+    </div>):<p className="rd-empty">No matching {view==="leads"?"leads":settings.memberTerm.toLowerCase()} found.</p>}</div>
+    {contactPages[view==="leads"?"lead":"member"].hasMore&&<button type="button" disabled={contactsLoading} onClick={()=>void loadMoreContacts(view==="leads"?"lead":"member")}>{contactsLoading?"Loading…":"Load more contacts"}</button>}
     <details className="rd-ops-details"><summary>+ Add {view==="leads"?"lead":singularTerm(settings.memberTerm).toLowerCase()}</summary><form onSubmit={addPerson} className="rd-form rd-add-contact"><label>Name<input required minLength={2} maxLength={80} value={person.name} onChange={e=>setPerson({...person,name:e.target.value,kind:view==="leads"?"lead":"member"})}/></label><div className="rd-ops-pair"><label>Email<input type="email" value={person.email} onChange={e=>setPerson({...person,email:e.target.value})}/></label><label>Phone<input type="tel" value={person.phone} onChange={e=>setPerson({...person,phone:e.target.value})}/></label></div>{view==="members"&&<><label>Operational tags<input maxLength={240} placeholder="trial, reformer, evening" value={person.tags} onChange={e=>setPerson({...person,tags:e.target.value})}/></label><label>Waiver status<select value={person.waiverStatus} onChange={e=>setPerson({...person,waiverStatus:e.target.value})}><option value="not_required">Not required</option><option value="pending">Pending</option><option value="signed">Signed</option><option value="expired">Expired</option></select></label><fieldset className="rd-related-contact"><legend>{settings.focus==="Dance"?"Parent / guardian contact":"Related / emergency contact"} <small>optional</small></legend><div className="rd-ops-pair"><label>Name<input maxLength={100} value={person.relatedContactName} onChange={e=>setPerson({...person,relatedContactName:e.target.value})}/></label><label>Relationship<input maxLength={40} placeholder={settings.focus==="Dance"?"Parent / guardian":"Partner, parent, guardian"} value={person.relatedContactRole} onChange={e=>setPerson({...person,relatedContactRole:e.target.value})}/></label></div><div className="rd-ops-pair"><label>Email<input type="email" maxLength={160} value={person.relatedContactEmail} onChange={e=>setPerson({...person,relatedContactEmail:e.target.value})}/></label><label>Phone<input type="tel" maxLength={30} value={person.relatedContactPhone} onChange={e=>setPerson({...person,relatedContactPhone:e.target.value})}/></label></div></fieldset></>}<label>Notes<textarea rows={3} maxLength={1600} value={person.notes} onChange={e=>setPerson({...person,notes:e.target.value})}/></label><button className="rd-primary" disabled={busy}>Add</button></form></details>
     {view==="members"&&<StudioOperations role={user.role} section="members" preferences={prefs}/>}
    </section>:<p className="rd-feedback">Your role does not have access to studio contacts.</p>:null}
