@@ -45,24 +45,36 @@ function Identity({ inverse = false }: { inverse?: boolean }) {
   );
 }
 
-function MiniSchedule({ compact = false }: { compact?: boolean }) {
+function PreviewDashboard() {
   return (
-    <div className={"ed-schedule" + (compact ? " ed-schedule-compact" : "")}>
-      <div className="ed-sch-head">
-        <div className="ed-sch-identity"><span className="ed-sch-icon"><Waves size={17} strokeWidth={1.6}/></span><div><strong>Willow Studio</strong><small>THE SPACE IS YOURS</small></div></div>
-        <span className="ed-sch-week">THIS WEEK <span>↗</span></span>
+    <div className="ed-preview-dashboard" aria-label="Illustrative StudioTasker studio overview with fictional sample data">
+      <div className="ed-preview-toolbar">
+        <span className="ed-preview-brand-mark"><StudioTaskerMark/></span>
+        <div className="ed-preview-brand-name"><strong>Willow Studio</strong><span>Studio overview</span></div>
+        <span className="ed-preview-sample">SAMPLE DATA</span>
       </div>
-      <div className="ed-sch-greeting"><span>Studio overview / <b>Wednesday</b></span><strong>Today is looking good.</strong></div>
-      <div className="ed-sch-metrics"><div><small>CLASSES</small><strong>08</strong></div><div><small>BOOKINGS</small><strong>42</strong></div><div><small>CAPACITY</small><strong>84<span>%</span></strong></div></div>
-      <div className="ed-sch-tablehead"><strong>TODAY&apos;S SCHEDULE</strong><span>4 of 8 classes <ArrowUpRight size={12}/></span></div>
-      <div className="ed-sch-rows">{timetable.map((c) =>
-        <div className="ed-sch-row" key={c.time}>
-          <span className="ed-sch-time">{c.time}</span>
-          <span className="ed-sch-class"><b>{c.title}</b><small>with {c.coach}</small></span>
-          <span className="ed-sch-cap"><b>{c.spots}</b><i><i style={{width:c.value+"%"}}/></i></span>
-          <span className={"ed-sch-status" + (c.state==="FULL" ? " is-full" : "")}>{c.state}</span>
-        </div>)}</div>
-      <div className="ed-sch-foot"><span><i/> Your studio, in sync.</span><span>VIEW DEMO <ArrowRight size={12}/></span></div>
+      <div className="ed-preview-body">
+        <p className="ed-preview-day">WEDNESDAY / DAILY OVERVIEW</p>
+        <h3>Today at a glance.</h3>
+        <div className="ed-preview-stats" aria-label="Example studio activity">
+          <div><span>CLASSES</span><strong>8</strong></div>
+          <div><span>BOOKINGS</span><strong>42</strong></div>
+          <div><span>CAPACITY</span><strong>84%</strong></div>
+        </div>
+        <div className="ed-preview-schedule-title"><strong>Today's classes</strong><span>3 of 8 shown</span></div>
+        <div className="ed-preview-classes">
+          {timetable.slice(0, 3).map((item) => (
+            <div className="ed-preview-class-row" key={item.time}>
+              <span className="ed-preview-time">{item.time}</span>
+              <div className="ed-preview-class-detail"><strong>{item.title}</strong><span>{item.coach} · {item.spots} booked</span></div>
+              <span className={"ed-preview-state" + (item.state === "FULL" ? " ed-preview-state-full" : "")}>{item.state}</span>
+            </div>
+          ))}
+        </div>
+        <Link className="ed-preview-demo-link" href="/app-demo?tour=1">
+          EXPLORE THE INTERACTIVE DEMO <ArrowUpRight size={19}/>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -103,12 +115,13 @@ export default function HomePage() {
               </div>
             </div>
             <div className="ed-hero-canvas">
-              <div className="ed-canvas-meta"><span>STUDIOTASKER / PRODUCT PREVIEW</span><span>EXPLORE WITH SAMPLE DATA · NO SIGN-UP NEEDED</span></div>
-              <figure className="ed-hero-lifestyle"><img src="https://images.unsplash.com/photo-1717500252172-b1840ea64f05?auto=format&fit=crop&q=82&w=900" alt="Pilates reformer session in a boutique studio" width="900" height="600" loading="eager" fetchPriority="high" decoding="async"/><figcaption>BUILT AROUND REAL STUDIO DAYS</figcaption></figure>
-              <div className="ed-hero-disc" aria-hidden="true"><span>YOUR<br/>STUDIO<br/>IN SYNC.</span><i>↗</i></div>
-              <div className="ed-hero-card"><MiniSchedule/></div>
-              <div className="ed-hero-sticker"><span className="ed-sticker-cross"><Dumbbell size={36}/></span><span>MORE ROOM<br/>TO DO YOUR<br/>THING.</span></div>
-              <div className="ed-canvas-bottom"><span>NOT MORE SOFTWARE. JUST LESS FRICTION.</span><span>↗</span></div>
+              <div className="ed-preview-intro">
+                <span className="ed-preview-eyebrow">STUDIOTASKER / PRODUCT PREVIEW</span>
+                <h2>See your studio in one clear view.</h2>
+                <p>Classes, bookings and capacity — without the daily admin clutter.</p>
+              </div>
+              <PreviewDashboard/>
+              <p className="ed-preview-note">Illustrative preview · Fictional data · Explore the working demo above</p>
             </div>
           </div>
           <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE · ENGLISH-FIRST · STUDIO-CONTROLLED MEMBER PAYMENTS</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
