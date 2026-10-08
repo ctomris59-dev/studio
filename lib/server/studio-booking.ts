@@ -154,12 +154,12 @@ export async function reserveClass(client:PoolClient,auth:Authenticated,sessionI
  const waiver=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
  if(waiver.rows[0]?.waiver_required&&member.waiver_status!=="signed")fail(409,"A signed waiver is required before booking.");
  const date=await studioDate(client,session.timezone,session.starts_at);
- if(!eligible(member,date))fail(409,"Member needs an active, confirmed and valid class pass.");
  const existing=await client.query<{id:string;status:string}>(`
  SELECT id,status FROM bookings
  WHERE studio_id=$1 AND session_id=$2 AND member_id=$3 AND status IN('booked','waitlisted')
  LIMIT 1`,[auth.studioId,sessionId,memberId]);
  if(existing.rowCount)return {...existing.rows[0],alreadyExists:true};
+ if(!eligible(member,date))fail(409,"Member needs an active, confirmed and valid class pass.");
  const count=await client.query<{total:number}>(`
  SELECT COUNT(*)::int AS total FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status='booked'`,[auth.studioId,sessionId]);
  const full=count.rows[0].total>=session.capacity;

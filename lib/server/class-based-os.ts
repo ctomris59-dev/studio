@@ -126,8 +126,12 @@ async function promoteWaitlist(client:PoolClient,auth:Authenticated,session:{id:
 
 export async function cancelBookingWithRules(client:PoolClient,auth:Authenticated,bookingId:string){
  if(!validUUID(bookingId))fail(400,"Invalid booking identifier.");
+ // Keep booking cancellations in the same lock order as reservations.
+ const lookup=await client.query<{session_id:string}>("SELECT session_id FROM bookings WHERE studio_id=$1 AND id=$2",[auth.studioId,bookingId]);
+ if(!lookup.rowCount)fail(404,"Booking not found in this studio.");
+ await client.query("SELECT id FROM class_sessions WHERE studio_id=$1 AND id=$2 FOR UPDATE",[auth.studioId,lookup.rows[0].session_id]);
  const record=await client.query<{id:string;member_id:string;status:string;attended_at:Date|null;no_show_at:Date|null;spot_number:number|null;session_id:string;starts_at:Date;cancel_cutoff_hours:number;timezone:string;spot_booking_enabled:boolean;late_cancel_refund_credit:boolean}>(
-  "SELECT b.id,b.member_id,b.status,b.attended_at,b.no_show_at,b.spot_number,b.session_id,c.starts_at,c.cancel_cutoff_hours,st.timezone,c.spot_booking_enabled,st.late_cancel_refund_credit FROM bookings b JOIN class_sessions c ON c.id=b.session_id AND c.studio_id=b.studio_id JOIN studios st ON st.id=b.studio_id WHERE b.studio_id=$1 AND b.id=$2 FOR UPDATE OF b,c",
+  "SELECT b.id,b.member_id,b.status,b.attended_at,b.no_show_at,b.spot_number,b.session_id,c.starts_at,c.cancel_cutoff_hours,st.timezone,c.spot_booking_enabled,st.late_cancel_refund_credit FROM bookings b JOIN class_sessions c ON c.id=b.session_id AND c.studio_id=b.studio_id JOIN studios st ON st.id=b.studio_id WHERE b.studio_id=$1 AND b.id=$2 FOR UPDATE OF b",
   [auth.studioId,bookingId]);
  if(!record.rowCount)fail(404,"Booking not found in this studio.");
  const b=record.rows[0];

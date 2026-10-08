@@ -11,7 +11,7 @@ type Preferences={
 };
 type ClassRow={
  id:string;title:string;instructor:string;room:string;starts_at:string;duration_minutes:number;capacity:number;
- booking_cutoff_hours:number;cancel_cutoff_hours:number;series_id:string|null;class_format:string;level:string;program_label:string;
+ booking_cutoff_hours:number;cancel_cutoff_hours:number;status:"scheduled"|"cancelled";series_id:string|null;class_format:string;level:string;program_label:string;
  spot_booking_enabled:boolean;spot_label:string;spot_count:number|null;staff_id:string|null;substitute_staff_id:string|null;
  booked_count:number;waitlist_count:number;
 };
@@ -42,6 +42,8 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const [insights,setInsights]=useState<Insights|null>(null),[selectedClass,setSelectedClass]=useState(""),[selectedMember,setSelectedMember]=useState(""),[selectedSpot,setSelectedSpot]=useState("");
  const [busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const [repeat,setRepeat]=useState({enabled:false,until:"",weekdays:[1,3,5] as number[]});
+ const [editingClass,setEditingClass]=useState(false);
+ const [classEdit,setClassEdit]=useState({title:"",instructor:"",room:"",startsAt:"",capacity:8,durationMinutes:50});
  const [staffForm,setStaffForm]=useState({displayName:"",role:"Instructor",availabilityNotes:""});
  const [editingStaff,setEditingStaff]=useState(""),[staffEdit,setStaffEdit]=useState({displayName:"",role:"Instructor",availabilityNotes:""});
  const [schedule,setSchedule]=useState({
@@ -53,6 +55,7 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const selected=classes.find(c=>c.id===selectedClass);
  const occupiedSpots=useMemo(()=>new Set(bookings.filter(b=>b.status==="booked"&&b.spot_number!==null).map(b=>Number(b.spot_number))),[bookings]);
  const classStarted=selected?Date.now()>=new Date(selected.starts_at).getTime():false;
+ useEffect(()=>{setEditingClass(false)},[selectedClass]);
  const isFull=selected?selected.booked_count>=selected.capacity:false;
 
  const refresh=useCallback(async()=>{
@@ -97,6 +100,23 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
    }
    await api("/api/studio/classes","POST",payload);return "Class created.";
   });
+ }
+ function startClassEdit(){
+  if(!selected)return;
+  const local=new Intl.DateTimeFormat("sv-SE",{timeZone:preferences.timezone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(new Date(selected.starts_at)).replace(" ","T");
+  setClassEdit({title:selected.title,instructor:selected.instructor,room:selected.room,startsAt:local,capacity:selected.capacity,durationMinutes:selected.duration_minutes});
+  setEditingClass(true);
+ }
+ function saveClassEdit(e:FormEvent){e.preventDefault();if(!selected)return;
+  let startsAt:string;
+  try{startsAt=localDateTimeToUTC(classEdit.startsAt.slice(0,10),classEdit.startsAt.slice(11,16),preferences.timezone)}
+  catch(error){setMessage(error instanceof Error?error.message:"Invalid class time");return}
+  void perform(async()=>{await api("/api/studio/classes/"+selected.id,"PATCH",{...classEdit,startsAt,staffId:null,substituteStaffId:null});
+   setEditingClass(false);return "Class updated. Check notification tasks if timing, instructor or room changed."});
+ }
+ function cancelEntire(){if(!selected||!window.confirm("Cancel this class and refund applicable booked credits?"))return;
+  void perform(async()=>{const result=await api<{class:{affected:number;creditsRefunded:number}}>("/api/studio/classes/"+selected.id,"DELETE");
+   return "Class cancelled. "+result.class.affected+" affected reservations, "+result.class.creditsRefunded+" credits refunded. Notify members using Follow-ups."});
  }
  function book(e:FormEvent){e.preventDefault();if(!selectedClass||!selectedMember)return;
   void perform(async()=>{
@@ -143,11 +163,26 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
     {repeat.enabled&&<div className="rd-repeat-config"><strong>Repeat on</strong><div className="rd-weekdays">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day,index)=><button type="button" key={day} className={repeat.weekdays.includes(index)?"selected":""} aria-pressed={repeat.weekdays.includes(index)} onClick={()=>setRepeat(v=>({...v,weekdays:v.weekdays.includes(index)?v.weekdays.filter(x=>x!==index):[...v.weekdays,index]}))}>{day}</button>)}</div><label>Repeat until<input type="date" value={repeat.until} onChange={e=>setRepeat({...repeat,until:e.target.value})}/></label></div>}
     <button className="rd-primary" disabled={busy}>{repeat.enabled?"Create recurring series":"Create class"}</button>
    </form></details>}
-   <div className="rd-class-list">{classes.length?classes.map(c=><button key={c.id} className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} onClick={()=>setSelectedClass(c.id)}><strong>{c.title} · {new Date(c.starts_at).toLocaleString("en-GB",{timeZone:preferences.timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:preferences.timeFormat==="12h"})}</strong><small>{c.instructor} · {c.room} · {formatLabels[c.class_format]||c.class_format}{c.level?" · "+c.level:""}{c.program_label?" · "+c.program_label:""}</small><span>{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting{c.spot_booking_enabled?" · "+c.spot_label+" selection":""}</span></button>):<p className="rd-empty">No upcoming classes.</p>}</div>
+   <div className="rd-class-list">{classes.length?classes.map(c=><button key={c.id} className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} onClick={()=>setSelectedClass(c.id)}><strong>{c.title} · {new Date(c.starts_at).toLocaleString("en-GB",{timeZone:preferences.timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:preferences.timeFormat==="12h"})}</strong><small>{c.instructor} · {c.room} · {formatLabels[c.class_format]||c.class_format}{c.level?" · "+c.level:""}{c.program_label?" · "+c.program_label:""}</small><span>{c.status==="cancelled"?"CANCELLED · ":""}{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting{c.spot_booking_enabled?" · "+c.spot_label+" selection":""}</span></button>):<p className="rd-empty">No upcoming classes.</p>}</div>
    {selected&&<div className="rd-ops-subsection">
+     {canManage&&!classStarted&&selected.status==="scheduled"&&<div className="rd-ops-section">
+      <button type="button" disabled={busy} onClick={startClassEdit}>Edit selected class</button>
+      <button type="button" disabled={busy} onClick={cancelEntire}>Cancel entire class and refund credits</button>
+      {editingClass&&<form className="rd-form" onSubmit={saveClassEdit}>
+       <label>Class name<input required minLength={2} value={classEdit.title} onChange={e=>setClassEdit(v=>({...v,title:e.target.value}))}/></label>
+       <label>Instructor<input required minLength={2} value={classEdit.instructor} onChange={e=>setClassEdit(v=>({...v,instructor:e.target.value}))}/></label>
+       <label>Room<input required minLength={2} value={classEdit.room} onChange={e=>setClassEdit(v=>({...v,room:e.target.value}))}/></label>
+       <label>Start ({preferences.timezone})<input required type="datetime-local" value={classEdit.startsAt} onChange={e=>setClassEdit(v=>({...v,startsAt:e.target.value}))}/></label>
+       <label>Capacity<input required type="number" min={selected.booked_count} max={100} value={classEdit.capacity} onChange={e=>setClassEdit(v=>({...v,capacity:Number(e.target.value)}))}/></label>
+       <label>Duration (minutes)<input required type="number" min={15} max={240} value={classEdit.durationMinutes} onChange={e=>setClassEdit(v=>({...v,durationMinutes:Number(e.target.value)}))}/></label>
+       <button className="rd-primary" disabled={busy}>Save class changes</button>
+       <button type="button" onClick={()=>setEditingClass(false)}>Close</button>
+      </form>}
+     </div>}
+     {selected.status==="cancelled"&&<p role="status">This class was cancelled. No new reservations are permitted.</p>}
     <div className="rd-class-rule-strip"><span><Clock3 size={14}/> Booking cutoff {selected.booking_cutoff_hours}h</span><span>Late cancel {selected.cancel_cutoff_hours}h</span>{selected.spot_booking_enabled&&<span>{selected.spot_count} × {selected.spot_label}</span>}</div>
-    {canBook&&<form className="rd-form rd-book-form" onSubmit={book}><div className="rd-ops-pair"><label>{preferences.memberTerm.slice(0,-1)||"Member"}<select required value={selectedMember} onChange={e=>setSelectedMember(e.target.value)}><option value="">Select</option>{members.map(m=><option key={m.id} value={m.id}>{m.full_name} · {m.credits===null?"Unlimited":m.credits+" "+preferences.creditTerm.toLowerCase()}</option>)}</select></label>{selected.spot_booking_enabled&&!isFull&&<label>{selected.spot_label}<select required value={selectedSpot} onChange={e=>setSelectedSpot(e.target.value)}><option value="">Choose</option>{Array.from({length:selected.spot_count||selected.capacity},(_,i)=>i+1).map(n=><option key={n} value={n} disabled={occupiedSpots.has(n)}>{selected.spot_label} {n}{occupiedSpots.has(n)?" · booked":""}</option>)}</select></label>}</div><button className="rd-primary" disabled={busy||!selectedMember||(selected.spot_booking_enabled&&!isFull&&!selectedSpot)}>{isFull?"Join waitlist":"Book member"}</button></form>}
-    <div className="rd-booking-list">{bookings.length?bookings.map(b=><div key={b.id}><span><b>{b.member_name}</b><small>{b.status}{b.status==="waitlisted"?" · waitlist #"+b.queue_number:""}{b.spot_number?" · "+selected.spot_label+" "+b.spot_number:""}{b.attended_at?" · checked in":""}{b.no_show_at?" · no-show":""}</small></span><div className="rd-booking-actions">{b.status==="booked"&&!b.no_show_at&&<button disabled={busy} onClick={()=>attendance(b)}>{b.attended_at?"Correct check-in":"Check in"}</button>}{b.status==="booked"&&classStarted&&!b.attended_at&&<button disabled={busy} onClick={()=>noShow(b)}>{b.no_show_at?"Correct no-show":"No-show"}</button>}{canBook&&!classStarted&&<button disabled={busy||Boolean(b.attended_at)} onClick={()=>cancel(b)}>Cancel</button>}</div></div>):<p className="rd-empty">No active bookings in this class.</p>}</div>
+    {canBook&&selected.status==="scheduled"&&<form className="rd-form rd-book-form" onSubmit={book}><div className="rd-ops-pair"><label>{preferences.memberTerm.slice(0,-1)||"Member"}<select required value={selectedMember} onChange={e=>setSelectedMember(e.target.value)}><option value="">Select</option>{members.map(m=><option key={m.id} value={m.id}>{m.full_name} · {m.credits===null?"Unlimited":m.credits+" "+preferences.creditTerm.toLowerCase()}</option>)}</select></label>{selected.spot_booking_enabled&&!isFull&&<label>{selected.spot_label}<select required value={selectedSpot} onChange={e=>setSelectedSpot(e.target.value)}><option value="">Choose</option>{Array.from({length:selected.spot_count||selected.capacity},(_,i)=>i+1).map(n=><option key={n} value={n} disabled={occupiedSpots.has(n)}>{selected.spot_label} {n}{occupiedSpots.has(n)?" · booked":""}</option>)}</select></label>}</div><button className="rd-primary" disabled={busy||!selectedMember||(selected.spot_booking_enabled&&!isFull&&!selectedSpot)}>{isFull?"Join waitlist":"Book member"}</button></form>}
+    <div className="rd-booking-list">{bookings.length?bookings.map(b=><div key={b.id}><span><b>{b.member_name}</b><small>{b.status}{b.status==="waitlisted"?" · waitlist #"+b.queue_number:""}{b.spot_number?" · "+selected.spot_label+" "+b.spot_number:""}{b.attended_at?" · checked in":""}{b.no_show_at?" · no-show":""}</small></span><div className="rd-booking-actions">{b.status==="booked"&&!b.no_show_at&&<button disabled={busy} onClick={()=>attendance(b)}>{b.attended_at?"Correct check-in":"Check in"}</button>}{b.status==="booked"&&classStarted&&!b.attended_at&&<button disabled={busy} onClick={()=>noShow(b)}>{b.no_show_at?"Correct no-show":"No-show"}</button>}{canBook&&selected.status==="scheduled"&&!classStarted&&<button disabled={busy||Boolean(b.attended_at)} onClick={()=>cancel(b)}>Cancel</button>}</div></div>):<p className="rd-empty">No active bookings in this class.</p>}</div>
    </div>}
   </div>
  </section>;
