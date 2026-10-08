@@ -1115,4 +1115,48 @@
 }
 
 /* Justify the homepage StudioTasker intro paragraph. */
-.ed-hero-under p{text-align:justify;text-justify:inter-word}
+.ed-hero-under p{text-align:left;text-justify:auto}
+
+
+/* Pricing panel: finish the tall right column with useful onboarding context. */
+.ed-price-light{display:flex;flex-direction:column;min-width:0}
+.ed-price-ready{
+  margin-top:auto;
+  padding:21px 24px 20px;
+  background:#edf0ff;
+  border:1px solid #bfc8ec;
+  color:#17203c;
+}
+.ed-price-ready-label{
+  display:block;
+  font:800 10px/1.35 "IBM Plex Mono",monospace;
+  letter-spacing:.06em;
+  color:#324bd8;
+}
+.ed-price-ready h3{
+  margin:8px 0 8px;
+  font:700 clamp(26px,2.5vw,34px)/1.03 "Barlow Condensed","Arial Narrow",sans-serif;
+  letter-spacing:-.015em;
+}
+.ed-price-ready p{
+  margin:0 0 14px;
+  color:#46546e;
+  font-size:13px;
+  line-height:1.5;
+}
+.ed-price-ready a{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#253dd2;
+  font:800 11px/1.4 "IBM Plex Mono",monospace;
+  text-decoration:none;
+}
+.ed-price-ready a:hover,.ed-price-ready a:focus-visible{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:1000px){
+  .ed-price-ready{margin-top:26px;padding:19px 20px}
+}
+@media(max-width:460px){
+  .ed-price-ready{padding:17px 15px}
+  .ed-price-ready h3{font-size:29px}
+}

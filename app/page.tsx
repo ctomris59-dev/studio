@@ -153,7 +153,16 @@ export default function HomePage() {
             <div className="ed-pricing-kicker"><span className="ed-overline">01 / PLAIN & SIMPLE</span></div>
             <div className="ed-price-grid">
               <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly. <b>Save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
-              <div className="ed-price-light"><span className="ed-price-include">WHAT&apos;S INCLUDED</span>{["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","CSV migration with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}</div>
+              <div className="ed-price-light">
+                <span className="ed-price-include">WHAT&apos;S INCLUDED</span>
+                {["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","Optional CSV import with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows","Studio branding and terminology","Studio timezone and class defaults"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}
+                <div className="ed-price-ready">
+                  <span className="ed-price-ready-label">YOUR STUDIO. YOUR RULES.</span>
+                  <h3>Make it yours.<br/>Keep things moving.</h3>
+                  <p>Personalize your workspace, add members one by one or import an existing list when it suits you.</p>
+                  <Link href="/app-demo?tour=1">EXPLORE THE WORKSPACE <ArrowUpRight size={18}/></Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
