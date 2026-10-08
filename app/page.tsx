@@ -27,13 +27,37 @@ const timetable = [
 ];
 
 const studioTypes = [
-  {name:"PILATES / REFORMER",copy:"Reformer spots, recurring schedules, private and semi-private formats, packages, credits and attendance.",href:"/pilates-studio-software",Icon:Activity},
-  {name:"YOGA",copy:"Recurring classes, workshops or courses, privates, room capacity, member records and follow-up.",href:"/yoga-studio-software",Icon:HeartPulse},
-  {name:"BARRE",copy:"Recurring classes, capacity, attendance, waitlists and package usage in one workspace.",href:"/barre-studio-software",Icon:Waves},
-  {name:"DANCE",copy:"Lessons, levels, course or term labels, student records and optional parent or guardian contact.",href:"/dance-studio-software",Icon:Users},
-  {name:"INDOOR CYCLING",copy:"Bike spots, capacity, waitlists, check-in and recurring class schedules.",href:"/indoor-cycling-software",Icon:Activity},
-  {name:"FITNESS & GYM",copy:"Group classes, personal training, open-gym formats, check-in and member context.",href:"/fitness-gym-software",Icon:Dumbbell},
-  {name:"BOUTIQUE FITNESS",copy:"Classes, leads, packages, credits, staff and follow-up without enterprise overhead.",href:"/boutique-fitness-software",Icon:Waves}
+  {name:"PILATES / REFORMER",short:"PILATES",copy:"Reformer classes, packages, credits and attendance.",href:"/pilates-studio-software",Icon:Activity},
+  {name:"YOGA",short:"YOGA",copy:"Classes, workshops, member records and scheduling.",href:"/yoga-studio-software",Icon:HeartPulse},
+  {name:"BARRE",short:"BARRE",copy:"Class capacity, waitlists and package usage.",href:"/barre-studio-software",Icon:Waves},
+  {name:"DANCE",short:"DANCE",copy:"Lessons, levels, student records and bookings.",href:"/dance-studio-software",Icon:Users},
+  {name:"INDOOR CYCLING",short:"CYCLING",copy:"Bike spots, waitlists, check-in and timetables.",href:"/indoor-cycling-software",Icon:Activity},
+  {name:"FITNESS & GYM",short:"FITNESS",copy:"Group classes, personal training and members.",href:"/fitness-gym-software",Icon:Dumbbell},
+  {name:"BOUTIQUE FITNESS",short:"BOUTIQUE",copy:"Leads, classes, credits and follow-up workflows.",href:"/boutique-fitness-software",Icon:Waves}
+];
+
+const studioMoments = [
+  {
+    eyebrow:"01 / PILATES & REFORMER",
+    label:"Make room for movement.",
+    href:"/pilates-studio-software",
+    src:"https://images.unsplash.com/photo-1717500251894-e127a481632e?auto=format&fit=crop&w=1100&q=82",
+    alt:"People training on Pilates reformer machines in a studio"
+  },
+  {
+    eyebrow:"02 / YOGA & BARRE",
+    label:"Focus on the class.",
+    href:"/yoga-studio-software",
+    src:"https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1100&q=82",
+    alt:"A group of women practicing yoga together"
+  },
+  {
+    eyebrow:"03 / FITNESS & CYCLING",
+    label:"Keep your studio moving.",
+    href:"/fitness-gym-software",
+    src:"https://images.unsplash.com/photo-1785861534635-5ec39c05acc6?auto=format&fit=crop&w=1100&q=82",
+    alt:"Three people exercising with dumbbells during a group fitness class"
+  }
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
@@ -127,6 +151,32 @@ export default function HomePage() {
           <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE · ENGLISH-FIRST · STUDIO-CONTROLLED MEMBER PAYMENTS</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
         </section>
 
+        <section className="ed-movement" aria-labelledby="movement-title">
+          <div className="ed-container">
+            <div className="ed-movement-heading">
+              <div>
+                <span className="ed-overline">BUILT FOR THE PEOPLE BEHIND EVERY BOOKING</span>
+                <h2 id="movement-title">Real movement.<br/><em>Less admin.</em></h2>
+              </div>
+              <p>From reformer sessions to yoga classes and group training, StudioTasker helps independent studios stay organized while their clients stay in motion.</p>
+            </div>
+            <div className="ed-movement-gallery">
+              {studioMoments.map(({eyebrow,label,href,src,alt})=>(
+                <article className="ed-movement-tile" key={eyebrow}>
+                  <Link className="ed-movement-image" href={href} aria-label={eyebrow.replace(/^\d+ \/ /,"") + " studio software"}>
+                    <img src={src} width="1100" height="760" alt={alt} loading="lazy" decoding="async"/>
+                  </Link>
+                  <div className="ed-movement-caption">
+                    <div><span>{eyebrow}</span><h3>{label}</h3></div>
+                    <Link href={href} aria-label={"Explore "+eyebrow.replace(/^\d+ \/ /,"").toLowerCase()+" software"}><ArrowUpRight size={23}/></Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <p className="ed-movement-credit">Illustrative photography: <a href="https://unsplash.com/photos/a-group-of-people-doing-exercises-in-a-room-qkc9HmIniDw" target="_blank" rel="noopener noreferrer">Ahmet Kurt</a>, <a href="https://unsplash.com/photos/group-of-women-doing-yoga-gJtDg6WfMlQ" target="_blank" rel="noopener noreferrer">bruce mars</a>, and <a href="https://unsplash.com/photos/three-people-doing-lunges-with-dumbbells-in-a-gym-CTDKI038S9Q" target="_blank" rel="noopener noreferrer">Sum Sum</a> / Unsplash. Images do not represent StudioTasker customers.</p>
+          </div>
+        </section>
+
         <section className="ed-pricing" id="pricing">
           <div className="ed-container">
             <div className="ed-pricing-kicker"><span className="ed-overline">01 / PLAIN & SIMPLE</span></div>
@@ -145,7 +195,7 @@ export default function HomePage() {
               <p>StudioTasker is designed for independent class-based businesses that need clear scheduling, member context, package entitlements and follow-up without an enterprise sales process.</p>
             </div>
             <div className="ed-studio-type-grid">
-              {studioTypes.map(({name,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href}>EXPLORE {name.replace(" / REFORMER","")} SOFTWARE <ArrowRight size={15}/></Link></article>)}
+              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+name.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
             </div>
             <div className="ed-proof-strip"><strong>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</strong><span>USA · CANADA · UK · EUROPE · INTERNATIONAL</span><span>English-first · transparent pricing · no fake customer-logo wall</span></div>
           </div>
