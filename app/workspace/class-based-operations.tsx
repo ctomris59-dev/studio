@@ -41,6 +41,8 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const [classes,setClasses]=useState<ClassRow[]>([]),[members,setMembers]=useState<Member[]>([]),[bookings,setBookings]=useState<Booking[]>([]),[staff,setStaff]=useState<Staff[]>([]);
  const [insights,setInsights]=useState<Insights|null>(null),[selectedClass,setSelectedClass]=useState(""),[selectedMember,setSelectedMember]=useState(""),[selectedSpot,setSelectedSpot]=useState("");
  const [busy,setBusy]=useState(false),[message,setMessage]=useState("");
+ const [classSearch,setClassSearch]=useState(""),[classHasMore,setClassHasMore]=useState(false),[classOffset,setClassOffset]=useState(0);
+ const [memberSearch,setMemberSearch]=useState(""),[memberHasMore,setMemberHasMore]=useState(false),[memberOffset,setMemberOffset]=useState(0);
  const [repeat,setRepeat]=useState({enabled:false,until:"",weekdays:[1,3,5] as number[]});
  const [editingClass,setEditingClass]=useState(false);
  const [classEdit,setClassEdit]=useState({title:"",instructor:"",room:"",startsAt:"",capacity:8,durationMinutes:50});
@@ -60,14 +62,16 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
 
  const refresh=useCallback(async()=>{
   const [c,m,s]=await Promise.all([
-   api<{classes:ClassRow[]}>("/api/studio/classes"),
-   canBook?api<{members:Member[]}>("/api/studio/members"):Promise.resolve({members:[] as Member[]}),
+   api<{classes:ClassRow[];hasMore:boolean;nextOffset:number}>("/api/studio/classes?search="+encodeURIComponent(classSearch)),
+   canBook?api<{members:Member[];hasMore:boolean;nextOffset:number}>("/api/studio/members?search="+encodeURIComponent(memberSearch)):Promise.resolve({members:[] as Member[],hasMore:false,nextOffset:0}),
    api<{staff:Staff[]}>("/api/studio/staff")
   ]);
   setClasses(c.classes);setMembers(m.members);setStaff(s.staff);
+  setClassHasMore(c.hasMore);setClassOffset(c.nextOffset);
+  setMemberHasMore(m.hasMore);setMemberOffset(m.nextOffset);
   setSelectedClass(v=>v||c.classes[0]?.id||"");setSelectedMember(v=>v||m.members[0]?.id||"");
   if(section==="insights")setInsights(await api<Insights>("/api/studio/insights"));
- },[section,canBook]);
+ },[section,canBook,classSearch,memberSearch]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load operations."))},[refresh]);
  useEffect(()=>{setSchedule(v=>({...v,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity,classFormat:preferences.defaultClassFormat,spotBookingEnabled:preferences.spotBookingEnabled,spotLabel:preferences.equipmentLabel,spotCount:preferences.defaultSpotCount}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity,preferences.defaultClassFormat,preferences.spotBookingEnabled,preferences.equipmentLabel,preferences.defaultSpotCount]);
  useEffect(()=>{if(!selectedClass){setBookings([]);return}void api<{bookings:Booking[]}>("/api/studio/bookings?sessionId="+encodeURIComponent(selectedClass)).then(x=>setBookings(x.bookings)).catch(()=>setBookings([]))},[selectedClass]);
@@ -78,6 +82,16 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
   setSelectedSpot(first?String(first):"");
  },[selectedClass,selected?.spot_booking_enabled,selected?.spot_count,selected?.capacity,isFull,occupiedSpots]);
 
+ async function loadMoreClasses(){
+  try{const r=await api<{classes:ClassRow[];hasMore:boolean;nextOffset:number}>("/api/studio/classes?search="+encodeURIComponent(classSearch)+"&offset="+classOffset);
+   setClasses(v=>[...v,...r.classes.filter(x=>!v.some(old=>old.id===x.id))]);setClassHasMore(r.hasMore);setClassOffset(r.nextOffset)}
+  catch(e){setMessage(e instanceof Error?e.message:"Could not load more classes.")}
+ }
+ async function loadMoreMembers(){
+  try{const r=await api<{members:Member[];hasMore:boolean;nextOffset:number}>("/api/studio/members?search="+encodeURIComponent(memberSearch)+"&offset="+memberOffset);
+   setMembers(v=>[...v,...r.members.filter(x=>!v.some(old=>old.id===x.id))]);setMemberHasMore(r.hasMore);setMemberOffset(r.nextOffset)}
+  catch(e){setMessage(e instanceof Error?e.message:"Could not load more members.")}
+ }
  async function perform(work:()=>Promise<string>){
   if(busy)return;setBusy(true);setMessage("");
   try{
@@ -163,7 +177,9 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
     {repeat.enabled&&<div className="rd-repeat-config"><strong>Repeat on</strong><div className="rd-weekdays">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day,index)=><button type="button" key={day} className={repeat.weekdays.includes(index)?"selected":""} aria-pressed={repeat.weekdays.includes(index)} onClick={()=>setRepeat(v=>({...v,weekdays:v.weekdays.includes(index)?v.weekdays.filter(x=>x!==index):[...v.weekdays,index]}))}>{day}</button>)}</div><label>Repeat until<input type="date" value={repeat.until} onChange={e=>setRepeat({...repeat,until:e.target.value})}/></label></div>}
     <button className="rd-primary" disabled={busy}>{repeat.enabled?"Create recurring series":"Create class"}</button>
    </form></details>}
-   <div className="rd-class-list">{classes.length?classes.map(c=><button key={c.id} className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} onClick={()=>setSelectedClass(c.id)}><strong>{c.title} · {new Date(c.starts_at).toLocaleString("en-GB",{timeZone:preferences.timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:preferences.timeFormat==="12h"})}</strong><small>{c.instructor} · {c.room} · {formatLabels[c.class_format]||c.class_format}{c.level?" · "+c.level:""}{c.program_label?" · "+c.program_label:""}</small><span>{c.status==="cancelled"?"CANCELLED · ":""}{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting{c.spot_booking_enabled?" · "+c.spot_label+" selection":""}</span></button>):<p className="rd-empty">No upcoming classes.</p>}</div>
+   <label>Search classes<input aria-label="Search classes" value={classSearch} onChange={e=>setClassSearch(e.target.value)} placeholder="Class, room or instructor"/></label>
+   <div className="rd-class-list">{classes.length?classes.map(c=><button key={c.id} className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} onClick={()=>setSelectedClass(c.id)}><strong>{c.title} · {new Date(c.starts_at).toLocaleString("en-GB",{timeZone:preferences.timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:preferences.timeFormat==="12h"})}</strong><small>{c.instructor} · {c.room} · {formatLabels[c.class_format]||c.class_format}{c.level?" · "+c.level:""}{c.program_label?" · "+c.program_label:""}</small><span>{c.status==="cancelled"?"CANCELLED · ":""}{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting{c.spot_booking_enabled?" · "+c.spot_label+" selection":""}</span></button>):<p className="rd-empty">No matching classes in the next 90 days.</p>}</div>
+   {classHasMore&&<button disabled={busy} type="button" onClick={()=>void loadMoreClasses()}>Load more classes</button>
    {selected&&<div className="rd-ops-subsection">
      {canManage&&!classStarted&&selected.status==="scheduled"&&<div className="rd-ops-section">
       <button type="button" disabled={busy} onClick={startClassEdit}>Edit selected class</button>
@@ -181,7 +197,9 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
      </div>}
      {selected.status==="cancelled"&&<p role="status">This class was cancelled. No new reservations are permitted.</p>}
     <div className="rd-class-rule-strip"><span><Clock3 size={14}/> Booking cutoff {selected.booking_cutoff_hours}h</span><span>Late cancel {selected.cancel_cutoff_hours}h</span>{selected.spot_booking_enabled&&<span>{selected.spot_count} × {selected.spot_label}</span>}</div>
-    {canBook&&selected.status==="scheduled"&&<form className="rd-form rd-book-form" onSubmit={book}><div className="rd-ops-pair"><label>{preferences.memberTerm.slice(0,-1)||"Member"}<select required value={selectedMember} onChange={e=>setSelectedMember(e.target.value)}><option value="">Select</option>{members.map(m=><option key={m.id} value={m.id}>{m.full_name} · {m.credits===null?"Unlimited":m.credits+" "+preferences.creditTerm.toLowerCase()}</option>)}</select></label>{selected.spot_booking_enabled&&!isFull&&<label>{selected.spot_label}<select required value={selectedSpot} onChange={e=>setSelectedSpot(e.target.value)}><option value="">Choose</option>{Array.from({length:selected.spot_count||selected.capacity},(_,i)=>i+1).map(n=><option key={n} value={n} disabled={occupiedSpots.has(n)}>{selected.spot_label} {n}{occupiedSpots.has(n)?" · booked":""}</option>)}</select></label>}</div><button className="rd-primary" disabled={busy||!selectedMember||(selected.spot_booking_enabled&&!isFull&&!selectedSpot)}>{isFull?"Join waitlist":"Book member"}</button></form>}
+    {canBook&&selected.status==="scheduled"&&<form className="rd-form rd-book-form" onSubmit={book}>
+     <label>Search members<input aria-label="Search members" value={memberSearch} onChange={e=>setMemberSearch(e.target.value)} placeholder="Member name, email or phone"/></label>
+     {memberHasMore&&<button type="button" onClick={()=>void loadMoreMembers()}>Load more members</button>}<div className="rd-ops-pair"><label>{preferences.memberTerm.slice(0,-1)||"Member"}<select required value={selectedMember} onChange={e=>setSelectedMember(e.target.value)}><option value="">Select</option>{members.map(m=><option key={m.id} value={m.id}>{m.full_name} · {m.credits===null?"Unlimited":m.credits+" "+preferences.creditTerm.toLowerCase()}</option>)}</select></label>{selected.spot_booking_enabled&&!isFull&&<label>{selected.spot_label}<select required value={selectedSpot} onChange={e=>setSelectedSpot(e.target.value)}><option value="">Choose</option>{Array.from({length:selected.spot_count||selected.capacity},(_,i)=>i+1).map(n=><option key={n} value={n} disabled={occupiedSpots.has(n)}>{selected.spot_label} {n}{occupiedSpots.has(n)?" · booked":""}</option>)}</select></label>}</div><button className="rd-primary" disabled={busy||!selectedMember||(selected.spot_booking_enabled&&!isFull&&!selectedSpot)}>{isFull?"Join waitlist":"Book member"}</button></form>}
     <div className="rd-booking-list">{bookings.length?bookings.map(b=><div key={b.id}><span><b>{b.member_name}</b><small>{b.status}{b.status==="waitlisted"?" · waitlist #"+b.queue_number:""}{b.spot_number?" · "+selected.spot_label+" "+b.spot_number:""}{b.attended_at?" · checked in":""}{b.no_show_at?" · no-show":""}</small></span><div className="rd-booking-actions">{b.status==="booked"&&!b.no_show_at&&<button disabled={busy} onClick={()=>attendance(b)}>{b.attended_at?"Correct check-in":"Check in"}</button>}{b.status==="booked"&&classStarted&&!b.attended_at&&<button disabled={busy} onClick={()=>noShow(b)}>{b.no_show_at?"Correct no-show":"No-show"}</button>}{canBook&&selected.status==="scheduled"&&!classStarted&&<button disabled={busy||Boolean(b.attended_at)} onClick={()=>cancel(b)}>Cancel</button>}</div></div>):<p className="rd-empty">No active bookings in this class.</p>}</div>
    </div>}
   </div>
