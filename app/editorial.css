@@ -1087,3 +1087,29 @@
   .ed-studio-type-grid p{margin:9px 0 11px}
   .ed-studio-type-grid a{font-size:11px}
 }
+
+
+/* Homepage vertical rhythm: compact transitions without squeezing content. */
+.ed-impact-band{padding:22px 0 24px}
+.ed-pricing{padding:44px 0 48px}
+.ed-studio-types{padding:44px 0 48px}
+.ed-product-tour{padding:46px 0 50px}
+.ed-why{padding:48px 0 52px}
+.ed-onboarding{padding:46px 0 50px}
+.ed-faq{padding:42px 0 46px}
+.ed-contact-cta{padding:38px 0 42px}
+.ed-section-heading{margin-bottom:32px}
+.ed-pricing-kicker{margin-bottom:18px}
+@media(max-width:850px){
+  .ed-impact-band{padding:16px 0 20px}
+  .ed-pricing,.ed-studio-types,.ed-product-tour,.ed-why,.ed-onboarding,.ed-faq{padding:38px 0 42px}
+  .ed-contact-cta{padding:34px 0 38px}
+  .ed-section-heading{margin-bottom:28px}
+}
+@media(max-width:640px){
+  .ed-impact-band{padding:12px 0 16px}
+  .ed-pricing,.ed-studio-types,.ed-product-tour,.ed-why,.ed-onboarding,.ed-faq{padding:30px 0 34px}
+  .ed-contact-cta{padding:28px 0 32px}
+  .ed-section-heading{margin-bottom:24px}
+  .ed-pricing-kicker{margin-bottom:14px}
+}
