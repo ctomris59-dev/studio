@@ -36,30 +36,6 @@ const studioTypes = [
   {name:"BOUTIQUE FITNESS",short:"BOUTIQUE",copy:"Leads, classes, credits and follow-up workflows.",href:"/boutique-fitness-software",Icon:Waves}
 ];
 
-const studioMoments = [
-  {
-    eyebrow:"01 / PILATES & REFORMER",
-    label:"Make room for movement.",
-    href:"/pilates-studio-software",
-    src:"https://images.unsplash.com/photo-1717500251894-e127a481632e?auto=format&fit=crop&w=1100&q=82",
-    alt:"People training on Pilates reformer machines in a studio"
-  },
-  {
-    eyebrow:"02 / YOGA & BARRE",
-    label:"Focus on the class.",
-    href:"/yoga-studio-software",
-    src:"https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1100&q=82",
-    alt:"A group of women practicing yoga together"
-  },
-  {
-    eyebrow:"03 / FITNESS & CYCLING",
-    label:"Keep your studio moving.",
-    href:"/fitness-gym-software",
-    src:"https://images.unsplash.com/photo-1785861534635-5ec39c05acc6?auto=format&fit=crop&w=1100&q=82",
-    alt:"Three people exercising with dumbbells during a group fitness class"
-  }
-];
-
 function Identity({ inverse = false }: { inverse?: boolean }) {
   return (
     <Link href="/" className={"ed-identity" + (inverse ? " ed-identity-inverse" : "")} aria-label="StudioTasker home">
@@ -151,29 +127,24 @@ export default function HomePage() {
           <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE · ENGLISH-FIRST · STUDIO-CONTROLLED MEMBER PAYMENTS</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
         </section>
 
-        <section className="ed-movement" aria-labelledby="movement-title">
+        <section className="ed-impact-band" aria-labelledby="impact-band-title">
           <div className="ed-container">
-            <div className="ed-movement-heading">
-              <div>
-                <span className="ed-overline">BUILT FOR THE PEOPLE BEHIND EVERY BOOKING</span>
-                <h2 id="movement-title">Real movement.<br/><em>Less admin.</em></h2>
+            <div className="ed-impact-card">
+              <img
+                src="https://images.pexels.com/photos/8436748/pexels-photo-8436748.jpeg?auto=compress&cs=tinysrgb&w=1800"
+                alt="People practicing yoga together in a bright fitness studio"
+                width="1800"
+                height="1200"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="ed-impact-overlay">
+                <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
+                <h2 id="impact-band-title">Less admin.<br/><em>More movement.</em></h2>
+                <p>Bookings, packages, check-ins and follow-ups — all in one clear studio system.</p>
+                <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
               </div>
-              <p>From reformer sessions to yoga classes and group training, StudioTasker helps independent studios stay organized while their clients stay in motion.</p>
             </div>
-            <div className="ed-movement-gallery">
-              {studioMoments.map(({eyebrow,label,href,src,alt})=>(
-                <article className="ed-movement-tile" key={eyebrow}>
-                  <Link className="ed-movement-image" href={href} aria-label={eyebrow.replace(/^\d+ \/ /,"") + " studio software"}>
-                    <img src={src} width="1100" height="760" alt={alt} loading="lazy" decoding="async"/>
-                  </Link>
-                  <div className="ed-movement-caption">
-                    <div><span>{eyebrow}</span><h3>{label}</h3></div>
-                    <Link href={href} aria-label={"Explore "+eyebrow.replace(/^\d+ \/ /,"").toLowerCase()+" software"}><ArrowUpRight size={23}/></Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <p className="ed-movement-credit">Illustrative photography: <a href="https://unsplash.com/photos/a-group-of-people-doing-exercises-in-a-room-qkc9HmIniDw" target="_blank" rel="noopener noreferrer">Ahmet Kurt</a>, <a href="https://unsplash.com/photos/group-of-women-doing-yoga-gJtDg6WfMlQ" target="_blank" rel="noopener noreferrer">bruce mars</a>, and <a href="https://unsplash.com/photos/three-people-doing-lunges-with-dumbbells-in-a-gym-CTDKI038S9Q" target="_blank" rel="noopener noreferrer">Sum Sum</a> / Unsplash. Images do not represent StudioTasker customers.</p>
           </div>
         </section>
 
