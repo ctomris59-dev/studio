@@ -33,7 +33,8 @@
     "seo:logs": "node scripts/analyze-crawl-log.cjs",
     "test:copy": "node scripts/test-copy.cjs",
     "test:timezone-select": "node scripts/test-timezone-select.cjs",
-    "test:pg-env": "node scripts/test-pg-connection-env.cjs"
+    "test:pg-env": "node scripts/test-pg-connection-env.cjs",
+    "db:roles:production": "node db/setup-production-roles.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
