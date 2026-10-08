@@ -66,6 +66,8 @@ async function main(){
   assert((bookingPreview.headers.get("content-type")||"").includes("text/html"));
   assert.equal((await call("/api/auth/me")).status,401);
   assert.equal((await call("/api/studio/people")).status,401);
+  const oversizedWebhook=await call("/api/billing/paddle-webhook",{method:"POST",body:{padding:"A".repeat(260000)}});
+  assert.equal(oversizedWebhook.status,413,"Webhook body must reject oversized payload before validation.");
   const badOrigin=await call("/api/auth/register",{method:"POST",origin:"https://cross-origin.example",body:{email:"x@example.com"}});
   assert.equal(badOrigin.status,403);
   const unique=randomUUID().replace(/-/g,"");
@@ -189,6 +191,19 @@ async function main(){
   assert.deepEqual(detailedMember.data.record.tags,["beginner","evening"]);assert.equal(detailedMember.data.record.waiver_status,"pending");
   assert.equal(detailedMember.data.record.related_contact_role,"Parent");
   const member1=await createMember(a,"Member One"),member2=await createMember(a,"Member Two"),member3=await createMember(a,"Member Pending");
+  const filteredMembers=await call("/api/studio/members?search=Member%20Two",{cookie:a.cookie});
+  assert.equal(filteredMembers.status,200,JSON.stringify(filteredMembers.data));
+  assert.equal(filteredMembers.data.members.length,1,"Member search must include only matching contacts.");
+  assert.equal(filteredMembers.data.members[0].id,member2);
+  const pagedMembers=await call("/api/studio/members?offset=1",{cookie:a.cookie});
+  assert.equal(pagedMembers.status,200);
+  assert(pagedMembers.data.members.every(x=>x.id!==member3),"Pagination must skip the requested offset.");
+  const searchedPeople=await call("/api/studio/people?kind=member&search=Member%20Two",{cookie:a.cookie});
+  assert.equal(searchedPeople.status,200);
+  assert.equal(searchedPeople.data.records.length,1);
+  assert.equal(searchedPeople.data.records[0].id,member2);
+  assert.equal((await call("/api/studio/people?offset=-1",{cookie:a.cookie})).status,400);
+  assert.equal((await call("/api/studio/members?offset=not-a-number",{cookie:a.cookie})).status,400);
   assert.equal((await call("/api/studio/members",{cookie:coachLogin.cookie})).status,403);
   const pack=await call("/api/studio/packages",{method:"POST",cookie:a.cookie,body:{name:"5 Class Pack",description:"Internal entitlement template",credits:5,validDays:30}});
   assert.equal(pack.status,201,JSON.stringify(pack.data));const packId=pack.data.package.id;
