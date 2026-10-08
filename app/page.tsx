@@ -173,8 +173,9 @@ export default function HomePage() {
                 <div><strong>StudioTasker</strong><small>GLOBAL STUDIO MANAGEMENT SOFTWARE</small></div>
               </div>
               <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
-              <h1 id="main-heading">LESS<br/>ADMIN.<br/><span>MORE</span><br/><em>MOVEMENT.</em></h1>
-              <div className="ed-hero-under">
+              <div className="ed-hero-content">
+                <h1 id="main-heading">YOUR<br/>STUDIO.<br/><em>IN SYNC.</em></h1>
+                <div className="ed-hero-under">
                 <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide.</p>
                 <div className="ed-hero-action-stack">
                   <Link className="ed-buy-cta ed-buy-cta-solo" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
@@ -182,6 +183,7 @@ export default function HomePage() {
                     <Link className="ed-demo-compact" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><small>No sign-up</small><ArrowRight size={16}/></Link>
                     <Link className="ed-annual-compact" href="/start?plan=annual"><span>ANNUAL · $33.90/MO</span><small>SAVE $72/YEAR</small><ArrowUpRight size={16}/></Link>
                   </div>
+                </div>
                 </div>
               </div>
             </div>
