@@ -14,6 +14,7 @@ const inviteAPI=read("app/api/studio/invitations/route.ts");
 const preview=read("app/book/preview/page.tsx");
 const onboarding=read("app/workspace/onboarding-panel.tsx");
 const schemaDraft=read("db/schema.sql");
+assert(workspace.includes('role="tablist"')&&workspace.includes('aria-selected={mode===next}'),"Account tab controls need keyboard and aria selected state.");
 assert(workspace.includes('type="email"')&&workspace.includes("registrationLegalAccepted"),"Account forms must validate email and require legal acceptance");
 assert(workspace.includes('"/api/auth/verify/resend"'),"Accounts must be able to resend verification");
 assert(demo.includes("TimezoneSelect"),"Interactive demo must use selectable timezones");

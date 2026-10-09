@@ -178,8 +178,21 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  if(!user)return <section className="rd-workspace-card rd-auth-card">
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
-  <div className="rd-tab-buttons">{modes.map(({mode:next,name})=><button key={next} type="button" className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&<button type="button" className={mode==="register"?"active":""} onClick={()=>{setMode("register");setPendingPlan(p=>p||"monthly");setNote("")}}>Create studio</button>}</div>
-  <form className="rd-form" onSubmit={submitAuth}>
+  <div className="rd-tab-buttons" role="tablist" aria-label="Account actions" onKeyDown={event=>{
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+    const all=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const current=all.indexOf(document.activeElement as HTMLButtonElement);
+    const target=event.key==="Home"?0:event.key==="End"?all.length-1:
+     event.key==="ArrowRight"?(current+1)%all.length:(current+all.length-1)%all.length;
+    if(!all[target])return;
+    event.preventDefault();all[target].focus();all[target].click();
+   }}>{modes.map(({mode:next,name})=><button key={next} id={"auth-tab-"+next} type="button" role="tab" aria-selected={mode===next}
+    aria-controls="auth-form" tabIndex={mode===next?0:-1}
+    className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&
+    <button id="auth-tab-register" type="button" role="tab" aria-selected={mode==="register"} aria-controls="auth-form" tabIndex={mode==="register"?0:-1}
+     className={mode==="register"?"active":""} onClick={()=>{setMode("register");setPendingPlan(p=>p||"monthly");setNote("")}}>Create studio</button>}</div>
+  <form className="rd-form" id="auth-form" role="tabpanel"
+   aria-labelledby={mode==="verify"||mode==="reset"?undefined:"auth-tab-"+mode} onSubmit={submitAuth}>
    {["verify","reset"].includes(mode)&&<p className="rd-tiny">{mode==="verify"?"Verify your email to activate your account.":"Choose a new password. Existing sessions will be revoked."}</p>}
    {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label><label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{STUDIO_FOCUSES.map(f=><option key={f}>{f}</option>)}</select></label></>}
    {["login","register","forgot","resend"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
