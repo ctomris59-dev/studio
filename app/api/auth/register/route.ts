@@ -45,6 +45,11 @@ export async function POST(request:NextRequest){
   return successResponse({ok:true,notice:"Check your email to verify your studio-owner account before signing in."},202);
  }catch(e){
   if((e as {code?:string}).code==="23505")return errorResponse(409,"An account with this email already exists.");
+  // Report only the error class and PostgreSQL code; never log submitted credentials.
+  console.error("Studio registration failure",{
+   name:e instanceof Error?e.name:"unknown",code:(e as {code?:string}).code||"unclassified",
+   message:e instanceof Error?e.message:"unknown"
+  });
   return backendError();
  }
 }
