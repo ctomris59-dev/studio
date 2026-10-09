@@ -456,6 +456,14 @@ async function main(){
   const paid=await signedEvent(eventBody);
   assert.equal(paid.status,200,JSON.stringify(paid.data));
   assert.equal(paid.data.processed,true);
+  const unknownStudioEvent=structuredClone(eventBody);
+  unknownStudioEvent.event_id="evt_"+"x".repeat(26);
+  unknownStudioEvent.data.custom_data.studio_id=randomUUID();
+  const ignoredDeletedStudio=await signedEvent(unknownStudioEvent);
+  assert.equal(ignoredDeletedStudio.status,200,"Delayed signed events for erased studios must not be retried as 503.");
+  assert.equal(ignoredDeletedStudio.data.processed,false);
+  assert.equal(ignoredDeletedStudio.data.reason,"ignored_unknown_studio");
+
   const duplicateWebhook=await signedEvent(eventBody);
   assert.equal(duplicateWebhook.status,200);
   assert.equal(duplicateWebhook.data.processed,false);
