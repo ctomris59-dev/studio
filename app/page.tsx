@@ -1,4 +1,4 @@
-export const dynamic="force-dynamic";
+export const revalidate=300;
 import type {Metadata} from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import {
 import "./editorial.css";
 import { StudioTaskerMark } from "../components/studio-tasker-mark";
 import ProductTourTabs from "../components/product-tour-tabs";
+import {MarketingMobileMenu} from "../components/marketing-mobile-menu";
 import {JsonLd} from "../components/json-ld";
 import {websiteJsonLd} from "../lib/seo";
 import { legalOperator } from "../lib/server/legal-config";
@@ -92,15 +93,7 @@ export default function HomePage() {
           <Identity/>
           <nav aria-label="Main navigation"><a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a><a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
           <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">BUY NOW · $39.90 <ArrowUpRight size={16}/></Link></div>
-          <details className="ed-mobile-menu">
-            <summary>Menu</summary>
-            <nav aria-label="Mobile navigation">
-              <a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a>
-              <a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a>
-              <Link href="/contact">Contact</Link><Link href="/workspace">Customer sign in</Link>
-              <Link href="/app-demo">Try demo</Link><Link href="/start">Start StudioTasker</Link>
-            </nav>
-          </details>
+          <MarketingMobileMenu/>
         </div>
       </header>
 

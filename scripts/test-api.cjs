@@ -121,7 +121,8 @@ async function main(){
   const a=await register("alpine");const b=await register("bluebird");
   studioA=a.studioId;studioB=b.studioId;ownerA=a.userId;ownerB=b.userId;
   const duplicate=await call("/api/auth/register",{method:"POST",body:{email:a.email,password,studioName:"Duplicate Studio",focus:"Pilates",...LEGAL}});
-  assert.equal(duplicate.status,409);
+  assert.equal(duplicate.status,202,"Existing account registration must not reveal existence.");
+  assert(duplicate.data.notice.includes("eligible"));
   // A new staff account is invited by the owner and is limited to this tenant and role.
   const invitedEmail="staff-"+unique+"@example.com";
   const invite=await call("/api/studio/invitations",{method:"POST",cookie:a.cookie,body:{email:invitedEmail,role:"receptionist"}});
@@ -456,6 +457,14 @@ async function main(){
   const paid=await signedEvent(eventBody);
   assert.equal(paid.status,200,JSON.stringify(paid.data));
   assert.equal(paid.data.processed,true);
+  const unknownStudioEvent=structuredClone(eventBody);
+  unknownStudioEvent.event_id="evt_"+"x".repeat(26);
+  unknownStudioEvent.data.custom_data.studio_id=randomUUID();
+  const ignoredDeletedStudio=await signedEvent(unknownStudioEvent);
+  assert.equal(ignoredDeletedStudio.status,200,"Delayed signed events for erased studios must not be retried as 503.");
+  assert.equal(ignoredDeletedStudio.data.processed,false);
+  assert.equal(ignoredDeletedStudio.data.reason,"ignored_unknown_studio");
+
   const duplicateWebhook=await signedEvent(eventBody);
   assert.equal(duplicateWebhook.status,200);
   assert.equal(duplicateWebhook.data.processed,false);

@@ -53,9 +53,9 @@ async function main(){
   await peer.send("Page.enable");
   await peer.send("Runtime.enable");
   const paths=["/","/start","/contact","/app-demo","/yoga-studio-software","/legal/security","/workspace"];
-  for(const width of [1280,390]){
+  for(const width of [1280,1200,1024,820,761,760,390,320]){
    await peer.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
-   for(const route of paths){
+   for(const route of (width===1280||width===390?paths:width===320?["/","/pilates-studio-software"]:["/"])){
     const url=HOST+route;
     const res=await fetch(url);assert.equal(res.status,200,route+" server render failed");
     await peer.send("Page.navigate",{url});
@@ -84,12 +84,21 @@ async function main(){
       const background=lum(getComputedStyle(annual).backgroundColor);
       annualContrast=(Math.max(foreground,background)+.05)/(Math.min(foreground,background)+.05);
      }
+     const menu=document.querySelector(".ed-mobile-menu");
+     const menuVisible=Boolean(menu&&getComputedStyle(menu).display!=="none"&&menu.getBoundingClientRect().height>0);
+     const menuLinks=menu?.querySelectorAll("nav a").length||0;
+     let closesOnEscape=false;
+     if(menuVisible&&menu){
+      menu.open=true;
+      menu.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
+      closesOnEscape=!menu.open;
+     }
      const h1=document.querySelector("main h1");
      return {title:document.title,unknown,total:nodes.length,loaded:loaded.map(x=>x.length),
       weightedFaces:weighted.map(x=>x.length),
       remoteFonts:performance.getEntriesByType("resource").filter(x=>/fonts\\.(googleapis|gstatic)\\.com/.test(x.name)).length,
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth+4,
-      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast};
+      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast,menuVisible,menuLinks,closesOnEscape};
     })()`});
     const result=evaluation.result?.value;
     assert(result,route+" browser evaluate failed: "+JSON.stringify(evaluation));
@@ -101,6 +110,7 @@ async function main(){
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
      assert(result.annualContrast!==null&&result.annualContrast>=4.5,"Annual CTA text must meet WCAG AA contrast, got "+result.annualContrast);
+     if(width<=1200){assert(result.menuVisible&&result.menuLinks>=7,"Tablet/mobile nav missing at "+width+"px");assert(result.closesOnEscape,"Escape must close the main navigation");}
     }
     // Sub-page typography may intentionally use a system font for controls,
     // but the content should not silently fall back across the whole page.
