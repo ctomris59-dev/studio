@@ -59,6 +59,6 @@ export default function ContactForm(){
    {deliveryAvailable===null&&<p role="status">Checking secure message delivery…</p>}
    <p className="ct-form-note">Your message is used to answer your enquiry. Review our <Link href="/legal/privacy">Privacy Policy</Link> for retention and contact details.</p>
    {status&&<p className={"ct-status "+(state==="sent"?"is-success":"is-error")} role="status">{status}{state==="error"&&<> <a href={"mailto:"+SUPPORT_EMAIL}>Email us directly.</a></>}</p>}
-  </form>
+  </form>}
  </div>
 }
