@@ -8,6 +8,7 @@ import {ClassBasedOperations} from "./class-based-operations";
 import {OnboardingPanel} from "./onboarding-panel";
 import {BillingPanel} from "./billing-panel";
 import {StaffInvitations} from "./staff-invitations";
+import {StudioClosureRequest} from "./studio-closure-request";
 import {TimezoneSelect} from "./timezone-select";
 import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS} from "../../lib/legal-versions";
 import {CLASS_FORMATS,STUDIO_FOCUSES,studioPreset,studioPresetProfile} from "../../lib/studio-presets";
@@ -276,6 +277,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
       <button disabled={busy} onClick={()=>void anonymizeArchived(p.id)}>Anonymize personal data</button></div>)}
      <p className="rd-tiny">Only archived contacts can be anonymized. Identity removal is irreversible; accounting references and encrypted backups follow retention rules.</p>
     </div>}
+    {user.role==="owner"&&<StudioClosureRequest/>}
     <ClassBasedOperations role={user.role} section="settings" preferences={prefs}/>
     <StudioOperations role={user.role} section="settings" preferences={prefs}/>
    </section>}
