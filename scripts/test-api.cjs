@@ -5,7 +5,7 @@ const {once}=require("node:events");
 const {randomUUID,randomBytes,scryptSync,createHmac}=require("node:crypto");
 const {Pool}=require("pg");
 const HOST="http://127.0.0.1:3187";
-const LEGAL={termsVersion:"2026-10-06.4",dpaVersion:"2026-10-06.3",privacyVersion:"2026-10-06.4",cancellationVersion:"2026-10-06.3",legalAccepted:true,plan:"monthly"};
+const LEGAL={termsVersion:"2026-10-09.1",dpaVersion:"2026-10-09.1",privacyVersion:"2026-10-09.1",cancellationVersion:"2026-10-09.1",legalAccepted:true,plan:"monthly"};
 function cookieFrom(response){
  const raw=response.headers.get("set-cookie")||"";
  return raw.split(";")[0];
