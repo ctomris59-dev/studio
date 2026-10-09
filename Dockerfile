@@ -19,7 +19,7 @@ FROM node:22-alpine3.24 AS runtime-tools
 # for the app, backup jobs and mail workers; do not ship npm's vulnerable toolchain.
 RUN apk upgrade --no-cache && apk add --no-cache postgresql-client rclone
 RUN set -eux; \
- zlib_version="$(apk info -v zlib | sed -n 's/^zlib-//p')"; \
+ zlib_version="$(apk list --installed zlib | sed -n 's/^zlib-\([^ ]*\).*/\1/p')"; \
  echo "Installed Alpine zlib: $zlib_version"; \
  test -n "$zlib_version"; \
  apk version -t "$zlib_version" "1.3.2-r1"; \
