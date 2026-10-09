@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import {useRef,useState,type KeyboardEvent} from "react";
 import {ArrowRight,CalendarDays,CheckCircle2,Clock3,Users} from "lucide-react";
 
 const tabs=[
@@ -11,13 +11,29 @@ const tabs=[
 
 export default function ProductTourTabs(){
  const [active,setActive]=useState("today");
+ const listRef=useRef<HTMLDivElement>(null);
+ function onKeyboard(event:KeyboardEvent<HTMLDivElement>){
+  const index=tabs.findIndex(tab=>tab.id===active);
+  let next=index;
+  if(event.key==="ArrowRight")next=(index+1)%tabs.length;
+  else if(event.key==="ArrowLeft")next=(index+tabs.length-1)%tabs.length;
+  else if(event.key==="Home")next=0;
+  else if(event.key==="End")next=tabs.length-1;
+  else return;
+  event.preventDefault();
+  setActive(tabs[next].id);
+  const target=listRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next];
+  target?.focus();
+ }
  const tab=tabs.find(x=>x.id===active)||tabs[0];
  const Icon=tab.icon;
  return <div className="ed-tour-tabs">
-  <div className="ed-tour-tablist" role="tablist" aria-label="StudioTasker product areas">
-   {tabs.map(item=>{const I=item.icon;return <button key={item.id} type="button" role="tab" aria-selected={active===item.id} className={active===item.id?"active":""} onClick={()=>setActive(item.id)}><I size={17}/>{item.label}</button>})}
+  <div className="ed-tour-tablist" role="tablist" ref={listRef} onKeyDown={onKeyboard} aria-label="StudioTasker product areas">
+   {tabs.map(item=>{const I=item.icon;return <button key={item.id} id={"tour-tab-"+item.id} type="button" role="tab" aria-selected={active===item.id}
+     aria-controls="tour-panel" tabIndex={active===item.id?0:-1}
+     className={active===item.id?"active":""} onClick={()=>setActive(item.id)}><I size={17}/>{item.label}</button>})}
   </div>
-  <div className="ed-tour-panel" role="tabpanel">
+  <div className="ed-tour-panel" id="tour-panel" role="tabpanel" aria-labelledby={"tour-tab-"+active} tabIndex={0}>
    <div className="ed-tour-copy"><span className="ed-tour-icon"><Icon size={22}/></span><h3>{tab.title}</h3><p>{tab.text}</p><a href="/app-demo?tour=1">WATCH THE 90-SEC DEMO <ArrowRight size={16}/></a></div>
    <div className="ed-tour-ui">
     <div className="ed-tour-ui-head"><div><strong>Willow Studio</strong><small>{tab.label.toUpperCase()} / SAMPLE WORKSPACE</small></div><span>LIVE PREVIEW ↗</span></div>
