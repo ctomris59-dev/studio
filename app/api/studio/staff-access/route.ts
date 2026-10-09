@@ -6,10 +6,10 @@ export const runtime="nodejs";
 export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner"],async(client,auth)=>{
-   const rows=await client.query(`SELECT su.user_id AS id,u.email,su.role,u.disabled_at,u.disabled_reason,u.disabled_by
+   const rows=await client.query(`SELECT su.user_id AS id,u.email,su.role,u.disabled_at,u.disabled_reason,u.disabled_by,(u.disabled_reason='owner_revoked' AND u.disabled_by=$2) AS can_restore
      FROM studio_users su JOIN app_users u ON u.id=su.user_id
      WHERE su.studio_id=$1 AND su.role IN ('manager','instructor','receptionist')
-     ORDER BY u.email LIMIT 200`,[auth.studioId]);
+     ORDER BY u.email LIMIT 200`,[auth.studioId,auth.userId]);
    return rows.rows;
   });
   return result.access.ok?successResponse({staff:result.value}):errorResponse(result.access.status,result.access.message);
