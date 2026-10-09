@@ -35,7 +35,8 @@
     "test:timezone-select": "node scripts/test-timezone-select.cjs",
     "test:pg-env": "node scripts/test-pg-connection-env.cjs",
     "db:roles:production": "node db/setup-production-roles.cjs",
-    "test:mail": "node scripts/test-mail.cjs"
+    "test:mail": "node scripts/test-mail.cjs",
+    "test:ops": "node scripts/test-ops.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

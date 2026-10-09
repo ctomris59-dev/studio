@@ -69,6 +69,8 @@ jobs:
         run: npm run test:copy
       - name: Test PostgreSQL CLI connection settings
         run: npm run test:pg-env
+      - name: Test systemd maintenance templates
+        run: npm run test:ops
       - name: Test basic accessibility and mobile layout guards
         run: npm run test:ui
       - name: Test technical SEO invariants

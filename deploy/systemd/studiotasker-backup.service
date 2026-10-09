@@ -1,0 +1,19 @@
+[Unit]
+Description=StudioTasker Encrypted PostgreSQL backup
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=studiotasker
+Group=studiotasker
+WorkingDirectory=/srv/studiotasker
+EnvironmentFile=/etc/studiotasker/studiotasker.env
+ExecStart=/usr/bin/npm run backup:create
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/studiotasker
+UMask=0077
+TimeoutStartSec=3600

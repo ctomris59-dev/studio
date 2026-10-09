@@ -1,0 +1,18 @@
+[Unit]
+Description=StudioTasker SMTP mail outbox
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=studiotasker
+Group=studiotasker
+WorkingDirectory=/srv/studiotasker
+EnvironmentFile=/etc/studiotasker/studiotasker.env
+ExecStart=/usr/bin/npm run jobs:mail
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+UMask=0077
+TimeoutStartSec=300

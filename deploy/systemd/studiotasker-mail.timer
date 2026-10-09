@@ -1,0 +1,11 @@
+[Unit]
+Description=Scheduled SMTP mail outbox
+
+[Timer]
+OnCalendar=*:*:00
+Persistent=true
+AccuracySec=10s
+Unit=studiotasker-mail.service
+
+[Install]
+WantedBy=timers.target
