@@ -103,6 +103,23 @@ async function main(){
   assert((workspaceFirst.headers.get("cache-control")||"").includes("no-store"),"Nonce responses must not be reused through caching.");
   const workspaceHtml=await workspaceFirst.text();
   assert(workspaceHtml.includes('nonce="'+firstNonce+'"'),"Next hydration scripts should receive their matching CSP nonce.");
+  const reporting=pilatesLanding.headers.get("reporting-endpoints")||"";
+  assert(reporting.includes("studio-csp=")&&reporting.includes("/api/security/csp-report"),"Public pages must advertise CSP report endpoint.");
+  assert((pilatesLanding.headers.get("content-security-policy")||"").includes("report-to studio-csp"),"CSP must refer to its named report endpoint.");
+  const rawReport=await fetch(HOST+"/api/security/csp-report",{
+   method:"POST",
+   headers:{"Content-Type":"application/reports+json"},
+   body:JSON.stringify([{type:"csp-violation",body:{effectiveDirective:"script-src-elem",documentURL:"https://example.com/?secret=DO_NOT_LOG"}}])
+  });
+  assert.equal(rawReport.status,204,"Well-formed anonymous violation should be accepted.");
+  assert((rawReport.headers.get("cache-control")||"").includes("no-store"),"Report collector responses must not be cached.");
+  const tooLargeReport=await fetch(HOST+"/api/security/csp-report",{
+   method:"POST",headers:{"Content-Type":"application/csp-report"},
+   body:"X".repeat(17_000)
+  });
+  assert.equal(tooLargeReport.status,413,"CSP report receiver must cap unauthenticated input.");
+  assert.equal((await fetch(HOST+"/api/security/csp-report")).status,405,"CSP reports must accept POST only.");
+  assert.equal((await fetch(HOST+"/api/security/csp-report",{method:"POST",headers:{"Content-Type":"text/plain"},body:"{}"})).status,415);
   assert.equal(health.headers.get("cache-control"),"private, no-store","Database readiness must not be cached.");
   assert((health.headers.get("x-robots-tag")||"").includes("noindex"),"API responses must not be indexed.");
 
@@ -652,6 +669,8 @@ async function main(){
   assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password,trustDevice:true}})).status,200,"A genuine owner on a recognized device must recover from malicious email-only lockout.");
   const signedOut=await call("/api/auth/logout",{method:"POST",cookie:known.cookie+"; "+familiar});
   assert.equal(signedOut.status,200);
+  assert.equal(signedOut.headers.get("clear-site-data"),'"cache", "storage"', "Successful logout must clear origin-local browser caches and storage.");
+  assert(!signedOut.headers.get("clear-site-data")?.includes('"cookies"'),"Clearing all subdomain cookies would unintentionally sign users out of sibling services.");
   assert((signedOut.headers.get("set-cookie")||"").includes("studiotasker_device="),"Logout must clear the trusted-device cookie.");
   const deviceHash=require("node:crypto").createHash("sha256").update(deviceValue).digest("hex");
   assert.equal((await admin.query("SELECT count(*)::int AS n FROM auth_trusted_devices WHERE token_hash=$1",[deviceHash])).rows[0].n,0,"Logout must revoke the trusted device in DB.");

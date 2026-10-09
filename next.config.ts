@@ -22,7 +22,9 @@ const contentSecurityPolicy=[
  "connect-src 'self' https://*.paddle.com https://*.paddlepayments.com",
  "frame-src https://*.paddle.com https://*.paddlepayments.com",
  "media-src 'self' blob:",
- "upgrade-insecure-requests"
+ "upgrade-insecure-requests",
+ "report-uri /api/security/csp-report",
+ "report-to studio-csp"
 ].join("; ");
 // HSTS subdomain/preload scope is irreversible for clients over its max-age.
 // Only opt in when every existing/future subdomain is HTTPS-only and the
