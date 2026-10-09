@@ -4,7 +4,7 @@ const compiled={exports:{}};
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 new Function("require","module","exports",js)(name=>name==="server-only"?{}:require(name),compiled,compiled.exports);
 const gate=compiled.exports.commercialRegistrationReady;
-const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT","LAUNCH_PADDLE_ACCOUNT_APPROVED","LAUNCH_LEGAL_REVIEW_CONFIRMED","LAUNCH_TAX_REVIEW_CONFIRMED",
+const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT","LAUNCH_PADDLE_ACCOUNT_APPROVED","LAUNCH_LEGAL_REVIEW_CONFIRMED","LAUNCH_TAX_REVIEW_CONFIRMED","TRUST_PROXY_IP_HEADERS","LAUNCH_TRUSTED_PROXY_VERIFIED","LOGIN_RATE_HMAC_KEY",
  "DATABASE_URL","SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD",
  "PADDLE_ENV","PADDLE_API_KEY","NEXT_PUBLIC_PADDLE_CLIENT_TOKEN","PADDLE_MONTHLY_PRICE_ID","PADDLE_ANNUAL_PRICE_ID","PADDLE_WEBHOOK_SECRET",
  "BACKUP_DATABASE_URL","BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR",
@@ -35,7 +35,14 @@ try{
  process.env.LAUNCH_PADDLE_ACCOUNT_APPROVED="true";
  process.env.LAUNCH_LEGAL_REVIEW_CONFIRMED="true";
  process.env.LAUNCH_TAX_REVIEW_CONFIRMED="true";
- assert.equal(gate(),true,"Fully configured live Paddle setup with explicit commercial reviews may enable registration");
+ assert.equal(gate(),false,"Commercial signup must refuse an unverified reverse proxy.");
+ process.env.TRUST_PROXY_IP_HEADERS="true";
+ process.env.LAUNCH_TRUSTED_PROXY_VERIFIED="true";
+ process.env.LOGIN_RATE_HMAC_KEY="c".repeat(40);
+ assert.equal(gate(),true,"Fully configured live Paddle setup with verified proxy and commercial reviews may enable registration");
+ process.env.LOGIN_RATE_HMAC_KEY="short";
+ assert.equal(gate(),false,"Weak IP hash secrets must block public signup.");
+ process.env.LOGIN_RATE_HMAC_KEY="c".repeat(40);
 
  process.env.PADDLE_ENV="sandbox";
  assert.equal(gate(),false,"Sandbox mode must never enable public paid registration");

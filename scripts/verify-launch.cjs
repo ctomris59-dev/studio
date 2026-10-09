@@ -20,8 +20,10 @@ if(process.env.BILLING_ALLOW_LOCAL_TEST==="true")missing.push("BILLING_ALLOW_LOC
 const databaseHost=(()=>{try{return new URL(process.env.DATABASE_URL||"").hostname}catch{return ""}})();
 if(!["localhost","127.0.0.1","::1"].includes(databaseHost)&&process.env.DATABASE_SSL_REQUIRE!=="true")
  missing.push("Remote database requires DATABASE_SSL_REQUIRE=true");
-if(process.env.TRUST_PROXY_IP_HEADERS==="true"&&process.env.LAUNCH_TRUSTED_PROXY_VERIFIED!=="true")
- missing.push("Trusted proxy IP header overwrite has not been verified");
+if(process.env.TRUST_PROXY_IP_HEADERS!=="true"||process.env.LAUNCH_TRUSTED_PROXY_VERIFIED!=="true")
+ missing.push("Trusted reverse proxy must overwrite X-Real-IP and X-Forwarded-For and be independently verified");
+if((process.env.LOGIN_RATE_HMAC_KEY||"").length<32)
+ missing.push("LOGIN_RATE_HMAC_KEY must be a random 32+ character secret");
 console.log(missing.length?"Paid launch configuration incomplete:\n- "+missing.join("\n- "):
  "Technical environment gate passed. Live Paddle checkout, tax/MoR behavior, SMTP delivery, backup restore, privacy/security procedures and Turkish legal/tax treatment still require real-environment validation and appropriate professional review.");
 if(missing.length)process.exitCode=1;
