@@ -13,7 +13,7 @@ export async function POST(request:NextRequest){
  if(!email||!emailIsValid(normalizeEmail(email)))return errorResponse(400,"Enter a valid email.");
  const budget=await publicAbuseGuard(request,"password-reset",email);
  if(budget)return budget;
- const verification=await verifyPublicChallenge(request,data);
+ const verification=await verifyPublicChallenge(request,data||{});
  if(verification)return verification;
  try{
   const origin=publicMailOrigin();
