@@ -199,8 +199,8 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
    {classHasMore&&<button disabled={busy} type="button" onClick={()=>void loadMoreClasses()}>Load more classes</button>}
    {selected&&<div className="rd-ops-subsection">
      {canManage&&!classStarted&&selected.status==="scheduled"&&<div className="rd-ops-section">
-      <button type="button" disabled={busy} onClick={startClassEdit}>Edit selected class</button>
-      <button type="button" disabled={busy} onClick={cancelEntire}>Cancel entire class and refund credits</button>
+      <button type="button" className="rd-class-edit" disabled={busy} onClick={startClassEdit}>Edit selected class</button>
+      <button type="button" className="rd-class-cancel" disabled={busy} onClick={cancelEntire}>Cancel entire class and refund credits</button>
       {editingClass&&<form className="rd-form" onSubmit={saveClassEdit}>
        <label>Class name<input required minLength={2} value={classEdit.title} onChange={e=>setClassEdit(v=>({...v,title:e.target.value}))}/></label>
        <label>Instructor name<input required minLength={2} value={classEdit.instructor} onChange={e=>setClassEdit(v=>({...v,instructor:e.target.value,staffId:"",substituteStaffId:""}))}/></label>
