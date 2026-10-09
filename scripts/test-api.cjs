@@ -64,6 +64,15 @@ async function main(){
   const bookingPreview=await call("/book/preview");
   assert.equal(bookingPreview.status,200,"Self-service booking preview must render.");
   assert((bookingPreview.headers.get("content-type")||"").includes("text/html"));
+  const contactStatus=await call("/api/contact");
+  assert.equal(contactStatus.status,200,"Public contact preflight must be available.");
+  assert.equal(typeof contactStatus.data.deliveryAvailable,"boolean");
+  if(!contactStatus.data.deliveryAvailable){
+   const unavailable=await call("/api/contact",{method:"POST",body:{
+    name:"Audit Tester",email:"audit@example.com",message:"Testing missing delivery configuration",topic:"Other"
+   }});
+   assert.equal(unavailable.status,424,"Contact must not pretend an unavailable email was delivered.");
+  }
   const health=await call("/api/health");
   assert.equal(health.status,200,"Readiness must verify restricted database access.");
   assert.equal(health.data.status,"ready");
@@ -557,6 +566,17 @@ async function main(){
   assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Revoked staff session must immediately lose access.");
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,401,"Revoked staff must not log back in.");
+
+  // Closure requests must be explicit, tenant scoped and idempotent.
+  const noConfirmation=await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{confirmation:"CLOSE MY STUDIO",exportAcknowledged:false}});
+  assert.equal(noConfirmation.status,400);
+  assert.equal((await call("/api/studio/privacy/closure",{cookie:coachLogin.cookie})).status,403);
+  const requestClosure=await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{confirmation:"CLOSE MY STUDIO",exportAcknowledged:true}});
+  assert.equal(requestClosure.status,202,JSON.stringify(requestClosure.data));
+  assert.equal((await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{confirmation:"CLOSE MY STUDIO",exportAcknowledged:true}})).status,202);
+  const closureAudit=await admin.query("SELECT count(*)::int AS count FROM activity_log WHERE studio_id=$1 AND action='privacy.studio_closure_requested'",[studioA]);
+  assert.equal(closureAudit.rows[0].count,1,"Repeated closure request must not create duplicate actions.");
+  assert.equal((await call("/api/auth/me",{cookie:a.cookie})).status,200,"A closure request is not immediate deletion.");
 
   // Password reset is one-time and revokes all sessions belonging to the user.
   const forgot=await call("/api/auth/password/forgot",{method:"POST",body:{email:a.email}});
