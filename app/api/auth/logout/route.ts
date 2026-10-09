@@ -16,7 +16,14 @@ export async function POST(request:NextRequest){
   });}
   catch{return backendError()}
  }
- const response=NextResponse.json({ok:true},{headers:{"Cache-Control":"no-store"}});
+ // Do not clear "cookies" here: that directive also deletes cookies on
+ // sibling subdomains, potentially terminating unrelated accounts. Auth and
+ // device cookies are expired explicitly below, while origin-local storage
+ // and cache are cleared on successful sign-out.
+ const response=NextResponse.json({ok:true},{headers:{
+  "Cache-Control":"no-store",
+  "Clear-Site-Data":'\"cache\", \"storage\"'
+ }});
  response.cookies.set(SESSION_COOKIE,"",{path:"/",maxAge:0,httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax"});
  response.cookies.set("studiotasker_device","",{path:"/",maxAge:0,httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax"});
  return response;
