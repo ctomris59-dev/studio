@@ -10,7 +10,7 @@ const staffRoles=["manager","instructor","receptionist"] as const;
 export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner"],async(client,auth)=>{
-   const rows=await client.query("SELECT id,email,role,created_at,expires_at,accepted_at FROM staff_invitations WHERE studio_id=$1 AND created_at>now()-interval '30 days' ORDER BY created_at DESC LIMIT 30",[auth.studioId]);
+   const rows=await client.query("SELECT id,email,role,created_at,expires_at,accepted_at,revoked_at FROM staff_invitations WHERE studio_id=$1 AND created_at>now()-interval '30 days' ORDER BY created_at DESC LIMIT 30",[auth.studioId]);
    return rows.rows;
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
@@ -46,7 +46,7 @@ export async function POST(request:NextRequest){
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
   if(result.value?.limited)return errorResponse(429,"Too many invitations. Please try again later.");
-  if(result.value?.existing)return errorResponse(409,"This email already has an account. Multi-studio invitations are not yet supported.");
-  return successResponse({ok:true,notice:"Invitation queued. The recipient has 48 hours to create a staff account."},202);
+  if(result.value?.existing)return successResponse({ok:true,notice:"If eligible, an invitation will be emailed."},202);
+  return successResponse({ok:true,notice:"If eligible, an invitation will be emailed."},202);
  }catch{return backendError()}
 }
