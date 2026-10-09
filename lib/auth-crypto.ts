@@ -1,11 +1,15 @@
 import {randomBytes,scrypt as scryptCallback,timingSafeEqual,createHash,createHmac} from "node:crypto";
 import {isIP} from "node:net";
-import {promisify} from "node:util";
-const scrypt=promisify(scryptCallback);
+// Use the native callback overload; promisify's type only exposes three arguments.
 export const SESSION_LIFETIME_SECONDS=60*60*24*14;
 const KEY_LENGTH=64;
 const V2={N:131072,r:8,p:1,maxmem:256*1024*1024};
 const V1={N:16384,r:8,p:1,maxmem:32*1024*1024};
+function derive(password:string,salt:Buffer,options:typeof V2):Promise<Buffer>{
+ return new Promise((resolve,reject)=>scryptCallback(password,salt,KEY_LENGTH,options,(error,derived)=>{
+  if(error)reject(error);else resolve(derived);
+ }));
+}
 export const needsPasswordRehash=(hash:string)=>hash.startsWith("scrypt$v1$");
 export const DUMMY_PASSWORD_HASH="scrypt$v2$"+"0".repeat(48)+"$"+"0".repeat(128);
 export function trustedLoginIp(header:string|null):string|null{
@@ -24,14 +28,14 @@ export function validatePassword(password:string):boolean{
 export async function passwordHash(password:string):Promise<string>{
  if(!validatePassword(password))throw new Error("Password must have 12–128 characters");
  const salt=randomBytes(24);
- const derived=await scrypt(password,salt,KEY_LENGTH,V2) as Buffer;
+ const derived=await derive(password,salt,V2);
  return "scrypt$v2$"+salt.toString("hex")+"$"+derived.toString("hex");
 }
 export async function passwordMatches(password:string,stored:string):Promise<boolean>{
  if(!password||password.length>128||typeof stored!=="string")return false;
  const match=/^scrypt\$(v1|v2)\$([a-f0-9]{48})\$([a-f0-9]{128})$/.exec(stored);
  if(!match)return false;
- const hashed=await scrypt(password,Buffer.from(match[2],"hex"),KEY_LENGTH,match[1]==="v2"?V2:V1) as Buffer;
+ const hashed=await derive(password,Buffer.from(match[2],"hex"),match[1]==="v2"?V2:V1);
  return timingSafeEqual(hashed,Buffer.from(match[3],"hex"));
 }
 export const normalizeEmail=(email:string)=>email.trim().toLowerCase();
