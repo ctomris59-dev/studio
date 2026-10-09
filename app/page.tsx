@@ -97,7 +97,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <section className="ed-hero" aria-labelledby="main-heading">
           <div className="ed-container ed-hero-grid">
             <div className="ed-hero-copy">
