@@ -1,11 +1,11 @@
 export const LEGAL_VERSIONS={
- terms:"2026-10-06.4",
- dpa:"2026-10-06.3",
- privacy:"2026-10-06.4",
- cookies:"2026-10-06.2",
- security:"2026-10-06.2",
- cancellation:"2026-10-06.3",
- subprocessors:"2026-10-06.3",
+ terms:"2026-10-09.1",
+ dpa:"2026-10-09.1",
+ privacy:"2026-10-09.1",
+ cookies:"2026-10-09.1",
+ security:"2026-10-09.1",
+ cancellation:"2026-10-09.1",
+ subprocessors:"2026-10-09.1",
  turkiyePrivacy:"2026-10-06"
 } as const;
 
