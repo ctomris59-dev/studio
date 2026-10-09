@@ -11,26 +11,43 @@ type BookingBrand={name:string;focus:string;accentColor:string;memberTerm:string
 const defaultBrand:BookingBrand={name:"Willow Studio",focus:"Pilates · Yoga · Barre",accentColor:"#334BDD",memberTerm:"Members",classTerm:"Classes",creditTerm:"Credits",privacyPolicyUrl:"https://willow.example/privacy"};
 const singular=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 
-const classes:DemoClass[]=[
- {id:"c1",day:"WED",date:"07 OCT",time:"07:30",title:"Morning Flow",coach:"Sophie M.",duration:"50 min",spots:2,capacity:8},
- {id:"c2",day:"WED",date:"07 OCT",time:"12:30",title:"Midday Sculpt",coach:"Ava R.",duration:"50 min",spots:3,capacity:8},
- {id:"c3",day:"THU",date:"08 OCT",time:"09:00",title:"Reformer Foundations",coach:"Olivia K.",duration:"50 min",spots:1,capacity:8},
- {id:"c4",day:"THU",date:"08 OCT",time:"17:30",title:"Evening Reset",coach:"Sophie M.",duration:"50 min",spots:4,capacity:8},
- {id:"c5",day:"FRI",date:"09 OCT",time:"08:00",title:"Barre Foundations",coach:"Olivia K.",duration:"45 min",spots:5,capacity:10},
- {id:"c6",day:"FRI",date:"09 OCT",time:"18:00",title:"Friday Unwind",coach:"Ava R.",duration:"50 min",spots:2,capacity:8},
+const sampleClasses:Omit<DemoClass,"day"|"date">[]=[
+ {id:"c1",time:"07:30",title:"Morning Flow",coach:"Sophie M.",duration:"50 min",spots:2,capacity:8},
+ {id:"c2",time:"12:30",title:"Midday Sculpt",coach:"Ava R.",duration:"50 min",spots:3,capacity:8},
+ {id:"c3",time:"09:00",title:"Reformer Foundations",coach:"Olivia K.",duration:"50 min",spots:1,capacity:8},
+ {id:"c4",time:"17:30",title:"Evening Reset",coach:"Sophie M.",duration:"50 min",spots:4,capacity:8},
+ {id:"c5",time:"08:00",title:"Barre Foundations",coach:"Olivia K.",duration:"45 min",spots:5,capacity:10},
+ {id:"c6",time:"18:00",title:"Friday Unwind",coach:"Ava R.",duration:"50 min",spots:2,capacity:8}
 ];
+function upcomingLondonDays():{day:string;date:string;label:string;number:string;month:string}[]{
+ const now=new Date();
+ const london=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(now);
+ const item=(key:string)=>Number(london.find(x=>x.type===key)?.value||"0");
+ return Array.from({length:3},(_,i)=>{
+  const date=new Date(Date.UTC(item("year"),item("month")-1,item("day")+i,12));
+  const day=new Intl.DateTimeFormat("en-GB",{timeZone:"UTC",weekday:"short"}).format(date).toUpperCase();
+  const number=new Intl.DateTimeFormat("en-GB",{timeZone:"UTC",day:"2-digit"}).format(date);
+  const month=new Intl.DateTimeFormat("en-GB",{timeZone:"UTC",month:"short"}).format(date).toUpperCase();
+  return {day,date:number+" "+month,label:day+" "+number+" "+month,number,month};
+ });
+}
 
 export default function BookingPreview(){
- const [selectedDay,setSelectedDay]=useState("WED 07 OCT");
+ const [days,setDays]=useState<ReturnType<typeof upcomingLondonDays>>([]);
+ const [selectedDay,setSelectedDay]=useState("");
  const [selectedId,setSelectedId]=useState<string|null>(null);
  const [stage,setStage]=useState<Stage>("choose");
  const [name,setName]=useState("");
  const [email,setEmail]=useState("");
  const [credits,setCredits]=useState(4);
  const [brand,setBrand]=useState<BookingBrand>(defaultBrand),[logoUrl,setLogoUrl]=useState<string|null>(null),[demoBookings,setDemoBookings]=useState(0);
+ useEffect(()=>{
+  const dates=upcomingLondonDays();setDays(dates);setSelectedDay(dates[0]?.label||"");
+ },[]);
  useEffect(()=>{try{const saved=sessionStorage.getItem("studiotasker-demo-settings");if(saved)setBrand({...defaultBrand,...JSON.parse(saved)});const logo=sessionStorage.getItem("studiotasker-demo-logo");if(logo)setLogoUrl(logo);const booked=Number(sessionStorage.getItem("studiotasker-booking-demo-count")||"0");const left=Number(sessionStorage.getItem("studiotasker-booking-demo-credits")||"4");setDemoBookings(Number.isFinite(booked)?Math.max(0,Math.min(3,booked)):0);setCredits(Number.isFinite(left)?Math.max(0,Math.min(4,left)):4)}catch{}},[]);
+ const classes=useMemo(()=>sampleClasses.map((item,i)=>({...item,day:days[Math.floor(i/2)]?.day||"",date:days[Math.floor(i/2)]?.date||""})),[days]);
  const selected=classes.find(x=>x.id===selectedId)??null;
- const visible=useMemo(()=>classes.filter(x=>(x.day+" "+x.date)===selectedDay),[selectedDay]);
+ const visible=useMemo(()=>classes.filter(x=>(x.day+" "+x.date)===selectedDay),[classes,selectedDay]);
 
  function continueToDetails(){
   if(!selected)return;
@@ -71,12 +88,12 @@ export default function BookingPreview(){
     {stage==="choose"&&<>
      <div className="sbp-heading"><span>01 / CHOOSE A {singular(brand.classTerm).toUpperCase()}</span><h2>Book your next<br/><em>{singular(brand.classTerm).toLowerCase()}.</em></h2><p>Select a day, then choose one available {singular(brand.classTerm).toLowerCase()}.</p></div>
      <div className="sbp-days">
-      {["WED 07 OCT","THU 08 OCT","FRI 09 OCT"].map((d,i)=><button key={d} className={selectedDay===d?"active":""} onClick={()=>{setSelectedDay(d);setSelectedId(null)}}>
-       <small>{["WED","THU","FRI"][i]}</small><strong>{["07","08","09"][i]}</strong><span>OCT</span>
+      {days.map(d=><button key={d.label} className={selectedDay===d.label?"active":""} onClick={()=>{setSelectedDay(d.label);setSelectedId(null)}} aria-pressed={selectedDay===d.label}>
+       <small>{d.day}</small><strong>{d.number}</strong><span>{d.month}</span>
       </button>)}
      </div>
      <div className="sbp-list">
-      {visible.map(c=><button key={c.id} className={"sbp-class "+(selectedId===c.id?"selected":"")} onClick={()=>setSelectedId(c.id)}>
+      {visible.map(c=><button key={c.id} className={"sbp-class "+(selectedId===c.id?"selected":"")} aria-pressed={selectedId===c.id} onClick={()=>setSelectedId(c.id)}>
        <span className="sbp-time">{c.time}</span>
        <span className="sbp-class-main"><b>{c.title}</b><small>with {c.coach} · {c.duration}</small></span>
        <span className="sbp-spots"><b>{c.spots}</b><small>spots left</small></span>
