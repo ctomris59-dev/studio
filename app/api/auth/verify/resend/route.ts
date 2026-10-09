@@ -1,3 +1,4 @@
+import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
 import {sameOrigin,jsonObject,stringField,errorResponse,successResponse,backendError} from "@/lib/server/responses";
@@ -10,6 +11,8 @@ export async function POST(request:NextRequest){
  if(!dbIsReady())return errorResponse(503,"Account service unavailable.");
  const data=await jsonObject(request),raw=data?stringField(data,"email",160):null;
  if(!raw||!emailIsValid(normalizeEmail(raw)))return errorResponse(400,"Enter a valid email.");
+ const budget=await publicAbuseGuard(request,"verify-resend",raw);
+ if(budget)return budget;
  try{
   const email=normalizeEmail(raw),origin=publicMailOrigin();
   await inTransaction(async client=>{

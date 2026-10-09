@@ -701,6 +701,28 @@ async function main(){
 
   assert.equal((await call("/api/auth/logout",{method:"POST",cookie:signin.cookie})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,401,"Revoked session should not work");
+  // Anonymous email floods must receive 429, not become unbounded SMTP jobs
+  // or DB pool exhaustion. Use unregistered addresses to avoid real mail.
+  for(const [endpoint,label] of [
+   ["/api/auth/password/forgot","password-reset"],
+   ["/api/auth/verify/resend","verify-resend"]
+  ]){
+   const burst=await Promise.all(Array.from({length:40},(_,n)=>
+    call(endpoint,{method:"POST",body:{email:label+"-"+unique+"-"+n+"@example.com"}})));
+   assert(burst.every(x=>x.status===200||x.status===429),
+     label+" burst must avoid 503 while throttling: "+JSON.stringify(burst.map(x=>x.status)));
+   assert(burst.some(x=>x.status===429),label+" flood must be throttled.");
+  }
+  const oversubscribed=await Promise.all(Array.from({length:25},()=>call("/api/auth/register",{
+   method:"POST",body:{email:a.email,password,studioName:"Flood Protection",focus:"Pilates",...LEGAL}
+  })));
+  assert(oversubscribed.some(x=>x.status===429),"Registration bursts must be rate limited.");
+  assert(oversubscribed.every(x=>[202,429].includes(x.status)),
+   "Registration burst must not report backend 503: "+JSON.stringify(oversubscribed.map(x=>x.status)));
+  // Unsupported media types may not be treated as JSON for public endpoints.
+  const unsupported=await fetch(HOST+"/api/auth/password/forgot",{method:"POST",
+   headers:{"Origin":HOST,"Content-Type":"text/plain"},body:JSON.stringify({email:a.email})});
+  assert.equal(unsupported.status,400);
   console.log("HTTP integration passed: auth, tenant isolation, personalization, logo isolation, studio operations and billing.");
  }catch(e){
   throw Error(e.message+"\nServer logs:\n"+logs.join("").slice(-2500));

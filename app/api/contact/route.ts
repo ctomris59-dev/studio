@@ -1,3 +1,4 @@
+import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import nodemailer from "nodemailer";
 import {createHash} from "node:crypto";
@@ -40,6 +41,8 @@ export async function POST(request:NextRequest){
  // Fail honestly when delivery is unavailable; never claim a missing email was sent.
  // The public contact page switches to an email-app fallback based on GET above.
  if(!deliveryReady())return errorResponse(424,"Message delivery is not configured. Please email "+SUPPORT_EMAIL+" directly.");
+ const quota=await publicAbuseGuard(request,"contact",email);
+ if(quota)return quota;
  const trustedIp=trustedLoginIp(request.headers.get("x-real-ip"));
  // Keep a global budget and an independent sender budget even without an
  // optional IP-HMAC secret. A valid proxy + secret adds a tighter IP budget.

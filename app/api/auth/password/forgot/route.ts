@@ -1,3 +1,4 @@
+import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {inTransaction,dbIsReady} from "@/lib/server/database";
 import {jsonObject,stringField,errorResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
@@ -9,6 +10,8 @@ export async function POST(request:NextRequest){
  if(!dbIsReady())return errorResponse(503,"Database unavailable.");
  const data=await jsonObject(request),email=data?stringField(data,"email",160):null;
  if(!email||!emailIsValid(normalizeEmail(email)))return errorResponse(400,"Enter a valid email.");
+ const budget=await publicAbuseGuard(request,"password-reset",email);
+ if(budget)return budget;
  try{
   const origin=publicMailOrigin();
   await inTransaction(async client=>{
