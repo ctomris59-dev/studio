@@ -120,3 +120,50 @@ jobs:
         run: npm run test:api
       - name: Real Chromium mobile and typography smoke
         run: npm run test:browser
+
+  runtime-image:
+    name: Full Docker runtime, read-only and reduced-privilege smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build actual production image from refreshed base
+        run: |
+          docker build --pull \
+            --build-arg NEXT_PUBLIC_SITE_URL=https://www.studiotasker.com \
+            -t studiotasker-runtime-smoke .
+      - name: Verify production runtime filesystem, startup and public routes
+        run: |
+          set -euo pipefail
+          docker run --rm --entrypoint sh studiotasker-runtime-smoke -ec '
+            test "$(id -u)" != "0"
+            command -v node && command -v pg_dump && command -v rclone
+            ! command -v npm && ! command -v npx
+            test ! -e /usr/local/lib/node_modules/npm
+            test -f /app/node_modules/next/dist/bin/next
+          '
+          docker run --detach --name st-smoke \
+            --read-only --tmpfs /tmp:rw,nosuid,nodev,size=64m \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --pids-limit 128 --memory 700m --cpus 1 \
+            -p 127.0.0.1:3198:3000 studiotasker-runtime-smoke
+          trap 'docker logs st-smoke || true; docker rm -f st-smoke || true' EXIT
+          ready=0
+          for i in $(seq 1 50); do
+            if curl --fail --silent --output /tmp/st-home.html http://127.0.0.1:3198/; then
+              ready=1
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' st-smoke)" != true ]; then
+              echo "Runtime exited before HTTP readiness"
+              exit 1
+            fi
+            sleep 2
+          done
+          test "$ready" = 1
+          grep -q 'StudioTasker' /tmp/st-home.html
+          curl --fail --silent http://127.0.0.1:3198/.well-known/security.txt | grep -q 'Contact:'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3198/_next/webpack-hmr)" != 200
+          docker inspect -f 'Readonly={{.HostConfig.ReadonlyRootfs}} CapDrop={{json .HostConfig.CapDrop}} SecurityOpt={{json .HostConfig.SecurityOpt}}' st-smoke
+          echo "Full production Docker image started under read-only filesystem, no privileges and served HTTP."

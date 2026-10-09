@@ -1,4 +1,4 @@
-import type {NextConfig} from "next";
+/** @type {import("next").NextConfig} */
 
 const noIndex=[
  {key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"},
@@ -59,7 +59,7 @@ const secure=[
  {key:"Cache-Control",value:"private, no-store"}
 ];
 
-const nextConfig:NextConfig={
+const nextConfig={
  reactStrictMode:true,
  poweredByHeader:false,
  trailingSlash:false,
