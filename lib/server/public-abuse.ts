@@ -16,7 +16,6 @@ const LIMITS:Record<Scope,{burst:number;global:number;sender:number;ip:number}>=
  contact:{burst:15,global:150,sender:5,ip:12}
 };
 const WINDOW_MS=60_000;
-const DATABASE_WINDOW="15 minutes";
 const windows=new Map<string,{count:number;expires:number}>();
 function key(value:string){
  const secret=process.env.LOGIN_RATE_HMAC_KEY;
