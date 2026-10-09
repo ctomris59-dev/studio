@@ -10,3 +10,5 @@ for(const name of ["studiotasker-mail","studiotasker-cleanup","studiotasker-back
 const readme=fs.readFileSync("deploy/systemd/README.md","utf8");
 assert(readme.includes("off-site")&&readme.includes("TRUST_PROXY_IP_HEADERS"));
 console.log("Systemd mail, cleanup and encrypted-backup job templates passed basic checks.");
+
+assert(fs.readFileSync("Dockerfile","utf8").includes('CMD ["node","node_modules/next/dist/bin/next","start"]'),"Docker must launch Next.js directly as PID 1.");
