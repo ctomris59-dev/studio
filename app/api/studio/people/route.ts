@@ -7,6 +7,7 @@ const staffRoles=["owner","manager","receptionist"] as const;
 export async function GET(request:NextRequest){
  const offset=Number(request.nextUrl.searchParams.get("offset")||0);
  const search=request.nextUrl.searchParams.get("search")?.trim()||"";
+ const pattern="%"+search.replace(/[!%_]/g,character=>"!"+character)+"%";
  if(!Number.isSafeInteger(offset)||offset<0||offset>10000||search.length>80)
   return errorResponse(400,"Invalid search or page offset.");
  try{
@@ -15,8 +16,8 @@ export async function GET(request:NextRequest){
    if(kind&&kind!=="lead"&&kind!=="member")return {badKind:true};
    const result=await client.query(`SELECT id,kind,full_name,email,phone,lead_stage,notes,member_status,tags,waiver_status,waiver_updated_at,related_contact_name,related_contact_role,related_contact_email,related_contact_phone,created_at
       FROM people WHERE studio_id=$1 AND archived_at IS NULL AND ($2::text IS NULL OR kind=$2)
-      AND ($3::text='' OR full_name ILIKE '%'||$3||'%' OR email ILIKE '%'||$3||'%' OR phone ILIKE '%'||$3||'%')
-      ORDER BY created_at DESC,id DESC LIMIT 101 OFFSET $4`,[auth.studioId,kind||null,search,offset]);
+      AND ($3::text='%%' OR full_name ILIKE $3 ESCAPE '!' OR email ILIKE $3 ESCAPE '!' OR phone ILIKE $3 ESCAPE '!')
+      ORDER BY created_at DESC,id DESC LIMIT 101 OFFSET $4`,[auth.studioId,kind||null,pattern,offset]);
    return {records:result.rows.slice(0,100),hasMore:result.rows.length>100,nextOffset:offset+Math.min(100,result.rows.length)};
   });
   if(!r.access.ok)return errorResponse(r.access.status,r.access.message);
