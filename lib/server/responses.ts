@@ -3,6 +3,9 @@ import {NextResponse} from "next/server";
 export function errorResponse(status:number,message:string){
  return NextResponse.json({error:message},{status,headers:{"Cache-Control":"no-store"}});
 }
+export function busyResponse(message:string){
+ return NextResponse.json({error:message},{status:429,headers:{"Cache-Control":"no-store","Retry-After":"60"}});
+}
 export function successResponse(value:unknown,status=200){
  return NextResponse.json(value,{status,headers:{"Cache-Control":"no-store"}});
 }
@@ -25,6 +28,8 @@ export function sameOrigin(request:NextRequest):boolean{
  }catch{return false}
 }
 export async function jsonObject(request:Request):Promise<Record<string,unknown>|null>{
+ const contentType=request.headers.get("content-type")||"";
+ if(!/^application\/json(?:\s*;|$)/i.test(contentType))return null;
  const length=Number(request.headers.get("content-length")||0);
  if(length>12_000||!request.body)return null;
  try{
