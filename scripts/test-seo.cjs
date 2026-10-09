@@ -11,7 +11,7 @@ for(const variable of ["--studio-sans","--studio-heading","--studio-mono"]){
 assert(layout.includes("new URL(SITE_URL)"),"Canonical metadata must use the same hostname as schema URLs.");
 const robots=read("app/robots.ts");
 const sitemap=read("app/sitemap.ts");
-const next=read("next.config.ts");
+const next=read("next.config.mjs");
 const home=read("app/page.tsx");
 const landing=read("app/studio-type-landing.tsx");
 const legalLayout=read("app/legal/layout.tsx");
