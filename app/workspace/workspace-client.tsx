@@ -175,7 +175,14 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   setBusy(true);setNote("");try{const response=await fetch("/api/studio/export",{credentials:"same-origin",cache:"no-store"});if(!response.ok){const body=await response.json();throw new Error(body.error||"Export failed")}const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="studiotasker-export-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);setNote("Studio export downloaded.")}
   catch(e){setNote(e instanceof Error?e.message:"Export failed")}finally{setBusy(false)}
  }
- async function logout(){await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});setUser(null);setStudio(null);setPeople([]);initializedView.current=false;setNote("Signed out.")}
+ async function logout(){
+  try{
+   const response=await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});
+   if(!response.ok)throw Error("Could not revoke the session or trusted device. Please try again.");
+   setUser(null);setStudio(null);setPeople([]);setTrustDevice(false);
+   initializedView.current=false;setNote("Signed out. Trusted-device access was removed.");
+  }catch(error){setNote(error instanceof Error?error.message:"Sign-out failed.")}
+ }
 
  if(!user)return <section className="rd-workspace-card rd-auth-card">
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
