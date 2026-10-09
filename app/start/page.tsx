@@ -14,7 +14,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
    <div className="st-start-top-actions"><Link href="/app-demo">Try demo</Link><Link href="/workspace">Customer sign in</Link></div>
   </header>
 
-  <section id="main-content" className="st-start-hero">
+  <section id="main-content" tabIndex={-1} className="st-start-hero">
    <div className="st-start-intro">
     <div className="st-start-intro-meta">
      <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>
