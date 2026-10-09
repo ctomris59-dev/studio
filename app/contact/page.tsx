@@ -18,7 +18,7 @@ export default function ContactPage(){
       <nav><Link href="/"><ArrowLeft size={16}/> Home</Link><Link className="ct-buy" href="/start">Start StudioTasker <ArrowUpRight size={16}/></Link></nav>
     </header>
 
-    <section id="main-content" className="ct-hero">
+    <section id="main-content" tabIndex={-1} className="ct-hero">
       <div className="ct-intro">
         <span className="ct-kicker">CONTACT / STUDIOTASKER</span>
         <h1>Questions?<br/><em>Talk to us.</em></h1>
