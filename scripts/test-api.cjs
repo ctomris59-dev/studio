@@ -67,6 +67,17 @@ async function main(){
   const health=await call("/api/health");
   assert.equal(health.status,200,"Readiness must verify restricted database access.");
   assert.equal(health.data.status,"ready");
+  // Audit regression: security headers must be present on rendered pages and API routes.
+  for(const [label,response] of [["public landing",pilatesLanding],["authenticated service endpoint",health]]){
+   const h=response.headers;
+   assert.equal(h.get("x-frame-options"),"DENY",label+" must reject framing.");
+   assert.equal(h.get("x-content-type-options"),"nosniff",label+" must disable MIME sniffing.");
+   assert((h.get("content-security-policy")||"").includes("frame-ancestors 'none'"),label+" must include framing CSP.");
+   assert((h.get("strict-transport-security")||"").includes("max-age=31536000"),label+" must advertise HSTS.");
+  }
+  assert.equal(health.headers.get("cache-control"),"private, no-store","Database readiness must not be cached.");
+  assert((health.headers.get("x-robots-tag")||"").includes("noindex"),"API responses must not be indexed.");
+
   assert.equal((await call("/api/auth/me")).status,401);
   assert.equal((await call("/api/studio/people")).status,401);
   const oversizedWebhook=await call("/api/billing/paddle-webhook",{method:"POST",body:{padding:"A".repeat(260000)}});
