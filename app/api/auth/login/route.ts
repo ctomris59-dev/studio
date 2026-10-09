@@ -24,6 +24,7 @@ export async function POST(request:NextRequest){
   // Claim the attempt and read a candidate hash under a brief transaction.
   // Expensive scrypt work must NEVER retain a database pool connection.
   const attempt=await inTransaction(async client=>{
+   let ipBlocked=false;
    if(ipKey){
     const limit=await client.query<{attempts:number}>(`
      INSERT INTO login_ip_attempts(ip_hash,attempts,window_started_at) VALUES($1,1,now())
@@ -31,7 +32,7 @@ export async function POST(request:NextRequest){
       attempts=CASE WHEN login_ip_attempts.window_started_at<now()-interval '15 minutes' THEN 1 ELSE login_ip_attempts.attempts+1 END,
       window_started_at=CASE WHEN login_ip_attempts.window_started_at<now()-interval '15 minutes' THEN now() ELSE login_ip_attempts.window_started_at END
      RETURNING attempts`,[ipKey]);
-    if(limit.rows[0].attempts>40)return {rateLimited:true as const};
+    ipBlocked=limit.rows[0].attempts>40;
    }
    const throttle=await client.query<{attempts:number}>(`
     INSERT INTO login_attempts(email_hash,attempts,window_started_at)
@@ -46,13 +47,13 @@ export async function POST(request:NextRequest){
    // with a previously enrolled secure device token may verify their real
    // password despite someone else's failures; wrong guesses still get 429.
    let recognized=false;
-   if(throttle.rows[0].attempts>5&&deviceHash&&user.rowCount){
+   if((throttle.rows[0].attempts>5||ipBlocked)&&deviceHash&&user.rowCount){
     const device=await client.query("SELECT 1 FROM auth_trusted_devices WHERE token_hash=$1 AND user_id=$2 AND expires_at>now()",
       [deviceHash,user.rows[0].id]);
     recognized=Boolean(device.rowCount);
    }
-   if(throttle.rows[0].attempts>5&&!recognized)return {rateLimited:true as const};
-   return {rateLimited:false as const,user:user.rows[0]||null,throttled:throttle.rows[0].attempts>5,recognized};
+   if((throttle.rows[0].attempts>5||ipBlocked)&&!recognized)return {rateLimited:true as const};
+   return {rateLimited:false as const,user:user.rows[0]||null,throttled:throttle.rows[0].attempts>5||ipBlocked,recognized};
   });
   if(attempt.rateLimited)return errorResponse(429,"Too many sign-in attempts. Try again later.");
   const candidate=attempt.user;
