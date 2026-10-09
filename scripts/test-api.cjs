@@ -213,6 +213,13 @@ async function main(){
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{accentColor:"purple"}})).status,400);
   assert.equal((await call("/api/studio/settings",{method:"PATCH",cookie:a.cookie,body:{privacyPolicyUrl:"javascript:alert(1)"}})).status,400);
   const legalStatus=await call("/api/legal/status",{cookie:a.cookie});assert.equal(legalStatus.status,200);assert.equal(legalStatus.data.legal.accepted.monthly,true);assert.equal(legalStatus.data.legal.accepted.annual,false);
+  // Previously accepted Terms must not silently satisfy a material version change.
+  // Existing customers can accept the new versions without a new registration.
+  await admin.query("UPDATE legal_acceptances SET terms_version='2026-10-06.4' WHERE studio_id=$1 AND user_id=$2 AND plan='monthly'",[studioA,ownerA]);
+  assert.equal((await call("/api/legal/status",{cookie:a.cookie})).data.legal.accepted.monthly,false,"Old legal consent must not count for updated Terms.");
+  assert.equal((await call("/api/legal/accept",{method:"POST",cookie:a.cookie,body:{...LEGAL,termsVersion:"2026-10-06.4"}})).status,409,"Old-version clickwrap must be rejected.");
+  assert.equal((await call("/api/legal/accept",{method:"POST",cookie:a.cookie,body:LEGAL})).status,200,"Existing studio owner must be able to reaccept the current versions.");
+  assert.equal((await call("/api/legal/status",{cookie:a.cookie})).data.legal.accepted.monthly,true);
   const tinyPng=Uint8Array.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]);
   const logoUp=await callLogo("/api/studio/logo",{cookie:a.cookie,bytes:tinyPng});assert.equal(logoUp.status,200);
   const logoA=await callLogo("/api/studio/logo",{method:"GET",cookie:a.cookie});assert.equal(logoA.status,200);assert.equal(logoA.contentType,"image/png");
