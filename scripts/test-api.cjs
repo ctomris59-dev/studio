@@ -95,8 +95,8 @@ async function main(){
   const firstPolicy=workspaceFirst.headers.get("content-security-policy")||"";
   const secondPolicy=workspaceSecond.headers.get("content-security-policy")||"";
   const firstScript=firstPolicy.split(";").map(s=>s.trim()).find(s=>s.startsWith("script-src "))||"";
-  const firstNonce=/\b'nonce-([^']+)'/.exec(firstScript)?.[1];
-  const secondNonce=/\b'nonce-([^']+)'/.exec(secondPolicy)?.[1];
+  const firstNonce=/'nonce-([^']+)'/.exec(firstScript)?.[1];
+  const secondNonce=/'nonce-([^']+)'/.exec(secondPolicy)?.[1];
   assert(firstNonce&&secondNonce&&firstNonce!==secondNonce,"Authenticated workspace must use distinct random CSP nonces. first="+firstPolicy+" second="+secondPolicy+" nextMiddleware="+workspaceFirst.headers.get("x-middleware-next"));
   assert(!firstScript.includes("'unsafe-inline'"),"Workspace must not allow unrestricted inline JavaScript.");
   assert(firstPolicy.includes("script-src-attr 'none'"),"Workspace must block HTML event handlers.");
