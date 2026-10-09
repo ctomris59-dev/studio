@@ -1,10 +1,9 @@
 import {NextRequest,NextResponse} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
 import {jsonObject,stringField,errorResponse,busyResponse,backendError,sameOrigin} from "@/lib/server/responses";
-import {emailIsValid,normalizeEmail,passwordMatches,passwordHash,needsPasswordRehash,DUMMY_PASSWORD_HASH,newSessionToken,tokenHash,loginKey,trustedLoginIp,loginIpKey,SESSION_COOKIE,PasswordHashBusyError} from "@/lib/auth-crypto";
+import {emailIsValid,normalizeEmail,passwordMatches,passwordHash,needsPasswordRehash,DUMMY_PASSWORD_HASH,newSessionToken,tokenHash,loginKey,trustedLoginIp,loginIpKey,SESSION_COOKIE,DEVICE_COOKIE,PasswordHashBusyError} from "@/lib/auth-crypto";
 import {sessionCookieConfig} from "@/lib/server/auth";
 export const runtime="nodejs";
-const DEVICE_COOKIE="studiotasker_device";
 const DEVICE_MAX_AGE=60*60*24*30;
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");

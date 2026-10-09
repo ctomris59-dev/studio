@@ -144,8 +144,10 @@ async function main(){
    assert.equal((await call("/api/auth/verify",{method:"POST",body:{token:verifyToken}})).status,400,"Verification links must be single-use.");
    const login=await call("/api/auth/login",{method:"POST",body:{email,password}});
    assert.equal(login.status,200,JSON.stringify(login.data));
-   assert(login.cookie.startsWith("reformdesk_session="));
+   assert(login.cookie.startsWith("__Host-studiotasker_session="));
    assert((login.headers.get("set-cookie")||"").includes("HttpOnly"));
+   assert((login.headers.get("set-cookie")||"").includes("Secure"),"Host-only session cookie must be Secure.");
+   assert(!(login.headers.get("set-cookie")||"").includes("Domain="),"__Host cookies must never carry a Domain attribute.");
    const account=(await call("/api/auth/me",{cookie:login.cookie}));
    assert.equal(account.status,200);
    assert.equal(account.data.user.email,email);
@@ -654,24 +656,24 @@ async function main(){
 
   const untrusted=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
   assert.equal(untrusted.status,200);
-  assert(!/studiotasker_device=[A-Za-z0-9_-]{43}/.test(untrusted.headers.get("set-cookie")||""),"Default sign-in must not enroll a trusted device.");
+  assert(!/__Host-studiotasker_device=[A-Za-z0-9_-]{43}/.test(untrusted.headers.get("set-cookie")||""),"Default sign-in must not enroll a trusted device.");
   const known=await call("/api/auth/login",{method:"POST",body:{email:a.email,password,trustDevice:true}});
   assert.equal(known.status,200);
   const rawCookies=known.headers.get("set-cookie")||"";
-  const deviceValue=/studiotasker_device=([A-Za-z0-9_-]{43})/.exec(rawCookies)?.[1];
+  const deviceValue=/__Host-studiotasker_device=([A-Za-z0-9_-]{43})/.exec(rawCookies)?.[1];
   assert(deviceValue,"Successful login must issue a trusted-device cookie.");
   const emailHash=require("node:crypto").createHash("sha256").update("login:"+a.email).digest("hex");
   await admin.query(`INSERT INTO login_attempts(email_hash,attempts,window_started_at) VALUES($1,5,now())
    ON CONFLICT(email_hash) DO UPDATE SET attempts=5,window_started_at=now()`,[emailHash]);
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:a.email,password}})).status,429,"A new device must respect email lockout.");
-  const familiar="studiotasker_device="+deviceValue;
+  const familiar="__Host-studiotasker_device="+deviceValue;
   assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password:"An incorrect password!"}})).status,429,"A known device must not permit wrong guesses during lockout.");
   assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password,trustDevice:true}})).status,200,"A genuine owner on a recognized device must recover from malicious email-only lockout.");
   const signedOut=await call("/api/auth/logout",{method:"POST",cookie:known.cookie+"; "+familiar});
   assert.equal(signedOut.status,200);
   assert.equal(signedOut.headers.get("clear-site-data"),'"cache", "storage"', "Successful logout must clear origin-local browser caches and storage.");
   assert(!signedOut.headers.get("clear-site-data")?.includes('"cookies"'),"Clearing all subdomain cookies would unintentionally sign users out of sibling services.");
-  assert((signedOut.headers.get("set-cookie")||"").includes("studiotasker_device="),"Logout must clear the trusted-device cookie.");
+  assert((signedOut.headers.get("set-cookie")||"").includes("__Host-studiotasker_device="),"Logout must clear the trusted-device cookie.");
   const deviceHash=require("node:crypto").createHash("sha256").update(deviceValue).digest("hex");
   assert.equal((await admin.query("SELECT count(*)::int AS n FROM auth_trusted_devices WHERE token_hash=$1",[deviceHash])).rows[0].n,0,"Logout must revoke the trusted device in DB.");
   await admin.query("UPDATE login_attempts SET attempts=5,window_started_at=now() WHERE email_hash=$1",[emailHash]);
