@@ -12,13 +12,13 @@ export const metadata={
 };
 
 export default function ContactPage(){
-  return <main className="ct-page">
+  return <main className="ct-page"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
     <header className="ct-top">
       <Link className="ct-brand" href="/" aria-label="StudioTasker home"><StudioTaskerMark/><span>studio<b>tasker</b><i>.</i></span></Link>
       <nav><Link href="/"><ArrowLeft size={16}/> Home</Link><Link className="ct-buy" href="/start">Start StudioTasker <ArrowUpRight size={16}/></Link></nav>
     </header>
 
-    <section className="ct-hero">
+    <section id="main-content" className="ct-hero">
       <div className="ct-intro">
         <span className="ct-kicker">CONTACT / STUDIOTASKER</span>
         <h1>Questions?<br/><em>Talk to us.</em></h1>
