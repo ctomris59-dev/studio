@@ -6,6 +6,7 @@ const fs=require("node:fs"),path=require("node:path"),assert=require("node:asser
 const folders=["app","components","lib"];
 const findings=[];
 const names=[];
+let reviewedJsonLdSinks=0;
 function walk(root){
  for(const entry of fs.readdirSync(root,{withFileTypes:true})){
   const full=path.join(root,entry.name);
@@ -24,6 +25,15 @@ function walk(root){
   ]){
    for(const match of content.matchAll(regex)){
     const line=content.slice(0,match.index).split("\n").length;
+    if(kind==="dangerouslySetInnerHTML"&&full===path.join("components","json-ld.tsx")){
+     // Only a non-executable JSON-LD script, and all '<' escaped before
+     // writing into HTML. Any extra raw HTML sink is still an audit failure.
+     assert(content.includes('type="application/ld+json"'));
+     assert(/JSON\.stringify\(data\)\.replace\(\/<\//.test(content),
+      "JSON-LD script must escape '<' to prevent closing its script tag.");
+     reviewedJsonLdSinks++;
+     continue;
+    }
     findings.push(full+":"+line+": "+kind);
    }
   }
@@ -34,5 +44,9 @@ function walk(root){
  }
 }
 for(const folder of folders)walk(folder);
+assert.equal(reviewedJsonLdSinks,1,"Expected one reviewed JSON-LD serialization sink.");
+const attack='</script><img src=x onerror=alert(1)>';
+const escaped=JSON.stringify({message:attack}).replace(/</g,"\\u003c");
+assert(!escaped.includes("</script"),"JSON-LD script breakout must be escaped.");
 assert.equal(findings.length,0,"First-party unsafe HTML sinks need individual auditing:\n"+findings.join("\n"));
-console.log("Security source scan passed:",names.length,"first-party files, no direct raw HTML insertion sinks.");
+console.log("Security source scan passed:",names.length,"files; one escaped JSON-LD sink; no other direct HTML injection sinks.");
