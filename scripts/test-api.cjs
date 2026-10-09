@@ -138,6 +138,14 @@ async function main(){
   const invalid=await call("/api/studio/people",{method:"POST",cookie:a.cookie,body:{kind:"member",name:"X",email:""}});assert.equal(invalid.status,400);
   const invalidLogin=await call("/api/auth/login",{method:"POST",body:{email:a.email,password:"incorrect"}});
   assert.equal(invalidLogin.status,401);
+  let wasThrottled=false;
+  for(let attempt=0;attempt<6;attempt++){
+   const denied=await call("/api/auth/login",{method:"POST",body:{email:a.email,password:"incorrect"}});
+   assert([401,429].includes(denied.status));
+   if(denied.status===429)wasThrottled=true;
+  }
+  assert(wasThrottled,"Repeated invalid passwords must trigger the email throttle.");
+  // A hostile party must not be able to prevent the legitimate owner signing in.
   const signin=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
   assert.equal(signin.status,200,JSON.stringify(signin.data));
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,200);
