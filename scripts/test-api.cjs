@@ -144,7 +144,10 @@ async function main(){
    assert.equal((await call("/api/auth/verify",{method:"POST",body:{token:verifyToken}})).status,400,"Verification links must be single-use.");
    const login=await call("/api/auth/login",{method:"POST",body:{email,password}});
    assert.equal(login.status,200,JSON.stringify(login.data));
-   assert(login.cookie.startsWith("reformdesk_session="));
+   assert(login.cookie.startsWith("__Host-studiotasker_session="),"Production session cookie must carry __Host- prefix.");
+   const cookieHeaders=login.headers.get("set-cookie")||"";
+   assert(cookieHeaders.includes("Secure")&&cookieHeaders.includes("HttpOnly"),"Host-only cookie must be Secure and HttpOnly.");
+   assert(cookieHeaders.includes("reformdesk_session=")&&cookieHeaders.includes("Max-Age=0"),"Login must clear legacy cookie name.");
    assert((login.headers.get("set-cookie")||"").includes("HttpOnly"));
    const account=(await call("/api/auth/me",{cookie:login.cookie}));
    assert.equal(account.status,200);
@@ -680,7 +683,7 @@ async function main(){
   await admin.query(`INSERT INTO login_attempts(email_hash,attempts,window_started_at) VALUES($1,5,now())
    ON CONFLICT(email_hash) DO UPDATE SET attempts=5,window_started_at=now()`,[emailHash]);
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:a.email,password}})).status,429,"A new device must respect email lockout.");
-  const familiar="studiotasker_device="+deviceValue;
+  const familiar="__Host-studiotasker_device="+deviceValue;
   assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password:"An incorrect password!"}})).status,429,"A known device must not permit wrong guesses during lockout.");
   assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password,trustDevice:true}})).status,200,"A genuine owner on a recognized device must recover from malicious email-only lockout.");
   const signedOut=await call("/api/auth/logout",{method:"POST",cookie:known.cookie+"; "+familiar});
