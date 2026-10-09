@@ -6,7 +6,7 @@ async function main(){
   // Remove raw, expired one-time URLs from a queued email, even when SMTP wasn't configured.
   const clear=await pool.query(`
    UPDATE mail_outbox SET payload='{}'::jsonb,last_error=COALESCE(last_error,'One-time link expired')
-   WHERE dispatched_at IS NULL AND template IN ('verify_email','password_reset','member_invitation')
+   WHERE dispatched_at IS NULL AND template IN ('verify_email','password_reset','member_invitation','staff_invitation')
     AND created_at<now()-interval '48 hours' AND payload<>'{}'::jsonb`);
   const challenges=await pool.query(`
    DELETE FROM auth_challenges WHERE expires_at<now()-interval '30 days'`);

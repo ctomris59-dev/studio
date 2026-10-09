@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useState,type FormEvent} from "react";
-type Invite={id:string;email:string;role:string;created_at:string;expires_at:string;accepted_at:string|null};
+type Invite={id:string;email:string;role:string;created_at:string;expires_at:string;accepted_at:string|null;revoked_at:string|null};
 export function StaffInvitations(){
  const [email,setEmail]=useState(""),[role,setRole]=useState("instructor");
  const [items,setItems]=useState<Invite[]>([]),[busy,setBusy]=useState(false),[status,setStatus]=useState("");
@@ -32,7 +32,7 @@ export function StaffInvitations(){
   </form>
   {status&&<p role="status" className="rd-feedback">{status}</p>}
   {items.length>0&&<div><h4>Recent invitations</h4>
-   {items.map(item=><p key={item.id}>{item.email} · {item.role} · {item.accepted_at?"Accepted":new Date(item.expires_at)<new Date()?"Expired":"Pending"}</p>)}
+   {items.map(item=><p key={item.id}>{item.email} · {item.role} · {item.accepted_at?"Accepted":item.revoked_at?"Revoked":new Date(item.expires_at)<new Date()?"Expired":"Pending"}</p>)}
   </div>}
   <p className="rd-tiny">Invitations expire after 48 hours. Existing accounts are not currently eligible for multi-studio invitations.</p>
  </div>;

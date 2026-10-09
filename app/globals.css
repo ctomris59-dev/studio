@@ -25,7 +25,7 @@
 .demo-pagehead .kicker{font-family:var(--studio-mono),monospace;color:#334bdd;font-size:10px}
 .demo-pagehead h1{font-family:var(--studio-heading),'Arial Narrow',sans-serif;color:#1b2237;font-size:61px;font-weight:700;letter-spacing:-.01em;text-transform:uppercase;line-height:.93}
 .demo-pagehead p{color:#6f7482}
-.demo-primary{background:#334bdd;border-radius:3px;font-family:"Source Sans 3",sans-serif}
+.demo-primary{background:#334bdd;border-radius:3px;font-family:var(--studio-sans),sans-serif}
 .demo-primary:hover{background:#253ac4}
 .demo-secondary{border-radius:3px;border-color:#cdd1da;color:#1b2237}
 .demo-secondary:hover{background:#e7f982}
@@ -34,7 +34,7 @@
 .stat-card{border-top:3px solid #334bdd}
 .stat-card-head{color:#666e80}
 .stat-card-head span:last-child{background:#eef0ff;color:#334bdd;border-radius:3px}
-.stat-card strong{color:#1b2237;font-family:"Source Sans 3",sans-serif;font-weight:600}
+.stat-card strong{color:#1b2237;font-family:var(--studio-sans),sans-serif;font-weight:600}
 .stat-card small{color:#848792}
 .panel-heading h2,.table-title h2,.setting-card h3,.demo-help-card h3{font-family:var(--studio-heading),'Arial Narrow',sans-serif;font-weight:700;letter-spacing:-.01em;font-size:34px;line-height:1;color:#1b2237}
 .panel-heading button{color:#334bdd}
