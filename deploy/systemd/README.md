@@ -4,7 +4,7 @@ These are **templates only**. They have not been installed or enabled on a user'
 
 ## Prerequisites
 - Confirm the actual checkout path, `npm` path and systemd service account; templates assume `/srv/studiotasker`, `/usr/bin/npm` and `studiotasker`.
-- Apply migrations, configure a restricted runtime `DATABASE_URL`, and set `MIGRATION_DATABASE_URL` only for maintenance work. Prefer a dedicated DELETE-only maintenance role, not the database superuser, before scheduling cleanup.
+- Apply migrations, configure a restricted runtime `DATABASE_URL`, and set `MAINTENANCE_DATABASE_URL` using a dedicated low-privilege maintenance role. Do not put migration/admin secrets in scheduled services.
 - Store secrets in `/etc/studiotasker/studiotasker.env` owned by root with mode 0600, not in GitHub.
 - Create `/var/backups/studiotasker` owned by the `studiotasker` service user (mode 0700). Ensure `BACKUP_OUTPUT_DIR` points there and a strong separate `BACKUP_PASSPHRASE` is available.
 

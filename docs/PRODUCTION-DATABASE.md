@@ -10,3 +10,6 @@ This procedure is for a database administrator, not for automatic app startup.
 6. Never commit database URLs, service passwords, backups or key material. Schedule encrypted offsite backups and periodic restoration drills.
 
 **Production readiness is not proven by creating this role alone.**
+
+## Cleanup identity
+A scheduled cleanup must run with `MAINTENANCE_DATABASE_URL` and a non-superuser role created by `npm run db:roles:maintenance`. Set a unique `MAINTENANCE_ROLE_NAME`, a random 32+ character `MAINTENANCE_ROLE_PASSWORD` and `CONFIRM_CREATE_MAINTENANCE_ROLE=YES_I_CONFIRMED` in a secure administrative shell. Remove the administrator credentials afterward. The role cannot access people or financial ledgers.
