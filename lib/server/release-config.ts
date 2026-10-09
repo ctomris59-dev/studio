@@ -17,7 +17,9 @@ export function commercialRegistrationReady():boolean{
  const trustedProxy=process.env.TRUST_PROXY_IP_HEADERS==="true"&&
   process.env.LAUNCH_TRUSTED_PROXY_VERIFIED==="true"&&
   (process.env.LOGIN_RATE_HMAC_KEY||"").length>=32;
+ const botProtection=process.env.TURNSTILE_REQUIRED==="true"&&
+  Boolean(process.env.TURNSTILE_SECRET_KEY&&process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
  const manualGates=process.env.LAUNCH_PADDLE_ACCOUNT_APPROVED==="true"&&
   process.env.LAUNCH_LEGAL_REVIEW_CONFIRMED==="true"&&process.env.LAUNCH_TAX_REVIEW_CONFIRMED==="true";
- return origin.startsWith("https://")&&process.env.BILLING_ENFORCEMENT==="required"&&productionBilling&&manualGates&&trustedProxy&&required.every(k=>Boolean(process.env[k]));
+ return origin.startsWith("https://")&&process.env.BILLING_ENFORCEMENT==="required"&&productionBilling&&manualGates&&trustedProxy&&botProtection&&required.every(k=>Boolean(process.env[k]));
 }
