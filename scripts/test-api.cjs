@@ -295,6 +295,22 @@ async function main(){
   assert.equal(filteredMembers.status,200,JSON.stringify(filteredMembers.data));
   assert.equal(filteredMembers.data.members.length,1,"Member search must include only matching contacts.");
   assert.equal(filteredMembers.data.members[0].id,member2);
+  // User search terms are literal text; SQL LIKE wildcards must not
+  // accidentally return every member or class in the tenant.
+  for(const special of ["%","_"]){
+   const term=encodeURIComponent(special);
+   const memberLiteral=await call("/api/studio/members?search="+term,{cookie:a.cookie});
+   const peopleLiteral=await call("/api/studio/people?search="+term,{cookie:a.cookie});
+   const classesLiteral=await call("/api/studio/classes?search="+term,{cookie:a.cookie});
+   assert.equal(memberLiteral.status,200);
+   assert.equal(peopleLiteral.status,200);
+   assert.equal(classesLiteral.status,200);
+   assert.equal(memberLiteral.data.members.length,0,"Wildcard must not expose unrelated members.");
+   assert.equal(peopleLiteral.data.records.length,0,"Wildcard must not expose unrelated contacts.");
+   assert.equal(classesLiteral.data.classes.length,0,"Wildcard must not expose unrelated classes.");
+  }
+  assert.equal((await call("/api/studio/members?offset=-1")).status,401,"Authentication must precede member query validation.");
+
   const pagedMembers=await call("/api/studio/members?offset=1",{cookie:a.cookie});
   assert.equal(pagedMembers.status,200);
   assert(pagedMembers.data.members.every(x=>x.id!==member3),"Pagination must skip the requested offset.");
