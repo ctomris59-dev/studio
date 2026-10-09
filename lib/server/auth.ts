@@ -36,7 +36,11 @@ export async function authenticated<T>(
   await client.query("SELECT set_config('app.user_id',$1,true)",[row.user_id]);
   // Opt-in production license gate. Auth, checkout, account exports and privacy requests
   // remain accessible without a paid entitlement.
-  if(process.env.BILLING_ENFORCEMENT==="required"&&
+  const localTest=process.env.BILLING_ALLOW_LOCAL_TEST==="true"&&
+   /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(process.env.PUBLIC_APP_ORIGIN||"");
+  const enforce=process.env.BILLING_ENFORCEMENT==="required"||
+   (process.env.NODE_ENV==="production"&&!localTest);
+  if(enforce&&
    !request.nextUrl.pathname.startsWith("/api/auth/")&&
    !["/api/studio/subscription","/api/studio/export","/api/studio/privacy"].some(path=>request.nextUrl.pathname.startsWith(path))){
    const {entitlement}=await import("./billing");

@@ -34,13 +34,15 @@ export async function POST(request:NextRequest){
        attempts=CASE WHEN login_attempts.window_started_at < now()-interval '15 minutes' THEN 1 ELSE login_attempts.attempts+1 END,
        window_started_at=CASE WHEN login_attempts.window_started_at < now()-interval '15 minutes' THEN now() ELSE login_attempts.window_started_at END
     RETURNING attempts`,[key]);
-   if(throttle.rows[0].attempts>5)return {ok:false as const,rateLimited:true};
+   // Never lock out a legitimate owner because an attacker guessed their email.
+   // A valid password can pass this email-only throttle; invalid guesses remain limited.
+   const emailExceeded=throttle.rows[0].attempts>5;
    const u=await client.query<{id:string;password_hash:string}>(`SELECT id,password_hash FROM app_users
        WHERE email=$1 AND disabled_at IS NULL AND email_verified_at IS NOT NULL LIMIT 1`,[normalizeEmail(email)]);
    const hash=u.rows[0]?.password_hash||DUMMY_PASSWORD_HASH;
    // Unknown accounts still run the expensive password check to limit enumeration.
    const matches=await passwordMatches(password,hash);
-   if(!u.rowCount||!matches)return {ok:false as const,rateLimited:false};
+   if(!u.rowCount||!matches)return {ok:false as const,rateLimited:emailExceeded};
    const membership=await client.query<{studio_id:string;role:string}>(`
       SELECT studio_id,role FROM studio_users WHERE user_id=$1 ORDER BY created_at ASC LIMIT 1`,[u.rows[0].id]);
    if(!membership.rowCount)return {ok:false as const,rateLimited:false};
