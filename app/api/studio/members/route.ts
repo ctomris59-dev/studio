@@ -1,3 +1,4 @@
+import {literalLikePattern} from "@/lib/server/sql-search";
 import {NextRequest} from "next/server";
 import {authenticated} from "@/lib/server/auth";
 import {errorResponse,successResponse,backendError} from "@/lib/server/responses";
@@ -12,8 +13,8 @@ export async function GET(request:NextRequest){
    const records=await client.query(`
     SELECT id,full_name,email,phone,plan,credits,package_status,member_status,start_date::text,expiry_date::text
     FROM people WHERE studio_id=$1 AND kind='member' AND archived_at IS NULL
-    AND ($2::text='' OR full_name ILIKE '%'||$2||'%' OR email ILIKE '%'||$2||'%' OR phone ILIKE '%'||$2||'%')
-    ORDER BY created_at DESC,id DESC LIMIT 121 OFFSET $3`,[auth.studioId,search,rawOffset]);
+    AND (full_name ILIKE $2 ESCAPE '~' OR email ILIKE $2 ESCAPE '~' OR phone ILIKE $2 ESCAPE '~')
+    ORDER BY created_at DESC,id DESC LIMIT 121 OFFSET $3`,[auth.studioId,literalLikePattern(search),rawOffset]);
    return {members:records.rows.slice(0,120),hasMore:records.rows.length>120,nextOffset:rawOffset+Math.min(120,records.rows.length)};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
