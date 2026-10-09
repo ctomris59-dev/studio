@@ -221,7 +221,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   <aside className="rd-live-sidebar">
    <div className="rd-live-brand">{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt={settings.name+" logo"}/>:<span className="rd-studio-fallback">{settings.name.slice(0,2).toUpperCase()}</span>}<div><strong>{settings.name}</strong><small>{settings.focus}</small></div></div>
    <div className="rd-powered"><StudioTaskerMark/> powered by <b>StudioTasker</b></div>
-   <nav aria-label="Studio workspace">{visibleNav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setView(id);setNote("");if(id==="leads")setPerson(p=>({...p,kind:"lead"}));if(id==="members")setPerson(p=>({...p,kind:"member"}))}}><Icon size={18}/>{label}</button>)}</nav>
+   <nav aria-label="Studio workspace">{visibleNav.map(([id,label,Icon])=><button key={id} type="button" aria-current={view===id?"page":undefined} className={view===id?"active":""} onClick={()=>{setView(id);setNote("");if(id==="leads")setPerson(p=>({...p,kind:"lead"}));if(id==="members")setPerson(p=>({...p,kind:"member"}))}}><Icon size={18}/>{label}</button>)}</nav>
    <div className="rd-live-sidebar-bottom"><small>{user.email}</small><span>{user.role}</span><button onClick={()=>void logout()}><LogOut size={16}/> Sign out</button></div>
   </aside>
   <main className="rd-live-main">
