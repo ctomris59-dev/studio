@@ -120,7 +120,7 @@ async function main(){
       return {exists:true,selected:forgot.getAttribute('aria-selected'),text:document.querySelector('#main-content h1')?.textContent};
      })()`});
      const interaction=ui.result?.value;
-     assert(interaction?.exists&&interaction.selected==="true"&&/forgot/i.test(interaction.text||""),
+     assert(interaction?.exists&&interaction.selected==="true"&&/account access/i.test(interaction.text||""),
       "Workspace React tab did not hydrate under strict nonce CSP: "+JSON.stringify(interaction));
     }
     assert(result.total>=1,route+" did not render text");
