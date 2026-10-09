@@ -27,7 +27,10 @@ jobs:
         env:
           npm_config_yes: 'true'
           CI: 'true'
-        run: npm init @eslint/config@latest -- --config eslint-config-next
+        run: |
+          # The create-config v3 wizard requires an actual TTY even with --config.
+          # Decline its unpinned install and pin Next 15/ESLint 9 explicitly below.
+          printf 'n\\n' | script -q -e -c 'npm init @eslint/config@latest -- --config eslint-config-next' /dev/null
       - name: Pin ESLint and Next to compatible major versions
         run: npm install --save-dev eslint@^9 eslint-config-next@15.5.27 @eslint/eslintrc@^3 --no-audit --no-fund
       - name: Commit generated config and reproducible lockfile to branch
