@@ -8,13 +8,13 @@ export const metadata={title:"StudioTasker Pricing | Monthly & Annual Plans",des
 export default async function StartPage({searchParams}:{searchParams:Promise<{plan?:string}>}){
  const params=await searchParams;
  const selected=params.plan==="annual"?"annual":"monthly";
- return <main className="st-start">
+ return <main className="st-start"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <header className="st-start-top">
    <Link href="/" className="st-start-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
    <div className="st-start-top-actions"><Link href="/app-demo">Try demo</Link><Link href="/workspace">Customer sign in</Link></div>
   </header>
 
-  <section className="st-start-hero">
+  <section id="main-content" tabIndex={-1} className="st-start-hero">
    <div className="st-start-intro">
     <div className="st-start-intro-meta">
      <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>

@@ -33,12 +33,12 @@ const icons={calendar:CalendarDays,users:Users,clock:Clock3,activity:Activity,he
 
 export function StudioTypeLanding({config}:{config:StudioLandingConfig}){
  const faqJson={"@context":"https://schema.org","@type":"FAQPage","mainEntity":config.faqs.map(([q,a])=>({"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":a}}))};
- return <main className="mk-page">
+ return <main className="mk-page"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <JsonLd data={faqJson}/>
   <JsonLd data={breadcrumbJsonLd([{name:"Home",path:"/"},{name:"Studio software",path:"/#studio-types"},{name:config.seoName,path:config.path}])}/>
   <header className="mk-top"><div className="mk-shell"><Link className="mk-brand" href="/"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link><nav className="mk-nav"><Link href="/">Studios</Link><Link href="/compare">VS. others</Link><Link href="/app-demo">Demo</Link><Link className="mk-nav-cta" href="/start">START · $39.90 <ArrowUpRight size={16}/></Link></nav></div></header>
 
-  <section className="mk-hero"><div className="mk-shell mk-hero-grid">
+  <section id="main-content" tabIndex={-1} className="mk-hero"><div className="mk-shell mk-hero-grid">
    <div className="mk-hero-copy"><span className="mk-kicker">{config.kicker}</span><h1>{config.heroLine}<br/><em>{config.heroEm}</em></h1><p className="mk-hero-lede">{config.lede}</p><div className="mk-hero-points"><span>USA</span><span>CANADA</span><span>UK</span><span>EUROPE</span><span>INTERNATIONAL</span></div><div className="mk-actions"><Link className="mk-primary" href="/start"><span>START STUDIOTASKER · $39.90</span><ArrowUpRight size={20}/></Link><Link className="mk-secondary" href="/app-demo"><span>TRY THE DEMO</span><ArrowRight size={20}/></Link></div></div>
    <div className="mk-hero-art"><div className="mk-board"><div className="mk-board-head"><strong>{config.boardName}</strong><span>TODAY / WEDNESDAY</span></div><div className="mk-board-metrics"><div><small>CLASSES</small><b>8</b></div><div><small>BOOKINGS</small><b>42</b></div><div><small>CAPACITY</small><b>84%</b></div></div><div className="mk-board-list"><span>WHAT NEEDS ATTENTION</span>{[["HIGH","Trial follow-up","Mia · attended yesterday"],["HIGH","Low credits","Oliver · 1 class remaining"],["MED","Inactive member","Emma · 24 days"],["LOW","Open places","Tomorrow · 3 spots"]].map(x=><article key={x[1]}><span>{x[0]}</span><div><b>{x[1]}</b><small>{x[2]}</small></div><i>→</i></article>)}</div></div><div className="mk-float">LESS ADMIN.<br/>MORE MOVEMENT.</div></div>
   </div></section>

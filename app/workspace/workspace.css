@@ -219,3 +219,23 @@
 .rd-os-report-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:1180px){.rd-os-report-grid{grid-template-columns:1fr 1fr}.rd-os-report-grid>section:last-child{grid-column:1/-1}}
 @media(max-width:720px){.rd-os-report-grid{grid-template-columns:1fr}.rd-os-report-grid>section:last-child{grid-column:auto}}
+
+/* Clear class controls with a distinct irreversible action. */
+.rd-class-os .rd-ops-section-title>button,.rd-class-os .rd-ops-subsection button,
+.rd-class-os .rd-class-list+button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 15px;border:1px solid #334bdd;border-radius:6px;background:#f0f2ff;color:#17203c;font-weight:700;cursor:pointer}
+.rd-class-os label:has(>input[aria-label="Search classes"]){display:flex;flex-direction:column;gap:7px;font-weight:700}
+.rd-class-os input[aria-label="Search classes"]{width:100%;min-height:44px;padding:10px 13px;border:2px solid #aeb7cf;border-radius:6px;background:white;color:#17203c;font:inherit}
+.rd-class-os .rd-class-cancel{background:#a12727!important;border-color:#8f2020!important;color:#fff!important}
+.rd-class-os .rd-class-cancel:hover{background:#7d1717!important}
+.rd-class-os button:focus-visible,.rd-class-os input:focus-visible{outline:3px solid #334bdd;outline-offset:3px}
+.rd-live-section .rd-contact-list{max-height:none;overflow:visible}
+.rd-auth-heading{font:700 clamp(28px,4vw,44px) var(--studio-heading),sans-serif;color:#17203c;margin:0 0 20px}
+@media(max-width:720px){
+ .rd-live-sidebar{padding:10px 12px}
+ .rd-live-brand{padding:3px 4px 7px}
+ .rd-live-sidebar nav{display:flex;flex-wrap:nowrap;overflow-x:auto;padding:6px 0;gap:5px}
+ .rd-live-sidebar nav button{flex:0 0 auto;min-height:40px;white-space:nowrap}
+ .rd-live-sidebar-bottom{padding:4px 2px;border-top:0;margin-top:4px}
+ .rd-powered{display:none}
+}
+@media print{.rd-live-sidebar,.rd-workspace-header,.rd-live-sidebar-bottom,.rd-live-accent,.rd-contact-actions{display:none!important}.rd-live-shell{display:block}.rd-live-main{padding:0}.rd-live-section{max-width:none}}

@@ -85,7 +85,7 @@ function PreviewDashboard() {
 export default function HomePage() {
   const op=legalOperator();
   return (
-    <div className="editorial">
+    <div className="editorial"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
       <JsonLd data={websiteJsonLd()}/>
       <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>INDEPENDENT STUDIOS · USA · CANADA · UK · EUROPE · INTERNATIONAL <span className="ed-star"><Activity size={12}/></span></span></div></div>
       <header className="ed-header">
@@ -97,7 +97,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className="ed-hero" aria-labelledby="main-heading">
           <div className="ed-container ed-hero-grid">
             <div className="ed-hero-copy">

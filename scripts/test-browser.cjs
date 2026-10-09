@@ -94,11 +94,15 @@ async function main(){
       closesOnEscape=!menu.open;
      }
      const h1=document.querySelector("main h1");
+     const mainCount=document.querySelectorAll("main").length;
+     const skip=document.querySelector(".studio-skip-link");
+     const hasSkip=Boolean(skip&&skip.getAttribute("href")==="#main-content"&&document.getElementById("main-content"));
+     const h1Count=document.querySelectorAll("main h1").length;
      return {title:document.title,unknown,total:nodes.length,loaded:loaded.map(x=>x.length),
       weightedFaces:weighted.map(x=>x.length),
       remoteFonts:performance.getEntriesByType("resource").filter(x=>/fonts\\.(googleapis|gstatic)\\.com/.test(x.name)).length,
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth+4,
-      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast,menuVisible,menuLinks,closesOnEscape};
+      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast,menuVisible,menuLinks,closesOnEscape,mainCount,hasSkip,h1Count};
     })()`});
     const result=evaluation.result?.value;
     assert(result,route+" browser evaluate failed: "+JSON.stringify(evaluation));
@@ -106,6 +110,11 @@ async function main(){
     assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
     assert(result.total>=1,route+" did not render text");
+    if(route!=="/legal/security"){
+     assert.equal(result.mainCount,1,route+" should contain exactly one main landmark");
+     assert(result.hasSkip,route+" should have functional skip to main content");
+     assert.equal(result.h1Count,1,route+" should contain one main page heading");
+    }
     assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
