@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useState,type FormEvent} from "react";
-type StaffAccount={id:string;email:string;role:string;disabled_at:string|null};
+type StaffAccount={id:string;email:string;role:string;disabled_at:string|null;disabled_reason:string|null;can_restore:boolean};
 type Invite={id:string;email:string;role:string;created_at:string;expires_at:string;accepted_at:string|null;revoked_at:string|null};
 export function StaffInvitations(){
  const [email,setEmail]=useState(""),[role,setRole]=useState("instructor");
@@ -56,9 +56,9 @@ export function StaffInvitations(){
   </form>
   {status&&<p role="status" className="rd-feedback">{status}</p>}
   {accounts.length>0&&<section><h4>Staff login access</h4>
-   {accounts.map(a=><p key={a.id}>{a.email} · {a.role} · {a.disabled_at?"Access revoked":"Active"}
+   {accounts.map(a=><p key={a.id}>{a.email} · {a.role} · {a.disabled_at?(a.disabled_reason==="owner_revoked"?"Access revoked by studio owner":"Operator/security suspension"):"Active"}
     {a.disabled_at
-     ? <button type="button" disabled={busy} onClick={()=>void restore(a)} style={{marginLeft:12}}>Restore access</button>
+     ? a.can_restore&&<button type="button" disabled={busy} onClick={()=>void restore(a)} style={{marginLeft:12}}>Restore access</button>
      : <button type="button" disabled={busy} onClick={()=>void revoke(a)} style={{marginLeft:12}}>Revoke access</button>}</p>)}
   </section>}
   {items.length>0&&<div><h4>Recent invitations</h4>
