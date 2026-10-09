@@ -4,9 +4,11 @@ const {promises:fs}=require("node:fs");
 const path=require("node:path");
 const {encryptStream}=require("./backup-crypto.cjs");
 const {pgConnectionEnv}=require("./pg-connection-env.cjs");
+const {checkBackupClient}=require("./pg-dump-compat.cjs");
 async function main(){
  const {BACKUP_DATABASE_URL,BACKUP_PASSPHRASE,BACKUP_OUTPUT_DIR}=process.env;
  if(!BACKUP_DATABASE_URL||!BACKUP_PASSPHRASE||!BACKUP_OUTPUT_DIR)throw Error("BACKUP_DATABASE_URL, BACKUP_PASSPHRASE and BACKUP_OUTPUT_DIR required");
+ await checkBackupClient(BACKUP_DATABASE_URL);
  await fs.mkdir(BACKUP_OUTPUT_DIR,{recursive:true,mode:0o700});
  const now=new Date().toISOString().replace(/[:.]/g,"-");
  const filename="studiotasker-"+now+"-"+randomUUID().slice(0,8)+".rdbk";
