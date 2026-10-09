@@ -330,34 +330,6 @@ async function main(){
   assert(aClasses.data.classes.some(c=>c.id===classId)&&!aClasses.data.classes.some(c=>c.id===crossClass.data.class.id));
 
   const bookMember=async(account,id,sessionId=classId)=>call("/api/studio/bookings",{method:"POST",cookie:account.cookie,body:{sessionId,memberId:id}});
-  // Controlled race: adding capacity and booking another member concurrently
-  // must never jump an eligible FIFO waitlist member or double-charge credits.
-  const raceMember=await createMember(a,"Capacity Race");
-  await confirmMember(raceMember);await signWaiver(raceMember);
-  const capacityClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
-   ...classInput,title:"Capacity expansion race",instructor:"Capacity Race Coach",
-   room:"Capacity Race Room",startsAt:future(9,9),capacity:1
-  }});
-  assert.equal(capacityClass.status,201,JSON.stringify(capacityClass.data));
-  const capacityId=capacityClass.data.class.id;
-  assert.equal((await bookMember(a,member1,capacityId)).data.booking.status,"booked");
-  const capacityWaiting=await bookMember(a,member2,capacityId);
-  assert.equal(capacityWaiting.data.booking.status,"waitlisted");
-  const [expanded,concurrentArrival]=await Promise.all([
-   call("/api/studio/classes/"+capacityId,{method:"PATCH",cookie:a.cookie,body:{capacity:3}}),
-   bookMember(a,raceMember,capacityId)
-  ]);
-  assert.equal(expanded.status,200,JSON.stringify(expanded.data));
-  assert.equal(concurrentArrival.status,201,JSON.stringify(concurrentArrival.data));
-  const capacityBookings=await call("/api/studio/bookings?sessionId="+capacityId,{cookie:a.cookie});
-  assert.equal(capacityBookings.status,200);
-  assert.equal(capacityBookings.data.bookings.filter(x=>x.status==="booked").length,3);
-  assert.equal(capacityBookings.data.bookings.filter(x=>x.status==="waitlisted").length,0);
-  assert.equal(capacityBookings.data.bookings.find(x=>x.member_id===member2)?.id,capacityWaiting.data.booking.id,"FIFO member must be promoted, not replaced.");
-  const debitRows=await admin.query("SELECT member_id,count(*)::int AS count FROM credit_ledger WHERE studio_id=$1 AND booking_id IN (SELECT id FROM bookings WHERE studio_id=$1 AND session_id=$2) AND reason='class_booking' GROUP BY member_id",[studioA,capacityId]);
-  assert.equal(debitRows.rowCount,3,"All booked members require one debit each.");
-  assert(debitRows.rows.every(x=>x.count===1),"No duplicate debit under capacity-change race.");
-
   assert.equal((await bookMember(a,member3)).status,409,"Pending entitlement must not book.");
   const first=await bookMember(a,member1);assert.equal(first.status,201);assert.equal(first.data.booking.status,"booked");
   const second=await bookMember(a,member2);assert.equal(second.status,201);assert.equal(second.data.booking.status,"waitlisted");
@@ -566,6 +538,36 @@ async function main(){
   assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Revoked staff session must immediately lose access.");
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,401,"Revoked staff must not log back in.");
+
+  // Controlled race: adding capacity and booking another member concurrently
+  // must never jump an eligible FIFO waitlist member or double-charge credits.
+  const raceFirst=await createMember(a,"Capacity First");
+  const raceWaiting=await createMember(a,"Capacity Waiting");
+  const raceMember=await createMember(a,"Capacity Newcomer");
+  for(const personId of [raceFirst,raceWaiting,raceMember]){await confirmMember(personId);await signWaiver(personId);}
+  const capacityClass=await call("/api/studio/classes",{method:"POST",cookie:a.cookie,body:{
+   ...classInput,title:"Capacity expansion race",instructor:"Capacity Race Coach",
+   room:"Capacity Race Room",startsAt:future(9,9),capacity:1
+  }});
+  assert.equal(capacityClass.status,201,JSON.stringify(capacityClass.data));
+  const capacityId=capacityClass.data.class.id;
+  assert.equal((await bookMember(a,raceFirst,capacityId)).data.booking.status,"booked");
+  const capacityWaiting=await bookMember(a,raceWaiting,capacityId);
+  assert.equal(capacityWaiting.data.booking.status,"waitlisted");
+  const [expanded,concurrentArrival]=await Promise.all([
+   call("/api/studio/classes/"+capacityId,{method:"PATCH",cookie:a.cookie,body:{capacity:3}}),
+   bookMember(a,raceMember,capacityId)
+  ]);
+  assert.equal(expanded.status,200,JSON.stringify(expanded.data));
+  assert.equal(concurrentArrival.status,201,JSON.stringify(concurrentArrival.data));
+  const capacityBookings=await call("/api/studio/bookings?sessionId="+capacityId,{cookie:a.cookie});
+  assert.equal(capacityBookings.status,200);
+  assert.equal(capacityBookings.data.bookings.filter(x=>x.status==="booked").length,3);
+  assert.equal(capacityBookings.data.bookings.filter(x=>x.status==="waitlisted").length,0);
+  assert.equal(capacityBookings.data.bookings.find(x=>x.member_id===raceWaiting)?.id,capacityWaiting.data.booking.id,"FIFO member must be promoted, not replaced.");
+  const debitRows=await admin.query("SELECT member_id,count(*)::int AS count FROM credit_ledger WHERE studio_id=$1 AND booking_id IN (SELECT id FROM bookings WHERE studio_id=$1 AND session_id=$2) AND reason='class_booking' GROUP BY member_id",[studioA,capacityId]);
+  assert.equal(debitRows.rowCount,3,"All booked members require one debit each.");
+  assert(debitRows.rows.every(x=>x.count===1),"No duplicate debit under capacity-change race.");
 
   // Closure requests must be explicit, tenant scoped and idempotent.
   const noConfirmation=await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{confirmation:"CLOSE MY STUDIO",exportAcknowledged:false}});
