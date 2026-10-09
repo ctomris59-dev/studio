@@ -1,7 +1,8 @@
+import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
 import {jsonObject,stringField,errorResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
-import {emailIsValid,normalizeEmail,validatePassword,passwordHash} from "@/lib/auth-crypto";
+import {emailIsValid,normalizeEmail,validatePassword,passwordHash,PasswordHashBusyError} from "@/lib/auth-crypto";
 import {newChallenge,queueMessage,publicMailOrigin} from "@/lib/server/challenges";
 import {validStudioTimezone} from "@/lib/studio-timezone";
 import {commercialRegistrationReady} from "@/lib/server/release-config";
@@ -23,6 +24,8 @@ export async function POST(request:NextRequest){
   !(STUDIO_FOCUSES as readonly string[]).includes(focus)||!validStudioTimezone(timezone)||
   !plan||!["monthly","annual"].includes(plan)||!legalPayloadIsCurrent(body))
   return errorResponse(400,"Check account details, subscription plan and required legal acceptance.");
+ const budget=await publicAbuseGuard(request,"register",email);
+ if(budget)return budget;
  try{
   const origin=publicMailOrigin(),secured=await passwordHash(password),preset=studioPreset(focus);
   await inTransaction(async client=>{
@@ -51,6 +54,7 @@ export async function POST(request:NextRequest){
    name:e instanceof Error?e.name:"unknown",code:(e as {code?:string}).code||"unclassified",
    message:e instanceof Error?e.message:"unknown"
   });
+  if(e instanceof PasswordHashBusyError)return errorResponse(429,"Registration service is busy. Try again shortly.");
   return backendError();
  }
 }
