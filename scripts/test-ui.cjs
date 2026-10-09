@@ -12,6 +12,8 @@ const headers=read("next.config.ts");
 const inviteUI=read("app/workspace/staff-invitations.tsx");
 const inviteAPI=read("app/api/studio/invitations/route.ts");
 const preview=read("app/book/preview/page.tsx");
+const onboarding=read("app/workspace/onboarding-panel.tsx");
+const schemaDraft=read("db/schema.sql");
 assert(workspace.includes('type="email"')&&workspace.includes("registrationLegalAccepted"),"Account forms must validate email and require legal acceptance");
 assert(workspace.includes('"/api/auth/verify/resend"'),"Accounts must be able to resend verification");
 assert(demo.includes("TimezoneSelect"),"Interactive demo must use selectable timezones");
@@ -24,4 +26,6 @@ assert(css.includes(":focus-visible")&&css.includes("@media"),"Responsive focus 
 assert(headers.includes("Content-Security-Policy")&&headers.includes("Strict-Transport-Security")&&headers.includes("frame-ancestors 'none'"),"All application surfaces must have browser security headers.");
 assert(inviteUI.includes("Email staff invitation")&&inviteAPI.includes('["owner"]'),"Staff invitations must be owner-controlled and available in the workspace.");
 assert(preview.includes("upcomingLondonDays")&&!preview.includes("WED 07 OCT"),"Booking preview dates must be dynamic.");
+assert(onboarding.includes("const expiry=new Date(")&&!onboarding.includes("2026-12-31"),"CSV sample expiry must be generated relative to export date.");
+assert(!schemaDraft.includes("CREATE TABLE")&&schemaDraft.includes("db/migrations"),"Obsolete SQL schema file must not describe deployable tables.");
 console.log("UI smoke checks passed: functional actions, navigation, accessibility and mobile CSS.");
