@@ -71,12 +71,25 @@ async function main(){
      ].map(face=>document.fonts.load(face)));
      const nodes=Array.from(document.querySelectorAll("h1,h2,h3,p,a,button,label,input")).filter(x=>x.getBoundingClientRect().width>0);
      const unknown=nodes.filter(x=>!fonts.some(name=>getComputedStyle(x).fontFamily.includes(name))).length;
+     const annual=document.querySelector(".ed-annual-compact");
+     const annualText=annual?.querySelector("span");
+     const rgb=value=>(value.match(/[0-9.]+/g)||[]).slice(0,3).map(Number);
+     const lum=color=>{
+      const n=rgb(color).map(x=>{const v=x/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});
+      return n.length===3?.2126*n[0]+.7152*n[1]+.0722*n[2]:0;
+     };
+     let annualContrast=null;
+     if(annual&&annualText){
+      const foreground=lum(getComputedStyle(annualText).color);
+      const background=lum(getComputedStyle(annual).backgroundColor);
+      annualContrast=(Math.max(foreground,background)+.05)/(Math.min(foreground,background)+.05);
+     }
      const h1=document.querySelector("main h1");
      return {title:document.title,unknown,total:nodes.length,loaded:loaded.map(x=>x.length),
       weightedFaces:weighted.map(x=>x.length),
       remoteFonts:performance.getEntriesByType("resource").filter(x=>/fonts\\.(googleapis|gstatic)\\.com/.test(x.name)).length,
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth+4,
-      heroTop:h1?h1.getBoundingClientRect().top:null};
+      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast};
     })()`});
     const result=evaluation.result?.value;
     assert(result,route+" browser evaluate failed: "+JSON.stringify(evaluation));
@@ -87,6 +100,7 @@ async function main(){
     assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
+     assert(result.annualContrast!==null&&result.annualContrast>=4.5,"Annual CTA text must meet WCAG AA contrast, got "+result.annualContrast);
     }
     // Sub-page typography may intentionally use a system font for controls,
     // but the content should not silently fall back across the whole page.
