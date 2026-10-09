@@ -18,7 +18,7 @@ const recentMetrics=`
    COUNT(b.id) FILTER(WHERE b.status='cancelled' AND b.cancellation_type='standard')::int AS standard_cancels
   FROM class_sessions c JOIN studios st ON st.id=c.studio_id
   LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id
-  WHERE c.studio_id=$1 AND c.starts_at>=now()-interval '30 days' AND c.starts_at<now()
+  WHERE c.studio_id=$1 AND c.status='scheduled' AND c.starts_at>=now()-interval '30 days' AND c.starts_at<now()
   GROUP BY c.id,st.timezone
  )
 `;
