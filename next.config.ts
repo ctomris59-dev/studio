@@ -32,8 +32,19 @@ const contentSecurityPolicy=[
 const hstsAllSubdomains=process.env.HSTS_ALL_SUBDOMAINS_HTTPS_VERIFIED==="true";
 const hstsPreload=process.env.HSTS_PRELOAD_APPROVED==="true"&&hstsAllSubdomains;
 const hstsValue="max-age=31536000"+(hstsAllSubdomains?"; includeSubDomains":"")+(hstsPreload?"; preload":"");
+// Static security headers avoid running Edge middleware on ISR pages and APIs.
+// Set PUBLIC_APP_ORIGIN to the canonical HTTPS hostname before production build.
+// Preview build origins must be supplied explicitly, never inferred from Host.
+const reportingOrigin=process.env.PUBLIC_APP_ORIGIN||process.env.NEXT_PUBLIC_SITE_URL||"https://www.studiotasker.com";
+let reportEndpoint="https://www.studiotasker.com/api/security/csp-report";
+try{
+ const target=new URL(reportingOrigin);
+ if(["https:","http:"].includes(target.protocol)&&!target.username&&!target.password)
+  reportEndpoint=new URL("/api/security/csp-report",target.origin).href;
+}catch{/* Keep verified canonical fallback. */}
 const publicSecurity=[
  {key:"Content-Security-Policy",value:contentSecurityPolicy},
+ {key:"Reporting-Endpoints",value:`studio-csp="${reportEndpoint}"`},
  {key:"Strict-Transport-Security",value:hstsValue},
  {key:"X-Frame-Options",value:"DENY"},
  {key:"X-Content-Type-Options",value:"nosniff"},
