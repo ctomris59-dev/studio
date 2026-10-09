@@ -14,6 +14,16 @@ export async function POST(request:NextRequest){
  if(!validChallengeToken(token)||!studio||!validUUID(studio)||typeof password!=="string"||!validatePassword(password))
   return errorResponse(400,"The invitation or password is invalid.");
  try{
+  // Validate the one-time token with a short transaction before expensive scrypt.
+  // Acceptance still rechecks and locks the invitation below to prevent replay.
+  const valid=await inTransaction(async client=>{
+   await client.query("SELECT set_config('app.studio_id',$1,true)",[studio]);
+   const found=await client.query(`SELECT 1 FROM staff_invitations
+     WHERE studio_id=$1 AND token_hash=$2 AND accepted_at IS NULL
+       AND revoked_at IS NULL AND expires_at>now() LIMIT 1`,[studio,tokenDigest(token)]);
+   return Boolean(found.rowCount);
+  });
+  if(!valid)return errorResponse(400,"Invitation expired or already used.");
   const secured=await passwordHash(password),session=newSessionToken();
   const result=await inTransaction(async client=>{
    // RLS is deliberately scoped to the studio supplied by the signed link;
