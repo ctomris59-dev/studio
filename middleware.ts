@@ -9,14 +9,8 @@ import {NextRequest,NextResponse} from "next/server";
  * while rendering the workspace (app/workspace/page.tsx is force-dynamic).
  */
 export function middleware(request:NextRequest){
- // Reporting-Endpoints requires an absolute URI; resolve it from the actual
- // HTTPS request host, not a hardcoded domain (preview and production differ).
+ // Only the dynamic workspace requires a fresh response nonce.
  const reportingEndpoint=new URL("/api/security/csp-report",request.nextUrl.origin).href;
- if(!request.nextUrl.pathname.startsWith("/workspace")){
-  const response=NextResponse.next();
-  response.headers.set("Reporting-Endpoints",`studio-csp="${reportingEndpoint}"`);
-  return response;
- }
  const nonce=btoa(crypto.randomUUID());
  const policy=[
   "default-src 'self'",
@@ -51,4 +45,4 @@ export function middleware(request:NextRequest){
 
 // Never intercept Next static chunks, optimizer, metadata image assets or
 // favicon. A response-only header on public routes preserves ISR page caching.
-export const config={matcher:["/((?!_next/static|_next/image|favicon.ico).*)"]};
+export const config={matcher:["/workspace/:path*"]};
