@@ -1,3 +1,4 @@
+import {sequentialPg} from "./pg-sequential";
 import "server-only";
 import type {PoolClient} from "pg";
 
@@ -10,37 +11,37 @@ export async function actionCenter(client:PoolClient,studioId:string,options?:{i
  const configResult=await client.query<{inactive_days:number;low_credits_threshold:number;renewal_window_days:number;trial_followup_hours:number;package_review_hours:number;open_seats_threshold:number}>(
   "SELECT inactive_days,low_credits_threshold,renewal_window_days,trial_followup_hours,package_review_hours,open_seats_threshold FROM studios WHERE id=$1",[studioId]);
  const config=configResult.rows[0]||{inactive_days:21,low_credits_threshold:2,renewal_window_days:14,trial_followup_hours:18,package_review_hours:24,open_seats_threshold:2};
- const [overdue,expiring,credits,gaps,tasks,inactive,trials,pendingPackages,today,snoozes]=await Promise.all([
-  client.query<{id:string;full_name:string;days_late:number;next_contact:string}>(`
+ const [overdue,expiring,credits,gaps,tasks,inactive,trials,pendingPackages,today,snoozes]=await sequentialPg([
+  ()=>client.query<{id:string;full_name:string;days_late:number;next_contact:string}>(`
    SELECT p.id,p.full_name,GREATEST((now() AT TIME ZONE s.timezone)::date-p.next_contact,0)::int AS days_late,p.next_contact::text
    FROM people p JOIN studios s ON s.id=p.studio_id
    WHERE p.studio_id=$1 AND p.kind='lead' AND p.archived_at IS NULL
     AND p.lead_stage NOT IN('Won','Lost') AND p.next_contact IS NOT NULL
     AND p.next_contact<=(now() AT TIME ZONE s.timezone)::date
    ORDER BY p.next_contact,p.id LIMIT 20`,[studioId]),
-  client.query<{id:string;full_name:string;days_left:number;expiry_date:string;credits:number|null}>(`
+  ()=>client.query<{id:string;full_name:string;days_left:number;expiry_date:string;credits:number|null}>(`
    SELECT p.id,p.full_name,(p.expiry_date-(now() AT TIME ZONE s.timezone)::date)::int AS days_left,p.expiry_date::text,p.credits
    FROM people p JOIN studios s ON s.id=p.studio_id
    WHERE p.studio_id=$1 AND p.kind='member' AND p.archived_at IS NULL AND p.package_status='Confirmed'
     AND p.member_status='Active' AND p.expiry_date IS NOT NULL
     AND p.expiry_date BETWEEN (now() AT TIME ZONE s.timezone)::date AND (now() AT TIME ZONE s.timezone)::date+$2::int
    ORDER BY p.expiry_date,p.id LIMIT 20`,[studioId,config.renewal_window_days]),
-  client.query<{id:string;full_name:string;credits:number}>(`
+  ()=>client.query<{id:string;full_name:string;credits:number}>(`
    SELECT id,full_name,credits FROM people WHERE studio_id=$1 AND kind='member'
     AND member_status='Active' AND archived_at IS NULL AND package_status='Confirmed' AND credits BETWEEN 0 AND $2::int
    ORDER BY credits,id LIMIT 20`,[studioId,config.low_credits_threshold]),
-  client.query<{id:string;title:string;starts_at:string;empty_seats:number}>(`
+  ()=>client.query<{id:string;title:string;starts_at:string;empty_seats:number}>(`
    SELECT c.id,c.title,c.starts_at,(c.capacity-COUNT(b.id) FILTER(WHERE b.status='booked'))::int AS empty_seats
    FROM class_sessions c LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id
    WHERE c.studio_id=$1 AND c.starts_at>now()+interval '2 hours' AND c.starts_at<=now()+interval '48 hours'
    GROUP BY c.id HAVING c.capacity-COUNT(b.id) FILTER(WHERE b.status='booked')>=$2::int
    ORDER BY c.starts_at,c.id LIMIT 15`,[studioId,config.open_seats_threshold]),
-  client.query<{id:string;title:string;due_at:string;full_name:string;person_id:string}>(`
+  ()=>client.query<{id:string;title:string;due_at:string;full_name:string;person_id:string}>(`
    SELECT t.id,t.title,t.due_at,p.full_name,t.person_id
    FROM followup_tasks t JOIN people p ON p.id=t.person_id AND p.studio_id=t.studio_id
    WHERE t.studio_id=$1 AND t.completed_at IS NULL AND t.due_at<now()
    ORDER BY t.due_at,t.id LIMIT 20`,[studioId]),
-  client.query<{id:string;full_name:string;days_inactive:number;activity_date:string}>(`
+  ()=>client.query<{id:string;full_name:string;days_inactive:number;activity_date:string}>(`
    SELECT p.id,p.full_name,
     COALESCE(MAX((c.starts_at AT TIME ZONE s.timezone)::date),p.last_visit,p.joined,p.start_date,p.created_at::date)::text AS activity_date,
     ((now() AT TIME ZONE s.timezone)::date-COALESCE(MAX((c.starts_at AT TIME ZONE s.timezone)::date),p.last_visit,p.joined,p.start_date,p.created_at::date))::int AS days_inactive
@@ -52,19 +53,19 @@ export async function actionCenter(client:PoolClient,studioId:string,options?:{i
    GROUP BY p.id,p.full_name,p.last_visit,p.joined,p.start_date,p.created_at,s.timezone
    HAVING ((now() AT TIME ZONE s.timezone)::date-COALESCE(MAX((c.starts_at AT TIME ZONE s.timezone)::date),p.last_visit,p.joined,p.start_date,p.created_at::date))>=$2::int
    ORDER BY days_inactive DESC,p.id LIMIT 20`,[studioId,config.inactive_days]),
-  client.query<{id:string;full_name:string;hours_since_trial:number}>(`
+  ()=>client.query<{id:string;full_name:string;hours_since_trial:number}>(`
    SELECT p.id,p.full_name,extract(epoch FROM(now()-p.updated_at))/3600 AS hours_since_trial
    FROM people p WHERE p.studio_id=$1 AND p.kind='lead' AND p.archived_at IS NULL AND p.lead_stage='Trial attended'
     AND p.updated_at<=now()-($2::int*interval '1 hour') AND p.updated_at>=now()-interval '30 days'
     AND NOT EXISTS(SELECT 1 FROM people m WHERE m.studio_id=p.studio_id AND m.kind='member' AND m.archived_at IS NULL
       AND (m.source_lead_id=p.id OR (p.email<>'' AND lower(m.email)=lower(p.email)) OR (p.phone<>'' AND m.phone=p.phone)))
    ORDER BY p.updated_at,p.id LIMIT 20`,[studioId,config.trial_followup_hours]),
-  client.query<{id:string;full_name:string;hours_pending:number}>(`
+  ()=>client.query<{id:string;full_name:string;hours_pending:number}>(`
    SELECT id,full_name,floor(extract(epoch FROM(now()-updated_at))/3600)::int AS hours_pending
    FROM people WHERE studio_id=$1 AND kind='member' AND archived_at IS NULL AND package_status='Pending'
     AND updated_at<=now()-($2::int*interval '1 hour')
    ORDER BY updated_at,id LIMIT 20`,[studioId,config.package_review_hours]),
-  client.query<{classes:number;bookings:number;waitlisted:number;capacity:number}>(`
+  ()=>client.query<{classes:number;bookings:number;waitlisted:number;capacity:number}>(`
    SELECT count(*)::int AS classes,coalesce(sum(day_class.booked_count),0)::int AS bookings,
     coalesce(sum(day_class.waitlist_count),0)::int AS waitlisted,coalesce(sum(day_class.capacity),0)::int AS capacity
    FROM (SELECT c.id,c.capacity,count(b.id) FILTER(WHERE b.status='booked')::int AS booked_count,
@@ -73,7 +74,7 @@ export async function actionCenter(client:PoolClient,studioId:string,options?:{i
      LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id
      WHERE c.studio_id=$1 AND (c.starts_at AT TIME ZONE s.timezone)::date=(now() AT TIME ZONE s.timezone)::date
      GROUP BY c.id) day_class`,[studioId]),
-  client.query<{action_key:string}>(`SELECT action_key FROM action_center_snoozes WHERE studio_id=$1 AND snoozed_until>now()`,[studioId])
+  ()=>client.query<{action_key:string}>(`SELECT action_key FROM action_center_snoozes WHERE studio_id=$1 AND snoozed_until>now()`,[studioId])
  ]);
  const items:ActionItem[]=[];
  const trialIds=new Set(trials.rows.map(x=>x.id));
