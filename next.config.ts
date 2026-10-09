@@ -4,9 +4,10 @@ const noIndex=[
  {key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"},
  {key:"X-Content-Type-Options",value:"nosniff"}
 ];
-// Conservative CSP allowing only current app/CDN resources and hosted Paddle checkout.
-// Inline script/style remain allowed for Next.js hydration and third-party checkout.
-// Tighten to nonce-based CSP after a dedicated browser compatibility test.
+// Marketing pages use 300-second ISR and currently need inline Next.js
+// hydration code. Their CSP cannot safely use a request nonce without disabling
+// caching. Middleware applies strict nonce CSP on dynamic /workspace instead;
+// upgrade cached routes to build-time script hashes only after browser verification.
 const contentSecurityPolicy=[
  "default-src 'self'",
  "base-uri 'self'",
@@ -14,6 +15,7 @@ const contentSecurityPolicy=[
  "frame-ancestors 'none'",
  "form-action 'self' https://*.paddle.com",
  "script-src 'self' 'unsafe-inline' https://*.paddle.com https://cdn.paddle.com",
+ "script-src-attr 'none'",
  "style-src 'self' 'unsafe-inline' https://*.paddle.com",
  "img-src 'self' data: blob: https://*.paddle.com",
  "font-src 'self' data:",
@@ -22,9 +24,15 @@ const contentSecurityPolicy=[
  "media-src 'self' blob:",
  "upgrade-insecure-requests"
 ].join("; ");
+// HSTS subdomain/preload scope is irreversible for clients over its max-age.
+// Only opt in when every existing/future subdomain is HTTPS-only and the
+// operator has approved preload requirements for the apex domain.
+const hstsAllSubdomains=process.env.HSTS_ALL_SUBDOMAINS_HTTPS_VERIFIED==="true";
+const hstsPreload=process.env.HSTS_PRELOAD_APPROVED==="true"&&hstsAllSubdomains;
+const hstsValue="max-age=31536000"+(hstsAllSubdomains?"; includeSubDomains":"")+(hstsPreload?"; preload":"");
 const publicSecurity=[
  {key:"Content-Security-Policy",value:contentSecurityPolicy},
- {key:"Strict-Transport-Security",value:"max-age=31536000"},
+ {key:"Strict-Transport-Security",value:hstsValue},
  {key:"X-Frame-Options",value:"DENY"},
  {key:"X-Content-Type-Options",value:"nosniff"},
  {key:"Referrer-Policy",value:"strict-origin-when-cross-origin"},
