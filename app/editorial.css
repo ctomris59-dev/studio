@@ -1383,3 +1383,42 @@
   background:var(--ed-lime);color:var(--ed-ink);outline:2px solid var(--ed-ink);outline-offset:-2px
  }
 }
+
+/* Legibility baseline for public content and booking/price metadata. */
+.editorial .ed-topline,
+.editorial .ed-overline,
+.editorial .ed-index,
+.editorial .ed-hero-end,
+.editorial .ed-price-top,
+.editorial .ed-price-include,
+.editorial .ed-price-disclaimer,
+.editorial .ed-footer-bottom,
+.editorial .ed-footer-nav,
+.editorial .ed-text-link,
+.editorial .ed-last-link,
+.editorial .ed-window-label,
+.editorial .ed-window-edition,
+.editorial .ed-canvas-meta,
+.editorial .ed-canvas-bottom,
+.editorial .ed-tape,
+.editorial .ed-feature-num,
+.editorial .ed-sch-week,
+.editorial .ed-sch-greeting span,
+.editorial .ed-sch-metrics small,
+.editorial .ed-sch-class small,
+.editorial .ed-sch-cap b,
+.editorial .ed-sch-foot,
+.editorial .ed-sch-tablehead,
+.editorial .ed-sch-tablehead strong,
+.editorial .ed-sch-tablehead span,
+.editorial .ed-sch-status,
+.editorial .ed-sch-time,
+.editorial .ed-sch-identity small {
+ font-size:12px;
+}
+.editorial .ed-footer-bottom{color:#c4cbd5}
+.editorial .ed-footer-main p{color:#c4cbd5}
+@media(max-width:760px){
+ .editorial .ed-topline>.ed-container{font-size:12px;min-height:35px;height:auto;padding-block:7px}
+ .editorial .ed-mobile-menu summary{font-size:14px}
+}
