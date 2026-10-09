@@ -2,7 +2,8 @@ const {Pool}=require("pg");
 const nodemailer=require("nodemailer");
 const templates={
  verify_email:(d)=>({subject:"Verify your StudioTasker email",text:"Verify your StudioTasker owner/staff account by opening this one-time link:\n"+d.url+"\nLink expires after 24 hours."}),
- password_reset:(d)=>({subject:"Reset your StudioTasker password",text:"Reset your StudioTasker password using this one-time link:\n"+d.url+"\nIf you did not request this, ignore it."})
+ password_reset:(d)=>({subject:"Reset your StudioTasker password",text:"Reset your StudioTasker password using this one-time link:\n"+d.url+"\nIf you did not request this, ignore it."}),
+ staff_invitation:(d)=>({subject:"Join "+String(d.studioName||"your studio")+" on StudioTasker",text:"You have been invited to join "+String(d.studioName||"a studio")+" as "+String(d.role||"staff")+".\nOpen this one-time link to set your password:\n"+d.url+"\nInvitation expires in 48 hours."})
 };
 const validText=x=>typeof x==="string"&&x.length<5000?x:"";
 async function main(){

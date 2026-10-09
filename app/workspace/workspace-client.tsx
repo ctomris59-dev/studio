@@ -7,6 +7,7 @@ import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "
 import {ClassBasedOperations} from "./class-based-operations";
 import {OnboardingPanel} from "./onboarding-panel";
 import {BillingPanel} from "./billing-panel";
+import {StaffInvitations} from "./staff-invitations";
 import {TimezoneSelect} from "./timezone-select";
 import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS} from "../../lib/legal-versions";
 import {CLASS_FORMATS,STUDIO_FOCUSES,studioPreset,studioPresetProfile} from "../../lib/studio-presets";
@@ -239,7 +240,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {view==="insights"&&<ClassBasedOperations role={user.role} section="insights" preferences={prefs}/>}
 
    {view==="settings"&&<section className="rd-live-section">
-    {user.role==="owner"&&<BillingPanel initialPlan={pendingPlan}/>} 
+    {user.role==="owner"&&<BillingPanel initialPlan={pendingPlan}/>}
+    {user.role==="owner"&&<StaffInvitations/>} 
     <OnboardingPanel role={user.role} onDataChange={()=>void load()}/>
     <div className="rd-customize-head"><div><p className="rd-eyebrow">MAKE STUDIOTASKER YOURS</p><h2>Studio identity & workflow</h2><p>Controlled customization: enough to feel like your studio without creating a fragile one-off software fork.</p></div>
      <div className="rd-brand-preview" style={{borderColor:settings.accentColor}}>{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,2).toUpperCase()}</span>}<div><b>{settings.name||"Your Studio"}</b><small>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</small></div></div></div>

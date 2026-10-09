@@ -9,6 +9,8 @@ const pricing=read("app/workspace/billing-panel.tsx");
 const homepage=read("app/page.tsx");
 const css=read("app/editorial.css");
 const headers=read("next.config.ts");
+const inviteUI=read("app/workspace/staff-invitations.tsx");
+const inviteAPI=read("app/api/studio/invitations/route.ts");
 assert(workspace.includes('type="email"')&&workspace.includes("registrationLegalAccepted"),"Account forms must validate email and require legal acceptance");
 assert(workspace.includes('"/api/auth/verify/resend"'),"Accounts must be able to resend verification");
 assert(demo.includes("TimezoneSelect"),"Interactive demo must use selectable timezones");
@@ -18,4 +20,5 @@ assert(pricing.includes("canManageExisting"),"Expired subscribers must be able t
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
 assert(css.includes(":focus-visible")&&css.includes("@media"),"Responsive focus states must be defined");
 assert(headers.includes("Content-Security-Policy")&&headers.includes("Strict-Transport-Security")&&headers.includes("frame-ancestors 'none'"),"All application surfaces must have browser security headers.");
+assert(inviteUI.includes("Email staff invitation")&&inviteAPI.includes('["owner"]'),"Staff invitations must be owner-controlled and available in the workspace.");
 console.log("UI smoke checks passed: functional actions, navigation, accessibility and mobile CSS.");
