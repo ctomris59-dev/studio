@@ -1,12 +1,12 @@
 import {NextRequest,NextResponse} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
-import {SESSION_COOKIE,tokenHash} from "@/lib/auth-crypto";
+import {SESSION_COOKIE,DEVICE_COOKIE,tokenHash} from "@/lib/auth-crypto";
 import {sameOrigin,errorResponse,backendError} from "@/lib/server/responses";
 export const runtime="nodejs";
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
  const token=request.cookies.get(SESSION_COOKIE)?.value;
- const deviceToken=request.cookies.get("studiotasker_device")?.value;
+ const deviceToken=request.cookies.get(DEVICE_COOKIE)?.value;
  const deviceHash=deviceToken&&/^[A-Za-z0-9_-]{43}$/.test(deviceToken)?tokenHash(deviceToken):null;
  if((token||deviceHash)&&!dbIsReady())return errorResponse(503,"Unable to revoke the session and trusted device while the database is unavailable.");
  if((token||deviceHash)&&dbIsReady()){
@@ -25,6 +25,12 @@ export async function POST(request:NextRequest){
   "Clear-Site-Data":'\"cache\", \"storage\"'
  }});
  response.cookies.set(SESSION_COOKIE,"",{path:"/",maxAge:0,httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax"});
- response.cookies.set("studiotasker_device","",{path:"/",maxAge:0,httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax"});
+ response.cookies.set(DEVICE_COOKIE,"",{path:"/",maxAge:0,httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax"});
+ // Expire the pre-hardening cookies as well. Their server sessions are no
+ // longer accepted, and we should not leave obsolete credentials in browsers.
+ if(process.env.NODE_ENV==="production"){
+  response.cookies.set("reformdesk_session","",{path:"/",maxAge:0,httpOnly:true,secure:true,sameSite:"lax"});
+  response.cookies.set("studiotasker_device","",{path:"/",maxAge:0,httpOnly:true,secure:true,sameSite:"lax"});
+ }
  return response;
 }
