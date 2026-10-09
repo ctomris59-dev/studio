@@ -353,6 +353,9 @@ async function main(){
   const cancelledClass=await call("/api/studio/classes/"+bulkId,{method:"DELETE",cookie:a.cookie});
   assert.equal(cancelledClass.status,200,JSON.stringify(cancelledClass.data));
   assert.equal(cancelledClass.data.class.creditsRefunded,1);
+  const staffNotice=await admin.query("SELECT title,source_key FROM followup_tasks WHERE studio_id=$1 AND person_id=$2 AND source_key LIKE 'class_cancelled:%'",[studioA,member1]);
+  assert(staffNotice.rows.some(r=>r.source_key.includes(bulkId)&&r.title.includes("Cancelled Studio Session")&&/\d{4}-\d{2}-\d{2}/.test(r.title)),"Class cancellation task must have readable name/date and a unique source key.");
+  assert(!staffNotice.rows.some(r=>r.title.includes(bulkId)),"Raw UUIDs must not appear in staff task titles.");
   assert.equal((await call("/api/studio/classes/"+bulkId,{method:"DELETE",cookie:a.cookie})).data.class.alreadyCancelled,true);
   const restoredCredits=(await call("/api/studio/members",{cookie:a.cookie})).data.members.find(x=>x.id===member1).credits;
   assert.equal(restoredCredits,priorCredits+1,"Whole-class cancellation must restore exactly one credit.");
@@ -538,6 +541,12 @@ async function main(){
   assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Revoked staff session must immediately lose access.");
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,401,"Revoked staff must not log back in.");
+  assert.equal((await call("/api/studio/staff-access",{method:"PATCH",cookie:b.cookie,body:{userId:invitedStaff.id,confirm:"RESTORE"}})).status,404,"Other tenants cannot restore staff.");
+  assert.equal((await call("/api/studio/staff-access",{method:"PATCH",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"RESTORE"}})).status,200);
+  assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Old sessions must remain revoked after restore.");
+  const reactivated=await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}});
+  assert.equal(reactivated.status,200,"Restored staff must be able to sign in again.");
+  assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,200);
 
   // Controlled race: adding capacity and booking another member concurrently
   // must never jump an eligible FIFO waitlist member or double-charge credits.
@@ -579,6 +588,26 @@ async function main(){
   const closureAudit=await admin.query("SELECT count(*)::int AS count FROM activity_log WHERE studio_id=$1 AND action='privacy.studio_closure_requested'",[studioA]);
   assert.equal(closureAudit.rows[0].count,1,"Repeated closure request must not create duplicate actions.");
   assert.equal((await call("/api/auth/me",{cookie:a.cookie})).status,200,"A closure request is not immediate deletion.");
+
+  const known=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
+  assert.equal(known.status,200);
+  const rawCookies=known.headers.get("set-cookie")||"";
+  const deviceValue=/studiotasker_device=([A-Za-z0-9_-]{43})/.exec(rawCookies)?.[1];
+  assert(deviceValue,"Successful login must issue a trusted-device cookie.");
+  const emailHash=require("node:crypto").createHash("sha256").update("login:"+a.email).digest("hex");
+  await admin.query(`INSERT INTO login_attempts(email_hash,attempts,window_started_at) VALUES($1,5,now())
+   ON CONFLICT(email_hash) DO UPDATE SET attempts=5,window_started_at=now()`,[emailHash]);
+  assert.equal((await call("/api/auth/login",{method:"POST",body:{email:a.email,password}})).status,429,"A new device must respect email lockout.");
+  const familiar="studiotasker_device="+deviceValue;
+  assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password:"An incorrect password!"}})).status,429,"A known device must not permit wrong guesses during lockout.");
+  assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password}})).status,200,"A genuine owner on a recognized device must recover from malicious email-only lockout.");
+
+  // Owner can withdraw and re-submit a pending closure request before manual erasure.
+  const withdrawal=await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{action:"withdraw",confirmation:"WITHDRAW CLOSURE REQUEST"}});
+  assert.equal(withdrawal.status,202,JSON.stringify(withdrawal.data));
+  assert.equal((await call("/api/studio/privacy/closure",{cookie:a.cookie})).data.requestedAt,null);
+  assert.equal((await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{confirmation:"CLOSE MY STUDIO",exportAcknowledged:true}})).status,202);
+  assert.equal((await admin.query("SELECT count(*)::int AS n FROM activity_log WHERE studio_id=$1 AND action='privacy.studio_closure_requested'",[studioA])).rows[0].n,2);
 
   // Password reset is one-time and revokes all sessions belonging to the user.
   const forgot=await call("/api/auth/password/forgot",{method:"POST",body:{email:a.email}});
