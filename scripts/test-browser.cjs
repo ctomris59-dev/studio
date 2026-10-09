@@ -84,6 +84,7 @@ async function main(){
     assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
     assert(result.total>=1,route+" did not render text");
+    assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
     }
