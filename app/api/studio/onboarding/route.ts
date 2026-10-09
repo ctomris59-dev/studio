@@ -1,3 +1,4 @@
+import {sequentialPg} from "@/lib/server/pg-sequential";
 import {NextRequest} from "next/server";
 import type {PoolClient} from "pg";
 import {authenticated} from "@/lib/server/auth";
@@ -5,11 +6,11 @@ import {errorResponse,successResponse,backendError,jsonObject,stringField,sameOr
 import {StudioOperationError} from "@/lib/server/studio-booking";
 export const runtime="nodejs";
 async function state(client:PoolClient,studioId:string){
- const [studio,people,classes,packs]=await Promise.all([
-  client.query("SELECT name,timezone,onboarding_import_skipped,onboarding_completed_at FROM studios WHERE id=$1",[studioId]),
-  client.query("SELECT count(*)::int n FROM people WHERE studio_id=$1 AND archived_at IS NULL",[studioId]),
-  client.query("SELECT count(*)::int n FROM class_sessions WHERE studio_id=$1 AND starts_at>now()",[studioId]),
-  client.query("SELECT count(*)::int n FROM studio_packages WHERE studio_id=$1 AND active=true",[studioId])
+ const [studio,people,classes,packs]=await sequentialPg([
+  ()=>client.query("SELECT name,timezone,onboarding_import_skipped,onboarding_completed_at FROM studios WHERE id=$1",[studioId]),
+  ()=>client.query("SELECT count(*)::int n FROM people WHERE studio_id=$1 AND archived_at IS NULL",[studioId]),
+  ()=>client.query("SELECT count(*)::int n FROM class_sessions WHERE studio_id=$1 AND starts_at>now()",[studioId]),
+  ()=>client.query("SELECT count(*)::int n FROM studio_packages WHERE studio_id=$1 AND active=true",[studioId])
  ]);
  const s=studio.rows[0],contactCount=people.rows[0].n,classCount=classes.rows[0].n,packageCount=packs.rows[0].n;
  const contactsDone=contactCount>0||s?.onboarding_import_skipped===true;
