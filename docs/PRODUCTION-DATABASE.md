@@ -13,3 +13,6 @@ This procedure is for a database administrator, not for automatic app startup.
 
 ## Cleanup identity
 A scheduled cleanup must run with `MAINTENANCE_DATABASE_URL` and a non-superuser role created by `npm run db:roles:maintenance`. Set a unique `MAINTENANCE_ROLE_NAME`, a random 32+ character `MAINTENANCE_ROLE_PASSWORD` and `CONFIRM_CREATE_MAINTENANCE_ROLE=YES_I_CONFIRMED` in a secure administrative shell. Remove the administrator credentials afterward. The role cannot access people or financial ledgers.
+
+## Runtime readiness check
+`GET /api/health` returns HTTP 200 only after a real database connection passes the runtime-role, table-existence and FORCE RLS checks. Docker health polling targets this endpoint rather than the marketing homepage. This does not replace SMTP, Paddle or offsite backup monitoring.

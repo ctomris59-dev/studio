@@ -64,6 +64,9 @@ async function main(){
   const bookingPreview=await call("/book/preview");
   assert.equal(bookingPreview.status,200,"Self-service booking preview must render.");
   assert((bookingPreview.headers.get("content-type")||"").includes("text/html"));
+  const health=await call("/api/health");
+  assert.equal(health.status,200,"Readiness must verify restricted database access.");
+  assert.equal(health.data.status,"ready");
   assert.equal((await call("/api/auth/me")).status,401);
   assert.equal((await call("/api/studio/people")).status,401);
   const oversizedWebhook=await call("/api/billing/paddle-webhook",{method:"POST",body:{padding:"A".repeat(260000)}});
