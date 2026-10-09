@@ -33,3 +33,6 @@ proxy_set_header X-Forwarded-For $remote_addr;
 After verifying the actual proxy configuration, set `TRUST_PROXY_IP_HEADERS=true`, `LAUNCH_TRUSTED_PROXY_VERIFIED=true`, and a 32+ character `LOGIN_RATE_HMAC_KEY`. Never copy incoming client-controlled X-Forwarded-For into legal or throttling evidence.
 
 The backup, email and cleanup timers are independent of Vercel; merely merging the units into GitHub does not schedule or activate them.
+
+## Off-site encrypted backup upload
+The backup service now runs `backup:offsite` after a successful `backup:create`. Install and configure `rclone` on the VPS, with `RCLONE_CONFIG` pointing to a service-account-readable 0600 configuration file and `RCLONE_REMOTE_DIR=remote:path`. The command uses `rclone copyto --immutable` to avoid overwriting prior archives, then verifies remote object length. A cloud-side retention policy and periodic isolated restore from the off-site archive are still required. Never commit remote tokens/keys or the backup passphrase.

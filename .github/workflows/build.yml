@@ -71,6 +71,8 @@ jobs:
         run: npm run test:pg-env
       - name: Test systemd maintenance templates
         run: npm run test:ops
+      - name: Test off-site backup path guards
+        run: npm run test:offsite
       - name: Test basic accessibility and mobile layout guards
         run: npm run test:ui
       - name: Test technical SEO invariants

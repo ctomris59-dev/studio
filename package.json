@@ -37,7 +37,9 @@
     "db:roles:production": "node db/setup-production-roles.cjs",
     "test:mail": "node scripts/test-mail.cjs",
     "test:ops": "node scripts/test-ops.cjs",
-    "db:roles:maintenance": "node db/setup-maintenance-role.cjs"
+    "db:roles:maintenance": "node db/setup-maintenance-role.cjs",
+    "backup:offsite": "node scripts/backup-offsite.cjs",
+    "test:offsite": "node scripts/test-offsite.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

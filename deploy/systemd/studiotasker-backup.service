@@ -10,6 +10,7 @@ Group=studiotasker
 WorkingDirectory=/srv/studiotasker
 EnvironmentFile=/etc/studiotasker/studiotasker.env
 ExecStart=/usr/bin/npm run backup:create
+ExecStartPost=/usr/bin/npm run backup:offsite
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
