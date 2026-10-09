@@ -1,5 +1,7 @@
 import {NextRequest} from "next/server";
 import nodemailer from "nodemailer";
+import {inTransaction,dbIsReady} from "@/lib/server/database";
+import {trustedLoginIp,loginIpKey} from "@/lib/auth-crypto";
 import {errorResponse,jsonObject,sameOrigin,stringField,successResponse} from "@/lib/server/responses";
 
 export const runtime="nodejs";
@@ -28,6 +30,24 @@ export async function POST(request:NextRequest){
  if(!name||!email||!validEmail(email)||!message||message.length<10)return errorResponse(400,"Please complete your name, email and message.");
  if(!allowedTopics.has(topic))return errorResponse(400,"Invalid topic.");
  if(startedAt&&Date.now()-startedAt<1500)return errorResponse(429,"Please wait a moment and try again.");
+ // One shared distributed budget plus a tighter per-client budget when the verified
+ // reverse proxy supplies X-Real-IP. Never trust client-supplied forwarded chains.
+ if(!dbIsReady())return errorResponse(503,"Contact form temporarily unavailable. Please email support@studiotasker.com.");
+ const trustedIp=trustedLoginIp(request.headers.get("x-real-ip"));
+ const key=loginIpKey("contact:"+(trustedIp||"unverified"));
+ if(!key)return errorResponse(503,"Contact form temporarily unavailable. Please email support@studiotasker.com.");
+ try{
+  const allowed=await inTransaction(async client=>{
+   const counter=await client.query<{attempts:number}>(`
+     INSERT INTO login_ip_attempts(ip_hash,attempts,window_started_at) VALUES($1,1,now())
+     ON CONFLICT(ip_hash) DO UPDATE SET
+      attempts=CASE WHEN login_ip_attempts.window_started_at<now()-interval '1 hour' THEN 1 ELSE login_ip_attempts.attempts+1 END,
+      window_started_at=CASE WHEN login_ip_attempts.window_started_at<now()-interval '1 hour' THEN now() ELSE login_ip_attempts.window_started_at END
+     RETURNING attempts`,[key]);
+   return counter.rows[0].attempts<=(trustedIp?5:50);
+  });
+  if(!allowed)return errorResponse(429,"Too many contact requests. Please try again later or email support.");
+ }catch{return errorResponse(503,"Contact form temporarily unavailable. Please email support@studiotasker.com.");}
 
  const {SMTP_HOST,SMTP_FROM,SMTP_USER,SMTP_PASSWORD}=process.env;
  const port=Number(process.env.SMTP_PORT||587);
