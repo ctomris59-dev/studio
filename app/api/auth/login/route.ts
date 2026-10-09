@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
-import {jsonObject,stringField,errorResponse,backendError,sameOrigin} from "@/lib/server/responses";
+import {jsonObject,stringField,errorResponse,busyResponse,backendError,sameOrigin} from "@/lib/server/responses";
 import {emailIsValid,normalizeEmail,passwordMatches,passwordHash,needsPasswordRehash,DUMMY_PASSWORD_HASH,newSessionToken,tokenHash,loginKey,trustedLoginIp,loginIpKey,SESSION_COOKIE,PasswordHashBusyError} from "@/lib/auth-crypto";
 import {sessionCookieConfig} from "@/lib/server/auth";
 export const runtime="nodejs";
@@ -102,5 +102,5 @@ export async function POST(request:NextRequest){
   response.cookies.set(DEVICE_COOKIE,result.deviceToken||"",{path:"/",maxAge:result.deviceToken?DEVICE_MAX_AGE:0,
    httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production"});
   return response;
- }catch(e){return e instanceof PasswordHashBusyError?errorResponse(429,"Sign-in service is busy. Try again shortly."):backendError()}
+ }catch(e){return e instanceof PasswordHashBusyError?busyResponse("Sign-in service is busy. Try again shortly."):backendError()}
 }
