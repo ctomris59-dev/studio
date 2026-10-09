@@ -42,9 +42,10 @@ export async function POST(request:NextRequest){
    const challenge=await newChallenge(client,{purpose:"verify_email",email,userId:u.rows[0].id,hours:24});
    await queueMessage(client,email,"verify_email",{url:origin+"/workspace#verify="+encodeURIComponent(challenge.secret),studioName});
   });
-  return successResponse({ok:true,notice:"Check your email to verify your studio-owner account before signing in."},202);
+  return successResponse({ok:true,notice:"If this email address is eligible, check your inbox for the next account step."},202);
  }catch(e){
-  if((e as {code?:string}).code==="23505")return errorResponse(409,"An account with this email already exists.");
+  // Do not disclose whether an email already belongs to an existing user.
+  if((e as {code?:string}).code==="23505")return successResponse({ok:true,notice:"If this email address is eligible, check your inbox for the next account step."},202);
   // Report only the error class and PostgreSQL code; never log submitted credentials.
   console.error("Studio registration failure",{
    name:e instanceof Error?e.name:"unknown",code:(e as {code?:string}).code||"unclassified",
