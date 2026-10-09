@@ -33,9 +33,25 @@ export async function POST(request:NextRequest){
  if(!validType)return new NextResponse(null,{status:415,headers:{"Cache-Control":"no-store"}});
  const declared=Number(request.headers.get("content-length")||0);
  if(declared>MAX_BODY)return new NextResponse(null,{status:413,headers:{"Cache-Control":"no-store"}});
+ // Do not buffer unbounded chunked payloads when Content-Length is absent.
  let body:string;
- try{body=await request.text()}catch{return new NextResponse(null,{status:400})}
- if(Buffer.byteLength(body,"utf8")>MAX_BODY)return new NextResponse(null,{status:413});
+ try{
+  if(!request.body)return new NextResponse(null,{status:400});
+  const reader=request.body.getReader();
+  let total=0;
+  const chunks:Uint8Array[]=[];
+  while(true){
+   const {done,value}=await reader.read();
+   if(done)break;
+   total+=value.byteLength;
+   if(total>MAX_BODY){
+    await reader.cancel();
+    return new NextResponse(null,{status:413});
+   }
+   chunks.push(value);
+  }
+  body=Buffer.concat(chunks).toString("utf8");
+ }catch{return new NextResponse(null,{status:400})}
  let parsed:unknown;
  try{parsed=JSON.parse(body)}catch{return new NextResponse(null,{status:400})}
  const list=Array.isArray(parsed)?parsed.slice(0,8):[parsed];
