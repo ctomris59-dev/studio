@@ -44,7 +44,10 @@
     "test:closure": "node scripts/test-studio-closure.cjs",
     "closure:finalize": "node scripts/finalize-studio-closure.cjs",
     "test:restore:e2e": "node scripts/test-restore-e2e.cjs",
-    "test:security:source": "node scripts/test-security-source.cjs"
+    "test:security:source": "node scripts/test-security-source.cjs",
+    "test:jsonld": "node scripts/test-jsonld.cjs",
+    "lint": "eslint components/json-ld.tsx lib/jsonld-safe.cjs scripts/test-jsonld.cjs",
+    "lint:all": "eslint app components lib scripts"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "5.3.0",
