@@ -184,7 +184,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   }catch(error){setNote(error instanceof Error?error.message:"Sign-out failed.")}
  }
 
- if(!user)return <section id="main-content" tabIndex={-1} className="rd-workspace-card rd-auth-card">
+ if(!user)return <main id="main-content" tabIndex={-1} className="rd-workspace-card rd-auth-card">
   <h1 className="rd-auth-heading">{mode==="login"?"Sign in to StudioTasker":mode==="register"?"Create your studio account":"StudioTasker account access"}</h1>
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
@@ -212,7 +212,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions",resend:"Send verification link"}[mode]}</button>
   </form>
   {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}
- </section>;
+ </main>;
 
  const canContacts=["owner","manager","receptionist"].includes(user.role),canEdit=["owner","manager"].includes(user.role);
  const prefs:WorkspacePreferences={timezone:settings.timezone,timeFormat:settings.timeFormat,classTerm:settings.classTerm,memberTerm:settings.memberTerm,creditTerm:settings.creditTerm,
