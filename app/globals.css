@@ -110,3 +110,9 @@ table.schedule-data .status-pill{display:inline-block}
   table.schedule-data td{padding:10px 12px}
   table.schedule-data th{padding:12px}
 }
+
+/* Keyboard navigation: available consistently across marketing and private routes. */
+.studio-skip-link{position:fixed;top:8px;left:8px;z-index:99999;transform:translateY(-180%);background:#17203c;color:#fff;padding:12px 18px;font:700 16px var(--studio-sans),Arial,sans-serif;border:3px solid #e7f982;text-decoration:none}
+.studio-skip-link:focus,.studio-skip-link:focus-visible{transform:translateY(0);outline:3px solid #17203c;outline-offset:3px}
+#main-content:focus{outline:none}
+@media print{.studio-skip-link{display:none!important}}
