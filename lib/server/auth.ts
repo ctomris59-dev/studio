@@ -2,7 +2,7 @@ import "server-only";
 import type {NextRequest} from "next/server";
 import type {PoolClient} from "pg";
 import {inTransaction,dbIsReady} from "./database";
-import {SESSION_COOKIE,tokenHash,SESSION_LIFETIME_SECONDS} from "../auth-crypto";
+import {SESSION_COOKIE,LEGACY_SESSION_COOKIE,tokenHash,SESSION_LIFETIME_SECONDS} from "../auth-crypto";
 export type StudioRole="owner"|"manager"|"instructor"|"receptionist";
 export type Authenticated={userId:string;studioId:string;role:StudioRole;email:string;studioName:string};
 export const sessionCookieConfig=()=>({
@@ -16,7 +16,7 @@ export async function authenticated<T>(
  execute:(client:PoolClient,auth:Authenticated)=>Promise<T>
 ):Promise<{access:Access;value?:T}>{
  if(!dbIsReady())return {access:{ok:false,status:503,message:"Workspace backend is not configured."}};
- const token=request.cookies.get(SESSION_COOKIE)?.value;
+ const token=request.cookies.get(SESSION_COOKIE)?.value||request.cookies.get(LEGACY_SESSION_COOKIE)?.value;
  if(!token||!/^[-_A-Za-z0-9]{43}$/.test(token))return {access:{ok:false,status:401,message:"Sign in required."}};
  return inTransaction(async client=>{
   const found=await client.query<{
