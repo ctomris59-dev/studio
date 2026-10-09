@@ -92,6 +92,10 @@ jobs:
         run: npm run test:ops
       - name: Test off-site backup path guards
         run: npm run test:offsite
+      - name: Validate XSS-resistant JSON-LD serialization
+        run: npm run test:jsonld
+      - name: Lint reviewed JSON-LD and security test sources
+        run: npm run lint
       - name: Audit first-party unsafe HTML insertion sinks
         run: npm run test:security:source
       - name: Test basic accessibility and mobile layout guards

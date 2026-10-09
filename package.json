@@ -44,29 +44,37 @@
     "test:closure": "node scripts/test-studio-closure.cjs",
     "closure:finalize": "node scripts/finalize-studio-closure.cjs",
     "test:restore:e2e": "node scripts/test-restore-e2e.cjs",
-    "test:security:source": "node scripts/test-security-source.cjs"
+    "test:security:source": "node scripts/test-security-source.cjs",
+    "test:jsonld": "node scripts/test-jsonld.cjs",
+    "lint": "eslint components/json-ld.tsx lib/jsonld-safe.cjs scripts/test-jsonld.cjs",
+    "lint:all": "eslint app components lib scripts"
   },
   "dependencies": {
-    "lucide-react": "^0.468.0",
-    "next": "15.5.27",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "pg": "^8.13.1",
-    "nodemailer": "10.0.16",
-    "@paddle/paddle-js": "^1.6.5",
-    "@paddle/paddle-node-sdk": "^3.10.0",
     "@fontsource/barlow-condensed": "5.3.0",
     "@fontsource/ibm-plex-mono": "5.3.0",
-    "@fontsource/source-sans-3": "5.3.0"
+    "@fontsource/source-sans-3": "5.3.0",
+    "@paddle/paddle-js": "^1.6.5",
+    "@paddle/paddle-node-sdk": "^3.10.0",
+    "lucide-react": "^0.468.0",
+    "next": "15.5.27",
+    "nodemailer": "10.0.16",
+    "pg": "^8.13.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@types/node": "^22.0.0",
+    "@types/nodemailer": "^7.0.0",
+    "@types/pg": "^8.11.11",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.27",
+    "exceljs": "^4.4.0",
     "typescript": "^5.7.0",
-    "@types/pg": "^8.11.11",
-    "@types/nodemailer": "^7.0.0",
-    "exceljs": "^4.4.0"
+    "@typescript-eslint/parser": "8.71.1",
+    "@next/eslint-plugin-next": "15.5.27"
   },
   "overrides": {
     "postcss": "8.5.29",

@@ -97,6 +97,28 @@ StudioTasker uses **Paddle as authorised reseller and Merchant of Record** for S
 
 This is separate from studio-member commerce, which is outside the product.
 
+## ESLint and third-party security review
+
+ESLint was bootstrapped with the requested official `npm init @eslint/config@latest`
+in GitHub Actions, then adapted to ESLint 9 and Next.js 15 without the
+incompatible legacy `@rushstack/eslint-patch` loader.
+
+- `npm ci` installs the pinned, reproducible development toolchain.
+- `npm run lint` is the enforced CI lint baseline for the JSON-LD serializer
+  integration and its security regression tests.
+- `npm run lint:all` scans the rest of the application; new or legacy
+  findings are reviewed and fixed separately rather than silently ignored.
+- `npm run test:jsonld` checks that untrusted strings cannot break out of an
+  inert JSON-LD script while preserving valid structured data.
+- `npm run test:security:source` fails on any newly introduced raw HTML
+  injection sink not individually reviewed.
+
+The one intentionally retained `dangerouslySetInnerHTML` usage is documented
+in `docs/SHARP-LIBVIPS-LICENSE-REVIEW.md`. Sharp/libvips LGPL notices in a
+cross-platform npm lockfile **do not** require publication of all proprietary
+StudioTasker source; before distributing a container or binaries, review the
+specific LGPL-covered artifacts and obligations for that distribution.
+
 ## Production launch blockers
 
 Do not enable public studio registration or production personal data until the selected production environment has:
