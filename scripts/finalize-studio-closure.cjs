@@ -47,6 +47,7 @@ async function main(){
   await client.query("DELETE FROM studios WHERE id=$1",[studioId]);
   // An orphaned account must not retain an identifying login or reusable hash.
   for(const row of members.rows){
+   await client.query("DELETE FROM auth_trusted_devices WHERE user_id=$1 AND NOT EXISTS(SELECT 1 FROM studio_users WHERE user_id=$1)",[row.user_id]);
    await client.query(`UPDATE app_users SET
     email='erased-'||id::text||'@invalid.example',password_hash='studio_erased',disabled_at=now()
     WHERE id=$1 AND NOT EXISTS(SELECT 1 FROM studio_users WHERE user_id=$1)`,[row.user_id]);
