@@ -12,10 +12,9 @@ export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
    const subscription=await entitlement(client,auth.studioId);
-   const [monthly,annual]=await Promise.all([
-    hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly"),
-    hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual")
-   ]);
+   // Serialize queries on one PostgreSQL client (pg disallows concurrent queries).
+   const monthly=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly");
+   const annual=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual");
    const provider=await client.query<{provider:string|null;provider_subscription_id:string|null;provider_customer_id:string|null}>(
     "SELECT provider,provider_subscription_id,provider_customer_id FROM subscriptions WHERE studio_id=$1",[auth.studioId]
    );

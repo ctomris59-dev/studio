@@ -39,6 +39,7 @@ const modes:{mode:AuthMode;name:string}[]=[{mode:"login",name:"Sign in"},{mode:"
 export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boolean}){
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
  const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null),[registrationLegalAccepted,setRegistrationLegalAccepted]=useState(false);
+ const [trustDevice,setTrustDevice]=useState(false);
  const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates",timezone:"UTC"}),[person,setPerson]=useState({kind:"lead",name:"",email:"",phone:"",notes:"",tags:"",waiverStatus:"not_required",relatedContactName:"",relatedContactRole:"",relatedContactEmail:"",relatedContactPhone:""});
  const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New",tags:"",waiverStatus:"not_required",relatedContactName:"",relatedContactRole:"",relatedContactEmail:"",relatedContactPhone:""});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
@@ -106,7 +107,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   event.preventDefault();setBusy(true);setNote("");
   try{
    const target={login:"/api/auth/login",register:"/api/auth/register",verify:"/api/auth/verify",reset:"/api/auth/password/reset",forgot:"/api/auth/password/forgot",resend:"/api/auth/verify/resend"}[mode];
-   const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:["forgot","resend"].includes(mode)?{email:form.email}:mode==="register"?{...form,plan:pendingPlan||"monthly",legalAccepted:registrationLegalAccepted,termsVersion:LEGAL_VERSIONS.terms,dpaVersion:LEGAL_VERSIONS.dpa,privacyVersion:LEGAL_VERSIONS.privacy,cancellationVersion:LEGAL_VERSIONS.cancellation}:form;
+   const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:["forgot","resend"].includes(mode)?{email:form.email}:mode==="register"?{...form,plan:pendingPlan||"monthly",legalAccepted:registrationLegalAccepted,termsVersion:LEGAL_VERSIONS.terms,dpaVersion:LEGAL_VERSIONS.dpa,privacyVersion:LEGAL_VERSIONS.privacy,cancellationVersion:LEGAL_VERSIONS.cancellation}:mode==="login"?{email:form.email,password:form.password,trustDevice}:form;
    const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)}),body=await res.json();
    if(!res.ok){setNote(body.error||"Unable to complete your request.");return}
    setForm(prev=>({...prev,password:""}));
@@ -174,7 +175,14 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   setBusy(true);setNote("");try{const response=await fetch("/api/studio/export",{credentials:"same-origin",cache:"no-store"});if(!response.ok){const body=await response.json();throw new Error(body.error||"Export failed")}const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="studiotasker-export-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);setNote("Studio export downloaded.")}
   catch(e){setNote(e instanceof Error?e.message:"Export failed")}finally{setBusy(false)}
  }
- async function logout(){await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});setUser(null);setStudio(null);setPeople([]);initializedView.current=false;setNote("Signed out.")}
+ async function logout(){
+  try{
+   const response=await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});
+   if(!response.ok)throw Error("Could not revoke the session or trusted device. Please try again.");
+   setUser(null);setStudio(null);setPeople([]);setTrustDevice(false);
+   initializedView.current=false;setNote("Signed out. Trusted-device access was removed.");
+  }catch(error){setNote(error instanceof Error?error.message:"Sign-out failed.")}
+ }
 
  if(!user)return <section className="rd-workspace-card rd-auth-card">
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
@@ -198,6 +206,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label><label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{STUDIO_FOCUSES.map(f=><option key={f}>{f}</option>)}</select></label></>}
    {["login","register","forgot","resend"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
    {["login","register","reset"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
+   {mode==="login"&&<label className="rd-trust-device"><input type="checkbox" checked={trustDevice} onChange={e=>setTrustDevice(e.target.checked)}/><span>Trust this device for 30 days (only on your own computer). Uncheck on shared devices; signing out removes this trust.</span></label>}
    {mode==="register"&&<><label>Studio timezone<TimezoneSelect value={form.timezone} onChange={timezone=>setForm(v=>({...v,timezone}))}/></label><label>Subscription plan<select value={pendingPlan||"monthly"} onChange={e=>setPendingPlan(e.target.value as "monthly"|"annual")}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $406.80/year · save 15%</option></select></label><label className="rd-legal-consent"><input type="checkbox" required checked={registrationLegalAccepted} onChange={e=>setRegistrationLegalAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms of Service</Link> · <Link href="/legal/cancellation" target="_blank">Cancellation & Refund</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link></span></label><p className="rd-tiny">Before account creation, please read the <Link href="/legal/privacy" target="_blank">Privacy Policy</Link> and, where Turkish Law No. 6698 applies, the <Link href="/legal/turkiye-privacy" target="_blank">Türkiye Privacy Notice (KVKK)</Link>. These notices are provided for transparency and are not a request for consent to core service processing.</p></>}
    <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions",resend:"Send verification link"}[mode]}</button>
   </form>
