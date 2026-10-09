@@ -45,7 +45,7 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const [memberSearch,setMemberSearch]=useState(""),[memberHasMore,setMemberHasMore]=useState(false),[memberOffset,setMemberOffset]=useState(0);
  const [repeat,setRepeat]=useState({enabled:false,until:"",weekdays:[1,3,5] as number[]});
  const [editingClass,setEditingClass]=useState(false);
- const [classEdit,setClassEdit]=useState({title:"",instructor:"",room:"",startsAt:"",capacity:8,durationMinutes:50});
+ const [classEdit,setClassEdit]=useState({title:"",instructor:"",room:"",startsAt:"",capacity:8,durationMinutes:50,staffId:"",substituteStaffId:""});
  const [staffForm,setStaffForm]=useState({displayName:"",role:"Instructor",availabilityNotes:""});
  const [editingStaff,setEditingStaff]=useState(""),[staffEdit,setStaffEdit]=useState({displayName:"",role:"Instructor",availabilityNotes:""});
  const [schedule,setSchedule]=useState({
@@ -127,14 +127,14 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  function startClassEdit(){
   if(!selected)return;
   const local=new Intl.DateTimeFormat("sv-SE",{timeZone:preferences.timezone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(new Date(selected.starts_at)).replace(" ","T");
-  setClassEdit({title:selected.title,instructor:selected.instructor,room:selected.room,startsAt:local,capacity:selected.capacity,durationMinutes:selected.duration_minutes});
+  setClassEdit({title:selected.title,instructor:selected.instructor,room:selected.room,startsAt:local,capacity:selected.capacity,durationMinutes:selected.duration_minutes,staffId:selected.staff_id||"",substituteStaffId:selected.substitute_staff_id||""});
   setEditingClass(true);
  }
  function saveClassEdit(e:FormEvent){e.preventDefault();if(!selected)return;
   let startsAt:string;
   try{startsAt=localDateTimeToUTC(classEdit.startsAt.slice(0,10),classEdit.startsAt.slice(11,16),preferences.timezone)}
   catch(error){setMessage(error instanceof Error?error.message:"Invalid class time");return}
-  void perform(async()=>{await api("/api/studio/classes/"+selected.id,"PATCH",{...classEdit,startsAt,staffId:null,substituteStaffId:null});
+  void perform(async()=>{await api("/api/studio/classes/"+selected.id,"PATCH",{...classEdit,startsAt,staffId:classEdit.staffId||null,substituteStaffId:classEdit.substituteStaffId||null});
    setEditingClass(false);return "Class updated. Check notification tasks if timing, instructor or room changed."});
  }
  function cancelEntire(){if(!selected||!window.confirm("Cancel this class and refund applicable booked credits?"))return;
@@ -195,7 +195,15 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
       <button type="button" disabled={busy} onClick={cancelEntire}>Cancel entire class and refund credits</button>
       {editingClass&&<form className="rd-form" onSubmit={saveClassEdit}>
        <label>Class name<input required minLength={2} value={classEdit.title} onChange={e=>setClassEdit(v=>({...v,title:e.target.value}))}/></label>
-       <label>Instructor<input required minLength={2} value={classEdit.instructor} onChange={e=>setClassEdit(v=>({...v,instructor:e.target.value}))}/></label>
+       <label>Instructor name<input required minLength={2} value={classEdit.instructor} onChange={e=>setClassEdit(v=>({...v,instructor:e.target.value,staffId:"",substituteStaffId:""}))}/></label>
+       <label>Primary instructor from roster<select value={classEdit.staffId} onChange={e=>setClassEdit(v=>({...v,staffId:e.target.value,substituteStaffId:""}))}>
+        <option value="">Manual instructor name</option>
+        {staff.filter(x=>x.active).map(x=><option key={x.id} value={x.id}>{x.display_name}</option>)}
+       </select></label>
+       <label>Substitute instructor<select value={classEdit.substituteStaffId} onChange={e=>setClassEdit(v=>({...v,substituteStaffId:e.target.value}))}>
+        <option value="">No substitute</option>
+        {staff.filter(x=>x.active&&x.id!==classEdit.staffId).map(x=><option key={x.id} value={x.id}>{x.display_name}</option>)}
+       </select></label>
        <label>Room<input required minLength={2} value={classEdit.room} onChange={e=>setClassEdit(v=>({...v,room:e.target.value}))}/></label>
        <label>Start ({preferences.timezone})<input required type="datetime-local" value={classEdit.startsAt} onChange={e=>setClassEdit(v=>({...v,startsAt:e.target.value}))}/></label>
        <label>Capacity<input required type="number" min={selected.booked_count} max={100} value={classEdit.capacity} onChange={e=>setClassEdit(v=>({...v,capacity:Number(e.target.value)}))}/></label>

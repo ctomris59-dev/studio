@@ -15,6 +15,7 @@ const preview=read("app/book/preview/page.tsx");
 assert(workspace.includes('type="email"')&&workspace.includes("registrationLegalAccepted"),"Account forms must validate email and require legal acceptance");
 assert(workspace.includes('"/api/auth/verify/resend"'),"Accounts must be able to resend verification");
 assert(demo.includes("TimezoneSelect"),"Interactive demo must use selectable timezones");
+assert(classUI.includes("Substitute instructor")&&classUI.includes("substituteStaffId:classEdit.substituteStaffId"),"Changing a class must preserve or update its substitute instructor.");
 assert(classUI.includes("Edit selected class")&&classUI.includes("Cancel entire class"),"Staff must be able to edit or cancel classes");
 assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),"Class modification requires tenant-scoped endpoints");
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
