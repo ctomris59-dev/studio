@@ -27,4 +27,5 @@ EXPOSE 3000
  # Liveness: the marketing site stays routable during a temporary DB outage.
 # DB readiness is monitored independently via /api/health.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 CMD node -e "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
-CMD ["npm","run","start"]
+# Run Next.js directly as PID 1 so stop/restart signals reach Node.
+CMD ["node","node_modules/next/dist/bin/next","start"]
