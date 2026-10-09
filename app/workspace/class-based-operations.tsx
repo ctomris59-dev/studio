@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
+import {Fragment,useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
 import {CheckCircle2,Clock3,RefreshCw,Users} from "lucide-react";
 import {localDateTimeToUTC} from "../../lib/studio-timezone";
 
@@ -195,7 +195,10 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
     <button className="rd-primary" disabled={busy}>{repeat.enabled?"Create recurring series":"Create class"}</button>
    </form></details>}
    <label>Search classes<input aria-label="Search classes" value={classSearch} onChange={e=>setClassSearch(e.target.value)} placeholder="Class, room or instructor"/></label>
-   <div className="rd-class-list">{classes.length?classes.map(c=><button key={c.id} className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} onClick={()=>setSelectedClass(c.id)}><strong>{c.title} · {new Date(c.starts_at).toLocaleString("en-GB",{timeZone:preferences.timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:preferences.timeFormat==="12h"})}</strong><small>{c.instructor} · {c.room} · {formatLabels[c.class_format]||c.class_format}{c.level?" · "+c.level:""}{c.program_label?" · "+c.program_label:""}</small><span>{c.status==="cancelled"?"CANCELLED · ":""}{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting{c.spot_booking_enabled?" · "+c.spot_label+" selection":""}</span></button>):<p className="rd-empty" role="status">{loading?"Loading class schedule…":"No matching classes in the next 90 days."}</p>}</div>
+   <div className="rd-class-list">{classes.length?classes.map((c,index)=>{
+    const day=new Date(c.starts_at).toLocaleDateString("en-GB",{timeZone:preferences.timezone,weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    const previous=index>0?new Date(classes[index-1].starts_at).toLocaleDateString("en-GB",{timeZone:preferences.timezone,weekday:"long",day:"numeric",month:"long",year:"numeric"}):null;
+    return <Fragment key={c.id}>{day!==previous&&<h4 className="rd-class-day">{day}</h4>}<button className={"rd-class-choice"+(selectedClass===c.id?" selected":"")} onClick={()=>setSelectedClass(c.id)}><strong>{c.title} · {new Date(c.starts_at).toLocaleString("en-GB",{timeZone:preferences.timezone,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:preferences.timeFormat==="12h"})}</strong><small>{c.instructor} · {c.room} · {formatLabels[c.class_format]||c.class_format}{c.level?" · "+c.level:""}{c.program_label?" · "+c.program_label:""}</small><span>{c.status==="cancelled"?"CANCELLED · ":""}{c.booked_count}/{c.capacity} booked · {c.waitlist_count} waiting{c.spot_booking_enabled?" · "+c.spot_label+" selection":""}</span></button></Fragment>}):<p className="rd-empty" role="status">{loading?"Loading class schedule…":"No matching classes in the next 90 days."}</p>}</div>
    {classHasMore&&<button disabled={busy} type="button" onClick={()=>void loadMoreClasses()}>Load more classes</button>}
    {selected&&<div className="rd-ops-subsection">
      {canManage&&!classStarted&&selected.status==="scheduled"&&<div className="rd-ops-section">

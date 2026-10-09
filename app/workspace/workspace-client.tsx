@@ -240,7 +240,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {note&&<p className="rd-feedback" role="status">{note}</p>}
 
    {view==="leads"||view==="members"?canContacts?<section className="rd-live-section">
-    <div className="rd-section-head"><div><h2>{view==="leads"?"Lead pipeline":settings.memberTerm}</h2><p>{view==="leads"?"Track enquiries, trial progress and next actions.":"Your studio's internal member records. Payments remain outside StudioTasker."}</p></div></div>
+    <div className="rd-section-head"><div><h2>{view==="leads"?"Leads / CRM":settings.memberTerm}</h2><p>{view==="leads"?"Track enquiries, trial progress and next actions.":"Your studio's internal member records. Payments remain outside StudioTasker."}</p></div></div>
     <form className="rd-form" onSubmit={searchContacts}>
       <label>Search {view==="leads"?"leads":settings.memberTerm.toLowerCase()}
        <input type="search" maxLength={80} placeholder="Name, email or phone" value={contactSearch} onChange={e=>setContactSearch(e.target.value)}/>
