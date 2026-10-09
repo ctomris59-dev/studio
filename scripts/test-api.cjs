@@ -519,6 +519,17 @@ async function main(){
   const afterLogoDelete=await call("/api/studio/settings",{cookie:a.cookie});
   assert.equal(afterLogoDelete.status,200);assert.equal(afterLogoDelete.data.studio.hasLogo,false);
 
+  // Owner can revoke staff login immediately without deleting historical staff assignments.
+  const staffAccess=await call("/api/studio/staff-access",{cookie:a.cookie});
+  assert.equal(staffAccess.status,200);
+  const invitedStaff=staffAccess.data.staff.find(s=>s.email===invitedEmail);
+  assert(invitedStaff,"Accepted staff account must be listed for access management.");
+  assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:b.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,404,"Other tenants cannot revoke this user.");
+  assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:accepted.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,403);
+  assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,200);
+  assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Revoked staff session must immediately lose access.");
+  assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,401,"Revoked staff must not log back in.");
+
   // Password reset is one-time and revokes all sessions belonging to the user.
   const forgot=await call("/api/auth/password/forgot",{method:"POST",body:{email:a.email}});
   assert.equal(forgot.status,200);
