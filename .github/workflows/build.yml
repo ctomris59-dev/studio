@@ -96,6 +96,12 @@ jobs:
         run: npm run test:jsonld
       - name: Lint reviewed JSON-LD and security test sources
         run: npm run lint
+      - name: Lint public security and reviewed HTML sources
+        run: npm run lint:security
+      - name: Typecheck standalone TypeScript sources
+        run: npm run typecheck
+      - name: Validate baseline formatting examples
+        run: npm run format:check
       - name: Audit first-party unsafe HTML insertion sinks
         run: npm run test:security:source
       - name: Test basic accessibility and mobile layout guards
