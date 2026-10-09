@@ -18,6 +18,7 @@ assert(workspace.includes('role="tablist"')&&workspace.includes('aria-selected={
 assert(workspace.includes('type="email"')&&workspace.includes("registrationLegalAccepted"),"Account forms must validate email and require legal acceptance");
 assert(workspace.includes('"/api/auth/verify/resend"'),"Accounts must be able to resend verification");
 assert(demo.includes("TimezoneSelect"),"Interactive demo must use selectable timezones");
+assert(classUI.includes("rd-class-day")&&classUI.includes("weekday:\"long\"")&&classUI.includes("timeZone:preferences.timezone"),"Class list must have studio-local day grouping.");
 assert(classUI.includes("Substitute instructor")&&classUI.includes("substituteStaffId:classEdit.substituteStaffId"),"Changing a class must preserve or update its substitute instructor.");
 assert(classUI.includes("Edit selected class")&&classUI.includes("Cancel entire class"),"Staff must be able to edit or cancel classes");
 assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),"Class modification requires tenant-scoped endpoints");
