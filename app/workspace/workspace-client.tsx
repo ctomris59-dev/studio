@@ -184,7 +184,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   }catch(error){setNote(error instanceof Error?error.message:"Sign-out failed.")}
  }
 
- if(!user)return <section id="main-content" className="rd-workspace-card rd-auth-card">
+ if(!user)return <section id="main-content" tabIndex={-1} className="rd-workspace-card rd-auth-card">
   <h1 className="rd-auth-heading">{mode==="login"?"Sign in to StudioTasker":mode==="register"?"Create your studio account":"StudioTasker account access"}</h1>
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
@@ -235,7 +235,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    <nav aria-label="Studio workspace">{visibleNav.map(([id,label,Icon])=><button key={id} type="button" aria-current={view===id?"page":undefined} className={view===id?"active":""} onClick={()=>{setView(id);setNote("");if(id==="leads")setPerson(p=>({...p,kind:"lead"}));if(id==="members")setPerson(p=>({...p,kind:"member"}))}}><Icon size={18}/>{label}</button>)}</nav>
    <div className="rd-live-sidebar-bottom"><small>{user.email}</small><span>{user.role}</span><button onClick={()=>void logout()}><LogOut size={16}/> Sign out</button></div>
   </aside>
-  <main id="main-content" className="rd-live-main">
+  <main id="main-content" tabIndex={-1} className="rd-live-main">
    <header className="rd-live-top"><div><p className="rd-eyebrow">YOUR STUDIO WORKSPACE</p><h1>{view==="members"?settings.memberTerm:view==="classes"?settings.classTerm:view==="leads"?"Leads / CRM":view.charAt(0).toUpperCase()+view.slice(1)}</h1></div><div className="rd-live-accent"><span style={{background:settings.accentColor}}/>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</div></header>
    {note&&<p className="rd-feedback" role="status">{note}</p>}
 
