@@ -192,7 +192,7 @@ export default function AppDemo(){
 
  if(demoExpired)return <main className="sad-demo-expired"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <header className="sad-login-top"><Link href="/" className="sad-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link><Link href="/">Back to website ↗</Link></header>
-  <section id="main-content" className="sad-expired-card"><span className="sad-kicker">60-MINUTE DEMO COMPLETE</span><Clock3 size={42}/><h1>Ready for the<br/><em>real workspace?</em></h1><p>Your demo sandbox has been reset. Choose a StudioTasker plan to keep real studio data, settings and day-to-day operations in a private customer workspace.</p>
+  <section id="main-content" tabIndex={-1} className="sad-expired-card"><span className="sad-kicker">60-MINUTE DEMO COMPLETE</span><Clock3 size={42}/><h1>Ready for the<br/><em>real workspace?</em></h1><p>Your demo sandbox has been reset. Choose a StudioTasker plan to keep real studio data, settings and day-to-day operations in a private customer workspace.</p>
    <div className="sad-expired-actions"><Link href="/start">CHOOSE A PLAN <ArrowRight size={18}/></Link><Link href="/">RETURN TO WEBSITE</Link></div>
    <small>The interactive demo is temporary and never becomes a free customer workspace.</small>
   </section>
@@ -200,7 +200,7 @@ export default function AppDemo(){
 
  if(!signedIn)return <main className="sad-login"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <header className="sad-login-top"><Link href="/" className="sad-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link><Link href="/">Back to website ↗</Link></header>
-  <section id="main-content" className="sad-login-grid">
+  <section id="main-content" tabIndex={-1} className="sad-login-grid">
    <div className="sad-login-story"><span className="sad-kicker">STUDIO OWNER APP / SANDBOX</span><h1>Sign in like a<br/><em>StudioTasker customer.</em></h1>
     <p>One canonical StudioTasker owner workspace: Today, Leads / CRM, Members, Classes, Follow-ups, Insights and Settings.</p>
     <div className="sad-safety"><ShieldCheck size={20}/><span><b>Safe 60-minute demo.</b> Add, edit the flow and remove fictional records. The session expires and resets automatically; no real data or payments.</span></div>
@@ -229,7 +229,7 @@ export default function AppDemo(){
    <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setTourActive(false);setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
-  <section id="main-content" className="sad-main">
+  <section id="main-content" tabIndex={-1} className="sad-main">
    <header className="sad-app-top"><div><span className="sad-kicker">OWNER WORKSPACE</span><h1>{settings.name}</h1></div><div className="sad-user-chip"><span>S</span><div><b>{DEMO_ACCOUNT.email}</b><small>Owner</small></div></div></header>
    <div className="sad-demo-strip"><ShieldCheck size={17}/><span>60-minute sandbox · {demoTimeLabel(demoRemaining)} left · max 3 new records per section.</span><button type="button" className="sad-tour-start" onClick={startTour}>Watch 90-sec demo <ChevronRight size={16}/></button></div>
    {tourActive&&<aside className="sad-tour-card" role="region" aria-live="polite" aria-label="90-second StudioTasker guided tour">
