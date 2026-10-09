@@ -4,7 +4,10 @@ const fs=require("node:fs");
 const read=p=>fs.readFileSync(p,"utf8");
 const layout=read("app/layout.tsx");
 const globalCSS=read("app/globals.css");
-assert(!globalCSS.includes("fonts.googleapis.com")&&layout.includes("next/font/google"),"Google fonts must be served as self-hosted Next font assets.");
+assert(!globalCSS.includes("fonts.googleapis.com")&&!layout.includes("next/font/google")&&layout.includes("@fontsource/barlow-condensed")&&layout.includes("@fontsource/ibm-plex-mono")&&layout.includes("@fontsource/source-sans-3"),"Fonts must be bundled without build-time Google requests.");
+for(const variable of ["--studio-sans","--studio-heading","--studio-mono"]){
+ assert(globalCSS.includes(variable+":"),"Font token not declared: "+variable);
+}
 assert(layout.includes("new URL(SITE_URL)"),"Canonical metadata must use the same hostname as schema URLs.");
 const robots=read("app/robots.ts");
 const sitemap=read("app/sitemap.ts");

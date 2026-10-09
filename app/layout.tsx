@@ -1,12 +1,19 @@
 import type {Metadata} from "next";
 import "./globals.css";
-import {Barlow_Condensed,IBM_Plex_Mono,Source_Sans_3} from "next/font/google";
+// Font files are packaged with the app and served from our own origin: no
+// build-time calls to Google Fonts, and no browser font requests to Google.
+import "@fontsource/source-sans-3/400.css";
+import "@fontsource/source-sans-3/600.css";
+import "@fontsource/source-sans-3/700.css";
+import "@fontsource/barlow-condensed/400.css";
+import "@fontsource/barlow-condensed/500.css";
+import "@fontsource/barlow-condensed/600.css";
+import "@fontsource/barlow-condensed/700.css";
+import "@fontsource/barlow-condensed/800.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource/ibm-plex-mono/600.css";
 import {SITE_URL} from "../lib/seo";
-
-const studioSans=Source_Sans_3({subsets:["latin"],display:"swap",variable:"--studio-sans"});
-const studioHeading=Barlow_Condensed({subsets:["latin"],weight:["400","500","600","700","800"],display:"swap",variable:"--studio-heading"});
-const studioMono=IBM_Plex_Mono({subsets:["latin"],weight:["400","500","600"],display:"swap",variable:"--studio-mono"});
-
 export const metadata:Metadata={
  metadataBase:new URL(SITE_URL),
  title:"StudioTasker | Studio Management Software",
@@ -20,5 +27,5 @@ export const metadata:Metadata={
 };
 
 export default function RootLayout({children}:Readonly<{children:React.ReactNode}>){
- return <html lang="en"><body className={`${studioSans.variable} ${studioHeading.variable} ${studioMono.variable}`}>{children}</body></html>;
+ return <html lang="en"><body>{children}</body></html>;
 }

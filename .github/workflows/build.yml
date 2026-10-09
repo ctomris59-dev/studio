@@ -42,9 +42,13 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
+      - name: Audit production dependencies for high/critical vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
       - name: Initialize isolated PostgreSQL test database
         run: npm run db:setup:local
+      - name: Test reviewed studio erasure on isolated database
+        run: npm run test:closure
       - name: Smoke test supported Nodemailer delivery API
         run: npm run test:mail
       - name: Test authentication cryptography
@@ -87,3 +91,5 @@ jobs:
         run: npm run test:seo:http
       - name: Test live HTTP auth and tenant access
         run: npm run test:api
+      - name: Real Chromium mobile and typography smoke
+        run: npm run test:browser
