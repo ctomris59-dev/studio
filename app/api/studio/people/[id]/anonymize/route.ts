@@ -29,7 +29,7 @@ export async function POST(request:NextRequest,{params}:{params:Promise<{id:stri
     completed_at=coalesce(completed_at,now()) WHERE studio_id=$1 AND person_id=$2`,[auth.studioId,id]);
    await client.query("UPDATE activity_log SET details='{}'::jsonb WHERE studio_id=$1 AND person_id=$2",[auth.studioId,id]);
    // Preserve numeric ledger entries for financial reconciliation, but erase unstructured personal names and referrals.
-   await client.query("UPDATE credit_ledger SET reason='Privacy-redacted adjustment' WHERE studio_id=$1 AND member_id=$2",[auth.studioId,id]);
+   await client.query("UPDATE credit_ledger SET reason='Privacy-redacted adjustment' WHERE studio_id=$1 AND member_id=$2 AND reason NOT IN ('studio_package_confirmation','class_booking','class_refund')",[auth.studioId,id]);
    await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action) VALUES($1,$2,$3,'privacy.person_anonymized')",[auth.studioId,id,auth.userId]);
    return {id,alreadyApplied:false};
   });
