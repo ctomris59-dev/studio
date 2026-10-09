@@ -17,6 +17,7 @@ async function main(){
   END $$`);
   await pool.query("GRANT CONNECT ON DATABASE \""+parsed.pathname.slice(1).replace(/"/g,"\"\"")+"\" TO reformdesk_app");
   await pool.query("GRANT USAGE ON SCHEMA public TO reformdesk_app");
+  await pool.query("GRANT SELECT, INSERT, UPDATE, DELETE ON auth_trusted_devices TO reformdesk_app");
   await pool.query("GRANT SELECT, INSERT, UPDATE ON app_users, studios, studio_users, auth_sessions, login_attempts, login_ip_attempts, staff_invitations TO reformdesk_app");
   await pool.query("GRANT SELECT, INSERT, UPDATE ON people, class_sessions, bookings, credit_ledger, followup_tasks, activity_log, subscriptions, studio_staff TO reformdesk_app");
   await pool.query("GRANT SELECT, INSERT, UPDATE ON billing_events TO reformdesk_app");

@@ -7,10 +7,8 @@ export const runtime="nodejs";
 export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner"],async(client,auth)=>{
-   const [monthly,annual]=await Promise.all([
-    hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly"),
-    hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual")
-   ]);
+   const monthly=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly");
+   const annual=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual");
    return {versions:LEGAL_VERSIONS,acceptanceText:LEGAL_ACCEPTANCE_TEXT,planLabels:LEGAL_PLAN_LABEL,accepted:{monthly,annual}};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);

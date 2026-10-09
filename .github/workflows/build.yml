@@ -45,6 +45,10 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Audit production dependencies for high/critical vulnerabilities
         run: npm audit --omit=dev --audit-level=high
+      - name: Verify Docker backup tooling stage
+        run: |
+          docker build --target runtime-tools -t studiotasker-runtime-tools .
+          docker run --rm --entrypoint sh studiotasker-runtime-tools -c 'command -v pg_dump && command -v rclone'
       - name: Initialize isolated PostgreSQL test database
         run: npm run db:setup:local
       - name: Test reviewed studio erasure on isolated database

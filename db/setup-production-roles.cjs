@@ -26,6 +26,7 @@ async function main(){
   await pool.query("GRANT USAGE ON SCHEMA public TO "+role);
   const general="app_users,studios,studio_users,auth_sessions,login_attempts,login_ip_attempts,staff_invitations,people,class_sessions,bookings,credit_ledger,followup_tasks,activity_log,subscriptions,studio_staff,billing_events,auth_challenges,mail_outbox,data_export_audits,studio_packages,import_batches";
   await pool.query("GRANT SELECT,INSERT,UPDATE ON "+general+" TO "+role);
+  await pool.query("GRANT SELECT,INSERT,UPDATE,DELETE ON auth_trusted_devices TO "+role);
   await pool.query("GRANT SELECT,INSERT,UPDATE,DELETE ON studio_brand_assets,action_center_snoozes TO "+role);
   await pool.query("GRANT SELECT,INSERT ON legal_acceptances TO "+role);
   await pool.query("GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO "+role);

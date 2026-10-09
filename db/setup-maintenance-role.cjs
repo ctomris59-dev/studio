@@ -19,6 +19,7 @@ async function main(){
   await pool.query("GRANT USAGE ON SCHEMA public TO "+role);
   await pool.query("GRANT SELECT,UPDATE,DELETE ON mail_outbox TO "+role);
   await pool.query("GRANT SELECT,DELETE ON auth_challenges,auth_sessions,login_attempts,login_ip_attempts TO "+role);
+  await pool.query("GRANT SELECT,DELETE ON auth_trusted_devices TO "+role);
   const extra=await pool.query("SELECT to_regclass('public.public_signup_attempts') AS tab");
   if(extra.rows[0]?.tab)await pool.query("GRANT SELECT,DELETE ON public_signup_attempts TO "+role);
   console.log("Limited maintenance role created. Do not use it for migrations, application requests or backups.");

@@ -64,10 +64,16 @@ async function main(){
      await document.fonts.ready;
      const fonts=["Source Sans 3","Barlow Condensed","IBM Plex Mono"];
      const loaded=await Promise.all(fonts.map(name=>document.fonts.load('400 16px "'+name+'"')));
+     const weighted=await Promise.all([
+      '700 16px "IBM Plex Mono"',
+      'italic 600 16px "Barlow Condensed"',
+      '900 16px "Source Sans 3"'
+     ].map(face=>document.fonts.load(face)));
      const nodes=Array.from(document.querySelectorAll("h1,h2,h3,p,a,button,label,input")).filter(x=>x.getBoundingClientRect().width>0);
      const unknown=nodes.filter(x=>!fonts.some(name=>getComputedStyle(x).fontFamily.includes(name))).length;
      const h1=document.querySelector("main h1");
      return {title:document.title,unknown,total:nodes.length,loaded:loaded.map(x=>x.length),
+      weightedFaces:weighted.map(x=>x.length),
       remoteFonts:performance.getEntriesByType("resource").filter(x=>/fonts\\.(googleapis|gstatic)\\.com/.test(x.name)).length,
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth+4,
       heroTop:h1?h1.getBoundingClientRect().top:null};
@@ -75,8 +81,10 @@ async function main(){
     const result=evaluation.result?.value;
     assert(result,route+" browser evaluate failed: "+JSON.stringify(evaluation));
     assert(result.loaded.every(n=>n>0),route+" missing locally served font family");
+    assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
     assert(result.total>=1,route+" did not render text");
+    assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
     }

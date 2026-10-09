@@ -167,7 +167,7 @@ export default function HomePage() {
               </div>
               <div className="ed-impact-overlay">
                 <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
-                <h2 id="impact-band-title">Less admin.<br/><em>More movement.</em></h2>
+                <h2 id="impact-band-title">Designed for the work behind every class.</h2>
                 <p>Bookings, packages, check-ins and follow-ups in one clear studio system.</p>
                 <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
               </div>

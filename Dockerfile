@@ -13,12 +13,18 @@ ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 RUN npm run build
 RUN npm prune --omit=dev
 
-FROM node:22-alpine
+FROM node:22-alpine AS runtime-tools
+# Separately buildable target: CI checks that both backup executables exist.
+RUN apk add --no-cache postgresql-client rclone
+
+FROM runtime-tools
 ENV NODE_ENV=production
 WORKDIR /app
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=builder --chown=app:app /app ./
 USER app
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 CMD node -e "require('http').get('http://127.0.0.1:3000/api/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+ # Liveness: the marketing site stays routable during a temporary DB outage.
+# DB readiness is monitored independently via /api/health.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 CMD node -e "require('http').get('http://127.0.0.1:3000/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 CMD ["npm","run","start"]
