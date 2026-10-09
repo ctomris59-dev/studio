@@ -34,7 +34,12 @@
     "test:copy": "node scripts/test-copy.cjs",
     "test:timezone-select": "node scripts/test-timezone-select.cjs",
     "test:pg-env": "node scripts/test-pg-connection-env.cjs",
-    "db:roles:production": "node db/setup-production-roles.cjs"
+    "db:roles:production": "node db/setup-production-roles.cjs",
+    "test:mail": "node scripts/test-mail.cjs",
+    "test:ops": "node scripts/test-ops.cjs",
+    "db:roles:maintenance": "node db/setup-maintenance-role.cjs",
+    "backup:offsite": "node scripts/backup-offsite.cjs",
+    "test:offsite": "node scripts/test-offsite.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -43,7 +48,7 @@
     "react-dom": "^19.0.0",
     "exceljs": "^4.4.0",
     "pg": "^8.13.1",
-    "nodemailer": "^7.0.0",
+    "nodemailer": "^10.0.13",
     "@paddle/paddle-js": "^1.6.5",
     "@paddle/paddle-node-sdk": "^3.10.0"
   },

@@ -43,7 +43,8 @@ export function OnboardingPanel({role,onDataChange}:{role:string;onDataChange:()
   }catch(e){setNote(e instanceof Error?e.message:"CSV import failed.")}finally{setBusy(false)}
  }
  function template(){
-  const content="name,email,phone,type,credits,expiry_date,plan,package_status,member_status,lead_stage,notes\nJane Example,jane@example.com,+441234567890,member,8,2026-12-31,10 Class Pack,confirmed,active,,Imported from previous system\nSam Lead,sam@example.com,,lead,,,,,,Trial attended,Follow up this week\n";
+  const expiry=new Date(Date.now()+365*86400000).toISOString().slice(0,10);
+  const content=`name,email,phone,type,credits,expiry_date,plan,package_status,member_status,lead_stage,notes\nJane Example,jane@example.com,+441234567890,member,8,${expiry},10 Class Pack,confirmed,active,,Imported from previous system\nSam Lead,sam@example.com,,lead,,,,,,Trial attended,Follow up this week\n`;
   const blob=new Blob([content],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
   a.href=url;a.download="studiotasker-import-template.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
  }

@@ -3,6 +3,7 @@ import {createHash,createHmac} from "node:crypto";
 import type {NextRequest} from "next/server";
 import type {PoolClient} from "pg";
 import {LEGAL_ACCEPTANCE_TEXT,LEGAL_PLAN_PRICE_CENTS,LEGAL_VERSIONS,type LegalPlan} from "../legal-versions";
+import {trustedLoginIp} from "../auth-crypto";
 
 function auditKey(){
  const key=process.env.LEGAL_AUDIT_HASH_KEY;
@@ -11,11 +12,9 @@ function auditKey(){
  throw new Error("LEGAL_AUDIT_HASH_KEY_NOT_CONFIGURED");
 }
 function clientIp(request:NextRequest){
- // Never hash a client-controlled X-Forwarded-For value.
- // The reverse proxy must overwrite X-Real-IP with its trusted remote address.
- if(process.env.TRUST_PROXY_IP_HEADERS!=="true")return "unknown";
- const trusted=request.headers.get("x-real-ip")?.trim()||"";
- return /^[a-fA-F0-9:.]+$/.test(trusted)?trusted:"unknown";
+ // Only rely on the address when both the deployment and proxy have been verified.
+ // Never hash a client-controlled X-Forwarded-For chain.
+ return trustedLoginIp(request.headers.get("x-real-ip"))||"unknown";
 }
 export function legalEvidence(request:NextRequest){
  const ipHash=createHmac("sha256",auditKey()).update(clientIp(request)).digest("hex");

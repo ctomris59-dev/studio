@@ -1,6 +1,7 @@
 export const dynamic="force-dynamic";
 import type {Metadata} from "next";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Activity, ArrowRight, ArrowUpRight, Check, Clock3,
   CreditCard, Dumbbell, HeartPulse, ShieldCheck, Users, Waves
@@ -107,14 +108,13 @@ export default function HomePage() {
         <section className="ed-impact-band ed-impact-band-first" aria-labelledby="impact-band-title">
           <div className="ed-container">
             <div className="ed-impact-card">
-              <img
-                src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg?auto=compress&cs=tinysrgb&w=1800"
-                alt="Woman doing battle rope exercises in a modern gym studio"
-                width="1800"
-                height="1200"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
+              <Image
+                src="/images/studio-group-fitness.avif"
+                alt="A group fitness studio training session"
+                width={1800}
+                height={1200}
+                priority
+                sizes="(max-width: 760px) 100vw, 1360px"
               />
               <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">
                 <Link href="/start?plan=monthly" className="ed-impact-price-option ed-impact-price-monthly" aria-label="Choose monthly plan, $39.90 per month">
@@ -157,7 +157,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-pricing-kicker"><span className="ed-overline">02 / PLAIN & SIMPLE</span></div>
             <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly. <b>Save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div></div>
+              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly. <b>Save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div><p className="ed-price-disclaimer">Prices are in USD. Applicable taxes and the final total are displayed by Paddle before payment confirmation.</p></div>
               <div className="ed-price-light">
                 <div className="ed-price-features">
                   <span className="ed-price-include">WHAT&apos;S INCLUDED</span>

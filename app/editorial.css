@@ -3,14 +3,14 @@
    Editorial typography, utility-paper, cobalt ink, citrus highlight.
    Intentionally no gradients, glossy 3D objects, testimonial avatars or template cards. */
 
-.editorial{--ed-ink:#1b2237;--ed-blue:#334bdd;--ed-blue-dark:#253ac4;--ed-paper:#f4f0e7;--ed-pale:#ebe6dc;--ed-white:#fffefa;--ed-lime:#e7f982;--ed-orange:#ff8360;--ed-muted:#666a72;color:var(--ed-ink);font-family:"Source Sans 3",Arial,sans-serif;background:var(--ed-paper);font-size:15px;line-height:1.5;overflow:hidden}
+.editorial{--ed-ink:#1b2237;--ed-blue:#334bdd;--ed-blue-dark:#253ac4;--ed-paper:#f4f0e7;--ed-pale:#ebe6dc;--ed-white:#fffefa;--ed-lime:#e7f982;--ed-orange:#ff8360;--ed-muted:#666a72;color:var(--ed-ink);font-family:var(--studio-sans),Arial,sans-serif;background:var(--ed-paper);font-size:15px;line-height:1.5;overflow:hidden}
 .editorial *{box-sizing:border-box}
 .editorial a{color:inherit}
 .editorial h1,.editorial h2,.editorial h3,.editorial p{margin:0}
-.editorial h1,.editorial h2,.editorial h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;letter-spacing:-.028em}
-.editorial em{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:600;font-style:italic;letter-spacing:-.025em}
+.editorial h1,.editorial h2,.editorial h3{font-family:var(--studio-heading),'Arial Narrow',sans-serif;font-weight:700;letter-spacing:-.028em}
+.editorial em{font-family:var(--studio-heading),'Arial Narrow',sans-serif;font-weight:600;font-style:italic;letter-spacing:-.025em}
 .ed-container{width:min(1360px,calc(100% - 104px));margin:0 auto}
-.ed-overline,.ed-topline,.ed-index,.ed-hero-end,.ed-canvas-meta,.ed-canvas-bottom,.ed-sch-identity small,.ed-sch-week,.ed-sch-greeting span,.ed-sch-metrics small,.ed-sch-tablehead,.ed-sch-time,.ed-sch-status,.ed-sch-foot,.ed-tape,.ed-feature-num,.ed-feature-title>span,.ed-window-label,.ed-window-edition,.ed-price-top,.ed-price-include,.ed-price-disclaimer,.ed-footer-bottom,.ed-last-link,.ed-text-link{font-family:"IBM Plex Mono",monospace;letter-spacing:.045em}
+.ed-overline,.ed-topline,.ed-index,.ed-hero-end,.ed-canvas-meta,.ed-canvas-bottom,.ed-sch-identity small,.ed-sch-week,.ed-sch-greeting span,.ed-sch-metrics small,.ed-sch-tablehead,.ed-sch-time,.ed-sch-status,.ed-sch-foot,.ed-tape,.ed-feature-num,.ed-feature-title>span,.ed-window-label,.ed-window-edition,.ed-price-top,.ed-price-include,.ed-price-disclaimer,.ed-footer-bottom,.ed-last-link,.ed-text-link{font-family:var(--studio-mono),monospace;letter-spacing:.045em}
 .ed-topline{background:var(--ed-blue);color:#fff;font-size:9px;font-weight:500;letter-spacing:.08em}
 .ed-topline>.ed-container{height:31px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .ed-star{color:var(--ed-lime);margin:0 6px}
@@ -42,7 +42,7 @@
 .ed-hero-canvas:after{content:"";width:610px;height:610px;border:1px solid #8ea1fc5e;border-radius:50%;position:absolute;right:-258px;top:10px}
 .ed-canvas-meta{position:absolute;z-index:2;left:27px;right:27px;top:25px;color:#e5e9ff;display:flex;justify-content:space-between;font-size:10px}
 .ed-hero-disc{position:absolute;z-index:0;left:35px;top:118px;width:207px;height:207px;border-radius:50%;background:var(--ed-lime);display:flex;align-items:center;justify-content:center;transform:rotate(-13deg)}
-.ed-hero-disc span{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:43px;line-height:.83;font-weight:700;letter-spacing:-.02em;color:var(--ed-ink)}
+.ed-hero-disc span{font-family:var(--studio-heading),'Arial Narrow',sans-serif;font-size:43px;line-height:.83;font-weight:700;letter-spacing:-.02em;color:var(--ed-ink)}
 .ed-hero-disc i{position:absolute;top:18px;right:30px;font-size:28px;font-style:normal}
 .ed-hero-card{position:absolute;z-index:2;left:12%;right:-7%;top:202px;transform:rotate(-4deg);filter:drop-shadow(17px 26px 0 #1e2d96)}
 .ed-hero-sticker{position:absolute;z-index:3;right:5%;bottom:29px;background:var(--ed-orange);color:var(--ed-ink);min-width:182px;min-height:117px;padding:18px;display:flex;align-items:center;justify-content:space-between;transform:rotate(8deg);border:2px solid var(--ed-ink)}
@@ -160,7 +160,7 @@
 .ed-sch-greeting{padding:21px 22px 14px;display:flex;flex-direction:column;gap:5px}
 .ed-sch-greeting span{font-size:9px;color:#85868f}
 .ed-sch-greeting span b{color:var(--ed-blue);font-weight:500}
-.ed-sch-greeting>strong{font-family:"Source Sans 3",Arial,sans-serif;font-size:22px;letter-spacing:-.025em;font-weight:700}
+.ed-sch-greeting>strong{font-family:var(--studio-sans),Arial,sans-serif;font-size:22px;letter-spacing:-.025em;font-weight:700}
 .ed-sch-metrics{display:grid;grid-template-columns:repeat(3,1fr);margin:0 20px 22px;border:1px solid #d8d7d0}
 .ed-sch-metrics>div{padding:12px 13px;border-right:1px solid #d8d7d0}
 .ed-sch-metrics>div:last-child{border-right:0}
@@ -764,7 +764,7 @@
   color:#17203c;
   border:2px solid #17203c;
   box-shadow:8px 9px 0 #172c93;
-  font-family:"Source Sans 3",Arial,sans-serif;
+  font-family:var(--studio-sans),Arial,sans-serif;
   transform:none;
   filter:none;
 }
@@ -1013,7 +1013,7 @@
 }
 .ed-impact-overlay h2{
   color:#fff;
-  font-family:"Barlow Condensed","Arial Narrow",sans-serif;
+  font-family:var(--studio-heading),'Arial Narrow',sans-serif;
   font-size:clamp(52px,6.2vw,92px);
   font-weight:700;
   line-height:.9;
@@ -1382,4 +1382,43 @@
  .ed-nav .ed-mobile-menu nav a:hover,.ed-nav .ed-mobile-menu nav a:focus-visible{
   background:var(--ed-lime);color:var(--ed-ink);outline:2px solid var(--ed-ink);outline-offset:-2px
  }
+}
+
+/* Legibility baseline for public content and booking/price metadata. */
+.editorial .ed-topline,
+.editorial .ed-overline,
+.editorial .ed-index,
+.editorial .ed-hero-end,
+.editorial .ed-price-top,
+.editorial .ed-price-include,
+.editorial .ed-price-disclaimer,
+.editorial .ed-footer-bottom,
+.editorial .ed-footer-nav,
+.editorial .ed-text-link,
+.editorial .ed-last-link,
+.editorial .ed-window-label,
+.editorial .ed-window-edition,
+.editorial .ed-canvas-meta,
+.editorial .ed-canvas-bottom,
+.editorial .ed-tape,
+.editorial .ed-feature-num,
+.editorial .ed-sch-week,
+.editorial .ed-sch-greeting span,
+.editorial .ed-sch-metrics small,
+.editorial .ed-sch-class small,
+.editorial .ed-sch-cap b,
+.editorial .ed-sch-foot,
+.editorial .ed-sch-tablehead,
+.editorial .ed-sch-tablehead strong,
+.editorial .ed-sch-tablehead span,
+.editorial .ed-sch-status,
+.editorial .ed-sch-time,
+.editorial .ed-sch-identity small {
+ font-size:12px;
+}
+.editorial .ed-footer-bottom{color:#c4cbd5}
+.editorial .ed-footer-main p{color:#c4cbd5}
+@media(max-width:760px){
+ .editorial .ed-topline>.ed-container{font-size:12px;min-height:35px;height:auto;padding-block:7px}
+ .editorial .ed-mobile-menu summary{font-size:14px}
 }

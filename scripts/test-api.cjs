@@ -64,6 +64,9 @@ async function main(){
   const bookingPreview=await call("/book/preview");
   assert.equal(bookingPreview.status,200,"Self-service booking preview must render.");
   assert((bookingPreview.headers.get("content-type")||"").includes("text/html"));
+  const health=await call("/api/health");
+  assert.equal(health.status,200,"Readiness must verify restricted database access.");
+  assert.equal(health.data.status,"ready");
   assert.equal((await call("/api/auth/me")).status,401);
   assert.equal((await call("/api/studio/people")).status,401);
   const oversizedWebhook=await call("/api/billing/paddle-webhook",{method:"POST",body:{padding:"A".repeat(260000)}});
@@ -99,6 +102,27 @@ async function main(){
   studioA=a.studioId;studioB=b.studioId;ownerA=a.userId;ownerB=b.userId;
   const duplicate=await call("/api/auth/register",{method:"POST",body:{email:a.email,password,studioName:"Duplicate Studio",focus:"Pilates",...LEGAL}});
   assert.equal(duplicate.status,409);
+  // A new staff account is invited by the owner and is limited to this tenant and role.
+  const invitedEmail="staff-"+unique+"@example.com";
+  const invite=await call("/api/studio/invitations",{method:"POST",cookie:a.cookie,body:{email:invitedEmail,role:"receptionist"}});
+  assert.equal(invite.status,202,JSON.stringify(invite.data));
+  assert.equal((await call("/api/studio/invitations",{cookie:b.cookie})).status,200,"Owners can list their own invitations.");
+  const staffMail=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE template='staff_invitation' AND recipient_email=$1",[invitedEmail]);
+  assert.equal(staffMail.rowCount,1,"Staff invitation must enqueue a one-time link.");
+  const staffLink=new URL(staffMail.rows[0].url),staffParams=new URLSearchParams(staffLink.hash.slice(1));
+  const staffToken=staffParams.get("token"),staffStudio=staffParams.get("studio");
+  assert.equal(staffStudio,studioA);
+  assert.equal((await call("/api/auth/staff-invite/accept",{method:"POST",body:{token:"wrong",studio:staffStudio,password}})).status,400);
+  const accepted=await call("/api/auth/staff-invite/accept",{method:"POST",body:{token:staffToken,studio:staffStudio,password}});
+  assert.equal(accepted.status,200,JSON.stringify(accepted.data));
+  assert.equal(accepted.data.role,"receptionist");
+  const staffMe=await call("/api/auth/me",{cookie:accepted.cookie});
+  assert.equal(staffMe.status,200);
+  assert.equal(staffMe.data.user.role,"receptionist");
+  assert.equal(staffMe.data.studio.id,studioA);
+  assert.equal((await call("/api/studio/invitations",{method:"POST",cookie:accepted.cookie,body:{email:"staff2-"+unique+"@example.com",role:"manager"}})).status,403);
+  assert.equal((await call("/api/auth/staff-invite/accept",{method:"POST",body:{token:staffToken,studio:staffStudio,password}})).status,400,"An invitation must not be reusable.");
+  assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,200,"Invited staff can sign in normally.");
   const create=async(account,name)=>call("/api/studio/people",{method:"POST",cookie:account.cookie,body:{kind:"lead",name,email:name.toLowerCase().replace(/ /g,".")+"-"+unique+"@example.com",phone:""}});
   const pa=await create(a,"Alice Client");assert.equal(pa.status,201,JSON.stringify(pa.data));
   const pb=await create(b,"Bob Client");assert.equal(pb.status,201,JSON.stringify(pb.data));
@@ -117,6 +141,14 @@ async function main(){
   const invalid=await call("/api/studio/people",{method:"POST",cookie:a.cookie,body:{kind:"member",name:"X",email:""}});assert.equal(invalid.status,400);
   const invalidLogin=await call("/api/auth/login",{method:"POST",body:{email:a.email,password:"incorrect"}});
   assert.equal(invalidLogin.status,401);
+  let wasThrottled=false;
+  for(let attempt=0;attempt<6;attempt++){
+   const denied=await call("/api/auth/login",{method:"POST",body:{email:a.email,password:"incorrect"}});
+   assert([401,429].includes(denied.status));
+   if(denied.status===429)wasThrottled=true;
+  }
+  assert(wasThrottled,"Repeated invalid passwords must trigger the email throttle.");
+  // A hostile party must not be able to prevent the legitimate owner signing in.
   const signin=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
   assert.equal(signin.status,200,JSON.stringify(signin.data));
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,200);

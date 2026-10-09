@@ -1,0 +1,11 @@
+[Unit]
+Description=Scheduled Encrypted PostgreSQL backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+AccuracySec=2min
+Unit=studiotasker-backup.service
+
+[Install]
+WantedBy=timers.target

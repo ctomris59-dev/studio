@@ -1,4 +1,4 @@
-export const SITE_URL="https://www.studiotasker.com";
+export const SITE_URL=(process.env.NEXT_PUBLIC_SITE_URL||"https://www.studiotasker.com").replace(/\/$/,"");
 
 export const studioTypeLinks=[
  {name:"Pilates & Reformer",href:"/pilates-studio-software"},

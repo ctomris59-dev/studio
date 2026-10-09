@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useState,type FormEvent} from "react";
+import {useEffect,useMemo,useRef,useState,type FormEvent} from "react";
 import Link from "next/link";
 import {
  ArrowRight,BarChart3,CalendarDays,Check,CheckCircle2,ChevronRight,Clock3,LayoutDashboard,LogOut,
@@ -83,6 +83,17 @@ export default function AppDemo(){
  const [classForm,setClassForm]=useState({title:"",time:"FRI · 18:00",coach:"Sophie M.",room:defaultStudioSettings.defaultRoom,duration:defaultStudioSettings.defaultClassDuration,capacity:defaultStudioSettings.defaultClassCapacity});
  const [taskForm,setTaskForm]=useState({person:"",title:"",due:"Tomorrow",priority:"NORMAL" as DemoTask["priority"]});
  const [tourActive,setTourActive]=useState(false),[tourElapsed,setTourElapsed]=useState(0);
+ const tourCloseButton=useRef<HTMLButtonElement|null>(null);
+ const tourStarter=useRef<HTMLElement|null>(null);
+ useEffect(()=>{
+  if(!tourActive)return;
+  tourCloseButton.current?.focus();
+  const escape=(event:KeyboardEvent)=>{
+   if(event.key==="Escape"){event.preventDefault();setTourActive(false)}
+  };
+  document.addEventListener("keydown",escape);
+  return ()=>{document.removeEventListener("keydown",escape);tourStarter.current?.focus()};
+ },[tourActive]);
  const [demoRemaining,setDemoRemaining]=useState(DEMO_SESSION_SECONDS),[demoExpired,setDemoExpired]=useState(false);
  const tourStepIndex=Math.min(tourSteps.length-1,Math.floor(tourElapsed/TOUR_STEP_SECONDS)),tourStep=tourSteps[tourStepIndex];
 
@@ -128,7 +139,7 @@ export default function AppDemo(){
  useEffect(()=>{if(!tourActive)return;setView(tourStep.view);setAdding(null);setMessage("")},[tourActive,tourStep.view]);
  useEffect(()=>{if(tourActive&&tourElapsed>=TOUR_SECONDS){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}},[tourActive,tourElapsed]);
 
- function startTour(){if(!beginDemoSession())return;setSignedIn(true);setTourElapsed(0);setTourActive(true);setView("today");setAdding(null);setMessage("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}}
+ function startTour(){if(!beginDemoSession())return;tourStarter.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setSignedIn(true);setTourElapsed(0);setTourActive(true);setView("today");setAdding(null);setMessage("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}}
  function jumpTour(direction:-1|1){const target=Math.max(0,Math.min(tourSteps.length-1,tourStepIndex+direction));setTourElapsed(target*TOUR_STEP_SECONDS)}
  function finishTour(){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}
  function login(e:FormEvent){e.preventDefault();setMessage("");if(!authenticateDemo(email,password)){setMessage("Demo email or password is incorrect.");return}
@@ -221,8 +232,8 @@ export default function AppDemo(){
   <section className="sad-main">
    <header className="sad-app-top"><div><span className="sad-kicker">OWNER WORKSPACE</span><h1>{settings.name}</h1></div><div className="sad-user-chip"><span>S</span><div><b>{DEMO_ACCOUNT.email}</b><small>Owner</small></div></div></header>
    <div className="sad-demo-strip"><ShieldCheck size={17}/><span>60-minute sandbox · {demoTimeLabel(demoRemaining)} left · max 3 new records per section.</span><button type="button" className="sad-tour-start" onClick={startTour}>Watch 90-sec demo <ChevronRight size={16}/></button></div>
-   {tourActive&&<aside className="sad-tour-card" role="dialog" aria-live="polite" aria-label="90-second StudioTasker guided tour">
-    <div className="sad-tour-card-top"><span>{tourStep.eyebrow} · GUIDED TOUR</span><button type="button" aria-label="Close guided tour" onClick={()=>setTourActive(false)}><X size={18}/></button></div>
+   {tourActive&&<aside className="sad-tour-card" role="region" aria-live="polite" aria-label="90-second StudioTasker guided tour">
+    <div className="sad-tour-card-top"><span>{tourStep.eyebrow} · GUIDED TOUR</span><button type="button" ref={tourCloseButton} aria-label="Close guided tour" onClick={()=>setTourActive(false)}><X size={18}/></button></div>
     <div className="sad-tour-progress" aria-hidden="true"><i style={{width:Math.min(100,(tourElapsed/TOUR_SECONDS)*100)+"%"}}/></div>
     <div className="sad-tour-meta"><span>STEP {tourStepIndex+1} / {tourSteps.length}</span><span>{tourElapsed}s / {TOUR_SECONDS}s</span></div>
     <h2>{tourStep.title}</h2><p>{tourStep.text}</p>

@@ -4,11 +4,22 @@ let pool:Pool|undefined;
 let runtimeVerified:Promise<void>|undefined;
 // A superuser or BYPASSRLS role bypasses tenant separation even with FORCE RLS.
 async function verifyRuntimeRole(p:Pool):Promise<void>{
- const result=await p.query<{rolsuper:boolean;rolbypassrls:boolean;rolcanlogin:boolean}>(
-  "SELECT rolsuper,rolbypassrls,rolcanlogin FROM pg_roles WHERE rolname=current_user");
+ const result=await p.query<{rolname:string;rolsuper:boolean;rolbypassrls:boolean;rolcanlogin:boolean}>(
+  "SELECT rolname,rolsuper,rolbypassrls,rolcanlogin FROM pg_roles WHERE rolname=current_user");
  const role=result.rows[0];
  if(!role||role.rolsuper||role.rolbypassrls||!role.rolcanlogin)
   throw new Error("UNSAFE_DATABASE_RUNTIME_ROLE");
+ const required=["people","class_sessions","bookings","credit_ledger","followup_tasks","activity_log","subscriptions","studio_staff","staff_invitations"];
+ const tables=await p.query<{relname:string;relrowsecurity:boolean;relforcerowsecurity:boolean;table_owner:string}>(`
+  SELECT c.relname,c.relrowsecurity,c.relforcerowsecurity,pg_get_userbyid(c.relowner) AS table_owner
+  FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+  WHERE n.nspname='public' AND c.relkind='r' AND c.relname=ANY($1::text[])`,[required]);
+ const found=new Map(tables.rows.map(row=>[row.relname,row]));
+ for(const name of required){
+  const table=found.get(name);
+  if(!table||!table.relrowsecurity||!table.relforcerowsecurity||table.table_owner===role.rolname)
+   throw new Error("UNSAFE_DATABASE_TENANT_TABLE:"+name);
+ }
 }
 
 export function dbIsReady(){return Boolean(process.env.DATABASE_URL);}

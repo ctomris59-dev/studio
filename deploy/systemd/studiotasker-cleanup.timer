@@ -1,0 +1,11 @@
+[Unit]
+Description=Scheduled Expired tokens and authentication records
+
+[Timer]
+OnCalendar=*-*-* 03:05:00
+Persistent=true
+AccuracySec=2min
+Unit=studiotasker-cleanup.service
+
+[Install]
+WantedBy=timers.target

@@ -14,7 +14,10 @@ export function commercialRegistrationReady():boolean{
   /^live_[A-Za-z0-9_-]{8,}$/.test(process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN||"")&&
   /^pri_[a-z\d]{26}$/.test(process.env.PADDLE_MONTHLY_PRICE_ID||"")&&
   /^pri_[a-z\d]{26}$/.test(process.env.PADDLE_ANNUAL_PRICE_ID||"");
+ const trustedProxy=process.env.TRUST_PROXY_IP_HEADERS==="true"&&
+  process.env.LAUNCH_TRUSTED_PROXY_VERIFIED==="true"&&
+  (process.env.LOGIN_RATE_HMAC_KEY||"").length>=32;
  const manualGates=process.env.LAUNCH_PADDLE_ACCOUNT_APPROVED==="true"&&
   process.env.LAUNCH_LEGAL_REVIEW_CONFIRMED==="true"&&process.env.LAUNCH_TAX_REVIEW_CONFIRMED==="true";
- return origin.startsWith("https://")&&process.env.BILLING_ENFORCEMENT==="required"&&productionBilling&&manualGates&&required.every(k=>Boolean(process.env[k]));
+ return origin.startsWith("https://")&&process.env.BILLING_ENFORCEMENT==="required"&&productionBilling&&manualGates&&trustedProxy&&required.every(k=>Boolean(process.env[k]));
 }

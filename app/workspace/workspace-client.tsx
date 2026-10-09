@@ -7,6 +7,7 @@ import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "
 import {ClassBasedOperations} from "./class-based-operations";
 import {OnboardingPanel} from "./onboarding-panel";
 import {BillingPanel} from "./billing-panel";
+import {StaffInvitations} from "./staff-invitations";
 import {TimezoneSelect} from "./timezone-select";
 import {LEGAL_ACCEPTANCE_TEXT,LEGAL_VERSIONS} from "../../lib/legal-versions";
 import {CLASS_FORMATS,STUDIO_FOCUSES,studioPreset,studioPresetProfile} from "../../lib/studio-presets";
@@ -177,8 +178,21 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  if(!user)return <section className="rd-workspace-card rd-auth-card">
   {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
-  <div className="rd-tab-buttons">{modes.map(({mode:next,name})=><button key={next} type="button" className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&<button type="button" className={mode==="register"?"active":""} onClick={()=>{setMode("register");setPendingPlan(p=>p||"monthly");setNote("")}}>Create studio</button>}</div>
-  <form className="rd-form" onSubmit={submitAuth}>
+  <div className="rd-tab-buttons" role="tablist" aria-label="Account actions" onKeyDown={event=>{
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+    const all=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const current=all.indexOf(document.activeElement as HTMLButtonElement);
+    const target=event.key==="Home"?0:event.key==="End"?all.length-1:
+     event.key==="ArrowRight"?(current+1)%all.length:(current+all.length-1)%all.length;
+    if(!all[target])return;
+    event.preventDefault();all[target].focus();all[target].click();
+   }}>{modes.map(({mode:next,name})=><button key={next} id={"auth-tab-"+next} type="button" role="tab" aria-selected={mode===next}
+    aria-controls="auth-form" tabIndex={mode===next?0:-1}
+    className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&
+    <button id="auth-tab-register" type="button" role="tab" aria-selected={mode==="register"} aria-controls="auth-form" tabIndex={mode==="register"?0:-1}
+     className={mode==="register"?"active":""} onClick={()=>{setMode("register");setPendingPlan(p=>p||"monthly");setNote("")}}>Create studio</button>}</div>
+  <form className="rd-form" id="auth-form" role="tabpanel"
+   aria-labelledby={mode==="verify"||mode==="reset"?undefined:"auth-tab-"+mode} onSubmit={submitAuth}>
    {["verify","reset"].includes(mode)&&<p className="rd-tiny">{mode==="verify"?"Verify your email to activate your account.":"Choose a new password. Existing sessions will be revoked."}</p>}
    {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label><label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{STUDIO_FOCUSES.map(f=><option key={f}>{f}</option>)}</select></label></>}
    {["login","register","forgot","resend"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
@@ -207,7 +221,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   <aside className="rd-live-sidebar">
    <div className="rd-live-brand">{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt={settings.name+" logo"}/>:<span className="rd-studio-fallback">{settings.name.slice(0,2).toUpperCase()}</span>}<div><strong>{settings.name}</strong><small>{settings.focus}</small></div></div>
    <div className="rd-powered"><StudioTaskerMark/> powered by <b>StudioTasker</b></div>
-   <nav aria-label="Studio workspace">{visibleNav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setView(id);setNote("");if(id==="leads")setPerson(p=>({...p,kind:"lead"}));if(id==="members")setPerson(p=>({...p,kind:"member"}))}}><Icon size={18}/>{label}</button>)}</nav>
+   <nav aria-label="Studio workspace">{visibleNav.map(([id,label,Icon])=><button key={id} type="button" aria-current={view===id?"page":undefined} className={view===id?"active":""} onClick={()=>{setView(id);setNote("");if(id==="leads")setPerson(p=>({...p,kind:"lead"}));if(id==="members")setPerson(p=>({...p,kind:"member"}))}}><Icon size={18}/>{label}</button>)}</nav>
    <div className="rd-live-sidebar-bottom"><small>{user.email}</small><span>{user.role}</span><button onClick={()=>void logout()}><LogOut size={16}/> Sign out</button></div>
   </aside>
   <main className="rd-live-main">
@@ -239,7 +253,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {view==="insights"&&<ClassBasedOperations role={user.role} section="insights" preferences={prefs}/>}
 
    {view==="settings"&&<section className="rd-live-section">
-    {user.role==="owner"&&<BillingPanel initialPlan={pendingPlan}/>} 
+    {user.role==="owner"&&<BillingPanel initialPlan={pendingPlan}/>}
+    {user.role==="owner"&&<StaffInvitations/>} 
     <OnboardingPanel role={user.role} onDataChange={()=>void load()}/>
     <div className="rd-customize-head"><div><p className="rd-eyebrow">MAKE STUDIOTASKER YOURS</p><h2>Studio identity & workflow</h2><p>Controlled customization: enough to feel like your studio without creating a fragile one-off software fork.</p></div>
      <div className="rd-brand-preview" style={{borderColor:settings.accentColor}}>{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,2).toUpperCase()}</span>}<div><b>{settings.name||"Your Studio"}</b><small>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</small></div></div></div>
