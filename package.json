@@ -39,7 +39,8 @@
     "test:ops": "node scripts/test-ops.cjs",
     "db:roles:maintenance": "node db/setup-maintenance-role.cjs",
     "backup:offsite": "node scripts/backup-offsite.cjs",
-    "test:offsite": "node scripts/test-offsite.cjs"
+    "test:offsite": "node scripts/test-offsite.cjs",
+    "test:browser": "node scripts/test-browser.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
