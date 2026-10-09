@@ -13,7 +13,13 @@ function run(args,env){
 async function counts(pool){
  const tables=(await pool.query("SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename")).rows.map(x=>x.tablename);
  const rows={};
- for(const table of tables)rows[table]=Number((await pool.query('SELECT count(*)::int AS n FROM "'+table+'"')).rows[0].n);
+ // Names come exclusively from the server's pg_tables catalogue. Quote identifier
+ // characters separately; PostgreSQL does not accept bind parameters for names.
+ const quoteIdentifier=name=>'"'+name.replaceAll('"','""')+'"';
+ for(const table of tables){
+  const identifier=quoteIdentifier(table);
+  rows[table]=Number((await pool.query("SELECT count(*)::int AS n FROM "+identifier)).rows[0].n);
+ }
  const metrics=await pool.query(`SELECT
   (SELECT count(*)::int FROM pg_policies WHERE schemaname='public') AS policies,
   (SELECT count(*)::int FROM pg_class WHERE relnamespace='public'::regnamespace AND relforcerowsecurity) AS forced,
