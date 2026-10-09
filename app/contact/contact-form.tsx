@@ -1,5 +1,6 @@
 "use client";
 import {FormEvent, useRef, useState} from "react";
+import Link from "next/link";
 
 const SUPPORT_EMAIL="support@studiotasker.com";
 
@@ -49,7 +50,7 @@ export default function ContactForm(){
     <label className="ct-message"><span>Message *</span><textarea name="message" required minLength={10} maxLength={5000} rows={5} placeholder="How can we help?"/></label>
    </div>
    <button type="submit" disabled={state==="sending"}>{state==="sending"?"SENDING…":"SEND MESSAGE"} <span>↗</span></button>
-   <p className="ct-form-note">Your message is sent securely to StudioTasker support. We use these details only to respond to your enquiry.</p>
+   <p className="ct-form-note">Your message is used to answer your enquiry. Review our <Link href="/legal/privacy">Privacy Policy</Link> for retention and contact details.</p>
    {status&&<p className={"ct-status "+(state==="sent"?"is-success":"is-error")} role="status">{status}{state==="error"&&<> <a href={"mailto:"+SUPPORT_EMAIL}>Email us directly.</a></>}</p>}
   </form>
  </div>
