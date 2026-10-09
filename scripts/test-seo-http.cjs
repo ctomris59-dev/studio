@@ -10,6 +10,14 @@ async function get(path){const r=await fetch(base+path,{redirect:"manual"});retu
 function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return tags.some(tag=>/\brel="canonical"/i.test(tag)&&tag.includes('href="'+url+'"'))}
 (async()=>{try{
  await wait();
+ const start=await get("/start");
+ const annualStart=await get("/start?plan=annual");
+ assert.equal(start.status,200);
+ assert.equal(annualStart.status,200);
+ assert(start.text.includes("$406.80")&&annualStart.text.includes("$406.80"),
+  "Pricing cards must remain pre-rendered and indexable.");
+ assert((start.headers.get("cache-control")||"").includes("s-maxage=300"),
+  "/start should be ISR-cached for five minutes.");
  const home=await get("/");
  assert.equal(home.status,200);
  // Production Next.js must not expose HMR/dev-overlay endpoints or runtimes.
