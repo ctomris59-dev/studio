@@ -2,7 +2,7 @@ import {NextRequest} from "next/server";
 import {inTransaction,dbIsReady} from "@/lib/server/database";
 import {jsonObject,errorResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
 import {validChallengeToken,tokenDigest} from "@/lib/server/challenges";
-import {passwordHash,validatePassword} from "@/lib/auth-crypto";
+import {passwordHash,validatePassword,loginKey} from "@/lib/auth-crypto";
 export const runtime="nodejs";
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
@@ -22,6 +22,8 @@ export async function POST(request:NextRequest){
    await client.query("UPDATE app_users SET password_hash=$2,password_changed_at=now() WHERE id=$1",[id,secured]);
    await client.query("UPDATE auth_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",[id]);
    await client.query("DELETE FROM auth_trusted_devices WHERE user_id=$1",[id]);
+   const identity=await client.query<{email:string}>("SELECT email FROM app_users WHERE id=$1",[id]);
+   if(identity.rowCount)await client.query("UPDATE login_attempts SET attempts=0,window_started_at=now() WHERE email_hash=$1",[loginKey(identity.rows[0].email)]);
    await client.query("UPDATE auth_challenges SET consumed_at=now() WHERE id=$1",[challenge.rows[0].id]);
    return true;
   });
