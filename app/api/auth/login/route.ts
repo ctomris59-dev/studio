@@ -19,6 +19,7 @@ export async function POST(request:NextRequest){
   // Scope proxy-aware throttles to the email/IP pair, not every user
   // who shares the same NAT. Unverified forwarded headers are ignored.
   const ipKey=trusted?loginIpKey("user:"+key+"|"+trusted):null;
+  const trustDevice=body.trustDevice===true;
   const deviceToken=request.cookies.get(DEVICE_COOKIE)?.value||"";
   const deviceHash=/^[a-zA-Z0-9_-]{43}$/.test(deviceToken)?tokenHash(deviceToken):null;
   // Claim the attempt and read a candidate hash under a brief transaction.
@@ -77,22 +78,28 @@ export async function POST(request:NextRequest){
    await client.query("UPDATE login_attempts SET attempts=0,window_started_at=now() WHERE email_hash=$1",[key]);
    await client.query(`INSERT INTO auth_sessions(token_hash,user_id,studio_id,expires_at)
       VALUES($1,$2,$3,now()+interval '14 days')`,[tokenHash(token),candidate.id,membership.rows[0].studio_id]);
+   // Never enroll shared computers silently. If the checkbox is unchecked,
+   // clear an existing device enrollment rather than extending its lifetime.
    const recognizedDevice=attempt.recognized&&deviceHash?deviceHash:null;
-   const newDeviceToken=recognizedDevice?null:newSessionToken();
-   const activeDeviceHash=recognizedDevice||tokenHash(newDeviceToken!);
-   await client.query(`INSERT INTO auth_trusted_devices(token_hash,user_id,expires_at)
-     VALUES($1,$2,now()+interval '30 days')
-     ON CONFLICT(token_hash) DO UPDATE SET last_used_at=now(),expires_at=now()+interval '30 days'`,
-     [activeDeviceHash,candidate.id]);
-   await client.query(`DELETE FROM auth_trusted_devices WHERE user_id=$1 AND token_hash NOT IN
-     (SELECT token_hash FROM auth_trusted_devices WHERE user_id=$1 ORDER BY last_used_at DESC LIMIT 10)`,[candidate.id]);
+   const newDeviceToken=trustDevice&&!recognizedDevice?newSessionToken():null;
+   if(trustDevice){
+    const activeDeviceHash=recognizedDevice||tokenHash(newDeviceToken!);
+    await client.query(`INSERT INTO auth_trusted_devices(token_hash,user_id,expires_at)
+      VALUES($1,$2,now()+interval '30 days')
+      ON CONFLICT(token_hash) DO UPDATE SET last_used_at=now(),expires_at=now()+interval '30 days'`,
+      [activeDeviceHash,candidate.id]);
+    await client.query(`DELETE FROM auth_trusted_devices WHERE user_id=$1 AND token_hash NOT IN
+      (SELECT token_hash FROM auth_trusted_devices WHERE user_id=$1 ORDER BY last_used_at DESC LIMIT 10)`,[candidate.id]);
+   }else if(deviceHash){
+    await client.query("DELETE FROM auth_trusted_devices WHERE token_hash=$1 AND user_id=$2",[deviceHash,candidate.id]);
+   }
    return {ok:true as const,studioId:membership.rows[0].studio_id,role:membership.rows[0].role,
-    deviceToken:newDeviceToken||deviceToken};
+    deviceToken:trustDevice?(newDeviceToken||deviceToken):null};
   });
   if(!result.ok)return errorResponse(result.rateLimited?429:401,result.rateLimited?"Too many sign-in attempts. Try again later.":"Invalid email or password.");
   const response=NextResponse.json({ok:true,studioId:result.studioId,role:result.role},{headers:{"Cache-Control":"no-store"}});
   response.cookies.set(SESSION_COOKIE,token,sessionCookieConfig());
-  response.cookies.set(DEVICE_COOKIE,result.deviceToken,{path:"/",maxAge:DEVICE_MAX_AGE,
+  response.cookies.set(DEVICE_COOKIE,result.deviceToken||"",{path:"/",maxAge:result.deviceToken?DEVICE_MAX_AGE:0,
    httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production"});
   return response;
  }catch(e){return e instanceof PasswordHashBusyError?errorResponse(429,"Sign-in service is busy. Try again shortly."):backendError()}
