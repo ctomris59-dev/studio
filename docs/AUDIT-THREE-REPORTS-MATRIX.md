@@ -109,3 +109,8 @@ Status legend: **CODE** = implemented and tested in repository, **PARTIAL** = co
 8. Only then enable live paying signups and consider complete audit closure.
 
 **Outstanding external and product scope findings intentionally remain OPEN/PARTIAL/EXTERNAL, not falsely marked fixed.**
+
+## October follow-up
+- Added `/api/health` to fail health checks when database tenant isolation is unsafe (instead of checking only whether homepage HTTP returns 200).
+- Enhanced `npm run launch:verify` to query the actual application role, FORCE RLS and applied migration list, authenticate to SMTP and verify a fresh encrypted backup plus remote object size. Real SMTP delivery, separate restore, live Paddle checkout, and legal/privacy review still require evidence and cannot be inferred from the script.
+- The outbox worker exits nonzero when a message exhausts the final retry, so systemd can surface a failed service rather than silent dropping.

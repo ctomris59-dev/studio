@@ -1,5 +1,9 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),ts=require("typescript");
 const source=fs.readFileSync("lib/server/release-config.ts","utf8");
+const launch=fs.readFileSync("scripts/verify-launch.cjs","utf8");
+assert(launch.includes("schema_migrations")&&launch.includes("relforcerowsecurity")&&launch.includes("transport.verify()")&&launch.includes("newestBackup("), "Paid launch verification must check real database, SMTP and backup readiness.");
+require("node:child_process").execFileSync(process.execPath,["--check","scripts/verify-launch.cjs"]);
+
 const compiled={exports:{}};
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 new Function("require","module","exports",js)(name=>name==="server-only"?{}:require(name),compiled,compiled.exports);
