@@ -496,6 +496,8 @@ async function main(){
   const scrubbed=await admin.query("SELECT email,phone,full_name,anonymized_at FROM people WHERE id=$1",[pa.data.record.id]);
   assert.equal(scrubbed.rows[0].full_name,"Anonymized person");
   assert(scrubbed.rows[0].email.endsWith("@invalid.example")&&scrubbed.rows[0].anonymized_at);
+  const privateCreditReasons=await admin.query("SELECT reason FROM credit_ledger WHERE studio_id=$1 AND member_id=$2",[studioA,pa.data.record.id]);
+  assert(privateCreditReasons.rows.every(row=>row.reason==="Privacy-redacted adjustment"),"Anonymization must scrub free-text credit ledger reasons.");
   const twoDozen=await Promise.all(Array.from({length:24},async()=>{
    const started=performance.now();
    const r=await call("/api/studio/classes",{cookie:a.cookie});
