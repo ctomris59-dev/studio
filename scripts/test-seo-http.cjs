@@ -12,6 +12,15 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  await wait();
  const home=await get("/");
  assert.equal(home.status,200);
+ // Production Next.js must not expose HMR/dev-overlay endpoints or runtimes.
+ for(const signature of ["/_next/webpack-hmr","__nextjs_original-stack-frame","react-refresh","webpackHotUpdate"]){
+  assert(!home.text.includes(signature),"Production HTML contains development/HMR indicator: "+signature);
+ }
+ const hmr=await get("/_next/webpack-hmr");
+ assert.notEqual(hmr.status,101,"Production must not expose a WebSocket hot-reload endpoint.");
+ assert(!/text\/event-stream/i.test(hmr.headers.get("content-type")||""),"HMR event stream exposed in production.");
+ assert((home.headers.get("content-security-policy")||"").includes("script-src-attr 'none'"),"Production must block inline handler attributes.");
+
  assert(canonical(home.text,"https://www.studiotasker.com/")||canonical(home.text,"https://www.studiotasker.com"),"Home raw HTML must contain self-canonical.");
  assert(home.text.includes('"Organization"')&&home.text.includes('"Service"')&&home.text.includes("application/ld+json"),"Home entity JSON-LD missing.");
  assert(home.text.includes('href="/yoga-studio-software"'),"Server HTML vertical links missing.");

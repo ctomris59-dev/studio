@@ -84,6 +84,25 @@ async function main(){
    assert((h.get("content-security-policy")||"").includes("frame-ancestors 'none'"),label+" must include framing CSP.");
    assert((h.get("strict-transport-security")||"").includes("max-age=31536000"),label+" must advertise HSTS.");
   }
+  // Enforced CSP must block inline event handlers site-wide. The dynamic
+  // authenticated workspace additionally requires a fresh script nonce.
+  const pagePolicy=pilatesLanding.headers.get("content-security-policy")||"";
+  assert(pagePolicy.includes("script-src-attr 'none'"),"Static routes must block HTML inline event handlers.");
+  const workspaceFirst=await fetch(HOST+"/workspace",{cache:"no-store"});
+  const workspaceSecond=await fetch(HOST+"/workspace",{cache:"no-store"});
+  assert.equal(workspaceFirst.status,200);
+  assert.equal(workspaceSecond.status,200);
+  const firstPolicy=workspaceFirst.headers.get("content-security-policy")||"";
+  const secondPolicy=workspaceSecond.headers.get("content-security-policy")||"";
+  const firstScript=firstPolicy.split(";").map(s=>s.trim()).find(s=>s.startsWith("script-src "))||"";
+  const firstNonce=/'nonce-([^']+)'/.exec(firstScript)?.[1];
+  const secondNonce=/'nonce-([^']+)'/.exec(secondPolicy)?.[1];
+  assert(firstNonce&&secondNonce&&firstNonce!==secondNonce,"Authenticated workspace must use distinct random CSP nonces. first="+firstPolicy+" second="+secondPolicy+" nextMiddleware="+workspaceFirst.headers.get("x-middleware-next"));
+  assert(!firstScript.includes("'unsafe-inline'"),"Workspace must not allow unrestricted inline JavaScript.");
+  assert(firstPolicy.includes("script-src-attr 'none'"),"Workspace must block HTML event handlers.");
+  assert((workspaceFirst.headers.get("cache-control")||"").includes("no-store"),"Nonce responses must not be reused through caching.");
+  const workspaceHtml=await workspaceFirst.text();
+  assert(workspaceHtml.includes('nonce="'+firstNonce+'"'),"Next hydration scripts should receive their matching CSP nonce.");
   assert.equal(health.headers.get("cache-control"),"private, no-store","Database readiness must not be cached.");
   assert((health.headers.get("x-robots-tag")||"").includes("noindex"),"API responses must not be indexed.");
 
