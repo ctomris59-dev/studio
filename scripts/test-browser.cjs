@@ -109,6 +109,20 @@ async function main(){
     assert(result.loaded.every(n=>n>0),route+" missing locally served font family");
     assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
+    // A strict CSP is only useful if Next's nonced hydration still works.
+    // Exercise an actual React onClick handler on the login view in Chromium.
+    if(route==="/workspace"&&width===1280){
+     const ui=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      const forgot=document.querySelector('#auth-tab-forgot');
+      if(!forgot)return {exists:false};
+      forgot.click();
+      await new Promise(resolve=>setTimeout(resolve,300));
+      return {exists:true,selected:forgot.getAttribute('aria-selected'),text:document.querySelector('#main-content h1')?.textContent};
+     })()`});
+     const interaction=ui.result?.value;
+     assert(interaction?.exists&&interaction.selected==="true"&&/forgot/i.test(interaction.text||""),
+      "Workspace React tab did not hydrate under strict nonce CSP: "+JSON.stringify(interaction));
+    }
     assert(result.total>=1,route+" did not render text");
     if(route!=="/legal/security"){
      assert.equal(result.mainCount,1,route+" should contain exactly one main landmark");
