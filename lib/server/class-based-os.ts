@@ -226,7 +226,7 @@ export async function reviseClass(client:PoolClient,auth:Authenticated,classId:s
  await applyClassMetadata(client,auth.studioId,[classId],meta);
  if(old.starts_at.getTime()!==from.getTime()||old.room!==parsed.room||old.instructor!==parsed.instructor){
   await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes)
-    SELECT $1,b.member_id,'Notify member: class schedule changed',now(),'General',$3
+    SELECT $1,b.member_id,'Notify member: class schedule changed '||$2::text,now(),'General',$3
     FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2 AND b.status IN('booked','waitlisted')
     ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId,oldStart:old.starts_at,newStart:from})]);
  }
@@ -258,7 +258,7 @@ export async function cancelEntireClass(client:PoolClient,auth:Authenticated,cla
  await client.query("UPDATE bookings SET status='cancelled',cancelled_at=now(),cancellation_type='standard' WHERE studio_id=$1 AND session_id=$2 AND status IN('booked','waitlisted')",[auth.studioId,classId]);
  await client.query("UPDATE class_sessions SET status='cancelled',cancelled_at=now() WHERE studio_id=$1 AND id=$2",[auth.studioId,classId]);
  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes)
-   SELECT $1,b.member_id,'Notify member: class cancelled',now(),'General',$3
+   SELECT $1,b.member_id,'Notify member: class cancelled '||$2::text,now(),'General',$3
    FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2 AND b.id=ANY($4::uuid[])
    ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId}),bookings.rows.map(x=>x.id)]);
  await client.query("INSERT INTO activity_log(studio_id,actor_id,action,details) VALUES($1,$2,'class.cancelled',$3::jsonb)",[auth.studioId,auth.userId,JSON.stringify({classId,affected:bookings.rows.length,creditsRefunded:refunded})]);
