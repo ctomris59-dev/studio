@@ -21,6 +21,7 @@ export async function POST(request:NextRequest){
    const id=challenge.rows[0].user_id;
    await client.query("UPDATE app_users SET password_hash=$2,password_changed_at=now() WHERE id=$1",[id,secured]);
    await client.query("UPDATE auth_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",[id]);
+   await client.query("DELETE FROM auth_trusted_devices WHERE user_id=$1",[id]);
    await client.query("UPDATE auth_challenges SET consumed_at=now() WHERE id=$1",[challenge.rows[0].id]);
    return true;
   });
