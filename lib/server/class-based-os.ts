@@ -87,7 +87,7 @@ export async function assignSpotToBooking<T extends {id:string;status:string}>(c
 export async function listBookingsExtended(client:PoolClient,studioId:string,sessionId:string){
  if(!validUUID(sessionId))fail(400,"Invalid class identifier.");
  const result=await client.query(
-  "SELECT b.id,b.session_id,b.member_id,b.status,b.queue_number,b.booked_at,b.attended_at,b.spot_number,b.cancellation_type,b.no_show_at,p.full_name AS member_name FROM bookings b JOIN people p ON p.id=b.member_id AND p.studio_id=b.studio_id WHERE b.studio_id=$1 AND b.session_id=$2 AND b.status IN('booked','waitlisted') ORDER BY CASE WHEN b.status='booked' THEN 0 ELSE 1 END,b.spot_number ASC NULLS LAST,b.queue_number ASC NULLS LAST,b.booked_at ASC,b.id ASC LIMIT 300",
+  "SELECT b.id,b.session_id,b.member_id,b.status,b.queue_number,b.booked_at,b.attended_at,b.spot_number,b.cancellation_type,b.no_show_at,p.full_name AS member_name FROM bookings b JOIN people p ON p.id=b.member_id AND p.studio_id=b.studio_id WHERE b.studio_id=$1 AND b.session_id=$2::uuid AND b.status IN('booked','waitlisted') ORDER BY CASE WHEN b.status='booked' THEN 0 ELSE 1 END,b.spot_number ASC NULLS LAST,b.queue_number ASC NULLS LAST,b.booked_at ASC,b.id ASC LIMIT 300",
   [studioId,sessionId]);
  return result.rows;
 }
@@ -259,7 +259,7 @@ export async function cancelEntireClass(client:PoolClient,auth:Authenticated,cla
  await client.query("UPDATE class_sessions SET status='cancelled',cancelled_at=now() WHERE studio_id=$1 AND id=$2",[auth.studioId,classId]);
  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes)
    SELECT $1,b.member_id,'Notify member: class cancelled '||$2::text,now(),'General',$3
-   FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2 AND b.id=ANY($4::uuid[])
+   FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2::uuid AND b.id=ANY($4::uuid[])
    ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId}),bookings.rows.map(x=>x.id)]);
  await client.query("INSERT INTO activity_log(studio_id,actor_id,action,details) VALUES($1,$2,'class.cancelled',$3::jsonb)",[auth.studioId,auth.userId,JSON.stringify({classId,affected:bookings.rows.length,creditsRefunded:refunded})]);
  return {id:classId,alreadyCancelled:false,affected:bookings.rows.length,creditsRefunded:refunded};
