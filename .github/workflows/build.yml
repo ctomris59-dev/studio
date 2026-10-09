@@ -42,7 +42,9 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
+      - name: Audit production dependencies for high/critical vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
       - name: Initialize isolated PostgreSQL test database
         run: npm run db:setup:local
       - name: Test reviewed studio erasure on isolated database
