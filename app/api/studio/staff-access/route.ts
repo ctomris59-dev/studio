@@ -60,6 +60,7 @@ export async function POST(request:NextRequest){
    if(Number(count.rows[0].count)>1)return {multiStudio:true};
    await client.query("UPDATE app_users SET disabled_at=COALESCE(disabled_at,now()) WHERE id=$1",[userId]);
    await client.query("UPDATE auth_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",[userId]);
+   await client.query("DELETE FROM auth_trusted_devices WHERE user_id=$1",[userId]);
    return {revoked:true};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
