@@ -254,7 +254,7 @@ export async function reviseClass(client:PoolClient,auth:Authenticated,classId:s
     SELECT $1,b.member_id,$4,now(),'General',$3,'class_changed:'||$5::text||':'||b.member_id::text
     FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2::uuid AND b.status IN('booked','waitlisted')
     ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId,oldStart:old.starts_at,newStart:from}),
-      "Notify member: class schedule changed — "+notification.rows[0].label,eventId]);
+      "Notify member: class schedule changed · "+notification.rows[0].label,eventId]);
  }
  await client.query("INSERT INTO activity_log(studio_id,actor_id,action,details) VALUES($1,$2,'class.edited',$3::jsonb)",[auth.studioId,auth.userId,JSON.stringify({classId})]);
  return {id:classId,updated:true};
@@ -291,7 +291,7 @@ export async function cancelEntireClass(client:PoolClient,auth:Authenticated,cla
    SELECT $1,b.member_id,$5,now(),'General',$3,'class_cancelled:'||$2::text||':'||b.member_id::text
    FROM bookings b WHERE b.studio_id=$1 AND b.session_id=$2::uuid AND b.id=ANY($4::uuid[])
    ON CONFLICT DO NOTHING`,[auth.studioId,classId,JSON.stringify({classId}),bookings.rows.map(x=>x.id),
-     "Notify member: class cancelled — "+notification.rows[0].label]);
+     "Notify member: class cancelled · "+notification.rows[0].label]);
  await client.query("INSERT INTO activity_log(studio_id,actor_id,action,details) VALUES($1,$2,'class.cancelled',$3::jsonb)",[auth.studioId,auth.userId,JSON.stringify({classId,affected:bookings.rows.length,creditsRefunded:refunded})]);
  return {id:classId,alreadyCancelled:false,affected:bookings.rows.length,creditsRefunded:refunded};
 }
