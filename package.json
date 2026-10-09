@@ -42,7 +42,8 @@
     "test:offsite": "node scripts/test-offsite.cjs",
     "test:browser": "node scripts/test-browser.cjs",
     "test:closure": "node scripts/test-studio-closure.cjs",
-    "closure:finalize": "node scripts/finalize-studio-closure.cjs"
+    "closure:finalize": "node scripts/finalize-studio-closure.cjs",
+    "test:restore:e2e": "node scripts/test-restore-e2e.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
