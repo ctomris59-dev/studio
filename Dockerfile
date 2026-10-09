@@ -13,11 +13,13 @@ ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 RUN npm run build
 RUN npm prune --omit=dev
 
-FROM node:22-alpine
+FROM node:22-alpine AS runtime-tools
+# Separately buildable target: CI checks that both backup executables exist.
+RUN apk add --no-cache postgresql-client rclone
+
+FROM runtime-tools
 ENV NODE_ENV=production
 WORKDIR /app
-# Supply the binaries required by the documented backup/off-site jobs.
-RUN apk add --no-cache postgresql-client rclone
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=builder --chown=app:app /app ./
 USER app
