@@ -225,7 +225,7 @@ export default function AppDemo(){
  ];
  return <main className="sad-app"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <aside className="sad-sidebar"><Link href="/" className="sad-brand sad-sidebar-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
-   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{background:settings.accentColor}}>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
+   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{borderColor:settings.accentColor}}>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
    <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setTourActive(false);setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
