@@ -73,6 +73,8 @@ jobs:
         run: npm run test:workflows
       - name: Test encrypted database backup format
         run: npm run test:backup
+      - name: Restore encrypted real PostgreSQL snapshot and compare RLS, data and constraints
+        run: npm run test:restore:e2e
       - name: Check editorial copy
         run: npm run test:copy
       - name: Test PostgreSQL CLI connection settings
