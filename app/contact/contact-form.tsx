@@ -1,6 +1,7 @@
 "use client";
 import {FormEvent, useEffect, useRef, useState} from "react";
 import Link from "next/link";
+import {TurnstileChallenge} from "../../components/turnstile-challenge";
 
 const SUPPORT_EMAIL="support@studiotasker.com";
 
@@ -8,6 +9,8 @@ export default function ContactForm(){
  const [state,setState]=useState<"idle"|"sending"|"sent"|"error">("idle");
  const [status,setStatus]=useState("");
  const [deliveryAvailable,setDeliveryAvailable]=useState<boolean|null>(null);
+ const [turnstileToken,setTurnstileToken]=useState("");
+ const [turnstileReset,setTurnstileReset]=useState(0);
  useEffect(()=>{
   let cancelled=false;
   void fetch("/api/contact",{cache:"no-store"}).then(r=>r.json()).then(data=>{if(!cancelled)setDeliveryAvailable(data.deliveryAvailable===true)}).catch(()=>{if(!cancelled)setDeliveryAvailable(false)});
@@ -28,11 +31,13 @@ export default function ContactForm(){
    topic:String(data.get("topic")||"Product question"),
    message:String(data.get("message")||""),
    website:String(data.get("website")||""),
-   startedAt:startedAt.current
+   startedAt:startedAt.current,
+   turnstileToken
   };
   try{
    const response=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
    const result=await response.json().catch(()=>({}));
+   setTurnstileToken("");setTurnstileReset(v=>v+1);
    if(!response.ok)throw new Error(typeof result.error==="string"?result.error:"Unable to send your message.");
    setState("sent");
    setStatus("Message sent. We’ll reply to your email as soon as we can.");
@@ -55,7 +60,7 @@ export default function ContactForm(){
     <label><span>Topic</span><select name="topic" defaultValue="Product question"><option>Product question</option><option>Pricing / annual plan</option><option>Account / sign in</option><option>Setup / migration</option><option>Billing</option><option>Feedback</option><option>Other</option></select></label>
     <label className="ct-message"><span>Message *</span><textarea name="message" required minLength={10} maxLength={5000} rows={5} placeholder="How can we help?"/></label>
    </div>
-   <button type="submit" disabled={state==="sending"||deliveryAvailable!==true}>{state==="sending"?"SENDING…":"SEND MESSAGE"} <span>↗</span></button>
+   <TurnstileChallenge onToken={setTurnstileToken} resetKey={turnstileReset}/><button type="submit" disabled={state==="sending"||deliveryAvailable!==true}>{state==="sending"?"SENDING…":"SEND MESSAGE"} <span>↗</span></button>
    {deliveryAvailable===null&&<p role="status">Checking secure message delivery…</p>}
    <p className="ct-form-note">Your message is used to answer your enquiry. Review our <Link href="/legal/privacy">Privacy Policy</Link> for retention and contact details.</p>
    {status&&<p className={"ct-status "+(state==="sent"?"is-success":"is-error")} role="status">{status}{state==="error"&&<> <a href={"mailto:"+SUPPORT_EMAIL}>Email us directly.</a></>}</p>}
