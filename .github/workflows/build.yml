@@ -87,3 +87,5 @@ jobs:
         run: npm run test:seo:http
       - name: Test live HTTP auth and tenant access
         run: npm run test:api
+      - name: Real Chromium mobile and typography smoke
+        run: npm run test:browser
