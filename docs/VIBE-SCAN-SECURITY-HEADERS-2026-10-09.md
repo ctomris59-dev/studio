@@ -47,9 +47,14 @@ equating a Vercel scan with the self-hosted StudioTasker server.
 
 ## Low – innerHTML / dangerouslySetInnerHTML
 
-- The inspected first-party app/source uses safe normal React rendering.
-  Added `test:security:source` to inspect first-party `app`, `components`,
-  and `lib` for DOM HTML insertion sinks at CI time.
+- First-party source includes **one** reviewed use of
+  `dangerouslySetInnerHTML`: `components/json-ld.tsx` serializes
+  structured SEO metadata into a non-executable `application/ld+json`
+  script. The serializer escapes every `<` as `\\u003c`, including
+  adversarial `</script>` input. The source test explicitly checks this
+  conversion and fails on any additional raw HTML sink.
+- `test:security:source` searches `app`, `components`, and `lib` for
+  other DOM HTML insertion code.
 - A scanner that sees compiled Next/React runtime code cannot establish that
   the HTML assignments are written by StudioTasker or that untrusted data flows
   into them. Request exact file/function/stack and a payload before declaring
