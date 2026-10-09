@@ -239,3 +239,8 @@
  .rd-powered{display:none}
 }
 @media print{.rd-live-sidebar,.rd-workspace-header,.rd-live-sidebar-bottom,.rd-live-accent,.rd-contact-actions{display:none!important}.rd-live-shell{display:block}.rd-live-main{padding:0}.rd-live-section{max-width:none}}
+
+/* Calendar day separators use the studio's configured timezone. */
+.rd-class-os .rd-class-day{grid-column:1/-1;margin:14px 0 0;padding:10px 14px;background:#17203c;color:#fff;border-left:4px solid #e7f982;font:700 21px var(--studio-heading),'Arial Narrow',sans-serif}
+.rd-class-os .rd-class-list{max-height:680px}
+@media(max-width:650px){.rd-class-os .rd-class-list{grid-template-columns:1fr}.rd-class-os .rd-class-day{font-size:20px}}
