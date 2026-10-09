@@ -4,7 +4,7 @@ import {Barlow_Condensed,IBM_Plex_Mono,Source_Sans_3} from "next/font/google";
 import {SITE_URL} from "../lib/seo";
 
 const studioSans=Source_Sans_3({subsets:["latin"],display:"swap",variable:"--studio-sans"});
-const studioHeading=Barlow_Condensed({subsets:["latin"],display:"swap",variable:"--studio-heading"});
+const studioHeading=Barlow_Condensed({subsets:["latin"],weight:["400","500","600","700","800"],display:"swap",variable:"--studio-heading"});
 const studioMono=IBM_Plex_Mono({subsets:["latin"],weight:["400","500","600"],display:"swap",variable:"--studio-mono"});
 
 export const metadata:Metadata={
