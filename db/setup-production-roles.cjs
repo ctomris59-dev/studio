@@ -24,7 +24,7 @@ async function main(){
   if(!allowed.test(database))throw Error("Database name requires manual GRANT review.");
   await pool.query("GRANT CONNECT ON DATABASE "+database+" TO "+role);
   await pool.query("GRANT USAGE ON SCHEMA public TO "+role);
-  const general="app_users,studios,studio_users,auth_sessions,login_attempts,people,class_sessions,bookings,credit_ledger,followup_tasks,activity_log,subscriptions,studio_staff,billing_events,auth_challenges,mail_outbox,data_export_audits,studio_packages,import_batches";
+  const general="app_users,studios,studio_users,auth_sessions,login_attempts,login_ip_attempts,people,class_sessions,bookings,credit_ledger,followup_tasks,activity_log,subscriptions,studio_staff,billing_events,auth_challenges,mail_outbox,data_export_audits,studio_packages,import_batches";
   await pool.query("GRANT SELECT,INSERT,UPDATE ON "+general+" TO "+role);
   await pool.query("GRANT SELECT,INSERT,UPDATE,DELETE ON studio_brand_assets,action_center_snoozes TO "+role);
   await pool.query("GRANT SELECT,INSERT ON legal_acceptances TO "+role);
