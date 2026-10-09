@@ -491,6 +491,7 @@ async function main(){
   assert.equal((await call("/api/studio/privacy",{cookie:a.cookie})).status,200);
   assert.equal((await call("/api/studio/privacy",{cookie:coachLogin.cookie})).status,403);
   assert.equal((await call("/api/studio/people/"+pa.data.record.id+"/anonymize",{method:"POST",cookie:coachLogin.cookie,body:{confirm:"ANONYMIZE"}})).status,403);
+  await admin.query("INSERT INTO credit_ledger(studio_id,member_id,delta,reason) VALUES($1,$2,1,$3)",[studioA,pa.data.record.id,"Gift from Maria Lopez for referring Ana"]);
   assert.equal((await call("/api/studio/people/"+pa.data.record.id+"/anonymize",{method:"POST",cookie:a.cookie,body:{confirm:"ANONYMIZE"}})).status,200);
   assert.equal((await call("/api/studio/people/"+pa.data.record.id+"/anonymize",{method:"POST",cookie:a.cookie,body:{confirm:"ANONYMIZE"}})).data.contact.alreadyApplied,true);
   const scrubbed=await admin.query("SELECT email,phone,full_name,anonymized_at FROM people WHERE id=$1",[pa.data.record.id]);
