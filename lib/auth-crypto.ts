@@ -57,4 +57,8 @@ export function emailIsValid(email:string){
 export const newSessionToken=()=>randomBytes(32).toString("base64url");
 export const tokenHash=(token:string)=>createHash("sha256").update(token).digest("hex");
 export const loginKey=(email:string)=>tokenHash("login:"+normalizeEmail(email));
-export const SESSION_COOKIE="reformdesk_session";
+// __Host- cookies must be Secure, host-only and Path=/ in production.
+// Deliberately invalidate legacy domain-scoped sessions during this upgrade;
+// existing users sign in once to obtain the hardened cookie.
+export const SESSION_COOKIE=process.env.NODE_ENV==="production"?"__Host-studiotasker_session":"studiotasker_session";
+export const DEVICE_COOKIE=process.env.NODE_ENV==="production"?"__Host-studiotasker_device":"studiotasker_device";
