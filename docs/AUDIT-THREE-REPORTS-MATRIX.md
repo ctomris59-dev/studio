@@ -4,6 +4,23 @@
 
 Status legend: **CODE** = implemented and tested in repository, **PARTIAL** = code exists but important work remains, **EXTERNAL** = a real credential, service or human verification is required, **OPEN** = not implemented.
 
+## 9 October follow-up: access recovery, readable notifications, typography and operational hygiene
+
+This section tracks PR #29 code changes separately from *production evidence*. It is not a blanket legal or live-deployment approval.
+
+| Audit finding | Repository remediation | Unresolved dependency |
+|---|---|---|
+| Email-only lockout can be weaponized | Recognized-device recovery uses 30-day random cookie with server-side SHA-256 hash, bounded password KDF, per email/IP throttle when a verified proxy is present; reset revokes recognized devices and releases an account's stale throttle. Unknown devices still receive 429 after email threshold | Without verified proxy/edge throttling, unknown devices can still suffer denial of access; install a trusted reverse proxy, monitor/login alerts and test a real production load profile |
+| Staff access reactivation | Owner can restore a disabled, non-erased, single-studio staff account; previous sessions remain revoked | Cross-studio accounts require operator review; staff password should be reset if compromise is suspected |
+| UUID-heavy staff tasks | Class name, local class time and room displayed; opaque class/member identifiers exist in unique `source_key` instead of task title | Manually inspect real staff workflows and native notifications |
+| Missing local font faces | Added IBM Plex Mono 700, Source Sans 3 800/900 and Barlow Condensed italic weights with Chrome font verification | Typography needs design QA across localization and device/browser combinations |
+| Low contrast and sub-12px text | Higher-contrast annual hero link; sub-12px declarations upgraded to 12px across active marketing, demo and workspace CSS | Full WCAG contrast and responsive keyboard screen-reader audits are not completed |
+| Dead globals CSS | Removed only proven-unreferenced legacy marketing rules; guarded live CSS retained | Full selector/dependency tracing remains partial, cannot claim 0 unused bytes |
+| Docker tools and health | Runtime image adds `pg_dump` and `rclone`; Docker HEALTHCHECK probes web process on `/`; `/api/health` remains DB readiness | Production jobs, IAM and encrypted off-site backup restore must be commissioned and tested independently |
+| Concurrent SQL on one pg client | Serialized action-center, onboarding and legal status queries with typed helper | Other usages may exist; monitor `pg` driver notices in deployment |
+| Withdraw studio closure request | Explicit owner withdrawal event, active request status, offline finalizer refuses withdrawn request | Requests already finalized cannot be undone |
+| Unchanged legal pages had unnecessary new versions | Restored prior Cookies and Subprocessors version IDs; CI checks old Terms acceptance + reacceptance | Legal counsel must approve revised binding terms; payment webhooks still require external checks |
+
 ## 9 October 2026 – GitHub-only audit follow-up (merged PR #28)
 
 The following items have passed the isolated PostgreSQL, HTTP, build and real Chromium desktop/mobile CI regression suite on the exact PR head. Merge SHA: `ec6db8dbcbcbe60ca9dee57afe32efa3f25872b0`.
