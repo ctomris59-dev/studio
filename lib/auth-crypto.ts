@@ -5,10 +5,22 @@ export const SESSION_LIFETIME_SECONDS=60*60*24*14;
 const KEY_LENGTH=64;
 const V2={N:131072,r:8,p:1,maxmem:256*1024*1024};
 const V1={N:16384,r:8,p:1,maxmem:32*1024*1024};
+// Bound expensive scrypt jobs per Node process. A full queue fails fast rather than
+// exhausting libuv workers, event-loop responsiveness and database health.
+let activeKdfs=0;
+const MAX_CONCURRENT_KDFS=2;
+export class PasswordHashBusyError extends Error{
+ constructor(){super("Password verification is temporarily busy.");this.name="PasswordHashBusyError";}
+}
 function derive(password:string,salt:Buffer,options:typeof V2):Promise<Buffer>{
- return new Promise((resolve,reject)=>scryptCallback(password,salt,KEY_LENGTH,options,(error,derived)=>{
-  if(error)reject(error);else resolve(derived);
- }));
+ if(activeKdfs>=MAX_CONCURRENT_KDFS)return Promise.reject(new PasswordHashBusyError());
+ activeKdfs++;
+ return new Promise((resolve,reject)=>{
+  try{scryptCallback(password,salt,KEY_LENGTH,options,(error,derived)=>{
+   activeKdfs--;
+   if(error)reject(error);else resolve(derived);
+  });}catch(error){activeKdfs--;reject(error)}
+ });
 }
 export const needsPasswordRehash=(hash:string)=>hash.startsWith("scrypt$v1$");
 export const DUMMY_PASSWORD_HASH="scrypt$v2$"+"0".repeat(48)+"$"+"0".repeat(128);
