@@ -548,6 +548,17 @@ async function main(){
   assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Revoked staff session must immediately lose access.");
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,401,"Revoked staff must not log back in.");
+  // Simulate an external operator changing this suspension to a security hold.
+  // A studio owner must never be able to override it.
+  const ownerRevocation=await admin.query("SELECT disabled_reason,disabled_by FROM app_users WHERE id=$1",[invitedStaff.id]);
+  assert.equal(ownerRevocation.rows[0].disabled_reason,"owner_revoked");
+  assert.equal(ownerRevocation.rows[0].disabled_by,ownerA);
+  await admin.query("UPDATE app_users SET disabled_reason='operator_suspended',disabled_by=NULL WHERE id=$1",[invitedStaff.id]);
+  assert.equal((await call("/api/studio/staff-access",{method:"PATCH",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"RESTORE"}})).status,403,"Owner must not override operator suspension.");
+  assert.equal((await call("/api/studio/staff-access",{method:"POST",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"REVOKE"}})).status,409,"Owner must not overwrite the suspension reason.");
+  assert.equal((await call("/api/auth/login",{method:"POST",body:{email:invitedEmail,password}})).status,401);
+  await admin.query("UPDATE app_users SET disabled_reason='owner_revoked',disabled_by=$2 WHERE id=$1",[invitedStaff.id,ownerA]);
+
   assert.equal((await call("/api/studio/staff-access",{method:"PATCH",cookie:b.cookie,body:{userId:invitedStaff.id,confirm:"RESTORE"}})).status,404,"Other tenants cannot restore staff.");
   assert.equal((await call("/api/studio/staff-access",{method:"PATCH",cookie:a.cookie,body:{userId:invitedStaff.id,confirm:"RESTORE"}})).status,200);
   assert.equal((await call("/api/auth/me",{cookie:accepted.cookie})).status,401,"Old sessions must remain revoked after restore.");
@@ -596,7 +607,10 @@ async function main(){
   assert.equal(closureAudit.rows[0].count,1,"Repeated closure request must not create duplicate actions.");
   assert.equal((await call("/api/auth/me",{cookie:a.cookie})).status,200,"A closure request is not immediate deletion.");
 
-  const known=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
+  const untrusted=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
+  assert.equal(untrusted.status,200);
+  assert(!/studiotasker_device=[A-Za-z0-9_-]{43}/.test(untrusted.headers.get("set-cookie")||""),"Default sign-in must not enroll a trusted device.");
+  const known=await call("/api/auth/login",{method:"POST",body:{email:a.email,password,trustDevice:true}});
   assert.equal(known.status,200);
   const rawCookies=known.headers.get("set-cookie")||"";
   const deviceValue=/studiotasker_device=([A-Za-z0-9_-]{43})/.exec(rawCookies)?.[1];
@@ -607,7 +621,14 @@ async function main(){
   assert.equal((await call("/api/auth/login",{method:"POST",body:{email:a.email,password}})).status,429,"A new device must respect email lockout.");
   const familiar="studiotasker_device="+deviceValue;
   assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password:"An incorrect password!"}})).status,429,"A known device must not permit wrong guesses during lockout.");
-  assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password}})).status,200,"A genuine owner on a recognized device must recover from malicious email-only lockout.");
+  assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password,trustDevice:true}})).status,200,"A genuine owner on a recognized device must recover from malicious email-only lockout.");
+  const signedOut=await call("/api/auth/logout",{method:"POST",cookie:known.cookie+"; "+familiar});
+  assert.equal(signedOut.status,200);
+  assert((signedOut.headers.get("set-cookie")||"").includes("studiotasker_device="),"Logout must clear the trusted-device cookie.");
+  const deviceHash=require("node:crypto").createHash("sha256").update(deviceValue).digest("hex");
+  assert.equal((await admin.query("SELECT count(*)::int AS n FROM auth_trusted_devices WHERE token_hash=$1",[deviceHash])).rows[0].n,0,"Logout must revoke the trusted device in DB.");
+  await admin.query("UPDATE login_attempts SET attempts=5,window_started_at=now() WHERE email_hash=$1",[emailHash]);
+  assert.equal((await call("/api/auth/login",{method:"POST",cookie:familiar,body:{email:a.email,password}})).status,429,"A previously trusted device must not bypass lockout after sign-out.");
 
   // Owner can withdraw and re-submit a pending closure request before manual erasure.
   const withdrawal=await call("/api/studio/privacy/closure",{method:"POST",cookie:a.cookie,body:{action:"withdraw",confirmation:"WITHDRAW CLOSURE REQUEST"}});
