@@ -1,0 +1,40 @@
+name: Bootstrap ESLint (temporary, PR branch only)
+on:
+  push:
+    branches:
+      - fix/jsonld-lgpl-eslint-bootstrap-20261009
+permissions:
+  contents: write
+jobs:
+  bootstrap:
+    if: ${{ !contains(github.event.head_commit.message, '[eslint-generated]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout requested branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/jsonld-lgpl-eslint-bootstrap-20261009
+          persist-credentials: true
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install existing lockfile dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run requested official ESLint initializer
+        env:
+          npm_config_yes: 'true'
+          CI: 'true'
+        run: npm init @eslint/config@latest -- --config eslint-config-next
+      - name: Pin ESLint and Next to compatible major versions
+        run: npm install --save-dev eslint@^9 eslint-config-next@15.5.27 @eslint/eslintrc@^3 --no-audit --no-fund
+      - name: Commit generated config and reproducible lockfile to branch
+        run: |
+          test -f eslint.config.js -o -f eslint.config.mjs
+          if test -f eslint.config.js; then mv eslint.config.js eslint.config.mjs; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add eslint.config.mjs package.json package-lock.json
+          git commit -m "chore: initialize ESLint with official npm wizard [eslint-generated]"
+          git push origin HEAD:fix/jsonld-lgpl-eslint-bootstrap-20261009
