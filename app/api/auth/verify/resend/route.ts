@@ -14,7 +14,7 @@ export async function POST(request:NextRequest){
  if(!raw||!emailIsValid(normalizeEmail(raw)))return errorResponse(400,"Enter a valid email.");
  const budget=await publicAbuseGuard(request,"verify-resend",raw);
  if(budget)return budget;
- const verification=await verifyPublicChallenge(request,data);
+ const verification=await verifyPublicChallenge(request,data||{});
  if(verification)return verification;
  try{
   const email=normalizeEmail(raw),origin=publicMailOrigin();
