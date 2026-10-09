@@ -112,7 +112,7 @@ async function main(){
    body:JSON.stringify([{type:"csp-violation",body:{effectiveDirective:"script-src-elem",documentURL:"https://example.com/?secret=DO_NOT_LOG"}}])
   });
   assert.equal(rawReport.status,204,"Well-formed anonymous violation should be accepted.");
-  assert.equal(rawReport.headers.get("cache-control"),"no-store");
+  assert((rawReport.headers.get("cache-control")||"").includes("no-store"),"Report collector responses must not be cached.");
   const tooLargeReport=await fetch(HOST+"/api/security/csp-report",{
    method:"POST",headers:{"Content-Type":"application/csp-report"},
    body:"X".repeat(17_000)
