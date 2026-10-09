@@ -8,6 +8,7 @@ const classAPI=read("app/api/studio/classes/[id]/route.ts");
 const pricing=read("app/workspace/billing-panel.tsx");
 const homepage=read("app/page.tsx");
 const css=read("app/editorial.css");
+const headers=read("next.config.ts");
 assert(workspace.includes('type="email"')&&workspace.includes("registrationLegalAccepted"),"Account forms must validate email and require legal acceptance");
 assert(workspace.includes('"/api/auth/verify/resend"'),"Accounts must be able to resend verification");
 assert(demo.includes("TimezoneSelect"),"Interactive demo must use selectable timezones");
@@ -16,4 +17,5 @@ assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
 assert(css.includes(":focus-visible")&&css.includes("@media"),"Responsive focus states must be defined");
+assert(headers.includes("Content-Security-Policy")&&headers.includes("Strict-Transport-Security")&&headers.includes("frame-ancestors 'none'"),"All application surfaces must have browser security headers.");
 console.log("UI smoke checks passed: functional actions, navigation, accessibility and mobile CSS.");
