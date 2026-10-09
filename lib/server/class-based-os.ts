@@ -1,3 +1,4 @@
+import {literalLikePattern} from "./sql-search";
 import {randomUUID as cryptoRandomUUID} from "node:crypto";
 import "server-only";
 import type {PoolClient} from "pg";
@@ -62,9 +63,9 @@ export async function applyClassMetadata(client:PoolClient,studioId:string,class
 export async function listClassesExtended(client:PoolClient,studioId:string,search='',offset=0){
  const records=await client.query(
   `SELECT c.id,c.title,c.instructor,c.room,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,c.status,c.cancelled_at,c.series_id,c.class_format,c.level,c.program_label,c.spot_booking_enabled,c.spot_label,c.spot_count,c.staff_id,c.substitute_staff_id,COUNT(b.id) FILTER(WHERE b.status='booked')::int AS booked_count,COUNT(b.id) FILTER(WHERE b.status='waitlisted')::int AS waitlist_count FROM class_sessions c LEFT JOIN bookings b ON b.studio_id=c.studio_id AND b.session_id=c.id WHERE c.studio_id=$1 AND c.starts_at>=now()-interval '1 day' AND c.starts_at<now()+interval '90 days'
-  AND ($2::text='' OR c.title ILIKE '%'||$2||'%' OR c.instructor ILIKE '%'||$2||'%' OR c.room ILIKE '%'||$2||'%')
+  AND (c.title ILIKE $2 ESCAPE '~' OR c.instructor ILIKE $2 ESCAPE '~' OR c.room ILIKE $2 ESCAPE '~')
   GROUP BY c.id ORDER BY c.starts_at ASC,c.id ASC LIMIT 121 OFFSET $3`,
-  [studioId,search,offset]);
+  [studioId,literalLikePattern(search),offset]);
  return records.rows;
 }
 
