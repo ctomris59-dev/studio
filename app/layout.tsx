@@ -5,14 +5,21 @@ import "./globals.css";
 import "@fontsource/source-sans-3/400.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/source-sans-3/700.css";
+import "@fontsource/source-sans-3/800.css";
+import "@fontsource/source-sans-3/900.css";
 import "@fontsource/barlow-condensed/400.css";
 import "@fontsource/barlow-condensed/500.css";
 import "@fontsource/barlow-condensed/600.css";
 import "@fontsource/barlow-condensed/700.css";
 import "@fontsource/barlow-condensed/800.css";
+import "@fontsource/barlow-condensed/400-italic.css";
+import "@fontsource/barlow-condensed/600-italic.css";
+import "@fontsource/barlow-condensed/700-italic.css";
+import "@fontsource/barlow-condensed/800-italic.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "@fontsource/ibm-plex-mono/600.css";
+import "@fontsource/ibm-plex-mono/700.css";
 import {SITE_URL} from "../lib/seo";
 export const metadata:Metadata={
  metadataBase:new URL(SITE_URL),
