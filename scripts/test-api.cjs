@@ -491,14 +491,16 @@ async function main(){
   assert.equal((await call("/api/studio/privacy",{cookie:a.cookie})).status,200);
   assert.equal((await call("/api/studio/privacy",{cookie:coachLogin.cookie})).status,403);
   assert.equal((await call("/api/studio/people/"+pa.data.record.id+"/anonymize",{method:"POST",cookie:coachLogin.cookie,body:{confirm:"ANONYMIZE"}})).status,403);
-  await admin.query("INSERT INTO credit_ledger(studio_id,member_id,delta,reason) VALUES($1,$2,1,$3)",[studioA,pa.data.record.id,"Gift from Maria Lopez for referring Ana"]);
+  await admin.query("INSERT INTO credit_ledger(studio_id,member_id,delta,reason) VALUES($1,$2,1,$3),($1,$2,-1,$4)",[studioA,pa.data.record.id,"Gift from Maria Lopez for referring Ana","class_refund"]);
   assert.equal((await call("/api/studio/people/"+pa.data.record.id+"/anonymize",{method:"POST",cookie:a.cookie,body:{confirm:"ANONYMIZE"}})).status,200);
   assert.equal((await call("/api/studio/people/"+pa.data.record.id+"/anonymize",{method:"POST",cookie:a.cookie,body:{confirm:"ANONYMIZE"}})).data.contact.alreadyApplied,true);
   const scrubbed=await admin.query("SELECT email,phone,full_name,anonymized_at FROM people WHERE id=$1",[pa.data.record.id]);
   assert.equal(scrubbed.rows[0].full_name,"Anonymized person");
   assert(scrubbed.rows[0].email.endsWith("@invalid.example")&&scrubbed.rows[0].anonymized_at);
   const privateCreditReasons=await admin.query("SELECT reason FROM credit_ledger WHERE studio_id=$1 AND member_id=$2",[studioA,pa.data.record.id]);
-  assert(privateCreditReasons.rows.every(row=>row.reason==="Privacy-redacted adjustment"),"Anonymization must scrub free-text credit ledger reasons.");
+  assert(privateCreditReasons.rows.some(row=>row.reason==="Privacy-redacted adjustment"),"Anonymization must scrub free-text credit ledger reasons.");
+  assert(privateCreditReasons.rows.some(row=>row.reason==="class_refund"),"Anonymization must preserve structured refund ledger codes.");
+  assert(!privateCreditReasons.rows.some(row=>row.reason.includes("Maria")),"PII must not survive anonymization.");
   const twoDozen=await Promise.all(Array.from({length:24},async()=>{
    const started=performance.now();
    const r=await call("/api/studio/classes",{cookie:a.cookie});
