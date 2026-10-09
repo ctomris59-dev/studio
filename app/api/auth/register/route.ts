@@ -1,7 +1,7 @@
 import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
-import {jsonObject,stringField,errorResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
+import {jsonObject,stringField,errorResponse,busyResponse,successResponse,backendError,sameOrigin} from "@/lib/server/responses";
 import {emailIsValid,normalizeEmail,validatePassword,passwordHash,PasswordHashBusyError} from "@/lib/auth-crypto";
 import {newChallenge,queueMessage,publicMailOrigin} from "@/lib/server/challenges";
 import {validStudioTimezone} from "@/lib/studio-timezone";
@@ -54,7 +54,7 @@ export async function POST(request:NextRequest){
    name:e instanceof Error?e.name:"unknown",code:(e as {code?:string}).code||"unclassified",
    message:e instanceof Error?e.message:"unknown"
   });
-  if(e instanceof PasswordHashBusyError)return errorResponse(429,"Registration service is busy. Try again shortly.");
+  if(e instanceof PasswordHashBusyError)return busyResponse("Registration service is busy. Try again shortly.");
   return backendError();
  }
 }
