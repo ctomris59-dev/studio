@@ -45,10 +45,19 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Audit production dependencies for high/critical vulnerabilities
         run: npm audit --omit=dev --audit-level=high
-      - name: Verify Docker backup tooling stage
+      - name: Verify hardened Docker runtime tools and patched zlib
         run: |
-          docker build --target runtime-tools -t studiotasker-runtime-tools .
-          docker run --rm --entrypoint sh studiotasker-runtime-tools -c 'command -v pg_dump && command -v rclone'
+          docker build --pull --target runtime-tools -t studiotasker-runtime-tools .
+          docker run --rm --entrypoint sh studiotasker-runtime-tools -ec '
+            command -v node && command -v pg_dump && command -v rclone
+            ! command -v npm
+            ! command -v npx
+            test ! -e /usr/local/lib/node_modules/npm
+            zlib_version="$(apk info -v zlib | sed -n "s/^zlib-//p")"
+            test -n "$zlib_version"
+            test "$(apk version -t "$zlib_version" "1.3.2-r1")" != "<"
+            echo "Verified patched zlib: $zlib_version; npm/npx absent in runtime"
+          '
       - name: Initialize isolated PostgreSQL test database
         run: npm run db:setup:local
       - name: Test reviewed studio erasure on isolated database
