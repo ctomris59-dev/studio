@@ -12,6 +12,7 @@ async function main(){
    DELETE FROM auth_challenges WHERE expires_at<now()-interval '30 days'`);
   const oldMail=await pool.query("DELETE FROM mail_outbox WHERE dispatched_at<now()-interval '90 days'");
   const expiredSessions=await pool.query("DELETE FROM auth_sessions WHERE expires_at<now()-interval '30 days'");
+  const expiredDevices=await pool.query("DELETE FROM auth_trusted_devices WHERE expires_at<now()");
   const loginAttempts=await pool.query("DELETE FROM login_attempts WHERE window_started_at<now()-interval '7 days'");
   const ipAttempts=await pool.query("DELETE FROM login_ip_attempts WHERE window_started_at<now()-interval '7 days'");
   const publicAttempts=await pool.query(`
