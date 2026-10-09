@@ -1,6 +1,7 @@
 export const dynamic="force-dynamic";
 import type {Metadata} from "next";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Activity, ArrowRight, ArrowUpRight, Check, Clock3,
   CreditCard, Dumbbell, HeartPulse, ShieldCheck, Users, Waves
@@ -107,14 +108,13 @@ export default function HomePage() {
         <section className="ed-impact-band ed-impact-band-first" aria-labelledby="impact-band-title">
           <div className="ed-container">
             <div className="ed-impact-card">
-              <img
-                src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg?auto=compress&cs=tinysrgb&w=1800"
-                alt="Woman doing battle rope exercises in a modern gym studio"
-                width="1800"
-                height="1200"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
+              <Image
+                src="/images/studio-group-fitness.avif"
+                alt="A group fitness studio training session"
+                width={1800}
+                height={1200}
+                priority
+                sizes="(max-width: 760px) 100vw, 1360px"
               />
               <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">
                 <Link href="/start?plan=monthly" className="ed-impact-price-option ed-impact-price-monthly" aria-label="Choose monthly plan, $39.90 per month">
