@@ -1,13 +1,14 @@
 import Link from "next/link";
-import {ArrowLeft,ArrowRight,ArrowUpRight,Check,Globe2,ShieldCheck} from "lucide-react";
+import {ArrowLeft,ArrowRight,Globe2,ShieldCheck} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import "./start.css";
+import {Suspense} from "react";
+import {PlanCards,PlanSelector} from "./plan-selector";
 
 export const metadata={title:"StudioTasker Pricing | Monthly & Annual Plans",description:"StudioTasker costs $39.90/month per studio or $406.80/year. Compare monthly and annual billing for the full studio management workspace.",alternates:{canonical:"/start"},robots:{index:true,follow:true}};
 
-export default async function StartPage({searchParams}:{searchParams:Promise<{plan?:string}>}){
- const params=await searchParams;
- const selected=params.plan==="annual"?"annual":"monthly";
+export const revalidate=300;
+export default function StartPage(){
  return <main className="st-start"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <header className="st-start-top">
    <Link href="/" className="st-start-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
@@ -28,23 +29,7 @@ export default async function StartPage({searchParams}:{searchParams:Promise<{pl
    </div>
    <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · International</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
 
-   <div className="st-start-plans" aria-label="StudioTasker plans">
-    <article className={selected==="monthly"?"selected":""}>
-     <div className="st-plan-head"><span>MONTHLY · FLEXIBLE</span>{selected==="monthly"&&<strong>SELECTED</strong>}</div>
-     <div className="st-plan-price"><sup>$</sup>39<em>.90</em><small>/ month · USD</small></div>
-     <p>Pay month to month. One StudioTasker workspace for one studio.</p>
-     <ul><li><Check size={18}/> Full StudioTasker workspace</li><li><Check size={18}/> StudioTasker Today priorities</li><li><Check size={18}/> CRM, classes, bookings and credits</li><li><Check size={18}/> Studio branding and customization</li></ul>
-     <Link href="/workspace?mode=register&plan=monthly" className="st-plan-buy">START MONTHLY · $39.90 <ArrowUpRight size={20}/></Link>
-    </article>
-
-    <article className={"annual "+(selected==="annual"?"selected":"")}>
-     <div className="st-plan-head"><span>ANNUAL · BEST VALUE · SAVE $72/YEAR</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
-     <div className="st-plan-price"><sup>$</sup>33<em>.90</em><small>/ month · USD</small></div>
-     <p>Billed once per year at <b>$406.80 USD</b>, which is $72 less than twelve monthly payments. Best for studios planning to use StudioTasker as an everyday operating system throughout the year.</p>
-     <ul><li><Check size={18}/> Everything in the monthly plan</li><li><Check size={18}/> $72/year lower total price</li><li><Check size={18}/> One yearly renewal instead of monthly billing</li><li><Check size={18}/> Lower effective monthly price: $33.90</li></ul>
-     <Link href="/workspace?mode=register&plan=annual" className="st-plan-buy">START ANNUAL · $406.80/YEAR <ArrowUpRight size={20}/></Link>
-    </article>
-   </div>
+   <Suspense fallback={<PlanCards selected="monthly"/>}><PlanSelector/></Suspense>
 
    <div className="st-start-legal"><ShieldCheck size={18}/><span>Before creating a paid studio, review our <Link href="/legal/terms">Terms</Link>, <Link href="/legal/dpa">DPA</Link> and <Link href="/legal/privacy">Privacy Policy</Link>. Acceptance is recorded when you create or update your subscription.</span></div>
    <div className="st-start-help">
