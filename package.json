@@ -46,11 +46,13 @@
     "next": "^15.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "exceljs": "^4.4.0",
     "pg": "^8.13.1",
     "nodemailer": "^10.0.13",
     "@paddle/paddle-js": "^1.6.5",
-    "@paddle/paddle-node-sdk": "^3.10.0"
+    "@paddle/paddle-node-sdk": "^3.10.0",
+    "@fontsource/barlow-condensed": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/source-sans-3": "5.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -58,6 +60,7 @@
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.7.0",
     "@types/pg": "^8.11.11",
-    "@types/nodemailer": "^7.0.0"
+    "@types/nodemailer": "^7.0.0",
+    "exceljs": "^4.4.0"
   }
 }
