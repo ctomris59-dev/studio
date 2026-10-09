@@ -21,8 +21,9 @@ async function main(){
   await client.query("BEGIN");
   const studio=await client.query("SELECT id FROM studios WHERE id=$1 FOR UPDATE",[studioId]);
   if(!studio.rowCount)throw Error("Studio not found; do not repeat erasure blindly.");
-  const request=await client.query("SELECT created_at,actor_id FROM activity_log WHERE studio_id=$1 AND action='privacy.studio_closure_requested' ORDER BY created_at DESC LIMIT 1",[studioId]);
-  if(!request.rowCount)throw Error("No explicit owner closure request recorded.");
+  const request=await client.query("SELECT created_at,actor_id,action FROM activity_log WHERE studio_id=$1 AND action IN('privacy.studio_closure_requested','privacy.studio_closure_withdrawn') ORDER BY created_at DESC,id DESC LIMIT 1",[studioId]);
+  if(!request.rowCount||request.rows[0].action!=="privacy.studio_closure_requested")
+   throw Error("No active owner closure request recorded; withdrawal blocks erasure.");
   const owner=await client.query("SELECT 1 FROM studio_users WHERE studio_id=$1 AND user_id=$2 AND role='owner'",[studioId,request.rows[0].actor_id]);
   if(!owner.rowCount)throw Error("Closure request is not attributed to a current studio owner.");
   if(Date.now()-new Date(request.rows[0].created_at).getTime()<7*86400000)
