@@ -23,14 +23,42 @@ jobs:
           node-version: '22'
       - name: Install existing lockfile dependencies
         run: npm ci --no-audit --no-fund
-      - name: Run requested official ESLint initializer
+      - name: Run requested official ESLint initializer with controlled TTY answer
         env:
-          npm_config_yes: 'true'
           CI: 'true'
         run: |
-          # The create-config v3 wizard requires an actual TTY even with --config.
-          # Decline its unpinned install and pin Next 15/ESLint 9 explicitly below.
-          printf 'n\\n' | script -q -e -c 'npm init @eslint/config@latest -- --config eslint-config-next' /dev/null
+          python3 - <<'PY'
+          import os, pty, select, subprocess, sys, time
+          master,slave=pty.openpty()
+          cmd=["npm","init","@eslint/config@latest","--","--config","eslint-config-next"]
+          proc=subprocess.Popen(cmd,stdin=slave,stdout=slave,stderr=slave,close_fds=True)
+          os.close(slave)
+          transcript=b""
+          answered=False
+          deadline=time.monotonic()+100
+          while proc.poll() is None and time.monotonic()<deadline:
+              read,_,_=select.select([master],[],[],0.3)
+              if read:
+                  try: output=os.read(master,65536)
+                  except OSError: break
+                  if not output: break
+                  transcript+=output
+                  sys.stdout.write(output.decode("utf-8","replace"))
+                  sys.stdout.flush()
+                  if not answered and b"Would you like to install them now?" in transcript:
+                      # The wizard's unpinned package list may select ESLint 10
+                      # / Next 16. Decline it and install matching pinned deps next.
+                      os.write(master,b"n\r")
+                      answered=True
+          if proc.poll() is None:
+              proc.terminate()
+              try: proc.wait(timeout=5)
+              except subprocess.TimeoutExpired: proc.kill()
+              raise SystemExit("ESLint config initializer timed out waiting for prompt")
+          if proc.returncode:
+              raise SystemExit("Official npm init command failed: "+str(proc.returncode))
+          print("Official npm init @eslint/config@latest completed.")
+          PY
       - name: Pin ESLint and Next to compatible major versions
         run: npm install --save-dev eslint@^9 eslint-config-next@15.5.27 @eslint/eslintrc@^3 --no-audit --no-fund
       - name: Commit generated config and reproducible lockfile to branch
