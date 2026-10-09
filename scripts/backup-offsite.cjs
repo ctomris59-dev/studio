@@ -1,7 +1,7 @@
 "use strict";
 const fs=require("node:fs/promises"),path=require("node:path"),{spawn}=require("node:child_process");
 function remotePath(base,name){
- if(!/^[A-Za-z0-9_-]+:[A-Za-z0-9/_.-]{1,180}$/.test(base)||base.includes("..")||base.endsWith("/"))
+ if(!/^[A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/.test(base)||base.length>190||base.includes(".."))
   throw Error("RCLONE_REMOTE_DIR must be a trusted configured remote:path with no parent traversal.");
  return base+"/"+name;
 }
