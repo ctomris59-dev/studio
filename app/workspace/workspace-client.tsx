@@ -86,7 +86,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   if(["owner","manager","receptionist","instructor"].includes(body.user.role)){
    const response=await fetch("/api/studio/settings",{credentials:"same-origin",cache:"no-store"});
    if(response.ok){const config=await response.json();setSettings(config.studio);setStudio((v:Studio|null)=>v?{...v,name:config.studio.name}:v);
-    if(!initializedView.current){setView(config.studio.onboardingCompleted?config.studio.defaultView:"settings");initializedView.current=true}
+    if(!initializedView.current){setView(body.user.role==="instructor"?"classes":config.studio.onboardingCompleted?config.studio.defaultView:"settings");initializedView.current=true}
    }
   }
   if(["owner","manager","receptionist"].includes(body.user.role)){
