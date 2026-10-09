@@ -1,10 +1,9 @@
 import {NextRequest,NextResponse} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
 import {jsonObject,stringField,errorResponse,busyResponse,backendError,sameOrigin} from "@/lib/server/responses";
-import {emailIsValid,normalizeEmail,passwordMatches,passwordHash,needsPasswordRehash,DUMMY_PASSWORD_HASH,newSessionToken,tokenHash,loginKey,trustedLoginIp,loginIpKey,SESSION_COOKIE,PasswordHashBusyError} from "@/lib/auth-crypto";
+import {emailIsValid,normalizeEmail,passwordMatches,passwordHash,needsPasswordRehash,DUMMY_PASSWORD_HASH,newSessionToken,tokenHash,loginKey,trustedLoginIp,loginIpKey,SESSION_COOKIE,DEVICE_COOKIE,LEGACY_SESSION_COOKIE,LEGACY_DEVICE_COOKIE,PasswordHashBusyError} from "@/lib/auth-crypto";
 import {sessionCookieConfig} from "@/lib/server/auth";
 export const runtime="nodejs";
-const DEVICE_COOKIE="studiotasker_device";
 const DEVICE_MAX_AGE=60*60*24*30;
 export async function POST(request:NextRequest){
  if(!sameOrigin(request))return errorResponse(403,"Invalid request origin.");
@@ -20,7 +19,7 @@ export async function POST(request:NextRequest){
   // who shares the same NAT. Unverified forwarded headers are ignored.
   const ipKey=trusted?loginIpKey("user:"+key+"|"+trusted):null;
   const trustDevice=body.trustDevice===true;
-  const deviceToken=request.cookies.get(DEVICE_COOKIE)?.value||"";
+  const deviceToken=request.cookies.get(DEVICE_COOKIE)?.value||request.cookies.get(LEGACY_DEVICE_COOKIE)?.value||"";
   const deviceHash=/^[a-zA-Z0-9_-]{43}$/.test(deviceToken)?tokenHash(deviceToken):null;
   // Claim the attempt and read a candidate hash under a brief transaction.
   // Expensive scrypt work must NEVER retain a database pool connection.
@@ -99,8 +98,12 @@ export async function POST(request:NextRequest){
   if(!result.ok)return errorResponse(result.rateLimited?429:401,result.rateLimited?"Too many sign-in attempts. Try again later.":"Invalid email or password.");
   const response=NextResponse.json({ok:true,studioId:result.studioId,role:result.role},{headers:{"Cache-Control":"no-store"}});
   response.cookies.set(SESSION_COOKIE,token,sessionCookieConfig());
+  if(SESSION_COOKIE!==LEGACY_SESSION_COOKIE)
+   response.cookies.set(LEGACY_SESSION_COOKIE,"",{path:"/",maxAge:0,httpOnly:true,secure:true,sameSite:"lax"});
   response.cookies.set(DEVICE_COOKIE,result.deviceToken||"",{path:"/",maxAge:result.deviceToken?DEVICE_MAX_AGE:0,
    httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production"});
+  if(DEVICE_COOKIE!==LEGACY_DEVICE_COOKIE)
+   response.cookies.set(LEGACY_DEVICE_COOKIE,"",{path:"/",maxAge:0,httpOnly:true,secure:true,sameSite:"lax"});
   return response;
  }catch(e){return e instanceof PasswordHashBusyError?busyResponse("Sign-in service is busy. Try again shortly."):backendError()}
 }
