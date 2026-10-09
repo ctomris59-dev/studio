@@ -3,6 +3,9 @@ const fs=require("node:fs");
 
 const read=p=>fs.readFileSync(p,"utf8");
 const layout=read("app/layout.tsx");
+const globalCSS=read("app/globals.css");
+assert(!globalCSS.includes("fonts.googleapis.com")&&layout.includes("next/font/google"),"Google fonts must be served as self-hosted Next font assets.");
+assert(layout.includes("new URL(SITE_URL)"),"Canonical metadata must use the same hostname as schema URLs.");
 const robots=read("app/robots.ts");
 const sitemap=read("app/sitemap.ts");
 const next=read("next.config.ts");
