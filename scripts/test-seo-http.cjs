@@ -24,6 +24,13 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  assert(canonical(home.text,"https://www.studiotasker.com/")||canonical(home.text,"https://www.studiotasker.com"),"Home raw HTML must contain self-canonical.");
  assert(home.text.includes('"Organization"')&&home.text.includes('"Service"')&&home.text.includes("application/ld+json"),"Home entity JSON-LD missing.");
  assert(home.text.includes('href="/yoga-studio-software"'),"Server HTML vertical links missing.");
+ assert(home.text.includes('href="/legal/privacy"'),"Home footer must expose a directly discoverable Privacy Policy.");
+ assert(home.text.includes('href="/legal/security"'),"Home footer must expose the security notice.");
+ const securityTxt=await get("/.well-known/security.txt");
+ assert.equal(securityTxt.status,200,"RFC 9116 security.txt missing");
+ assert(securityTxt.text.includes("Contact: mailto:support@studiotasker.com")&&securityTxt.text.includes("Expires: 2027-10-09T00:00:00Z"),"Security contact/expiry invalid.");
+ assert((home.headers.get("reporting-endpoints")||"").includes("studio-csp="),"Marketing CSP report endpoint header missing.");
+
  const about=await get("/about"); assert.equal(about.status,200); assert(canonical(about.text,"https://www.studiotasker.com/about"),"About canonical missing.");
  const yoga=await get("/yoga-studio-software");
  assert.equal(yoga.status,200);
