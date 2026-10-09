@@ -57,4 +57,10 @@ export function emailIsValid(email:string){
 export const newSessionToken=()=>randomBytes(32).toString("base64url");
 export const tokenHash=(token:string)=>createHash("sha256").update(token).digest("hex");
 export const loginKey=(email:string)=>tokenHash("login:"+normalizeEmail(email));
-export const SESSION_COOKIE="reformdesk_session";
+// __Host- requires Secure, Path=/ and no Domain, preventing sibling hosts
+// from setting or overriding StudioTasker authentication cookies.
+// During migration, read legacy sessions only until their natural expiry.
+export const LEGACY_SESSION_COOKIE="reformdesk_session";
+export const LEGACY_DEVICE_COOKIE="studiotasker_device";
+export const SESSION_COOKIE=process.env.NODE_ENV==="production"?"__Host-studiotasker_session":LEGACY_SESSION_COOKIE;
+export const DEVICE_COOKIE=process.env.NODE_ENV==="production"?"__Host-studiotasker_device":LEGACY_DEVICE_COOKIE;
