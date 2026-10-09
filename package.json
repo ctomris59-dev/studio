@@ -51,7 +51,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "pg": "^8.13.1",
-    "nodemailer": "^10.0.13",
+    "nodemailer": "10.0.16",
     "@paddle/paddle-js": "^1.6.5",
     "@paddle/paddle-node-sdk": "^3.10.0",
     "@fontsource/barlow-condensed": "5.3.0",
