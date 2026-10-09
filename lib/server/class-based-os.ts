@@ -224,6 +224,25 @@ export async function reviseClass(client:PoolClient,auth:Authenticated,classId:s
   booking_cutoff_hours=$9,cancel_cutoff_hours=$10 WHERE studio_id=$1 AND id=$2`,
   [auth.studioId,classId,parsed.title,parsed.instructor,parsed.room,from.toISOString(),parsed.durationMinutes,parsed.capacity,parsed.bookingCutoffHours,parsed.cancelCutoffHours]);
  await applyClassMetadata(client,auth.studioId,[classId],meta);
+ // Fill newly opened capacity from the existing FIFO waitlist before later bookings.
+ // The class row stays locked for this entire transaction.
+ if(parsed.capacity>old.capacity&&booked.rows[0].count<parsed.capacity){
+  const zone=await client.query<{timezone:string}>("SELECT timezone FROM studios WHERE id=$1",[auth.studioId]);
+  const session={id:classId,starts_at:from,timezone:zone.rows[0].timezone,spot_booking_enabled:meta.spotBookingEnabled};
+  for(let seat=booked.rows[0].count;seat<parsed.capacity;seat++){
+   let spot:number|null=null;
+   if(meta.spotBookingEnabled){
+    const free=await client.query<{spot:number}>(`SELECT n::int AS spot FROM generate_series(1,$3::int) n
+     WHERE NOT EXISTS (SELECT 1 FROM bookings b WHERE b.studio_id=$1
+       AND b.session_id=$2 AND b.status='booked' AND b.spot_number=n)
+     ORDER BY n LIMIT 1`,[auth.studioId,classId,meta.spotCount]);
+    if(!free.rowCount)break;
+    spot=free.rows[0].spot;
+   }
+   const next=await promoteWaitlist(client,auth,session,spot);
+   if(!next)break;
+  }
+ }
  if(old.starts_at.getTime()!==from.getTime()||old.room!==parsed.room||old.instructor!==parsed.instructor){
   await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes)
     SELECT $1,b.member_id,'Notify member: class schedule changed '||$2::text,now(),'General',$3

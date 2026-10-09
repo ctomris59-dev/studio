@@ -44,6 +44,10 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const [loading,setLoading]=useState(true),[bookingsLoading,setBookingsLoading]=useState(false);
  const [classSearch,setClassSearch]=useState(""),[classHasMore,setClassHasMore]=useState(false),[classOffset,setClassOffset]=useState(0);
  const [memberSearch,setMemberSearch]=useState(""),[memberHasMore,setMemberHasMore]=useState(false),[memberOffset,setMemberOffset]=useState(0);
+ const [debouncedClassSearch,setDebouncedClassSearch]=useState("");
+ const [debouncedMemberSearch,setDebouncedMemberSearch]=useState("");
+ useEffect(()=>{const timer=setTimeout(()=>setDebouncedClassSearch(classSearch),300);return ()=>clearTimeout(timer)},[classSearch]);
+ useEffect(()=>{const timer=setTimeout(()=>setDebouncedMemberSearch(memberSearch),300);return ()=>clearTimeout(timer)},[memberSearch]);
  const [repeat,setRepeat]=useState({enabled:false,until:"",weekdays:[1,3,5] as number[]});
  const [editingClass,setEditingClass]=useState(false);
  const [classEdit,setClassEdit]=useState({title:"",instructor:"",room:"",startsAt:"",capacity:8,durationMinutes:50,staffId:"",substituteStaffId:""});
@@ -64,8 +68,8 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const refresh=useCallback(async()=>{
   setLoading(true);try{
   const [c,m,s]=await Promise.all([
-   api<{classes:ClassRow[];hasMore:boolean;nextOffset:number}>("/api/studio/classes?search="+encodeURIComponent(classSearch)),
-   canBook?api<{members:Member[];hasMore:boolean;nextOffset:number}>("/api/studio/members?search="+encodeURIComponent(memberSearch)):Promise.resolve({members:[] as Member[],hasMore:false,nextOffset:0}),
+   api<{classes:ClassRow[];hasMore:boolean;nextOffset:number}>("/api/studio/classes?search="+encodeURIComponent(debouncedClassSearch)),
+   canBook?api<{members:Member[];hasMore:boolean;nextOffset:number}>("/api/studio/members?search="+encodeURIComponent(debouncedMemberSearch)):Promise.resolve({members:[] as Member[],hasMore:false,nextOffset:0}),
    api<{staff:Staff[]}>("/api/studio/staff")
   ]);
   setClasses(c.classes);setMembers(m.members);setStaff(s.staff);
@@ -75,7 +79,7 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
   setSelectedMember(v=>m.members.some(item=>item.id===v)?v:m.members[0]?.id||"");
   if(section==="insights")setInsights(await api<Insights>("/api/studio/insights"));
   }finally{setLoading(false)}
- },[section,canBook,classSearch,memberSearch]);
+ },[section,canBook,debouncedClassSearch,debouncedMemberSearch]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load operations."))},[refresh]);
  useEffect(()=>{setSchedule(v=>({...v,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity,classFormat:preferences.defaultClassFormat,spotBookingEnabled:preferences.spotBookingEnabled,spotLabel:preferences.equipmentLabel,spotCount:preferences.defaultSpotCount}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity,preferences.defaultClassFormat,preferences.spotBookingEnabled,preferences.equipmentLabel,preferences.defaultSpotCount]);
  useEffect(()=>{
@@ -96,12 +100,12 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  },[selectedClass,selected?.spot_booking_enabled,selected?.spot_count,selected?.capacity,isFull,occupiedSpots]);
 
  async function loadMoreClasses(){
-  try{const r=await api<{classes:ClassRow[];hasMore:boolean;nextOffset:number}>("/api/studio/classes?search="+encodeURIComponent(classSearch)+"&offset="+classOffset);
+  try{const r=await api<{classes:ClassRow[];hasMore:boolean;nextOffset:number}>("/api/studio/classes?search="+encodeURIComponent(debouncedClassSearch)+"&offset="+classOffset);
    setClasses(v=>[...v,...r.classes.filter(x=>!v.some(old=>old.id===x.id))]);setClassHasMore(r.hasMore);setClassOffset(r.nextOffset)}
   catch(e){setMessage(e instanceof Error?e.message:"Could not load more classes.")}
  }
  async function loadMoreMembers(){
-  try{const r=await api<{members:Member[];hasMore:boolean;nextOffset:number}>("/api/studio/members?search="+encodeURIComponent(memberSearch)+"&offset="+memberOffset);
+  try{const r=await api<{members:Member[];hasMore:boolean;nextOffset:number}>("/api/studio/members?search="+encodeURIComponent(debouncedMemberSearch)+"&offset="+memberOffset);
    setMembers(v=>[...v,...r.members.filter(x=>!v.some(old=>old.id===x.id))]);setMemberHasMore(r.hasMore);setMemberOffset(r.nextOffset)}
   catch(e){setMessage(e instanceof Error?e.message:"Could not load more members.")}
  }
