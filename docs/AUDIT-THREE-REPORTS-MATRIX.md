@@ -4,6 +4,22 @@
 
 Status legend: **CODE** = implemented and tested in repository, **PARTIAL** = code exists but important work remains, **EXTERNAL** = a real credential, service or human verification is required, **OPEN** = not implemented.
 
+## 9 October 2026 – GitHub-only audit follow-up (merged PR #28)
+
+The following items have passed the isolated PostgreSQL, HTTP, build and real Chromium desktop/mobile CI regression suite on the exact PR head. Merge SHA: `ec6db8dbcbcbe60ca9dee57afe32efa3f25872b0`.
+
+| Finding | GitHub code / test state | Remaining external or scope limitations |
+|---|---|---|
+| Contact form returns a misleading 503 when delivery secrets are unavailable | CODE: public delivery-availability preflight and clearly unsent direct-mail fallback; sender/global database throttles do not require the optional login IP HMAC key | SMTP and database delivery availability still require actual deployment secrets; absence of SMTP cannot be converted into successful delivery |
+| Google Fonts dependency / typography fallback | CODE: Fontsource families bundled as local origin assets, shared CSS tokens, and real Chrome font-loading checks on seven routes at desktop/mobile widths | Cross-device visual judgment, localization and all interactive authenticated workspace screens are not comprehensively audited |
+| Dead CSS | PARTIAL: removed 418 unused homepage stylesheet rules (30,437 bytes) based on current JSX references | Other legacy global CSS and dynamic authenticated-view selectors need a separate guarded cleanup; no claim of zero dead CSS |
+| Dependency advisories | PARTIAL: `next@15.5.27`, PostCSS override `8.5.29`, `npm ci` for CI/Docker, ExcelJS moved to dev-only; production high/critical `npm audit` CI gate passed | Moderate advisories and development dependencies require continuous monitoring; passing high/critical gate does not mean zero vulnerabilities |
+| Studio account termination and data deletion | CODE: owner closure request, explicit export acknowledgment, idempotent tenant audit, 7-day operator finalization gate, verified subscription/billing/backup/legal prerequisites, pseudonymized closure audit; isolated purge regression | **NOT automatic production erasure:** operator must verify legal holds, Paddle state and off-site backup expiration, then explicitly execute the documented finalizer |
+| Unverified legal/security promises | CODE: Terms, DPA, Privacy, Security and Cancellation disclosures revised and legal versions advanced | Qualified legal counsel must review the real contracting entity and deployment implementation before paid launch |
+| Waitlist expansion race | CODE: isolated PostgreSQL/HTTP concurrency regression proves FIFO promotion, booking occupancy and exactly-once credit debit under class expansion/new booking race | Production scale/performance stress testing, external SMTP and provider operations remain separate |
+
+**CI evidence:** GitHub Actions run `37910780872` completed successfully on the final PR head `8aa8e2572ac5fa0d41859234ed8c33d5358368d6`. This does not authorize a production launch or attest to actual off-site backups, Paddle, SMTP, Google Search Console, legal compliance or all devices.
+
 ## Payment, account and legal
 
 | Finding | Status | Evidence / remaining work |
