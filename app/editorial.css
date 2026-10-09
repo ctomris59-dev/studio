@@ -1061,9 +1061,11 @@
 }
 
 
-/* Accessible native mobile navigation. Keep customer sign-in discoverable. */
+/* Accessible tablet and mobile navigation: no empty menu breakpoint. */
 .ed-mobile-menu{display:none}
-@media(max-width:760px){
+@media(max-width:1200px){
+ .ed-nav>nav:not(.ed-mobile-menu nav){display:none}
+
  .ed-nav{position:relative}
  .ed-nav-actions{display:none}
  .ed-mobile-menu{display:block;margin-left:auto;position:relative;z-index:1010}
@@ -1126,3 +1128,9 @@
  .editorial .ed-topline>.ed-container{font-size:12px;min-height:35px;height:auto;padding-block:7px}
  .editorial .ed-mobile-menu summary{font-size:14px}
 }
+
+/* 24px minimum touch target for marketing site navigation and FAQs. */
+.editorial .ed-footer-nav a,.editorial .ed-nav nav a,.editorial .ed-hero-quick-links a{min-height:24px;display:inline-flex;align-items:center}
+.editorial .ed-faq summary{min-height:32px;display:flex;align-items:center}
+.editorial .ed-mobile-menu summary:focus-visible{outline:3px solid var(--ed-blue);outline-offset:3px}
+@media print{.ed-header,.ed-topline,.ed-mobile-menu,.ed-floating-cta,.ed-footer-nav{display:none!important}.editorial{color:#111;background:#fff}.editorial a{color:#111}}
