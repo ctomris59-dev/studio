@@ -82,14 +82,16 @@ export function parsePaddleSubscriptionEvent(raw:unknown):PaddleSubscriptionEven
 }
 
 export async function applyPaddleEvent(client:PoolClient,event:PaddleSubscriptionEvent){
+ // A deleted studio can still receive delayed verified Paddle events.
+ // Acknowledge them without retrying forever or recreating tenant data.
+ const existing=await client.query<{provider_subscription_id:string|null;provider_updated_at:Date|null;status:string}>(`
+ SELECT provider_subscription_id,provider_updated_at,status FROM subscriptions
+ WHERE studio_id=$1 FOR UPDATE`,[event.studioId]);
+ if(!existing.rowCount)return {processed:false,reason:"ignored_unknown_studio"};
  const inserted=await client.query(`
  INSERT INTO billing_events(provider,event_id)
  VALUES('paddle',$1) ON CONFLICT DO NOTHING RETURNING event_id`,[event.eventId]);
  if(!inserted.rowCount)return {processed:false,reason:"duplicate"};
- const existing=await client.query<{provider_subscription_id:string|null;provider_updated_at:Date|null;status:string}>(`
- SELECT provider_subscription_id,provider_updated_at,status FROM subscriptions
- WHERE studio_id=$1 FOR UPDATE`,[event.studioId]);
- if(!existing.rowCount)throw new Error("Unknown studio subscription");
  const old=existing.rows[0];
  const replaceable=["inactive","cancelled","expired"].includes(old.status);
  if(old.provider_subscription_id&&old.provider_subscription_id!==event.providerId&&!replaceable)
