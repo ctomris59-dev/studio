@@ -1,3 +1,4 @@
+import {verifyPublicChallenge} from "@/lib/server/turnstile";
 import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
@@ -26,6 +27,8 @@ export async function POST(request:NextRequest){
   return errorResponse(400,"Check account details, subscription plan and required legal acceptance.");
  const budget=await publicAbuseGuard(request,"register",email);
  if(budget)return budget;
+ const verification=await verifyPublicChallenge(request,body);
+ if(verification)return verification;
  try{
   const origin=publicMailOrigin(),secured=await passwordHash(password),preset=studioPreset(focus);
   await inTransaction(async client=>{

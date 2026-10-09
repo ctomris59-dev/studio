@@ -8,7 +8,7 @@ const compiled={exports:{}};
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 new Function("require","module","exports",js)(name=>name==="server-only"?{}:require(name),compiled,compiled.exports);
 const gate=compiled.exports.commercialRegistrationReady;
-const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT","LAUNCH_PADDLE_ACCOUNT_APPROVED","LAUNCH_LEGAL_REVIEW_CONFIRMED","LAUNCH_TAX_REVIEW_CONFIRMED","TRUST_PROXY_IP_HEADERS","LAUNCH_TRUSTED_PROXY_VERIFIED","LOGIN_RATE_HMAC_KEY",
+const names=["PUBLIC_APP_ORIGIN","BILLING_ALLOW_LOCAL_TEST","BILLING_ENFORCEMENT","LAUNCH_PADDLE_ACCOUNT_APPROVED","LAUNCH_LEGAL_REVIEW_CONFIRMED","LAUNCH_TAX_REVIEW_CONFIRMED","TRUST_PROXY_IP_HEADERS","LAUNCH_TRUSTED_PROXY_VERIFIED","LOGIN_RATE_HMAC_KEY","TURNSTILE_REQUIRED","TURNSTILE_SECRET_KEY","NEXT_PUBLIC_TURNSTILE_SITE_KEY",
  "DATABASE_URL","SMTP_HOST","SMTP_FROM","SMTP_USER","SMTP_PASSWORD",
  "PADDLE_ENV","PADDLE_API_KEY","NEXT_PUBLIC_PADDLE_CLIENT_TOKEN","PADDLE_MONTHLY_PRICE_ID","PADDLE_ANNUAL_PRICE_ID","PADDLE_WEBHOOK_SECRET",
  "BACKUP_DATABASE_URL","BACKUP_PASSPHRASE","BACKUP_OUTPUT_DIR",
@@ -43,6 +43,10 @@ try{
  process.env.TRUST_PROXY_IP_HEADERS="true";
  process.env.LAUNCH_TRUSTED_PROXY_VERIFIED="true";
  process.env.LOGIN_RATE_HMAC_KEY="c".repeat(40);
+ assert.equal(gate(),false,"Paid signup must fail closed without verified bot challenge configuration.");
+ process.env.TURNSTILE_REQUIRED="true";
+ process.env.TURNSTILE_SECRET_KEY="ci_only_secret";
+ process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY="ci_only_public";
  assert.equal(gate(),true,"Fully configured live Paddle setup with verified proxy and commercial reviews may enable registration");
  process.env.LOGIN_RATE_HMAC_KEY="short";
  assert.equal(gate(),false,"Weak IP hash secrets must block public signup.");

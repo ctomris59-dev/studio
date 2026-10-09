@@ -1,3 +1,4 @@
+import {verifyPublicChallenge} from "@/lib/server/turnstile";
 import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import nodemailer from "nodemailer";
@@ -43,6 +44,8 @@ export async function POST(request:NextRequest){
  if(!deliveryReady())return errorResponse(424,"Message delivery is not configured. Please email "+SUPPORT_EMAIL+" directly.");
  const quota=await publicAbuseGuard(request,"contact",email);
  if(quota)return quota;
+ const verification=await verifyPublicChallenge(request,body);
+ if(verification)return verification;
  const trustedIp=trustedLoginIp(request.headers.get("x-real-ip"));
  // Keep a global budget and an independent sender budget even without an
  // optional IP-HMAC secret. A valid proxy + secret adds a tighter IP budget.

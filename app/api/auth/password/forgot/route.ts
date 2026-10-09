@@ -1,3 +1,4 @@
+import {verifyPublicChallenge} from "@/lib/server/turnstile";
 import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {inTransaction,dbIsReady} from "@/lib/server/database";
@@ -12,6 +13,8 @@ export async function POST(request:NextRequest){
  if(!email||!emailIsValid(normalizeEmail(email)))return errorResponse(400,"Enter a valid email.");
  const budget=await publicAbuseGuard(request,"password-reset",email);
  if(budget)return budget;
+ const verification=await verifyPublicChallenge(request,data||{});
+ if(verification)return verification;
  try{
   const origin=publicMailOrigin();
   await inTransaction(async client=>{

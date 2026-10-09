@@ -22,6 +22,8 @@ if(!["localhost","127.0.0.1","::1"].includes(databaseHost)&&process.env.DATABASE
  missing.push("Remote database requires DATABASE_SSL_REQUIRE=true");
 if(process.env.TRUST_PROXY_IP_HEADERS!=="true"||process.env.LAUNCH_TRUSTED_PROXY_VERIFIED!=="true")
  missing.push("Trusted reverse proxy must overwrite X-Real-IP and X-Forwarded-For and be independently verified");
+if(process.env.TURNSTILE_REQUIRED!=="true"||!process.env.TURNSTILE_SECRET_KEY||!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
+ missing.push("Cloudflare Turnstile keys and TURNSTILE_REQUIRED=true must be configured for paid launch");
 if((process.env.LOGIN_RATE_HMAC_KEY||"").length<32)
  missing.push("LOGIN_RATE_HMAC_KEY must be a random 32+ character secret");
 for(const attestation of [

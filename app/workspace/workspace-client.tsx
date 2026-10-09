@@ -3,6 +3,7 @@ import Link from "next/link";
 import {useEffect,useRef,useState,type CSSProperties,type FormEvent} from "react";
 import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Settings2,Target,Trash2,Users} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
+import {TurnstileChallenge} from "../../components/turnstile-challenge";
 import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "./studio-operations";
 import {ClassBasedOperations} from "./class-based-operations";
 import {OnboardingPanel} from "./onboarding-panel";
@@ -40,6 +41,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
  const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null),[registrationLegalAccepted,setRegistrationLegalAccepted]=useState(false);
  const [trustDevice,setTrustDevice]=useState(false);
+ const [turnstileToken,setTurnstileToken]=useState("");
+ const [turnstileReset,setTurnstileReset]=useState(0);
  const [form,setForm]=useState({email:"",password:"",studioName:"",focus:"Pilates",timezone:"UTC"}),[person,setPerson]=useState({kind:"lead",name:"",email:"",phone:"",notes:"",tags:"",waiverStatus:"not_required",relatedContactName:"",relatedContactRole:"",relatedContactEmail:"",relatedContactPhone:""});
  const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New",tags:"",waiverStatus:"not_required",relatedContactName:"",relatedContactRole:"",relatedContactEmail:"",relatedContactPhone:""});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
@@ -108,7 +111,10 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   try{
    const target={login:"/api/auth/login",register:"/api/auth/register",verify:"/api/auth/verify",reset:"/api/auth/password/reset",forgot:"/api/auth/password/forgot",resend:"/api/auth/verify/resend"}[mode];
    const payload=mode==="verify"?{token}:mode==="reset"?{token,password:form.password}:["forgot","resend"].includes(mode)?{email:form.email}:mode==="register"?{...form,plan:pendingPlan||"monthly",legalAccepted:registrationLegalAccepted,termsVersion:LEGAL_VERSIONS.terms,dpaVersion:LEGAL_VERSIONS.dpa,privacyVersion:LEGAL_VERSIONS.privacy,cancellationVersion:LEGAL_VERSIONS.cancellation}:mode==="login"?{email:form.email,password:form.password,trustDevice}:form;
-   const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(payload)}),body=await res.json();
+   const protectedMode=["register","forgot","resend"].includes(mode);
+   const submitted=protectedMode?{...payload,turnstileToken}:payload;
+   const res=await fetch(target,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(submitted)}),body=await res.json();
+   if(protectedMode){setTurnstileToken("");setTurnstileReset(n=>n+1)}
    if(!res.ok){setNote(body.error||"Unable to complete your request.");return}
    setForm(prev=>({...prev,password:""}));
    if(mode==="login"){initializedView.current=false;await load();if(pendingPlan)setView("settings");setNote(pendingPlan?"Signed in. Complete your "+pendingPlan+" StudioTasker subscription below.":"Signed in successfully.")}
@@ -209,6 +215,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    {["login","register","reset"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
    {mode==="login"&&<label className="rd-trust-device"><input type="checkbox" checked={trustDevice} onChange={e=>setTrustDevice(e.target.checked)}/><span>Trust this device for 30 days (only on your own computer). Uncheck on shared devices; signing out removes this trust.</span></label>}
    {mode==="register"&&<><label>Studio timezone<TimezoneSelect value={form.timezone} onChange={timezone=>setForm(v=>({...v,timezone}))}/></label><label>Subscription plan<select value={pendingPlan||"monthly"} onChange={e=>setPendingPlan(e.target.value as "monthly"|"annual")}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $406.80/year · save 15%</option></select></label><label className="rd-legal-consent"><input type="checkbox" required checked={registrationLegalAccepted} onChange={e=>setRegistrationLegalAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms of Service</Link> · <Link href="/legal/cancellation" target="_blank">Cancellation & Refund</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link></span></label><p className="rd-tiny">Before account creation, please read the <Link href="/legal/privacy" target="_blank">Privacy Policy</Link> and, where Turkish Law No. 6698 applies, the <Link href="/legal/turkiye-privacy" target="_blank">Türkiye Privacy Notice (KVKK)</Link>. These notices are provided for transparency and are not a request for consent to core service processing.</p></>}
+   {["register","forgot","resend"].includes(mode)&&<TurnstileChallenge onToken={setTurnstileToken} resetKey={turnstileReset}/>}
    <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions",resend:"Send verification link"}[mode]}</button>
   </form>
   {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}

@@ -1,3 +1,4 @@
+import {verifyPublicChallenge} from "@/lib/server/turnstile";
 import {publicAbuseGuard} from "@/lib/server/public-abuse";
 import {NextRequest} from "next/server";
 import {dbIsReady,inTransaction} from "@/lib/server/database";
@@ -13,6 +14,8 @@ export async function POST(request:NextRequest){
  if(!raw||!emailIsValid(normalizeEmail(raw)))return errorResponse(400,"Enter a valid email.");
  const budget=await publicAbuseGuard(request,"verify-resend",raw);
  if(budget)return budget;
+ const verification=await verifyPublicChallenge(request,data||{});
+ if(verification)return verification;
  try{
   const email=normalizeEmail(raw),origin=publicMailOrigin();
   await inTransaction(async client=>{
