@@ -1,0 +1,97 @@
+"use strict";
+// Real Chromium smoke checks. Requires Chrome installed on the CI runner.
+const {spawn}=require("node:child_process");
+const fs=require("node:fs");
+const os=require("node:os");
+const path=require("node:path");
+const assert=require("node:assert/strict");
+const HOST="http://127.0.0.1:3190";
+const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function cdp(wsUrl){
+ return new Promise((resolve,reject)=>{
+  const socket=new WebSocket(wsUrl),pending=new Map();let nextId=1;
+  socket.addEventListener("open",()=>{
+   resolve({send:(method,params={})=>new Promise((ok,fail)=>{
+    const id=nextId++;pending.set(id,{ok,fail});
+    socket.send(JSON.stringify({id,method,params}));
+   }),close:()=>socket.close()});
+  });
+  socket.addEventListener("error",reject);
+  socket.addEventListener("message",event=>{
+   const msg=JSON.parse(String(event.data));const p=pending.get(msg.id);
+   if(p){pending.delete(msg.id);msg.error?p.fail(Error(msg.error.message)):p.ok(msg.result);}
+  });
+ });
+}
+async function waitFor(url,check){
+ for(let tries=0;tries<75;tries++){
+  try{const response=await fetch(url,{signal:AbortSignal.timeout(800)});if(response.ok){
+   const value=await response.json().catch(()=>null);if(check(value))return value;
+  }}catch{}
+  await delay(250);
+ }
+ throw Error("Browser/server was not ready: "+url);
+}
+async function main(){
+ const chrome=["/usr/bin/google-chrome","/usr/bin/google-chrome-stable","/usr/bin/chromium","/usr/bin/chromium-browser"]
+  .find(file=>fs.existsSync(file))||process.env.CHROME_BIN;
+ if(!chrome)throw Error("Real-browser CI requires Chrome; never silently skip this gate.");
+ const profile=fs.mkdtempSync(path.join(os.tmpdir(),"studiotasker-chrome-"));
+ const server=spawn(process.execPath,["node_modules/next/dist/bin/next","start","-H","127.0.0.1","-p","3190"],{
+  env:{...process.env,NODE_ENV:"production"},stdio:"ignore"
+ });
+ const browser=spawn(chrome,["--headless=new","--no-sandbox","--disable-dev-shm-usage","--disable-gpu",
+  "--remote-debugging-port=9237","--user-data-dir="+profile,"about:blank"],{stdio:"ignore"});
+ let peer;
+ try{
+  for(let i=0;i<75;i++){
+   try{const r=await fetch(HOST+"/");if(r.ok)break;}catch{}
+   await delay(300);
+  }
+  const targets=await waitFor("http://127.0.0.1:9237/json/list",v=>Array.isArray(v)&&v.some(x=>x.type==="page"));
+  peer=await cdp(targets.find(x=>x.type==="page").webSocketDebuggerUrl);
+  await peer.send("Page.enable");
+  await peer.send("Runtime.enable");
+  const paths=["/","/start","/contact","/app-demo","/yoga-studio-software","/legal/security","/workspace"];
+  for(const width of [1280,390]){
+   await peer.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
+   for(const route of paths){
+    const url=HOST+route;
+    const res=await fetch(url);assert.equal(res.status,200,route+" server render failed");
+    await peer.send("Page.navigate",{url});
+    await delay(1050);
+    const evaluation=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+     await document.fonts.ready;
+     const fonts=["Source Sans 3","Barlow Condensed","IBM Plex Mono"];
+     const loaded=await Promise.all(fonts.map(name=>document.fonts.load('400 16px "'+name+'"')));
+     const nodes=Array.from(document.querySelectorAll("h1,h2,h3,p,a,button,label,input")).filter(x=>x.getBoundingClientRect().width>0);
+     const unknown=nodes.filter(x=>!fonts.some(name=>getComputedStyle(x).fontFamily.includes(name))).length;
+     const h1=document.querySelector("main h1");
+     return {title:document.title,unknown,total:nodes.length,loaded:loaded.map(x=>x.length),
+      remoteFonts:performance.getEntriesByType("resource").filter(x=>/fonts\\.(googleapis|gstatic)\\.com/.test(x.name)).length,
+      horizontalOverflow:document.documentElement.scrollWidth>innerWidth+4,
+      heroTop:h1?h1.getBoundingClientRect().top:null};
+    })()`});
+    const result=evaluation.result?.value;
+    assert(result,route+" browser evaluate failed: "+JSON.stringify(evaluation));
+    assert(result.loaded.every(n=>n>0),route+" missing locally served font family");
+    assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
+    assert(result.total>=1,route+" did not render text");
+    if(route==="/"){
+     assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
+    }
+    // Sub-page typography may intentionally use a system font for controls,
+    // but the content should not silently fall back across the whole page.
+    assert(result.unknown<result.total,route+" has no text using registered font families");
+    console.log("Browser",width,route,"elements",result.total,"unregistered",result.unknown);
+   }
+  }
+  console.log("Real Chrome checks passed on desktop and mobile for seven routes.");
+ }finally{
+  if(peer)peer.close();
+  browser.kill("SIGTERM");server.kill("SIGTERM");
+  await delay(400);
+  fs.rmSync(profile,{recursive:true,force:true});
+ }
+}
+main().catch(e=>{console.error(e);process.exitCode=1});
