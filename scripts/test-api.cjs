@@ -159,7 +159,11 @@ async function main(){
    if(denied.status===429)wasThrottled=true;
   }
   assert(wasThrottled,"Repeated invalid passwords must trigger the email throttle.");
-  // A hostile party must not be able to prevent the legitimate owner signing in.
+  // Once throttled, even a correct password must not bypass the online guessing limit.
+  const blockedCorrect=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
+  assert.equal(blockedCorrect.status,429,"Correct password must not bypass a throttled email.");
+  const {createHash}=require("node:crypto");
+  await admin.query("DELETE FROM login_attempts WHERE email_hash=$1",[createHash("sha256").update("login:"+a.email).digest("hex")]);
   const signin=await call("/api/auth/login",{method:"POST",body:{email:a.email,password}});
   assert.equal(signin.status,200,JSON.stringify(signin.data));
   assert.equal((await call("/api/auth/me",{cookie:signin.cookie})).status,200);
