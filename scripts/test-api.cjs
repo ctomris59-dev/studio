@@ -260,7 +260,9 @@ async function main(){
   assert.equal((await call("/api/legal/accept",{method:"POST",cookie:a.cookie,body:{...LEGAL,termsVersion:"2026-10-06.4"}})).status,409,"Old-version clickwrap must be rejected.");
   assert.equal((await call("/api/legal/accept",{method:"POST",cookie:a.cookie,body:LEGAL})).status,200,"Existing studio owner must be able to reaccept the current versions.");
   assert.equal((await call("/api/legal/status",{cookie:a.cookie})).data.legal.accepted.monthly,true);
-  const tinyPng=Uint8Array.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]);
+  const tinyPng=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/mFEAAAAASUVORK5CYII=","base64");
+  assert.equal((await callLogo("/api/studio/logo",{cookie:a.cookie,bytes:Buffer.concat([tinyPng,Buffer.from("<script>alert(1)</script>")])})).status,400,"Reject valid PNG with appended HTML polyglot content.");
+  assert.equal((await callLogo("/api/studio/logo",{cookie:a.cookie,bytes:tinyPng.subarray(0,16)})).status,400,"Reject incomplete PNG masquerading as a logo.");
   const logoUp=await callLogo("/api/studio/logo",{cookie:a.cookie,bytes:tinyPng});assert.equal(logoUp.status,200);
   const logoA=await callLogo("/api/studio/logo",{method:"GET",cookie:a.cookie});assert.equal(logoA.status,200);assert.equal(logoA.contentType,"image/png");
   assert.equal((await callLogo("/api/studio/logo",{method:"GET",cookie:b.cookie})).status,404,"Studio B must not see Studio A logo.");
