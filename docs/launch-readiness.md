@@ -11,7 +11,7 @@ Updated 2026-10-06. This is a technical development snapshot, not a production s
 | Studio onboarding | Five-step owner setup and CSV preview/import | Real onboarding timing study, help copy, production import acceptance tests |
 | SaaS billing | Paddle server-bound transactions, signed/idempotent webhook processing, 72-hour past-due recovery grace, Customer Portal and entitlement gate | Paddle live account/domain approval, exact $39.90/$406.80 live prices, real sandbox/live acceptance and payout reconciliation |
 | Privacy/backups | Terms, Privacy, DPA, Refund, Cookies, Security, processors/controller disclosure, owner export, encrypted backup/verify/restore utilities | Production provider details, irreversible erasure policy, off-site schedule/restore drill and appropriate legal/privacy review |
-| QA | Auth/RLS/CRM/CSV/Excel/booking/timezone/UI/build/HTTP CI | Cross-device testing, WCAG review, VPS load test, independent security review |
+| QA | Auth/RLS/CRM/CSV/booking/timezone/UI/build/HTTP CI | Cross-device testing, WCAG review, VPS load test, independent security review |
 
 ## Explicit product boundary
 
