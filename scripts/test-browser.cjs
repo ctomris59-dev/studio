@@ -109,6 +109,21 @@ async function main(){
     assert(result.loaded.every(n=>n>0),route+" missing locally served font family");
     assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
+    if(width===1280&&route==="/app-demo"){
+     const demo=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      const start=document.querySelector(".sad-watch-tour");
+      if(!start)return {button:false};
+      start.click();
+      await new Promise(r=>setTimeout(r,350));
+      const avatar=document.querySelector(".sad-app .sad-studio .sad-avatar");
+      const accentStyle=Array.from(document.querySelectorAll("style[nonce]")).some(x=>x.textContent?.includes(".sad-app .sad-studio"));
+      return {button:true,rendered:!!avatar,accentStyle,
+       border:avatar?getComputedStyle(avatar).borderColor:""};
+     })()`});
+     const proof=demo.result?.value;
+     assert(proof?.button&&proof.rendered&&proof.accentStyle&&proof.border==="rgb(51, 75, 221)",
+      "CSP broke demo hydration or nonce-scoped branding: "+JSON.stringify(proof));
+    }
     // Verify that Chromium actually refuses untrusted DOM-injected scripts,
     // stylesheets and style attributes; checking headers alone is insufficient.
     if(width===1280&&(route==="/"||route==="/workspace")){
