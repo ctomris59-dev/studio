@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useMemo,useState,type CSSProperties,type FormEvent} from "react";
+import {useEffect,useMemo,useState,type FormEvent} from "react";
 import {ArrowLeft,ArrowRight,CalendarDays,Check,CheckCircle2,Clock3,ShieldCheck,UserRound} from "lucide-react";
 import {StudioTaskerMark} from "../../../components/studio-tasker-mark";
+import {CspAccentStyle} from "../../../components/csp-styles";
 import "./booking-preview.css";
 
 type DemoClass={id:string;day:string;date:string;time:string;title:string;coach:string;duration:string;spots:number;capacity:number};
@@ -61,8 +62,7 @@ export default function BookingPreview(){
  function reset(){
   setSelectedId(null);setStage("choose");setName("");setEmail("");
  }
- const pageStyle={"--sbp-accent":brand.accentColor} as CSSProperties;
- return <main className="sbp-page" style={pageStyle}>
+ return <main className="sbp-page"><CspAccentStyle accent={brand.accentColor} kind="booking"/>
   <header className="sbp-top">
    <Link href="/" className="sbp-product"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
    <div className="sbp-demo-pill"><ShieldCheck size={15}/> SAMPLE BOOKING DEMO · NO PAYMENT</div>
