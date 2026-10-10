@@ -17,7 +17,7 @@ function walk(root){
   // CSP blocks style= attributes. Flag future first-party additions before
   // they silently lose their appearance in production. The Open Graph image
   // is rendered to an image, not an HTML document, and is exempt.
-  if(full!==path.join("app","opengraph-image.tsx")&&/\\bstyle\\s*=\\s*\\{/.test(content))
+  if(full!==path.join("app","opengraph-image.tsx")&&/\bstyle\s*=\s*\{/.test(content))
    findings.push(full+": CSP forbids style=; use a class or nonce-authorized style element.");
   // There is no reason for first-party application code to bypass React text
   // escaping or assign unsanitized parsed markup. Reviewed JSON-LD can later
