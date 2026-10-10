@@ -42,7 +42,7 @@ export function middleware(request:NextRequest){
 }
 
 // Never intercept Next static chunks, optimizer, metadata image assets or
-// favicon. A response-only header on public routes preserves ISR page caching.
+// favicon. HTML responses are intentionally dynamic for nonce isolation.
 export const config={matcher:[
  "/((?!api/|_next/|favicon.ico|robots.txt|sitemap.xml|opengraph-image|.*\\.(?:png|jpe?g|webp|avif|gif|ico|svg|woff2?|txt|xml|webmanifest)).*)"
 ]};
