@@ -39,7 +39,7 @@ assert(home.includes('src="https://images.pexels.com/photos/2294400/pexels-photo
  "The new user-selected Pexels photograph must be the banner image.");
 assert(home.includes('<h1 id="impact-band-title">')&&home.includes('<h2 id="main-heading">'),
  "Use a single first-screen H1 while keeping the former product hero as a secondary H2.");
-assert.equal((home.match(/<h1\\b/g)||[]).length,1,"Homepage should define exactly one H1.");
+assert.equal((home.match(/<h1\b/g)||[]).length,1,"Homepage should define exactly one H1.");
 assert(home.includes('href="/start?plan=monthly" className="ed-impact-price-option')&&
  home.includes('href="/start?plan=annual" className="ed-impact-price-option'),
  "Both pricing links must remain on the top banner.");
