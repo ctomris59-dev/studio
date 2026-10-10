@@ -130,6 +130,20 @@ async function main(){
      assert.equal(result.h1Count,1,route+" should contain one main page heading");
     }
     assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
+    if(route==="/"&&width===1280){
+     const photo=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      const img=document.querySelector(".ed-impact-card > img");
+      if(!img)return {found:false};
+      try{
+       await Promise.race([img.decode(),new Promise((_,reject)=>setTimeout(()=>reject(Error("Image load timed out")),12000))]);
+       return {found:true,loaded:img.naturalWidth>0,width:img.naturalWidth,src:img.currentSrc};
+      }catch(error){
+       return {found:true,loaded:false,error:String(error),src:img.currentSrc};
+      }
+     })()`});
+     const status=photo.result?.value;
+     assert(status?.found&&status.loaded,"Top homepage photograph must load through Next image optimization: "+JSON.stringify(status));
+    }
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
      assert(result.annualContrast!==null&&result.annualContrast>=4.5,"Annual CTA text must meet WCAG AA contrast, got "+result.annualContrast);
