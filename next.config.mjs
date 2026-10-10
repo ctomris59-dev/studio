@@ -31,7 +31,7 @@ const contentSecurityPolicy=[
 const hstsAllSubdomains=process.env.HSTS_ALL_SUBDOMAINS_HTTPS_VERIFIED==="true";
 const hstsPreload=process.env.HSTS_PRELOAD_APPROVED==="true"&&hstsAllSubdomains;
 const hstsValue="max-age=31536000"+(hstsAllSubdomains?"; includeSubDomains":"")+(hstsPreload?"; preload":"");
-// Static security headers avoid running Edge middleware on ISR pages and APIs.
+// Static security headers cover APIs and assets without consuming an HTML nonce.
 // Set PUBLIC_APP_ORIGIN to the canonical HTTPS hostname before production build.
 // Preview build origins must be supplied explicitly, never inferred from Host.
 const reportingOrigin=process.env.PUBLIC_APP_ORIGIN||process.env.NEXT_PUBLIC_SITE_URL||"https://www.studiotasker.com";
