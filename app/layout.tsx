@@ -1,4 +1,6 @@
 import type {Metadata} from "next";
+import {headers} from "next/headers";
+import {CspNonceProvider} from "../components/csp-styles";
 import "./globals.css";
 // Font files are packaged with the app and served from our own origin: no
 // build-time calls to Google Fonts, and no browser font requests to Google.
@@ -33,6 +35,9 @@ export const metadata:Metadata={
  }
 };
 
-export default function RootLayout({children}:Readonly<{children:React.ReactNode}>){
- return <html lang="en"><body>{children}</body></html>;
+export default async function RootLayout({children}:Readonly<{children:React.ReactNode}>){
+ // Reading request headers forces dynamic rendering and prevents cached HTML
+ // from reusing a nonce generated for an earlier visitor.
+ const nonce=(await headers()).get("x-nonce")||undefined;
+ return <html lang="en"><body><CspNonceProvider nonce={nonce}>{children}</CspNonceProvider></body></html>;
 }
