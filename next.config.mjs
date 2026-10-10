@@ -4,19 +4,18 @@ const noIndex=[
  {key:"X-Robots-Tag",value:"noindex, nofollow, noarchive"},
  {key:"X-Content-Type-Options",value:"nosniff"}
 ];
-// Marketing pages use 300-second ISR and currently need inline Next.js
-// hydration code. Their CSP cannot safely use a request nonce without disabling
-// caching. Middleware applies strict nonce CSP on dynamic /workspace instead;
-// upgrade cached routes to build-time script hashes only after browser verification.
+// Non-HTML routes receive a conservative static policy. All HTML requests
+// receive nonce-based CSP through middleware; the root layout is dynamic.
 const contentSecurityPolicy=[
- "default-src 'self'",
+ "default-src 'none'",
  "base-uri 'self'",
  "object-src 'none'",
  "frame-ancestors 'none'",
  "form-action 'self' https://*.paddle.com",
- "script-src 'self' 'unsafe-inline' https://*.paddle.com https://cdn.paddle.com https://challenges.cloudflare.com",
+ "script-src 'none'",
  "script-src-attr 'none'",
- "style-src 'self' 'unsafe-inline' https://*.paddle.com https://challenges.cloudflare.com",
+ "style-src 'self'",
+ "style-src-attr 'none'",
  "img-src 'self' data: blob: https://*.paddle.com",
  "font-src 'self' data:",
  "connect-src 'self' https://*.paddle.com https://*.paddlepayments.com https://challenges.cloudflare.com",
