@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {headers} from "next/headers";
 import {CspNonceProvider} from "../components/csp-styles";
 import "./globals.css";
+import "./csp-overrides.css";
 // Font files are packaged with the app and served from our own origin: no
 // build-time calls to Google Fonts, and no browser font requests to Google.
 import "@fontsource/source-sans-3/400.css";
