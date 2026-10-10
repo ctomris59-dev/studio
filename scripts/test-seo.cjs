@@ -26,6 +26,27 @@ const notFound=read("app/not-found.tsx");
 
 assert(!layout.includes("alternates:"),"Root layout must not force one canonical URL onto child pages.");
 assert(home.includes('alternates:{canonical:"/"}'),"Homepage must self-canonicalize.");
+
+// The current photograph-led acquisition banner, not the secondary product
+// preview, must be the first <main> section and only top-level heading.
+const banner=home.indexOf('section className="ed-impact-band ed-impact-band-first"');
+const preview=home.indexOf('section className="ed-hero"');
+const studioTypes=home.indexOf('section className="ed-studio-types"');
+const main=home.indexOf('<main id="main-content"');
+assert(main>=0&&main<banner&&banner<preview&&preview<studioTypes,
+ "The photo/pricing banner must appear first, before the secondary product preview and studio types.");
+assert(home.includes('src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"'),
+ "The new user-selected Pexels photograph must be the banner image.");
+assert(home.includes('<h1 id="impact-band-title">')&&home.includes('<h2 id="main-heading">'),
+ "Use a single first-screen H1 while keeping the former product hero as a secondary H2.");
+assert.equal((home.match(/<h1\\b/g)||[]).length,1,"Homepage should define exactly one H1.");
+assert(home.includes('href="/start?plan=monthly" className="ed-impact-price-option')&&
+ home.includes('href="/start?plan=annual" className="ed-impact-price-option'),
+ "Both pricing links must remain on the top banner.");
+assert(next.includes('hostname:"images.pexels.com"')&&
+ next.includes('pathname:"/photos/2294400/pexels-photo-2294400.jpeg"'),
+ "Next image optimizer must allow only the exact new image path.");
+
 assert(["OAI-SearchBot","ChatGPT-User","GPTBot","PerplexityBot","Google-Extended"].every(x=>robots.includes('userAgent:"'+x+'"')),"Search/AI crawler policy must be explicit.");
 assert(!robots.includes("/_next"),"Rendering assets must remain crawlable.");
 assert(robots.includes('disallow:["/api/"]'),"API endpoints should not consume crawler traffic.");
