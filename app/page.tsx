@@ -102,8 +102,8 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-impact-card">
               <Image
-                src="/images/studio-group-fitness.avif"
-                alt="A group fitness studio training session"
+                src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"
+                alt=""
                 width={1800}
                 height={1200}
                 priority
