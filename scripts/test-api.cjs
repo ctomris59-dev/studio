@@ -87,7 +87,7 @@ async function main(){
   // Enforced CSP must block inline event handlers site-wide. The dynamic
   // authenticated workspace additionally requires a fresh script nonce.
   const pagePolicy=pilatesLanding.headers.get("content-security-policy")||"";
-  const directives=policy=>Object.fromEntries(policy.split(";").map(x=>x.trim()).filter(Boolean).map(x=>[x.split(/\\s+/)[0],x]));
+  const directives=policy=>Object.fromEntries(policy.split(";").map(x=>x.trim()).filter(Boolean).map(x=>[x.split(/\s+/)[0],x]));
   const publicRules=directives(pagePolicy);
   assert.equal(publicRules["default-src"],"default-src 'none'","Public HTML must deny unknown resource types.");
   assert.equal(publicRules["object-src"],"object-src 'none'","Public HTML must block objects.");
@@ -97,7 +97,7 @@ async function main(){
    assert(publicRules[name]?.includes("'nonce-"),name+" must use a fresh nonce.");
    assert(!publicRules[name]?.includes("'unsafe-inline'"),name+" must not permit arbitrary inline content.");
    assert(!publicRules[name]?.includes("data:"),name+" must not allow data: URLs.");
-   assert(!/(?:^|\\s)https:(?:\\s|$)/.test(publicRules[name]),name+" must not trust the entire HTTPS scheme.");
+   assert(!/(?:^|\s)https:(?:\s|$)/.test(publicRules[name]),name+" must not trust the entire HTTPS scheme.");
   }
   const publicNonce=/'nonce-([^']+)'/.exec(publicRules["script-src"]||"")?.[1];
   assert(publicNonce,"Public HTML nonce is required.");
