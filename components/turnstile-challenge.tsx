@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import {useCspNonce} from "./csp-styles";
 import {useEffect,useRef} from "react";
 
 type WidgetApi={
@@ -11,6 +12,7 @@ declare global{interface Window{turnstile?:WidgetApi}}
 const sitekey=process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function TurnstileChallenge({onToken,resetKey}:{onToken:(token:string)=>void;resetKey?:number}){
+ const nonce=useCspNonce();
  const mount=useRef<HTMLDivElement>(null);
  const widget=useRef<string|null>(null);
  const callback=useRef(onToken);
@@ -33,6 +35,6 @@ export function TurnstileChallenge({onToken,resetKey}:{onToken:(token:string)=>v
  return <div className="studio-turnstile" aria-label="Bot verification">
   <div ref={mount}/>
   <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-   strategy="afterInteractive" onReady={render}/>
+   strategy="afterInteractive" nonce={nonce} onReady={render}/>
  </div>;
 }
