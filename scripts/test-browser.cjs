@@ -109,6 +109,32 @@ async function main(){
     assert(result.loaded.every(n=>n>0),route+" missing locally served font family");
     assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
+    // Verify that Chromium actually refuses untrusted DOM-injected scripts,
+    // stylesheets and style attributes; checking headers alone is insufficient.
+    if(width===1280&&(route==="/"||route==="/workspace")){
+     const probe=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      delete window.__studiotaskerCspProbe;
+      const script=document.createElement("script");
+      script.textContent="window.__studiotaskerCspProbe=true";
+      document.body.appendChild(script);
+      const node=document.createElement("span");
+      node.className="csp-attack-style-test";
+      node.setAttribute("style","color:rgb(13,27,59)");
+      document.body.appendChild(node);
+      const inlineStyleBlocked=getComputedStyle(node).color!=="rgb(13, 27, 59)";
+      const sheet=document.createElement("style");
+      sheet.textContent=".csp-attack-style-test{color:rgb(8,21,47)!important}";
+      document.head.appendChild(sheet);
+      await new Promise(r=>setTimeout(r,50));
+      const result={scriptBlocked:window.__studiotaskerCspProbe!==true,
+       inlineStyleBlocked,styleTagBlocked:getComputedStyle(node).color!=="rgb(8, 21, 47)"};
+      sheet.remove();node.remove();script.remove();
+      return result;
+     })()`});
+     const proof=probe.result?.value;
+     assert(proof&&proof.scriptBlocked&&proof.inlineStyleBlocked&&proof.styleTagBlocked,
+      route+" browser CSP accepted unauthorised inline content: "+JSON.stringify(proof));
+    }
     // A strict CSP is only useful if Next's nonced hydration still works.
     // Exercise an actual React onClick handler on the login view in Chromium.
     if(route==="/workspace"&&width===1280){
