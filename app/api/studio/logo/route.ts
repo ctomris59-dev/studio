@@ -5,9 +5,36 @@ import {StudioOperationError} from "@/lib/server/studio-booking";
 export const runtime="nodejs";
 const MAX_LOGO_BYTES=200000;
 function validMagic(bytes:Uint8Array,mime:string){
- if(mime==="image/png")return bytes.length>=8&&[137,80,78,71,13,10,26,10].every((v,i)=>bytes[i]===v);
- if(mime==="image/jpeg")return bytes.length>=3&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255;
- if(mime==="image/webp")return bytes.length>=12&&String.fromCharCode(...bytes.slice(0,4))==="RIFF"&&String.fromCharCode(...bytes.slice(8,12))==="WEBP";
+ const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+ if(mime==="image/png"){
+  if(bytes.length<57||![137,80,78,71,13,10,26,10].every((v,i)=>bytes[i]===v))return false;
+  // Validate chunk framing, image dimensions, IDAT and terminal IEND.
+  // Do not accept trailing HTML after IEND or incomplete PNG headers.
+  let pos=8,hasHeader=false,hasImageData=false;
+  while(pos+12<=bytes.length){
+   const length=view.getUint32(pos,false);
+   if(length>bytes.length-pos-12)return false;
+   const chunk=String.fromCharCode(...bytes.subarray(pos+4,pos+8));
+   if(!hasHeader){
+    if(chunk!=="IHDR"||length!==13)return false;
+    const w=view.getUint32(pos+8,false),h=view.getUint32(pos+12,false);
+    if(!w||!h||w>8192||h>8192)return false;
+    hasHeader=true;
+   }
+   if(chunk==="IDAT")hasImageData=true;
+   const end=pos+12+length;
+   if(chunk==="IEND")return length===0&&hasImageData&&end===bytes.length;
+   pos=end;
+  }
+  return false;
+ }
+ if(mime==="image/jpeg")
+  return bytes.length>=8&&bytes[0]===255&&bytes[1]===216&&
+   bytes[bytes.length-2]===255&&bytes[bytes.length-1]===217;
+ if(mime==="image/webp")
+  return bytes.length>=20&&String.fromCharCode(...bytes.subarray(0,4))==="RIFF"&&
+   String.fromCharCode(...bytes.subarray(8,12))==="WEBP"&&
+   view.getUint32(4,true)+8===bytes.length;
  return false;
 }
 export async function GET(request:NextRequest){
