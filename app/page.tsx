@@ -98,41 +98,6 @@ export default function HomePage() {
       </header>
 
       <main id="main-content" tabIndex={-1}>
-        <section className="ed-hero" aria-labelledby="main-heading">
-          <div className="ed-container ed-hero-grid">
-            <div className="ed-hero-copy">
-              <div className="ed-hero-brand">
-                <span className="ed-hero-brand-icon"><StudioTaskerMark/></span>
-                <div><strong>StudioTasker</strong><small>GLOBAL STUDIO MANAGEMENT SOFTWARE</small></div>
-              </div>
-              <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
-              <div className="ed-hero-content">
-                <h1 id="main-heading">YOUR<br/>STUDIO.<br/><em>IN SYNC.</em></h1>
-                <div className="ed-hero-under">
-                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide.</p>
-                <div className="ed-hero-action-stack">
-                  <Link className="ed-buy-cta ed-buy-cta-solo" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
-                  <div className="ed-hero-quick-links">
-                    <Link className="ed-demo-compact" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><small>No sign-up</small><ArrowRight size={16}/></Link>
-                    <Link className="ed-annual-compact" href="/start?plan=annual"><span>ANNUAL · $33.90/MO</span><small>SAVE $72/YEAR</small><ArrowUpRight size={16}/></Link>
-                  </div>
-                </div>
-                </div>
-              </div>
-            </div>
-            <div className="ed-hero-canvas">
-              <div className="ed-preview-intro">
-                <span className="ed-preview-eyebrow">STUDIOTASKER / PRODUCT PREVIEW</span>
-                <h2>See your studio in one clear view.</h2>
-                
-              </div>
-              <PreviewDashboard/>
-              
-            </div>
-          </div>
-          <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
-        </section>
-
         <section className="ed-impact-band ed-impact-band-first" aria-labelledby="impact-band-title">
           <div className="ed-container">
             <div className="ed-impact-card">
@@ -160,12 +125,47 @@ export default function HomePage() {
               </div>
               <div className="ed-impact-overlay">
                 <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
-                <h2 id="impact-band-title">Designed for the work behind every class.</h2>
+                <h1 id="impact-band-title">Designed for the work behind every class.</h1>
                 <p>Bookings, packages, check-ins and follow-ups in one clear studio system.</p>
                 <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
               </div>
             </div>
           </div>
+        </section>
+
+        <section className="ed-hero" aria-labelledby="main-heading">
+          <div className="ed-container ed-hero-grid">
+            <div className="ed-hero-copy">
+              <div className="ed-hero-brand">
+                <span className="ed-hero-brand-icon"><StudioTaskerMark/></span>
+                <div><strong>StudioTasker</strong><small>GLOBAL STUDIO MANAGEMENT SOFTWARE</small></div>
+              </div>
+              <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
+              <div className="ed-hero-content">
+                <h2 id="main-heading">YOUR<br/>STUDIO.<br/><em>IN SYNC.</em></h2>
+                <div className="ed-hero-under">
+                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide.</p>
+                <div className="ed-hero-action-stack">
+                  <Link className="ed-buy-cta ed-buy-cta-solo" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
+                  <div className="ed-hero-quick-links">
+                    <Link className="ed-demo-compact" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><small>No sign-up</small><ArrowRight size={16}/></Link>
+                    <Link className="ed-annual-compact" href="/start?plan=annual"><span>ANNUAL · $33.90/MO</span><small>SAVE $72/YEAR</small><ArrowUpRight size={16}/></Link>
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+            <div className="ed-hero-canvas">
+              <div className="ed-preview-intro">
+                <span className="ed-preview-eyebrow">STUDIOTASKER / PRODUCT PREVIEW</span>
+                <h2>See your studio in one clear view.</h2>
+                
+              </div>
+              <PreviewDashboard/>
+              
+            </div>
+          </div>
+          <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
         </section>
 
         <section className="ed-studio-types" id="studio-types" aria-labelledby="studio-types-title">
