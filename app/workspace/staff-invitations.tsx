@@ -58,8 +58,8 @@ export function StaffInvitations(){
   {accounts.length>0&&<section><h4>Staff login access</h4>
    {accounts.map(a=><p key={a.id}>{a.email} · {a.role} · {a.disabled_at?(a.disabled_reason==="owner_revoked"?"Access revoked by studio owner":"Operator/security suspension"):"Active"}
     {a.disabled_at
-     ? a.can_restore&&<button type="button" disabled={busy} onClick={()=>void restore(a)} style={{marginLeft:12}}>Restore access</button>
-     : <button type="button" disabled={busy} onClick={()=>void revoke(a)} style={{marginLeft:12}}>Revoke access</button>}</p>)}
+     ? a.can_restore&&<button type="button" disabled={busy} onClick={()=>void restore(a)} className="csp-staff-access-button">Restore access</button>
+     : <button type="button" disabled={busy} onClick={()=>void revoke(a)} className="csp-staff-access-button">Revoke access</button>}</p>)}
   </section>}
   {items.length>0&&<div><h4>Recent invitations</h4>
    {items.map(item=><p key={item.id}>{item.email} · {item.role} · {item.accepted_at?"Accepted":item.revoked_at?"Revoked":new Date(item.expires_at)<new Date()?"Expired":"Pending"}</p>)}
