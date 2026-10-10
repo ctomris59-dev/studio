@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useRef,useState,type CSSProperties,type FormEvent} from "react";
+import {useEffect,useRef,useState,type FormEvent} from "react";
+import {CspAccentStyle} from "../../components/csp-styles";
 import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Settings2,Target,Trash2,Users} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {TurnstileChallenge} from "../../components/turnstile-challenge";
@@ -233,9 +234,8 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  ];
  const visibleNav=user.role==="instructor"?nav.filter(([id])=>["classes","followups"].includes(id)):nav;
  const currentPeople=people.filter(p=>p.kind===(view==="leads"?"lead":"member"));
- const style={"--studio-accent":settings.accentColor} as CSSProperties;
 
- return <section className="rd-live-shell" style={style}>
+ return <section className="rd-live-shell"><CspAccentStyle accent={settings.accentColor} kind="workspace"/>
   <aside className="rd-live-sidebar">
    <div className="rd-live-brand">{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt={settings.name+" logo"}/>:<span className="rd-studio-fallback">{settings.name.slice(0,2).toUpperCase()}</span>}<div><strong>{settings.name}</strong><small>{settings.focus}</small></div></div>
    <div className="rd-powered"><StudioTaskerMark/> powered by <b>StudioTasker</b></div>
@@ -243,7 +243,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    <div className="rd-live-sidebar-bottom"><small>{user.email}</small><span>{user.role}</span><button onClick={()=>void logout()}><LogOut size={16}/> Sign out</button></div>
   </aside>
   <main id="main-content" tabIndex={-1} className="rd-live-main">
-   <header className="rd-live-top"><div><p className="rd-eyebrow">YOUR STUDIO WORKSPACE</p><h1>{view==="members"?settings.memberTerm:view==="classes"?settings.classTerm:view==="leads"?"Leads / CRM":view==="followups"?"Follow-ups":view.charAt(0).toUpperCase()+view.slice(1)}</h1></div><div className="rd-live-accent"><span style={{background:settings.accentColor}}/>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</div></header>
+   <header className="rd-live-top"><div><p className="rd-eyebrow">YOUR STUDIO WORKSPACE</p><h1>{view==="members"?settings.memberTerm:view==="classes"?settings.classTerm:view==="leads"?"Leads / CRM":view==="followups"?"Follow-ups":view.charAt(0).toUpperCase()+view.slice(1)}</h1></div><div className="rd-live-accent"><span/>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</div></header>
    {note&&<p className="rd-feedback" role="status">{note}</p>}
 
    {view==="leads"||view==="members"?canContacts?<section className="rd-live-section">
@@ -275,7 +275,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     {user.role==="owner"&&<StaffInvitations/>} 
     <OnboardingPanel role={user.role} onDataChange={()=>void load()}/>
     <div className="rd-customize-head"><div><p className="rd-eyebrow">MAKE STUDIOTASKER YOURS</p><h2>Studio identity & workflow</h2><p>Controlled customization: enough to feel like your studio without creating a fragile one-off software fork.</p></div>
-     <div className="rd-brand-preview" style={{borderColor:settings.accentColor}}>{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,2).toUpperCase()}</span>}<div><b>{settings.name||"Your Studio"}</b><small>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</small></div></div></div>
+     <div className="rd-brand-preview">{settings.hasLogo?<img src={"/api/studio/logo?v="+logoVersion} alt="Studio logo preview"/>:<span>{settings.name.slice(0,2).toUpperCase()}</span>}<div><b>{settings.name||"Your Studio"}</b><small>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</small></div></div></div>
     <form className="rd-settings-grid" onSubmit={saveSettings}>
      <section><h3>Identity</h3><label>Studio name<input required minLength={2} maxLength={100} value={settings.name} onChange={e=>setSettings({...settings,name:e.target.value})}/></label><label>Studio type<select value={settings.focus} onChange={e=>{const focus=e.target.value,preset=studioPreset(focus);setSettings({...settings,focus,...preset})}}>{STUDIO_FOCUSES.map(x=><option key={x}>{x}</option>)}</select><small>Changing the type loads recommended defaults in this form. Save to apply them.</small></label><div className="rd-preset-card"><span>ACTIVE PRESET</span><b>{studioPresetProfile(settings.focus).headline}</b><div>{studioPresetProfile(settings.focus).capabilities.map(x=><small key={x}>✓ {x}</small>)}</div><p>Recommended formats: {studioPresetProfile(settings.focus).recommendedFormats.map(x=>CLASS_FORMATS.find(([value])=>value===x)?.[1]||x).join(" · ")}</p></div><label>Timezone<TimezoneSelect value={settings.timezone} onChange={timezone=>setSettings(v=>({...v,timezone}))}/></label>
       <label>Primary brand color<div className="rd-color-row"><input type="color" value={settings.accentColor} onChange={e=>setSettings({...settings,accentColor:e.target.value.toUpperCase()})}/><input pattern="^#[0-9A-Fa-f]{6}$" maxLength={7} value={settings.accentColor} onChange={e=>setSettings({...settings,accentColor:e.target.value})}/></div></label>
