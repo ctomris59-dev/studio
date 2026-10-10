@@ -87,7 +87,7 @@ CSV import always previews before commit. Imported credits are migration entitle
 - transactional bookings, waitlist promotion and credit ledger
 - versioned SQL migrations
 - encrypted PostgreSQL backup/verify/restore scripts
-- CI covering auth, tenant isolation, CRM workflows, CSV/Excel validation, timezones, UI guards, build and live HTTP integration
+- CI covering auth, tenant isolation, production studio/CRM workflows, CSV validation, timezones, UI guards, build and live HTTP integration
 
 The database migration directory is authoritative for new installations. Historical compatibility identifiers such as the internal database/localStorage names may still use the earlier ReformDesk wording and should only be renamed through a deliberate migration.
 
