@@ -98,6 +98,41 @@ export default function HomePage() {
       </header>
 
       <main id="main-content" tabIndex={-1}>
+        <section className="ed-impact-band ed-impact-band-first" aria-labelledby="impact-band-title">
+          <div className="ed-container">
+            <div className="ed-impact-card">
+              <Image
+                src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"
+                alt=""
+                width={1800}
+                height={1200}
+                priority
+                sizes="(max-width: 760px) 100vw, 1360px"
+              />
+              <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">
+                <Link href="/start?plan=monthly" className="ed-impact-price-option ed-impact-price-monthly" aria-label="Choose monthly plan, $39.90 per month">
+                  <span>MONTHLY PLAN</span>
+                  <strong>$39.90 / MONTH</strong>
+                  <small>PAY MONTH TO MONTH</small>
+                  <ArrowUpRight size={18} aria-hidden="true"/>
+                </Link>
+                <Link href="/start?plan=annual" className="ed-impact-price-option ed-impact-price-annual" aria-label="Choose yearly plan, $33.90 per month equivalent, billed $406.80 annually">
+                  <span>YEARLY PLAN · SAVE 15%</span>
+                  <strong>$33.90 / MONTH</strong>
+                  <small>$406.80 BILLED YEARLY</small>
+                  <ArrowUpRight size={18} aria-hidden="true"/>
+                </Link>
+              </div>
+              <div className="ed-impact-overlay">
+                <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
+                <h1 id="impact-band-title">Designed for the work behind every class.</h1>
+                <p>Bookings, packages, check-ins and follow-ups in one clear studio system.</p>
+                <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="ed-hero" aria-labelledby="main-heading">
           <div className="ed-container ed-hero-grid">
             <div className="ed-hero-copy">
@@ -107,7 +142,7 @@ export default function HomePage() {
               </div>
               <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
               <div className="ed-hero-content">
-                <h1 id="main-heading">YOUR<br/>STUDIO.<br/><em>IN SYNC.</em></h1>
+                <h2 id="main-heading">YOUR<br/>STUDIO.<br/><em>IN SYNC.</em></h2>
                 <div className="ed-hero-under">
                 <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide.</p>
                 <div className="ed-hero-action-stack">
@@ -131,41 +166,6 @@ export default function HomePage() {
             </div>
           </div>
           <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
-        </section>
-
-        <section className="ed-impact-band ed-impact-band-first" aria-labelledby="impact-band-title">
-          <div className="ed-container">
-            <div className="ed-impact-card">
-              <Image
-                src="/images/studio-group-fitness.avif"
-                alt="A group fitness studio training session"
-                width={1800}
-                height={1200}
-                priority
-                sizes="(max-width: 760px) 100vw, 1360px"
-              />
-              <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">
-                <Link href="/start?plan=monthly" className="ed-impact-price-option ed-impact-price-monthly" aria-label="Choose monthly plan, $39.90 per month">
-                  <span>MONTHLY PLAN</span>
-                  <strong>$39.90 / MONTH</strong>
-                  <small>PAY MONTH TO MONTH</small>
-                  <ArrowUpRight size={18} aria-hidden="true"/>
-                </Link>
-                <Link href="/start?plan=annual" className="ed-impact-price-option ed-impact-price-annual" aria-label="Choose yearly plan, $33.90 per month equivalent, billed $406.80 annually">
-                  <span>YEARLY PLAN · SAVE 15%</span>
-                  <strong>$33.90 / MONTH</strong>
-                  <small>$406.80 BILLED YEARLY</small>
-                  <ArrowUpRight size={18} aria-hidden="true"/>
-                </Link>
-              </div>
-              <div className="ed-impact-overlay">
-                <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
-                <h2 id="impact-band-title">Designed for the work behind every class.</h2>
-                <p>Bookings, packages, check-ins and follow-ups in one clear studio system.</p>
-                <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
-              </div>
-            </div>
-          </div>
         </section>
 
         <section className="ed-studio-types" id="studio-types" aria-labelledby="studio-types-title">

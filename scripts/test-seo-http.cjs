@@ -20,6 +20,16 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
   "/start should be ISR-cached for five minutes.");
  const home=await get("/");
  assert.equal(home.status,200);
+ const impact=home.text.indexOf('class="ed-impact-band ed-impact-band-first"');
+ const preview=home.text.indexOf('class="ed-hero"');
+ assert(impact>=0&&preview>impact,"Initial HTML must render the photo banner before the secondary product preview.");
+ assert(home.text.includes('pexels-photo-2294400.jpeg'),"Requested photo should appear in server-rendered image markup.");
+ const homeH1s=home.text.match(/<h1\b/g)||[];
+ assert.equal(homeH1s.length,1,"Home document must expose only one H1.");
+ assert(home.text.includes('<h1 id="impact-band-title">Designed for the work behind every class.</h1>'),
+  "Photo banner headline must be crawlable and the primary heading.");
+ assert(home.text.includes('$39.90 / MONTH')&&home.text.includes('$406.80 BILLED YEARLY'),
+  "Banner must preserve monthly and yearly pricing details.");
  // Production Next.js must not expose HMR/dev-overlay endpoints or runtimes.
  for(const signature of ["/_next/webpack-hmr","__nextjs_original-stack-frame","react-refresh","webpackHotUpdate"]){
   assert(!home.text.includes(signature),"Production HTML contains development/HMR indicator: "+signature);

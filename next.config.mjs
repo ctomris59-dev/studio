@@ -61,6 +61,10 @@ const secure=[
 
 const nextConfig={
  reactStrictMode:true,
+ images:{remotePatterns:[{
+  protocol:"https",hostname:"images.pexels.com",
+  pathname:"/photos/2294400/pexels-photo-2294400.jpeg"
+ }]},
  poweredByHeader:false,
  trailingSlash:false,
  async redirects(){
