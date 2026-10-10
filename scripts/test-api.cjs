@@ -87,7 +87,24 @@ async function main(){
   // Enforced CSP must block inline event handlers site-wide. The dynamic
   // authenticated workspace additionally requires a fresh script nonce.
   const pagePolicy=pilatesLanding.headers.get("content-security-policy")||"";
-  assert(pagePolicy.includes("script-src-attr 'none'"),"Static routes must block HTML inline event handlers.");
+  const directives=policy=>Object.fromEntries(policy.split(";").map(x=>x.trim()).filter(Boolean).map(x=>[x.split(/\s+/)[0],x]));
+  const publicRules=directives(pagePolicy);
+  assert.equal(publicRules["default-src"],"default-src 'none'","Public HTML must deny unknown resource types.");
+  assert.equal(publicRules["object-src"],"object-src 'none'","Public HTML must block objects.");
+  assert.equal(publicRules["style-src-attr"],"style-src-attr 'none'","Public HTML must block unsafe style attributes.");
+  assert.equal(publicRules["script-src-attr"],"script-src-attr 'none'","Public HTML must block unsafe event handlers.");
+  for(const name of ["script-src","style-src"]){
+   assert(publicRules[name]?.includes("'nonce-"),name+" must use a fresh nonce.");
+   assert(!publicRules[name]?.includes("'unsafe-inline'"),name+" must not permit arbitrary inline content.");
+   assert(!publicRules[name]?.includes("data:"),name+" must not allow data: URLs.");
+   assert(!/(?:^|\s)https:(?:\s|$)/.test(publicRules[name]),name+" must not trust the entire HTTPS scheme.");
+  }
+  const publicNonce=/'nonce-([^']+)'/.exec(publicRules["script-src"]||"")?.[1];
+  assert(publicNonce,"Public HTML nonce is required.");
+  const pilatesAgain=await call("/pilates-studio-software");
+  const nonceAgain=/'nonce-([^']+)'/.exec(directives(pilatesAgain.headers.get("content-security-policy")||"")["script-src"]||"")?.[1];
+  assert(nonceAgain&&nonceAgain!==publicNonce,"Every public HTML response must get a distinct nonce.");
+  assert((pilatesLanding.headers.get("cache-control")||"").includes("no-store"),"HTML with per-request CSP must never be ISR cached.");
   const workspaceFirst=await fetch(HOST+"/workspace",{cache:"no-store"});
   const workspaceSecond=await fetch(HOST+"/workspace",{cache:"no-store"});
   assert.equal(workspaceFirst.status,200);

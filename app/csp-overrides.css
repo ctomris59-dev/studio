@@ -1,0 +1,27 @@
+/* CSP: replace handwritten style= attributes with stylesheet rules. */
+/* 404 page */
+.csp-notfound{min-height:100vh;display:grid;place-items:center;padding:40px;background:#f4f0e7;color:#17203c;font-family:Arial,sans-serif}
+.csp-notfound-inner{max-width:720px}
+.csp-notfound-kicker{font-family:monospace;color:#334bdd;font-weight:800}
+.csp-notfound h1{font-size:clamp(52px,8vw,96px);line-height:.9;letter-spacing:-.05em;margin:20px 0}
+.csp-notfound-copy{font-size:18px;line-height:1.6}
+.csp-notfound-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.csp-notfound-actions a{padding:14px 18px;border:2px solid #17203c;color:#17203c;text-decoration:none;font-weight:800}
+.csp-notfound-home{background:#e7f982}
+/* Staff invitation */
+.csp-invite{max-width:560px;margin:6vh auto;padding:clamp(24px,5vw,48px);border:1px solid #dde4ee;border-radius:20px;background:#fff;box-shadow:0 18px 55px #162c4515}
+.csp-invite-brand{font-weight:800;font-size:24px;text-decoration:none;color:#193355}
+.csp-invite-dot{color:#4169e1}
+.csp-invite-form{display:grid;gap:20px;margin-top:26px}
+.csp-invite-label{display:grid;gap:10px;font-weight:650}
+.csp-invite-password{padding:14px 16px;border:1px solid #aeb9ca;border-radius:9px;font-size:16px}
+.csp-invite-submit{padding:14px 16px;border-radius:9px;border:0;background:#163bb9;color:white;font-weight:700;cursor:pointer}
+/* Studio landing type-links */
+.csp-studio-explore-link{display:flex;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid #ccd0d8;color:inherit;text-decoration:none;font-weight:800}
+/* Staff access controls */
+.csp-staff-access-button{margin-left:12px}
+/* Progress uses native elements instead of CSP-blocked inline widths. */
+.sad-tour-progress progress,.sad-class-grid article>div>progress{display:block;width:100%;height:100%;appearance:none;-webkit-appearance:none;border:0;background:transparent}
+.sad-tour-progress progress::-webkit-progress-bar,.sad-class-grid article>div>progress::-webkit-progress-bar{background:transparent}
+.sad-tour-progress progress::-webkit-progress-value,.sad-class-grid article>div>progress::-webkit-progress-value{background:#334bdd}
+.sad-tour-progress progress::-moz-progress-bar,.sad-class-grid article>div>progress::-moz-progress-bar{background:#334bdd}

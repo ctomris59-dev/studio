@@ -109,6 +109,43 @@ async function main(){
     assert(result.loaded.every(n=>n>0),route+" missing locally served font family");
     assert(result.weightedFaces.every(n=>n>0),route+" missing bold or italic local font face");
     assert.equal(result.remoteFonts,0,route+" requested fonts from Google");
+    if(width===1280&&route==="/app-demo"){
+     const demo=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      const start=document.querySelector(".sad-watch-tour");
+      if(!start)return {button:false};
+      start.click();
+      await new Promise(r=>setTimeout(r,350));
+      const avatar=document.querySelector(".sad-app .sad-studio .sad-avatar");
+      const accentStyle=Array.from(document.querySelectorAll("style[nonce]")).some(x=>x.textContent?.includes(".sad-app .sad-studio"));
+      return {button:true,rendered:!!avatar,accentStyle,
+       border:avatar?getComputedStyle(avatar).borderColor:""};
+     })()`});
+     const proof=demo.result?.value;
+     assert(proof?.button&&proof.rendered&&proof.accentStyle&&proof.border==="rgb(51, 75, 221)",
+      "CSP broke demo hydration or nonce-scoped branding: "+JSON.stringify(proof));
+    }
+    // Chromium DevTools Runtime.evaluate can bypass script CSP, so it is NOT
+    // a valid hostile-script test. HTTP tests cover script-src/nonce instead.
+    // The real browser can still verify inline CSS restrictions.
+    if(width===1280&&(route==="/"||route==="/workspace")){
+     const probe=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      const node=document.createElement("span");
+      node.className="csp-attack-style-test";
+      node.setAttribute("style","color:rgb(13,27,59)");
+      document.body.appendChild(node);
+      const inlineStyleBlocked=getComputedStyle(node).color!=="rgb(13, 27, 59)";
+      const sheet=document.createElement("style");
+      sheet.textContent=".csp-attack-style-test{color:rgb(8,21,47)!important}";
+      document.head.appendChild(sheet);
+      await new Promise(r=>setTimeout(r,50));
+      const result={inlineStyleBlocked,styleTagBlocked:getComputedStyle(node).color!=="rgb(8, 21, 47)"};
+      sheet.remove();node.remove();
+      return result;
+     })()`});
+     const proof=probe.result?.value;
+     assert(proof&&proof.inlineStyleBlocked&&proof.styleTagBlocked,
+      route+" browser CSP accepted unauthorised inline styles: "+JSON.stringify(proof));
+    }
     // A strict CSP is only useful if Next's nonced hydration still works.
     // Exercise an actual React onClick handler on the login view in Chromium.
     if(route==="/workspace"&&width===1280){

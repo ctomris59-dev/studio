@@ -6,6 +6,7 @@ import {
  Plus,RefreshCw,Search,Settings2,ShieldCheck,Target,Trash2,Users,X
 } from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
+import {CspAccentStyle} from "../../components/csp-styles";
 import {TimezoneSelect} from "../workspace/timezone-select";
 import {DEMO_ACCOUNT,authenticateDemo} from "../../lib/demo-auth";
 import "./app-demo.css";
@@ -223,9 +224,9 @@ export default function AppDemo(){
   ["today","Today",LayoutDashboard],["leads","Leads / CRM",Target],["members",settings.memberTerm,Users],["classes",settings.classTerm,CalendarDays],
   ["followups","Follow-ups",CheckCircle2],["insights","Insights",BarChart3],["settings","Settings",Settings2]
  ];
- return <main className="sad-app"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
+ return <main className="sad-app"><CspAccentStyle accent={settings.accentColor} kind="demo"/><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <aside className="sad-sidebar"><Link href="/" className="sad-brand sad-sidebar-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
-   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar" style={{borderColor:settings.accentColor}}>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
+   <div className="sad-studio">{logoUrl?<span className="sad-avatar sad-avatar-logo"><img src={logoUrl} alt={settings.name+" logo"}/></span>:<span className="sad-avatar">{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><b>{settings.name}</b><small>{settings.focus}</small></div></div>
    <nav aria-label="StudioTasker owner navigation">{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>{setTourActive(false);setView(id);setAdding(null);setMessage("")}}><Icon size={19}/>{label}</button>)}</nav>
    <div className="sad-sidebar-bottom"><span>DEMO MODE</span><p>Fictional studio data · browser only</p><button onClick={reset}><RefreshCw size={17}/> Reset demo</button><button onClick={logout}><LogOut size={17}/> Sign out</button></div>
   </aside>
@@ -234,7 +235,7 @@ export default function AppDemo(){
    <div className="sad-demo-strip"><ShieldCheck size={17}/><span>60-minute sandbox · {demoTimeLabel(demoRemaining)} left · max 3 new records per section.</span><button type="button" className="sad-tour-start" onClick={startTour}>Watch 90-sec demo <ChevronRight size={16}/></button></div>
    {tourActive&&<aside className="sad-tour-card" role="region" aria-live="polite" aria-label="90-second StudioTasker guided tour">
     <div className="sad-tour-card-top"><span>{tourStep.eyebrow} · GUIDED TOUR</span><button type="button" ref={tourCloseButton} aria-label="Close guided tour" onClick={()=>setTourActive(false)}><X size={18}/></button></div>
-    <div className="sad-tour-progress" aria-hidden="true"><i style={{width:Math.min(100,(tourElapsed/TOUR_SECONDS)*100)+"%"}}/></div>
+    <div className="sad-tour-progress" aria-hidden="true"><progress value={tourElapsed} max={TOUR_SECONDS}/></div>
     <div className="sad-tour-meta"><span>STEP {tourStepIndex+1} / {tourSteps.length}</span><span>{tourElapsed}s / {TOUR_SECONDS}s</span></div>
     <h2>{tourStep.title}</h2><p>{tourStep.text}</p>
     <div className="sad-tour-actions"><button type="button" disabled={tourStepIndex===0} onClick={()=>jumpTour(-1)}>Back</button><button type="button" onClick={()=>tourStepIndex===tourSteps.length-1?finishTour():jumpTour(1)}>{tourStepIndex===tourSteps.length-1?"Finish":"Next"} <ArrowRight size={16}/></button></div>
@@ -293,7 +294,7 @@ export default function AppDemo(){
    </section>}
    {view==="settings"&&<section className="sad-view"><ViewHead eyebrow="SETTINGS / CUSTOMIZE" title="Make StudioTasker yours." text="This is where a studio customizes its identity, terminology and booking experience after purchase."/>
     <div className="sad-customize-preview">
-     <div className="sad-brand-preview" style={{borderColor:settings.accentColor}}>{logoUrl?<img src={logoUrl} alt="Studio logo preview"/>:<span style={{background:settings.accentColor}}>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><small>LIVE BRAND PREVIEW</small><b>{settings.name}</b><em>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</em></div></div>
+     <div className="sad-brand-preview">{logoUrl?<img src={logoUrl} alt="Studio logo preview"/>:<span>{settings.name.split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}</span>}<div><small>LIVE BRAND PREVIEW</small><b>{settings.name}</b><em>{settings.memberTerm} · {settings.classTerm} · {settings.creditTerm}</em></div></div>
      <div><span className="sad-kicker">CUSTOMER WORKSPACE</span><h3>One product. Their studio identity.</h3><p>Customers do not receive a separate codebase. These settings personalize their own StudioTasker workspace and public booking page.</p></div>
     </div>
     <form className="sad-settings-grid" onSubmit={saveSettings}>
@@ -330,7 +331,7 @@ export default function AppDemo(){
       <label>Open-seat signal from<input type="number" min={1} max={30} value={settings.openSeatsThreshold} onChange={e=>setSettings({...settings,openSeatsThreshold:Number(e.target.value)})}/></label>
      </div>
      <div className="sad-settings-card sad-booking-settings"><h3>Booking preview (demo only)</h3><p>This fictional preview demonstrates studio branding. StudioTasker does not currently provide a public member booking link. Staff manage real reservations inside the private studio workspace.</p><label>Studio Privacy Policy URL<input type="url" maxLength={500} value={settings.privacyPolicyUrl} onChange={e=>setSettings({...settings,privacyPolicyUrl:e.target.value})}/><small>Shown in the booking privacy notice.</small></label>
-      <div className="sad-booking-mini" style={{borderColor:settings.accentColor}}><div>{logoUrl?<img src={logoUrl} alt="Booking page logo"/>:<span style={{background:settings.accentColor}}>{settings.name.slice(0,1).toUpperCase()}</span>}<b>{settings.name}</b></div><small>{settings.focus}</small><strong style={{color:settings.accentColor}}>Book a {singular(settings.classTerm).toLowerCase()}</strong></div>
+      <div className="sad-booking-mini"><div>{logoUrl?<img src={logoUrl} alt="Booking page logo"/>:<span>{settings.name.slice(0,1).toUpperCase()}</span>}<b>{settings.name}</b></div><small>{settings.focus}</small><strong>Book a {singular(settings.classTerm).toLowerCase()}</strong></div>
       <Link className="sad-preview-link" href="/book/preview">Open self-service booking preview <ArrowRight size={16}/></Link>
      </div>
      <div className="sad-settings-card"><h3>Internal class packages</h3><p>Operational entitlement templates only. StudioTasker does not price or collect member payments.</p>
@@ -356,4 +357,4 @@ function OwnerToday({signals,activity,settings,onAction}:{signals:Signal[];activ
   {activity.length>0&&<div className="sad-activity"><span className="sad-kicker">RECENT DEMO ACTIONS</span>{activity.map((a,i)=><p key={i}>{a}</p>)}</div>}
  </section>;
 }
-function DemoClasses({items,onRemove}:{items:DemoClass[];onRemove:(id:string)=>void}){return <div className="sad-class-grid">{items.map(c=><article key={c.id}><small>{c.time}</small><h3>{c.title}</h3><p>{c.coach} · {c.room} · {c.duration} min</p><div><span style={{width:(c.booked/c.capacity*100)+"%"}}/></div><b>{c.booked}/{c.capacity} booked</b><em>{Math.max(0,c.capacity-c.booked)} places left</em>{isCreated(c.id)&&<small className="sad-demo-created">ADDED IN DEMO</small>}<button type="button" className="sad-card-remove" aria-label={"Remove "+c.title} onClick={()=>onRemove(c.id)}><Trash2 size={15}/> Remove</button></article>)}</div>}
+function DemoClasses({items,onRemove}:{items:DemoClass[];onRemove:(id:string)=>void}){return <div className="sad-class-grid">{items.map(c=><article key={c.id}><small>{c.time}</small><h3>{c.title}</h3><p>{c.coach} · {c.room} · {c.duration} min</p><div><progress value={c.booked} max={c.capacity}/></div><b>{c.booked}/{c.capacity} booked</b><em>{Math.max(0,c.capacity-c.booked)} places left</em>{isCreated(c.id)&&<small className="sad-demo-created">ADDED IN DEMO</small>}<button type="button" className="sad-card-remove" aria-label={"Remove "+c.title} onClick={()=>onRemove(c.id)}><Trash2 size={15}/> Remove</button></article>)}</div>}

@@ -16,8 +16,8 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  assert.equal(annualStart.status,200);
  assert(start.text.includes("$406.80")&&annualStart.text.includes("$406.80"),
   "Pricing cards must remain pre-rendered and indexable.");
- assert((start.headers.get("cache-control")||"").includes("s-maxage=300"),
-  "/start should be ISR-cached for five minutes.");
+ assert((start.headers.get("cache-control")||"").includes("no-store"),
+  "/start must not cache an HTML response carrying a per-request CSP nonce.");
  const home=await get("/");
  assert.equal(home.status,200);
  // Production Next.js must not expose HMR/dev-overlay endpoints or runtimes.

@@ -19,12 +19,12 @@ export function StaffInviteForm(){
   }catch(error){setMessage(error instanceof Error?error.message:"Invitation failed.")}
   finally{setBusy(false)}
  }
- return <main className="invite-page" style={{maxWidth:560,margin:"6vh auto",padding:"clamp(24px,5vw,48px)",border:"1px solid #dde4ee",borderRadius:20,background:"#fff",boxShadow:"0 18px 55px #162c4515"}}><Link href="/" style={{fontWeight:800,fontSize:24,textDecoration:"none",color:"#193355"}}>StudioTasker<span style={{color:"#4169e1"}}>.</span></Link>
+ return <main className="invite-page csp-invite"><Link href="/" className="csp-invite-brand">StudioTasker<span className="csp-invite-dot">.</span></Link>
   <h1>Join your studio</h1>
   <p>Create a private staff login with a password of at least 12 characters. This invitation is valid for 48 hours and can only be used once.</p>
-  <form onSubmit={submit} style={{display:"grid",gap:20,marginTop:26}}>
-   <label style={{display:"grid",gap:10,fontWeight:650}}>Set password<input style={{padding:"14px 16px",border:"1px solid #aeb9ca",borderRadius:9,fontSize:16}} type="password" required minLength={12} maxLength={128} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
-   <button type="submit" style={{padding:"14px 16px",borderRadius:9,border:0,background:"#163bb9",color:"white",fontWeight:700,cursor:"pointer"}} disabled={busy||!token||!studio}>{busy?"Creating account…":"Accept staff invitation"}</button>
+  <form onSubmit={submit} className="csp-invite-form">
+   <label className="csp-invite-label">Set password<input className="csp-invite-password" type="password" required minLength={12} maxLength={128} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
+   <button type="submit" className="csp-invite-submit" disabled={busy||!token||!studio}>{busy?"Creating account…":"Accept staff invitation"}</button>
   </form>
   {message&&<p role="alert">{message}</p>}
   <p><Link href="/workspace">Already have an account? Sign in</Link></p>
