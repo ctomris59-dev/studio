@@ -45,7 +45,9 @@ export type PaddleSubscriptionEvent={
 export function parsePaddleSubscriptionEvent(raw:unknown):PaddleSubscriptionEvent|null{
  if(!object(raw))return null;
  const eventId=text(raw.eventId||raw.event_id),eventType=text(raw.eventType||raw.event_type);
- if(!/^evt_[a-z\d]{26}$/.test(eventId))return null;
+ const localSimulator=process.env.PADDLE_ENV==="sandbox"&&process.env.BILLING_ALLOW_LOCAL_TEST==="true"&&
+  /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(process.env.PUBLIC_APP_ORIGIN||"");
+ if(!/^evt_[a-z\d]{26}$/.test(eventId)&&!(localSimulator&&/^ntfsimevt_[a-z\d]{26}$/.test(eventId)))return null;
  const supported=new Set([
   "subscription.created","subscription.updated","subscription.activated","subscription.trialing",
   "subscription.past_due","subscription.paused","subscription.resumed","subscription.canceled"

@@ -48,7 +48,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .prettierrc.json docs/ARCHITECTURE.md",
     "format:check:all": "prettier --check app components lib scripts",
-    "lint:security": "eslint components/json-ld.tsx lib/server/public-abuse.ts"
+    "lint:security": "eslint components/json-ld.tsx lib/server/public-abuse.ts",
+    "test:paddle:simulation": "node scripts/test-paddle-simulator.cjs"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "5.3.0",

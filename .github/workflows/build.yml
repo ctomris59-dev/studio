@@ -104,6 +104,8 @@ jobs:
         run: npm run test:timezone
       - name: Test commercial registration release gate
         run: npm run test:release
+      - name: Regression test Paddle simulator events and production rejection
+        run: npm run test:paddle:simulation
       - name: Compile production build
         run: npm run build
       - name: Test production HTML and SEO HTTP behavior
