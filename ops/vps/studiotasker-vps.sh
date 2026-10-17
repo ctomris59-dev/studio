@@ -245,11 +245,31 @@ process.stdin.on("end",()=>{
 });' || stop "Resolve PM2 environment overrides before deployment."
  node --env-file="$LIVE/.env.production" - <<'NODE'
 const e=process.env;
-if(e.AUTH_ALLOW_REGISTRATION!=="false")throw Error("Public registration must remain disabled");
-if(e.PADDLE_ENV!=="production"||e.NEXT_PUBLIC_PADDLE_ENV!=="production"||
- !/^live_/.test(e.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN||"")||!e.PADDLE_WEBHOOK_SECRET)
- throw Error("Paddle LIVE integration not fully configured");
-if(!e.MIGRATION_DATABASE_URL)throw Error("MIGRATION_DATABASE_URL missing");
+// The site must be updated before Paddle approves Live. Do NOT force users to
+// configure payment keys or attest business approval just to ship code fixes.
+if(e.AUTH_ALLOW_REGISTRATION!=="false")
+ throw Error("Public registration must remain disabled during maintenance.");
+if(e.BILLING_ALLOW_LOCAL_TEST==="true"||e.BILLING_ALLOW_SANDBOX_TEST==="true")
+ throw Error("Public deployment must not accept Sandbox/local payment test events.");
+if(e.PADDLE_ENV==="sandbox"){
+ if(e.NEXT_PUBLIC_PADDLE_ENV!=="sandbox")
+  throw Error("Sandbox server/client environments disagree.");
+ if(e.LAUNCH_PADDLE_ACCOUNT_APPROVED==="true")
+  throw Error("Do not declare Paddle Live approved while deploying Sandbox.");
+ console.log("Paddle approval pending: deploying code update in SAFE Sandbox mode; signup disabled.");
+}else if(e.PADDLE_ENV==="production"){
+ if(e.NEXT_PUBLIC_PADDLE_ENV!=="production"||
+  !/^live_[A-Za-z0-9_-]{8,}$/.test(e.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN||"")||
+  !e.PADDLE_API_KEY||!e.PADDLE_WEBHOOK_SECRET||
+  !/^pri_[a-z\d]{26}$/.test(e.PADDLE_MONTHLY_PRICE_ID||"")||
+  !/^pri_[a-z\d]{26}$/.test(e.PADDLE_ANNUAL_PRICE_ID||""))
+  throw Error("Paddle production credentials and prices are incomplete.");
+ console.log("Paddle LIVE credentials prepared; public registration is STILL disabled.");
+}else{
+ throw Error("Unrecognized PADDLE_ENV. Expected sandbox or production.");
+}
+if(!e.MIGRATION_DATABASE_URL)
+ throw Error("MIGRATION_DATABASE_URL missing. Do not guess admin credentials.");
 NODE
  say "Creating FRESH backup. Stop immediately if service fails."
  systemctl start "$BACKUP_SERVICE" || stop "Backup service failed. Nothing was deployed."
@@ -299,7 +319,7 @@ NODE
    stop "Previous app files restored where possible. Database migrations remain applied."
  fi
  say "Deployment complete and production /api/health returned HTTP 200."
- say "Real payment signup is STILL disabled pending Paddle approval and release verification."
+ say "Public registration remains disabled. Paddle Live approval and release checks are separate."
 }
 help(){
  cat <<'EOF'
@@ -308,7 +328,7 @@ StudioTasker Contabo VPS assistant (run as root):
   backup-debug Read-only pg_dump error with fuller diagnostic
   configure    Prompt privately for LIVE Paddle keys and webhook secret
   prepare      Fetch, test, build new version in an ISOLATED folder
-  deploy       Fresh backup + migration + app upgrade + health + rollback on failure
+  deploy       Fresh backup + migration + app upgrade + health + rollback on failure\n               Supports Sandbox while Paddle Live approval is pending
 No command opens registration, claims Paddle approval or deletes databases.
 EOF
 }
