@@ -41,4 +41,48 @@ assert(source.includes('if len(sources) != 1'), "Ambiguous sourced env must be r
 assert(!source.includes('else printf \'%s\\n\' "$LIVE/.env.production"'),
  "Must not silently fall back to app env for root-wrapper backups.");
 
-console.log("VPS assistant checks passed: Bash syntax, CLI help, fail-closed live flags, backup and staged release guards.");
+// Execute the EXACT Node pre-deploy gate extracted from the shell script.
+const deployBlock=source.match(/deploy\(\)\{[\s\S]*?node --env-file="\$LIVE\/\.env\.production" - <<'NODE'\n([\s\S]*?)\nNODE/);
+assert(deployBlock,"Production deployment preflight gate must be present.");
+const valid={
+ AUTH_ALLOW_REGISTRATION:"false",
+ BILLING_ALLOW_LOCAL_TEST:"false",
+ BILLING_ALLOW_SANDBOX_TEST:"false",
+ PADDLE_ENV:"sandbox",NEXT_PUBLIC_PADDLE_ENV:"sandbox",
+ LAUNCH_PADDLE_ACCOUNT_APPROVED:"false",
+ MIGRATION_DATABASE_URL:"postgresql://example.invalid/no-connection-is-made"
+};
+function preflight(overrides={}){
+ return spawnSync(process.execPath,["-e",deployBlock[1]],{
+  env:{...process.env,...valid,...overrides},
+  encoding:"utf8",timeout:5000
+ });
+}
+assert.equal(preflight().status,0,"Sandbox mode must permit code releases during Live approval.");
+for(const [label,overrides] of Object.entries({
+ "sandbox test events enabled":{BILLING_ALLOW_SANDBOX_TEST:"true"},
+ "local test events enabled":{BILLING_ALLOW_LOCAL_TEST:"true"},
+ "public registration enabled":{AUTH_ALLOW_REGISTRATION:"true"},
+ "client/server mismatch":{NEXT_PUBLIC_PADDLE_ENV:"production"},
+ "false Live approval claim":{LAUNCH_PADDLE_ACCOUNT_APPROVED:"true"},
+ "unsupported Paddle environment":{PADDLE_ENV:"unknown"},
+ "missing migration role":{MIGRATION_DATABASE_URL:""}
+})){
+ assert.notEqual(preflight(overrides).status,0,label+" must fail closed.");
+}
+const production={
+ PADDLE_ENV:"production",NEXT_PUBLIC_PADDLE_ENV:"production",
+ NEXT_PUBLIC_PADDLE_CLIENT_TOKEN:"live_ci_client_123456",
+ PADDLE_API_KEY:"CI_FAKE_KEY",
+ PADDLE_WEBHOOK_SECRET:"CI_FAKE_SECRET",
+ PADDLE_MONTHLY_PRICE_ID:"pri_"+"a".repeat(26),
+ PADDLE_ANNUAL_PRICE_ID:"pri_"+"b".repeat(26)
+};
+assert.equal(preflight(production).status,0,
+ "Fully configured Production mode must allow code release with signup OFF.");
+assert.notEqual(preflight({...production,NEXT_PUBLIC_PADDLE_CLIENT_TOKEN:"test_ci_wrong"}).status,0,
+ "Sandbox token in production must fail closed.");
+assert.notEqual(preflight({...production,AUTH_ALLOW_REGISTRATION:"true"}).status,0,
+ "Live key presence must never bypass public registration gate.");
+
+console.log("VPS assistant checks passed: Bash syntax, CLI help, sandbox-first and production fail-closed flags, backup and staged release guards.");
