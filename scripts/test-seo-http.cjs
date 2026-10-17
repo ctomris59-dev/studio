@@ -24,7 +24,7 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const preview=home.text.indexOf('class="ed-hero"');
  assert(impact>=0&&preview>impact,"Initial HTML must render the photo banner before the secondary product preview.");
  assert(home.text.includes('pexels-photo-2294400.jpeg'),"Requested photo should appear in server-rendered image markup.");
- const heroImage=home.text.match(/<img\\b[^>]*pexels-photo-2294400\.jpeg[^>]*>/i)?.[0]||"";
+ const heroImage=(home.text.match(/<img\b[^>]*>/gi)||[]).find(tag=>tag.includes("pexels-photo-2294400.jpeg"))||"";
  assert(heroImage,"LCP hero image must be visible in initial server HTML.");
  assert(/fetchpriority="high"/i.test(heroImage),"LCP image should be fetched with high priority.");
  assert(!/loading="lazy"/i.test(heroImage),"LCP image must never be lazy-loaded.");
