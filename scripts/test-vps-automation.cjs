@@ -38,6 +38,13 @@ assert(source.includes('systemctl", "show", "studiotasker-backup.service"'),
  "Backup configuration must be discovered from the actual systemd unit.");
 assert(source.includes('ws.st_mode & 0o022') && source.includes('cs.st_mode & 0o022'), "Source must check file permissions.");
 assert(source.includes('if len(sources) != 1'), "Ambiguous sourced env must be rejected.");
+assert(source.includes('BACKUP_ENV_FILE="$file" bash -c'),
+ "Backup diagnosis must source the root wrapper's trusted shell env.");
+assert(source.includes('BACKUP_ENV_FILE="$envfile" bash -c'),
+ "Encrypted-backup authentication must use the exact shell-sourced passphrase.");
+assert(!source.includes('node --env-file="$file" - <<'),
+ "Shell-format backup variables cannot be parsed reliably as dotenv.");
+
 assert(!source.includes('else printf \'%s\\n\' "$LIVE/.env.production"'),
  "Must not silently fall back to app env for root-wrapper backups.");
 

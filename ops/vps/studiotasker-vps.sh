@@ -115,7 +115,16 @@ backup_debug(){
  file="$(backup_env)"
  [ -r "$file" ] || stop "Backup configuration not readable."
  say "Reproduce pg_dump error without writing a backup; database remains unchanged."
- node --env-file="$file" - <<'NODE'
+ # The root-owned file is the SAME shell fragment trusted by the existing
+ # systemd backup wrapper. A dotenv parser cannot evaluate shell exports or
+ # variable references and falsely reported BACKUP_DATABASE_URL missing.
+ # Keep secrets local to the inherited child environment, never print values.
+ BACKUP_ENV_FILE="$file" bash -c '
+   set -a
+   . "$BACKUP_ENV_FILE"
+   set +a
+   exec node -
+ ' <<'NODE'
 const {spawn}=require("node:child_process");
 let url;
 try{url=new URL(process.env.BACKUP_DATABASE_URL);
@@ -278,7 +287,14 @@ NODE
    sort -nr | head -1 | cut -d' ' -f2-)"
  [ -n "$fresh" ] && [ -f "$fresh" ] || stop "Fresh encrypted backup not found."
  envfile="$(backup_env)"
- node --env-file="$envfile" "$TARGET/scripts/verify-backup.cjs" "$fresh" ||
+ # Authenticate encrypted archive with exactly the backup service's own
+ # exported passphrase; do not misinterpret shell-format env as a dotenv file.
+ BACKUP_ENV_FILE="$envfile" bash -c '
+   set -a
+   . "$BACKUP_ENV_FILE"
+   set +a
+   exec node "$1" "$2"
+ ' _ "$TARGET/scripts/verify-backup.cjs" "$fresh" ||
    stop "Backup authentication failed. Deploy refused."
  say "Database migrations are FORWARD-ONLY. Code rollback will not reverse schema changes."
  printf 'Type DEPLOY-STUDIOTASKER to approve migration and brief restart: '
