@@ -16,8 +16,8 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  assert.equal(annualStart.status,200);
  assert(start.text.includes("$406.80")&&annualStart.text.includes("$406.80"),
   "Pricing cards must remain pre-rendered and indexable.");
- assert((start.headers.get("cache-control")||"").includes("s-maxage=300"),
-  "/start should be ISR-cached for five minutes.");
+ assert((start.headers.get("cache-control")||"").includes("no-store"),
+  "/start must never cache HTML containing one-time CSP nonces.");
  const home=await get("/");
  assert.equal(home.status,200);
  const impact=home.text.indexOf('class="ed-impact-band ed-impact-band-first"');
@@ -48,6 +48,34 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  assert.equal(securityTxt.status,200,"RFC 9116 security.txt missing");
  assert(securityTxt.text.includes("Contact: mailto:support@studiotasker.com")&&securityTxt.text.includes("Expires: 2027-10-09T00:00:00Z"),"Security contact/expiry invalid.");
  assert((home.headers.get("reporting-endpoints")||"").includes("studio-csp="),"Marketing CSP report endpoint header missing.");
+ // A public page must receive its own CSP nonce and matching SSR script
+ // attributes on every request. This prevents reusing a cached nonce.
+ const again=await get("/");
+ const scriptDirective=policy=>policy.split(";").map(s=>s.trim()).find(s=>s.startsWith("script-src "))||"";
+ const publicCsp=home.headers.get("content-security-policy")||"";
+ const publicCsp2=again.headers.get("content-security-policy")||"";
+ const nonce=/'nonce-([^']+)'/.exec(scriptDirective(publicCsp))?.[1];
+ const nonce2=/'nonce-([^']+)'/.exec(scriptDirective(publicCsp2))?.[1];
+ assert(nonce&&nonce2&&nonce!==nonce2,"Public HTML must receive distinct unpredictable script nonces.");
+ assert(home.text.includes('nonce="'+nonce+'"')&&again.text.includes('nonce="'+nonce2+'"'),
+  "Server-side Next scripts must carry the actual response CSP nonce.");
+ assert(!scriptDirective(publicCsp).includes("'unsafe-inline'")&&
+  !scriptDirective(publicCsp).includes("data:")&&
+  !/\\bhttps:\\s*(?:;|$)/.test(scriptDirective(publicCsp))&&
+  !scriptDirective(publicCsp).includes("https://*.paddle.com"),
+  "script-src must not include inline, data, wildcard scheme or broad script hosts.");
+ assert(publicCsp.includes("object-src 'none'"),"Public CSP must deny embedded objects.");
+ assert((home.headers.get("cache-control")||"").includes("no-store"),
+  "HTML with per-request nonces must never be cached.");
+ for(const route of ["/start","/about","/legal/privacy","/app-demo","/checkout"]){
+  const response=await get(route);
+  const directive=scriptDirective(response.headers.get("content-security-policy")||"");
+  assert(/'nonce-[^']+'/.test(directive),"Missing script nonce on "+route);
+  assert(!directive.includes("'unsafe-inline'")&&!directive.includes("data:"),"Unsafe script policy on "+route);
+  assert((response.headers.get("cache-control")||"").includes("no-store"),
+   "Nonce page must not be cached: "+route);
+ }
+
 
  const about=await get("/about"); assert.equal(about.status,200); assert(canonical(about.text,"https://www.studiotasker.com/about"),"About canonical missing.");
  const yoga=await get("/yoga-studio-software");
