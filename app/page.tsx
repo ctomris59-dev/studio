@@ -107,6 +107,7 @@ export default function HomePage() {
                 width={1800}
                 height={1200}
                 priority
+                fetchPriority="high"
                 sizes="(max-width: 760px) 100vw, 1360px"
               />
               <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">

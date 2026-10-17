@@ -78,6 +78,22 @@ async function main(){
       const n=rgb(color).map(x=>{const v=x/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});
       return n.length===3?.2126*n[0]+.7152*n[1]+.0722*n[2]:0;
      };
+     // Lighthouse contrast guard for solid-color first-screen marketing controls.
+     // These can be measured directly without guessing a photo/gradient background.
+     const solidContrast=selector=>{
+      const node=document.querySelector(selector);
+      if(!node||getComputedStyle(node).display==="none")return null;
+      const style=getComputedStyle(node);
+      if(style.backgroundColor==="rgba(0, 0, 0, 0)")return null;
+      const fg=lum(style.color),bg=lum(style.backgroundColor);
+      return (Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05);
+     };
+     const firstScreenContrast={
+      topBar:solidContrast(".ed-topline"),
+      monthlyPlan:solidContrast(".editorial .ed-impact-price-monthly"),
+      yearlyPlan:solidContrast(".editorial .ed-impact-price-annual"),
+      demoLink:solidContrast(".ed-nav-demo")
+     };
      let annualContrast=null;
      if(annual&&annualText){
       const foreground=lum(getComputedStyle(annualText).color);
@@ -102,7 +118,7 @@ async function main(){
       weightedFaces:weighted.map(x=>x.length),
       remoteFonts:performance.getEntriesByType("resource").filter(x=>/fonts\\.(googleapis|gstatic)\\.com/.test(x.name)).length,
       horizontalOverflow:document.documentElement.scrollWidth>innerWidth+4,
-      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast,menuVisible,menuLinks,closesOnEscape,mainCount,hasSkip,h1Count};
+      heroTop:h1?h1.getBoundingClientRect().top:null,annualContrast,firstScreenContrast,menuVisible,menuLinks,closesOnEscape,mainCount,hasSkip,h1Count};
     })()`});
     const result=evaluation.result?.value;
     assert(result,route+" browser evaluate failed: "+JSON.stringify(evaluation));
@@ -131,6 +147,10 @@ async function main(){
     }
     assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
     if(route==="/"&&width===1280){
+     for(const [label,ratio] of Object.entries(result.firstScreenContrast||{})){
+      assert(ratio!==null&&ratio>=4.5,
+       "Homepage solid-color text fails WCAG AA contrast: "+label+" ratio="+ratio);
+     }
      const photo=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
       const img=document.querySelector(".ed-impact-card > img");
       if(!img)return {found:false};
