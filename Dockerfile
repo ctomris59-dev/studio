@@ -30,7 +30,7 @@ RUN set -eux; \
 # The currently reviewed CVE-2026-14456/14457 fix is 3.5.8-r0 or newer.
 RUN set -eux; \
  for library in libcrypto3 libssl3; do \
-   library_version="$(apk list --installed "$library" | sed -n "s/^${library}-\\([^ ]*\\).*/\\1/p")"; \
+   library_version="$(apk list --installed "$library" | sed -n "s/^${library}-\([^ ]*\).*/\1/p")"; \
    echo "Installed Alpine $library: $library_version"; \
    test -n "$library_version"; \
    test "$(apk version -t "$library_version" "3.5.8-r0")" != "<"; \
