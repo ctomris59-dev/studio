@@ -4,23 +4,26 @@ This document records code evidence and the limits of an unauthenticated
 surface scanner. Review the exact URL and production deployment digest before
 equating a Vercel scan with the self-hosted StudioTasker server.
 
-## High – inline scripts: partial, risk-reducing remediation
+## High – script CSP: updated source, deployment verification pending
 
-- **Confirmed**: `next.config.ts` has `script-src 'unsafe-inline'` on
-  cacheable marketing/preview routes. This is a CSP policy weakness even if the
-  scanner cannot demonstrate an injection source.
-- **Remediated for /workspace**: `middleware.ts` creates a fresh request
-  nonce for this **force-dynamic** authenticated route and emits a script CSP
-  without `unsafe-inline`. Next.js receives the nonce on its request header;
-  CI requires separate nonces across requests and checks rendered nonce HTML.
-- **Remediated across public routes**: `script-src-attr 'none'` forbids
-  inline event attributes such as `onerror=`, independently of allowing
-  Next's inline hydration elements.
-- **OPEN**: cached public ISR pages cannot safely reuse a per-request nonce;
-  removing `unsafe-inline` there requires verified per-build script hashes
-  across every prerendered route, and a browser test of all hydration and
-  checkout flows. Do not disable ISR or break pages solely to improve an
-  automated score.
+- **Current source**: `next.config.mjs` fallback headers explicitly use
+  `script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com`,
+  without `'unsafe-inline'`, `data:` or scheme-wide `https:`. They include
+  `object-src 'none'` and `script-src-attr 'none'`.
+- **All HTML documents**: `middleware.ts` generates unpredictable request
+  nonces with `script-src 'self' 'nonce-…' 'strict-dynamic'…`, and the root
+  layout uses `force-dynamic` so Next.js adds those nonces to its hydration scripts.
+  Public and workspace routes use `Cache-Control: private, no-store`.
+- **Trade-off**: marketing ISR and 300-second HTML caching have been removed
+  deliberately. This increases server render work, and needs throughput/
+  performance testing on the self-hosted Contabo VPS. Static JS/CSS/image
+  assets remain cacheable. Do not add ISR without switching to verified
+  hash-based CSP that covers the exact rendered inline scripts.
+- **Acceptance**: CI verifies nonces, CSP directives, no-store and public HTML
+  hydration script attributes. An actual VPS deployment and full Chromium
+  check (marketing, demo, checkout and authenticated workspace) are still
+  required before marking the live finding closed. A reverse proxy must not
+  overwrite or duplicate CSP response headers.
 
 ## High – HMR / development mode
 
