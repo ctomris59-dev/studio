@@ -46,7 +46,7 @@ export function parsePaddleSubscriptionEvent(raw:unknown):PaddleSubscriptionEven
  if(!object(raw))return null;
  const eventId=text(raw.eventId||raw.event_id),eventType=text(raw.eventType||raw.event_type);
  const localSimulator=process.env.PADDLE_ENV==="sandbox"&&process.env.BILLING_ALLOW_LOCAL_TEST==="true"&&
-  /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(process.env.PUBLIC_APP_ORIGIN||"");
+  /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test((process.env.PUBLIC_APP_ORIGIN||"").trim());
  if(!/^evt_[a-z\d]{26}$/.test(eventId)&&!(localSimulator&&/^ntfsimevt_[a-z\d]{26}$/.test(eventId)))return null;
  const supported=new Set([
   "subscription.created","subscription.updated","subscription.activated","subscription.trialing",
