@@ -24,6 +24,10 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const preview=home.text.indexOf('class="ed-hero"');
  assert(impact>=0&&preview>impact,"Initial HTML must render the photo banner before the secondary product preview.");
  assert(home.text.includes('pexels-photo-2294400.jpeg'),"Requested photo should appear in server-rendered image markup.");
+ const heroImage=home.text.match(/<img\\b[^>]*pexels-photo-2294400\.jpeg[^>]*>/i)?.[0]||"";
+ assert(heroImage,"LCP hero image must be visible in initial server HTML.");
+ assert(/fetchpriority="high"/i.test(heroImage),"LCP image should be fetched with high priority.");
+ assert(!/loading="lazy"/i.test(heroImage),"LCP image must never be lazy-loaded.");
  const homeH1s=home.text.match(/<h1\b/g)||[];
  assert.equal(homeH1s.length,1,"Home document must expose only one H1.");
  assert(home.text.includes('<h1 id="impact-band-title">Designed for the work behind every class.</h1>'),
