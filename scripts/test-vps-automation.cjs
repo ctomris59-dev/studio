@@ -36,7 +36,7 @@ assert(!source.includes("curl | bash"),
  "Do not download and execute unaudited remote scripts.");
 assert(source.includes('systemctl", "show", "studiotasker-backup.service"'),
  "Backup configuration must be discovered from the actual systemd unit.");
-assert(source.includes('stati'), "Source should check file permissions.");
+assert(source.includes('ws.st_mode & 0o022') && source.includes('cs.st_mode & 0o022'), "Source must check file permissions.");
 assert(source.includes('if len(sources) != 1'), "Ambiguous sourced env must be rejected.");
 assert(!source.includes('else printf \'%s\\n\' "$LIVE/.env.production"'),
  "Must not silently fall back to app env for root-wrapper backups.");
