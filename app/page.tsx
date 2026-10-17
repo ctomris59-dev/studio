@@ -1,4 +1,4 @@
-export const revalidate=300;
+// Rendered dynamically by root layout to guarantee fresh CSP script nonces.
 import type {Metadata} from "next";
 import Link from "next/link";
 import Image from "next/image";

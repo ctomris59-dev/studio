@@ -7,7 +7,7 @@ import {PlanCards,PlanSelector} from "./plan-selector";
 
 export const metadata={title:"StudioTasker Pricing | Monthly & Annual Plans",description:"StudioTasker costs $39.90/month per studio or $406.80/year. Compare monthly and annual billing for the full studio management workspace.",alternates:{canonical:"/start"},robots:{index:true,follow:true}};
 
-export const revalidate=300;
+// Rendered dynamically by root layout to guarantee fresh CSP script nonces.
 export default function StartPage(){
  return <main className="st-start"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <header className="st-start-top">

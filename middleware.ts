@@ -1,15 +1,15 @@
 import {NextRequest,NextResponse} from "next/server";
 
 /**
- * Strict per-request CSP for the dynamic, authenticated workspace.
- * Marketing routes intentionally retain ISR and require a separate hash-based
- * rollout; sending nonces to a cached HTML page breaks hydration.
- *
- * Next.js extracts the nonce from the incoming Content-Security-Policy header
- * while rendering the workspace (app/workspace/page.tsx is force-dynamic).
+ * Strict per-request CSP for every dynamically rendered HTML document.
+ * The root layout is force-dynamic: Next.js reads this header during SSR and
+ * stamps matching nonces on framework hydration scripts. Never cache these
+ * HTML responses or enable static ISR without a tested hash-based policy.
  */
 export function middleware(request:NextRequest){
- // Only the dynamic workspace requires a fresh response nonce.
+ if(request.headers.get("rsc")==="1"||request.headers.has("next-router-prefetch")||
+    request.headers.get("purpose")==="prefetch")return NextResponse.next();
+ // No static/ISR HTML is served: all page responses use fresh nonces.
  const reportingEndpoint=new URL("/api/security/csp-report",request.nextUrl.origin).href;
  const nonce=btoa(crypto.randomUUID());
  const policy=[
@@ -18,10 +18,10 @@ export function middleware(request:NextRequest){
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self' https://*.paddle.com",
-  `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.paddle.com https://cdn.paddle.com https://challenges.cloudflare.com`,
+  `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://cdn.paddle.com https://challenges.cloudflare.com`,
   "script-src-attr 'none'",
-  // Workspace uses React-generated inline style attributes; keep style policy
-  // separate from script execution until a verified CSS refactor.
+  // React components use inline style attributes. Style policy is separate
+  // from script execution; remove style unsafe-inline only after CSS refactor.
   "style-src 'self' 'unsafe-inline' https://*.paddle.com https://challenges.cloudflare.com",
   "img-src 'self' data: blob: https://*.paddle.com",
   "font-src 'self' data:",
@@ -43,6 +43,9 @@ export function middleware(request:NextRequest){
  return response;
 }
 
-// Never intercept Next static chunks, optimizer, metadata image assets or
-// favicon. A response-only header on public routes preserves ISR page caching.
-export const config={matcher:["/workspace/:path*"]};
+// Intercept document routes only; exclude API, static chunks, image optimizer,
+// SEO data, static metadata and icons. RSC prefetch responses must not create
+// standalone navigation nonces.
+export const config={matcher:[
+ "/((?!api/|_next/|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|opengraph-image|twitter-image|icon|apple-icon|\\.well-known/).*)"
+]};

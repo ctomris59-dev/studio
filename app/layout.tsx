@@ -1,3 +1,5 @@
+// Nonce CSP needs per-request server rendering; never ISR-cache nonce HTML.
+export const dynamic="force-dynamic";
 import type {Metadata} from "next";
 import "./globals.css";
 // Font files are packaged with the app and served from our own origin: no
