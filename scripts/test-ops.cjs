@@ -40,3 +40,29 @@ assert(canonical&&canonical[1].includes("proxy_pass http://127.0.0.1:3000;"),
 assert(!canonical[1].includes("add_header Strict-Transport-Security"),
  "Do not duplicate upstream HSTS from Next.js on canonical www.");
 console.log("Nginx example HSTS on apex HTTPS redirect and ALPN configuration guards passed.");
+
+
+// Security advisories reviewed 2026-10-17: do not force a potentially
+// breaking Next 16 migration when 15.5.27 already carries the 15.x fixes.
+// CVE-2025-59472 requires PPR/cacheComponents AND NEXT_PRIVATE_MINIMAL_MODE=1.
+// CVE-2026-27980 is fixed on 15.x since 15.5.14.
+// CVE-2026-94543 is fixed in 15.5.27.
+// CVE-2026-94544 affects only Next 16.3.0 through 16.3.7.
+const nextVersion=manifest.dependencies.next;
+assert.equal(nextVersion,"15.5.27","Change the reviewed Next.js version only as a tested and approved migration.");
+assert.equal(lock.packages["node_modules/next"].version,nextVersion,
+ "The locked Next.js version must match the reviewed patched package.");
+const nextConfig=fs.readFileSync("next.config.mjs","utf8");
+assert(!/experimental\.ppr|\bppr\s*:|\bcacheComponents\s*:|\buseCache\s*:/.test(nextConfig),
+ "Do not enable PPR or Cache Components without explicit security assessment.");
+for(const file of ["Dockerfile",".github/workflows/build.yml"]){
+ const value=fs.readFileSync(file,"utf8");
+ assert(!/NEXT_PRIVATE_MINIMAL_MODE\s*=\s*1/.test(value),
+  "Production build must not activate Next.js minimal mode without review.");
+}
+assert(docker.includes("3.5.8-r0")&&docker.includes("libcrypto3 libssl3"),
+ "Alpine runtime image must reject pre-fix OpenSSL libraries.");
+const action=fs.readFileSync(".github/workflows/build.yml","utf8");
+assert(action.includes('test "$(apk version -t "$library_version" "3.5.8-r0")" != "<"'),
+ "CI must verify the installed OpenSSL libraries against their patched version.");
+console.log("Reviewed Next.js advisory exposure and patched Alpine OpenSSL image guards.");
