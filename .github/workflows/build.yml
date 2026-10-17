@@ -106,6 +106,8 @@ jobs:
         run: npm run test:release
       - name: Regression test Paddle simulator events and production rejection
         run: npm run test:paddle:simulation
+      - name: Validate guarded VPS maintenance assistant
+        run: npm run test:vps
       - name: Compile production build
         run: npm run build
       - name: Test production HTML and SEO HTTP behavior
