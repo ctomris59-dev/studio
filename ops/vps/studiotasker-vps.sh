@@ -114,7 +114,7 @@ backup_debug(){
  local file
  file="$(backup_env)"
  [ -r "$file" ] || stop "Backup configuration not readable."
- say "Reproduce pg_dump error without writing a backup; database remains unchanged."
+ say "Diagnose pg_dump with stdout discarded (not --file=/dev/null, which fails fsync). Database unchanged."
  # The root-owned file is the SAME shell fragment trusted by the existing
  # systemd backup wrapper. A dotenv parser cannot evaluate shell exports or
  # variable references and falsely reported BACKUP_DATABASE_URL missing.
@@ -134,7 +134,7 @@ const env={...process.env,PGHOST:decodeURIComponent(url.hostname),PGPORT:url.por
  PGUSER:decodeURIComponent(url.username),PGPASSWORD:decodeURIComponent(url.password),
  PGDATABASE:decodeURIComponent(url.pathname.slice(1))};
 if(url.searchParams.get("sslmode"))env.PGSSLMODE=url.searchParams.get("sslmode");
-const p=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges","--file=/dev/null"],
+const p=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges"],
  {env,stdio:["ignore","ignore","pipe"]});
 let err="";
 p.stderr.on("data",b=>{err+=String(b).slice(0,12000-err.length)});
@@ -232,6 +232,39 @@ ready_release(){
  [ "$(cat "$TARGET/.env-digest")" = "$(sha256sum "$LIVE/.env.production" | cut -d' ' -f1)" ] ||
    stop "Live env changed since build. Prepare again."
 }
+# The live checkout may contain the older backup script that misuses the
+# entire BACKUP_DATABASE_URL as PGDATABASE. For the *pre-deployment* snapshot,
+# run the fixed backup code from the verified, prepared release instead.
+# The service's systemd wrapper will resume using updated live code after deploy.
+staged_backup(){
+ check; clean; ready_release
+ local envfile started fresh
+ envfile="$(backup_env)"
+ started="$(date +%s)"
+ say "Creating encrypted pre-deployment backup using patched prepared-release code."
+ BACKUP_ENV_FILE="$envfile" TARGET_DIR="$TARGET" EXPECTED_BACKUP_DIR="$BACKUP_DIR" bash -c '
+  set -euo pipefail
+  set -a
+  . "$BACKUP_ENV_FILE"
+  set +a
+  [ "$BACKUP_OUTPUT_DIR" = "$EXPECTED_BACKUP_DIR" ] || {
+   echo "STOP: Backup output directory differs from the reviewed path." >&2
+   exit 2
+  }
+  exec node "$TARGET_DIR/scripts/backup-postgres.cjs"
+ ' || stop "Prepared-release backup failed; no migration or service changes."
+ fresh="$(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'studiotasker-*.rdbk' \
+   -newermt "@$started" -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)"
+ [ -n "$fresh" ] && [ -f "$fresh" ] || stop "Fresh encrypted backup not found."
+ BACKUP_ENV_FILE="$envfile" TARGET_DIR="$TARGET" BACKUP_FILE="$fresh" bash -c '
+  set -euo pipefail
+  set -a
+  . "$BACKUP_ENV_FILE"
+  set +a
+  exec node "$TARGET_DIR/scripts/verify-backup.cjs" "$BACKUP_FILE"
+ ' || stop "Encrypted backup authentication failed; no deployment."
+ say "Fresh authenticated archive created and verified using prepared release."
+}
 deploy(){
  check; clean; ready_release
  [ "$(gitapp rev-parse HEAD)" != "$(cat "$TARGET/.revision")" ] || stop "Already on the target revision."
@@ -280,22 +313,8 @@ if(e.PADDLE_ENV==="sandbox"){
 if(!e.MIGRATION_DATABASE_URL)
  throw Error("MIGRATION_DATABASE_URL missing. Do not guess admin credentials.");
 NODE
- say "Creating FRESH backup. Stop immediately if service fails."
- systemctl start "$BACKUP_SERVICE" || stop "Backup service failed. Nothing was deployed."
- local fresh envfile old rollback confirm failed=0
- fresh="$(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'studiotasker-*.rdbk' -mmin -30 -printf '%T@ %p\n' |
-   sort -nr | head -1 | cut -d' ' -f2-)"
- [ -n "$fresh" ] && [ -f "$fresh" ] || stop "Fresh encrypted backup not found."
- envfile="$(backup_env)"
- # Authenticate encrypted archive with exactly the backup service's own
- # exported passphrase; do not misinterpret shell-format env as a dotenv file.
- BACKUP_ENV_FILE="$envfile" bash -c '
-   set -a
-   . "$BACKUP_ENV_FILE"
-   set +a
-   exec node "$1" "$2"
- ' _ "$TARGET/scripts/verify-backup.cjs" "$fresh" ||
-   stop "Backup authentication failed. Deploy refused."
+ staged_backup
+ local old rollback confirm failed=0
  say "Database migrations are FORWARD-ONLY. Code rollback will not reverse schema changes."
  printf 'Type DEPLOY-STUDIOTASKER to approve migration and brief restart: '
  read -r confirm </dev/tty
@@ -335,6 +354,13 @@ NODE
    stop "Previous app files restored where possible. Database migrations remain applied."
  fi
  say "Deployment complete and production /api/health returned HTTP 200."
+ say "Checking that the existing systemd backup service now uses the patched live script."
+ systemctl reset-failed "$BACKUP_SERVICE" || true
+ if systemctl start "$BACKUP_SERVICE"; then
+  say "Scheduled encrypted backup service passed after the application update."
+ else
+  say "WARNING: Site is updated but the systemd backup service still fails. Inspect it immediately."
+ fi
  say "Public registration remains disabled. Paddle Live approval and release checks are separate."
 }
 help(){
@@ -344,13 +370,14 @@ StudioTasker Contabo VPS assistant (run as root):
   backup-debug Read-only pg_dump error with fuller diagnostic
   configure    Prompt privately for LIVE Paddle keys and webhook secret
   prepare      Fetch, test, build new version in an ISOLATED folder
-  deploy       Fresh backup + migration + app upgrade + health + rollback on failure\n               Supports Sandbox while Paddle Live approval is pending
+  backup       Fresh encrypted backup using VERIFIED prepared release; no live changes
+  deploy       Fresh prepared-code backup + migration + app upgrade + health + rollback\n               Supports Sandbox while Paddle Live approval is pending
 No command opens registration, claims Paddle approval or deletes databases.
 EOF
 }
 case "$#" in 0) help; exit 0;; esac
 case "$1" in
  doctor) doctor;; backup-debug) backup_debug;; configure) configure;;
- prepare) prepare;; deploy) deploy;; --help|-h|help) help;;
+ prepare) prepare;; backup) staged_backup;; deploy) deploy;; --help|-h|help) help;;
  *) help; exit 2;;
 esac

@@ -10,7 +10,7 @@ const syntax=spawnSync("bash",["-n",file],{encoding:"utf8"});
 assert.equal(syntax.status,0,syntax.stderr||"Bash syntax check failed");
 const help=spawnSync("bash",[file,"--help"],{encoding:"utf8",timeout:5000});
 assert.equal(help.status,0,help.stderr);
-for(const action of ["doctor","backup-debug","configure","prepare","deploy"])
+for(const action of ["doctor","backup-debug","configure","prepare","backup","deploy"])
  assert.match(help.stdout,new RegExp("\\b"+action+"\\b"));
 for(const guard of [
  "require", // script should reject unsupported prerequisites; kept intentionally generic
@@ -40,10 +40,26 @@ assert(source.includes('ws.st_mode & 0o022') && source.includes('cs.st_mode & 0o
 assert(source.includes('if len(sources) != 1'), "Ambiguous sourced env must be rejected.");
 assert(source.includes('BACKUP_ENV_FILE="$file" bash -c'),
  "Backup diagnosis must source the root wrapper's trusted shell env.");
-assert(source.includes('BACKUP_ENV_FILE="$envfile" bash -c'),
+assert(source.includes('BACKUP_ENV_FILE="$envfile" TARGET_DIR="$TARGET" BACKUP_FILE="$fresh" bash -c'),
  "Encrypted-backup authentication must use the exact shell-sourced passphrase.");
 assert(!source.includes('node --env-file="$file" - <<'),
  "Shell-format backup variables cannot be parsed reliably as dotenv.");
+assert(!source.includes('"--file=/dev/null"'),
+ "pg_dump diagnostic must never fsync /dev/null; discard stdout instead.");
+assert(source.includes('stdio:["ignore","ignore","pipe"]'),
+ "pg_dump diagnostic must discard its stdout and retain error reporting.");
+assert(source.includes('staged_backup(){')&&source.includes('staged_backup\n local old rollback'),
+ "Deployment must use prepared-release encrypted backup, not the old live script.");
+assert(source.includes('exec node "$TARGET_DIR/scripts/backup-postgres.cjs"'),
+ "Before schema migrations, use vetted prepared-release pg_dump code.");
+assert(source.includes('exec node "$TARGET_DIR/scripts/verify-backup.cjs" "$BACKUP_FILE"'),
+ "Prepared encrypted backup must be authenticated before deployment.");
+assert(source.includes('BACKUP_OUTPUT_DIR" = "$EXPECTED_BACKUP_DIR"'),
+ "Prepared backup may only write into the verified backup folder.");
+assert(source.includes('systemctl start "$BACKUP_SERVICE"'),
+ "The scheduled systemd backup must be tested again after new code starts.");
+assert(!source.includes('systemctl start "$BACKUP_SERVICE" || stop "Backup service failed. Nothing was deployed."'),
+ "Do not run the unpatched live backup code before deployment.");
 
 assert(!source.includes('else printf \'%s\\n\' "$LIVE/.env.production"'),
  "Must not silently fall back to app env for root-wrapper backups.");
