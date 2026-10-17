@@ -8,7 +8,7 @@ This file describes the **existing** Contabo installation, not a generic one-cli
 - Running production service: PM2 `studiotasker`, working directory `/var/www/studio`, HTTP at 127.0.0.1:3001.
 - Other PM2 applications `studiotasker-test` and `studiotasker-paddle-stage` must **never** be restarted by this helper.
 - The live checkout was on commit `ed1d32d` on October 17, 2026, while `origin/main` had already advanced hundreds of commits.
-- Root systemd unit `studiotasker-backup.service` was failing `pg_dump`. The real PostgreSQL error was truncated from its logs; this must be repaired before application deploy.
+- Root systemd unit `studiotasker-backup.service` runs `/usr/local/sbin/studiotasker-backup.sh` (a 9-line root wrapper), which loads the actual backup credentials from its own sourced file before calling `npm`. The backup was failing `pg_dump`, and the original 400-byte log truncation hid the PostgreSQL cause. Resolve both before deployment.
 - Latest encrypted `.rdbk` seen was dated October 11; **presence is not evidence of recoverability**.
 - Paddle Production website/account approval was `In Review`; keep registration closed.
 
@@ -35,7 +35,7 @@ bash /root/studiotasker-vps.sh prepare
 bash /root/studiotasker-vps.sh deploy
 ```
 
-**doctor** reads git/PM2, backup schedule, selected non-secret env flags; it never edits data. **backup-debug** invokes `pg_dump` against the backup configuration with output discarded, showing the beginning of the PostgreSQL error instead of the original lossy tail. It may read the entire database, so run it once during a quiet period and never post credentials or unredacted connection URLs.
+**doctor** reads git/PM2, backup schedule, selected non-secret env flags; it never edits data. **backup-debug** locates the root-owned `ExecStart` shell wrapper from systemd, scans it (without executing it) to find the single root-owned environment file it sources, and runs `pg_dump` with output discarded using that file's backup connection URL. It shows the beginning of the PostgreSQL error instead of the original lossy tail. Unsupported source expressions or insecure permissions cause it to stop, never guess/fall back to `.env.production`. It may read the entire database, so run it once during a quiet period and never post credentials or unredacted connection URLs. The file must contain ordinary `KEY=value` or `export KEY=value` entries; do not use shell command substitution in secret values.
 
 **configure** requires the Paddle LIVE API key, LIVE client token, and *LIVE webhook destination secret* through hidden prompts on the SSH terminal. Create the Live webhook in the Paddle Live panel first:
 
@@ -57,7 +57,7 @@ The tool never enables public registration and never sets a review confirmation 
 
 ## Troubleshooting
 
-- `backup-debug` returns a PostgreSQL error: repair the exact reported cause. For RLS-protected tables, ensure your dedicated backup role can dump all tenant data *without* giving ordinary runtime credentials BYPASSRLS or superuser rights. Do not weaken tenant policies to make backups pass.
+- `backup-debug` cannot discover the sourced file: inspect the local root wrapper and update the resolver to match its actual syntax. Never execute a wrapper merely to extract credentials.\n- `backup-debug` returns a PostgreSQL error: repair the exact reported cause. For RLS-protected tables, ensure your dedicated backup role can dump all tenant data *without* giving ordinary runtime credentials BYPASSRLS or superuser rights. Do not weaken tenant policies to make backups pass.
 - `doctor` reports a dirty checkout: inspect and preserve edits; do not auto-reset.
 - `prepare` fails: live site stays up.
 - `deploy` stops on backup: no migration, Git update, or PM2 restart has occurred.

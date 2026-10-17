@@ -16,15 +16,23 @@ async function main(){
  const proc=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges"],{
   env:{...process.env,...pgConnectionEnv(BACKUP_DATABASE_URL)},stdio:["ignore","pipe","pipe"]
  });
+ // Keep the beginning: PostgreSQL prints the actionable ERROR before the long LOCK TABLE query.
+ // The previous implementation kept only the last 300 characters, hiding permission/RLS failures.
  let stderr="";
- proc.stderr.on("data",b=>{stderr+=(b.toString()).slice(0,400)});
+ proc.stderr.on("data",b=>{
+  if(stderr.length<8000)stderr+=b.toString().slice(0,8000-stderr.length);
+ });
  try{
   await encryptStream(proc.stdout,partial,BACKUP_PASSPHRASE);
   const exit=await new Promise((resolve,reject)=>{
    if(proc.exitCode!==null)return resolve(proc.exitCode);
    proc.once("close",resolve);proc.once("error",reject);
   });
-  if(exit!==0)throw Error("pg_dump failed (exit "+exit+"): "+stderr.slice(-300));
+  if(exit!==0){
+   const redacted=stderr.replace(/postgres(?:ql)?:\/\/[^\s]+/gi,"[DB_URL_REDACTED]")
+     .replace(/(?:password|PGPASSWORD)\s*=\s*\S+/gi,"[PASSWORD_REDACTED]");
+   throw Error("pg_dump failed (exit "+exit+"): "+redacted.slice(0,1500));
+  }
   await fs.rename(partial,output);
   console.log("Encrypted backup written:",path.basename(output));
   console.log("Store an additional copy OFF this server, with the passphrase kept separately.");

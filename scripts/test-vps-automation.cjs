@@ -34,4 +34,11 @@ assert(!source.includes("AUTH_ALLOW_REGISTRATION:\"true\""),
  "Deployment helper must not enable public registrations.");
 assert(!source.includes("curl | bash"),
  "Do not download and execute unaudited remote scripts.");
+assert(source.includes('systemctl", "show", "studiotasker-backup.service"'),
+ "Backup configuration must be discovered from the actual systemd unit.");
+assert(source.includes('ws.st_mode & 0o022') && source.includes('cs.st_mode & 0o022'), "Source must check file permissions.");
+assert(source.includes('if len(sources) != 1'), "Ambiguous sourced env must be rejected.");
+assert(!source.includes('else printf \'%s\\n\' "$LIVE/.env.production"'),
+ "Must not silently fall back to app env for root-wrapper backups.");
+
 console.log("VPS assistant checks passed: Bash syntax, CLI help, fail-closed live flags, backup and staged release guards.");
