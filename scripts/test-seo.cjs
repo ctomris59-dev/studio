@@ -5,6 +5,20 @@ const read=p=>fs.readFileSync(p,"utf8");
 const layout=read("app/layout.tsx");
 const globalCSS=read("app/globals.css");
 assert(!globalCSS.includes("fonts.googleapis.com")&&!layout.includes("next/font/google")&&layout.includes("@fontsource/barlow-condensed")&&layout.includes("@fontsource/ibm-plex-mono")&&layout.includes("@fontsource/source-sans-3"),"Fonts must be bundled without build-time Google requests.");
+const faces=[...layout.matchAll(/import "@fontsource\/[^"]+\.css";/g)].map(x=>x[0]);
+assert.equal(faces.length,8,"Do not reintroduce all 18 static font weights into the critical CSS.");
+for(const face of [
+ "@fontsource/source-sans-3/400.css",
+ "@fontsource/source-sans-3/600.css",
+ "@fontsource/source-sans-3/700.css",
+ "@fontsource/barlow-condensed/400.css",
+ "@fontsource/barlow-condensed/700.css",
+ "@fontsource/barlow-condensed/800.css",
+ "@fontsource/barlow-condensed/600-italic.css",
+ "@fontsource/ibm-plex-mono/400.css"
+]){
+ assert(layout.includes('import "'+face+'";'),"Missing reviewed primary font face: "+face);
+}
 for(const variable of ["--studio-sans","--studio-heading","--studio-mono"]){
  assert(globalCSS.includes(variable+":"),"Font token not declared: "+variable);
 }
@@ -35,6 +49,7 @@ const studioTypes=home.indexOf('section className="ed-studio-types"');
 const main=home.indexOf('<main id="main-content"');
 assert(main>=0&&main<banner&&banner<preview&&preview<studioTypes,
  "The photo/pricing banner must appear first, before the secondary product preview and studio types.");
+assert(home.includes('fetchPriority="high"')&&home.includes('                priority'),"Above-the-fold hero image must be eagerly loaded with high priority.");
 assert(home.includes('src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"'),
  "The new user-selected Pexels photograph must be the banner image.");
 assert(home.includes('<h1 id="impact-band-title">')&&home.includes('<h2 id="main-heading">'),
