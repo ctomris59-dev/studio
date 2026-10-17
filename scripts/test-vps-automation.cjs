@@ -44,7 +44,7 @@ assert(source.includes('BACKUP_ENV_FILE="$envfile" TARGET_DIR="$TARGET" BACKUP_F
  "Encrypted-backup authentication must use the exact shell-sourced passphrase.");
 assert(!source.includes('node --env-file="$file" - <<'),
  "Shell-format backup variables cannot be parsed reliably as dotenv.");
-assert(source.includes('staged_backup(){')&&source.includes('staged_backup\\n local old rollback'),
+assert(source.includes('staged_backup(){')&&source.includes('staged_backup\n local old rollback'),
  "Deployment must use prepared-release encrypted backup, not the old live script.");
 assert(source.includes('exec node "$TARGET_DIR/scripts/backup-postgres.cjs"'),
  "Before schema migrations, use vetted prepared-release pg_dump code.");
