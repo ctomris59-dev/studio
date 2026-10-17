@@ -29,7 +29,8 @@ const apex=nginx.match(/server \{\s*listen 443 ssl http2;\s*server_name studiota
 assert(apex,"The HTTPS apex redirect vhost must exist and advertise HTTP/2.");
 assert(/add_header Strict-Transport-Security "max-age=31536000" always;/.test(apex[1]),
  "HTTPS apex redirect must include HSTS even on HTTP 308 responses.");
-assert(!apex[1].includes("includeSubDomains")&&!apex[1].includes("; preload"),
+const apexDirectives=apex[1].split("\n").filter(line=>!line.trim().startsWith("#")).join("\n");
+assert(!apexDirectives.includes("includeSubDomains")&&!apexDirectives.includes("; preload"),
  "Do not roll out cross-subdomain/preload HSTS without explicit approval.");
 assert(/return 308 https:\/\/www\.studiotasker\.com\$request_uri;/.test(apex[1]),
  "Apex must keep the canonical HTTPS 308 redirect.");
