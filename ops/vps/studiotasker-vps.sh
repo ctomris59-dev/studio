@@ -172,6 +172,21 @@ deploy(){
  [ "$(gitapp rev-parse HEAD)" != "$(cat "$TARGET/.revision")" ] || stop "Already on the target revision."
  app pm2 show "$SERVICE" | grep -Fq "exec cwd" || stop "PM2 service not found."
  app pm2 show "$SERVICE" | grep -Fq "$LIVE" || stop "PM2 cwd differs from expected live directory."
+ app pm2 jlist | node --env-file="$LIVE/.env.production" -e '
+let content="";
+process.stdin.on("data",chunk=>content+=chunk);
+process.stdin.on("end",()=>{
+ const matches=JSON.parse(content).filter(p=>p.name==="studiotasker");
+ if(matches.length!==1)throw Error("Expected exactly one production PM2 app");
+ const env=matches[0].pm2_env||{};
+ for(const key of ["DATABASE_URL","PUBLIC_APP_ORIGIN","PADDLE_ENV","NEXT_PUBLIC_PADDLE_ENV",
+  "PADDLE_API_KEY","NEXT_PUBLIC_PADDLE_CLIENT_TOKEN","PADDLE_WEBHOOK_SECRET"]){
+  if(Object.prototype.hasOwnProperty.call(env,key)&&String(env[key])!==String(process.env[key])){
+   console.error("PM2 saved environment conflicts with production env for: "+key);
+   process.exitCode=1;
+  }
+ }
+});' || stop "Resolve PM2 environment overrides before deployment."
  node --env-file="$LIVE/.env.production" - <<'NODE'
 const e=process.env;
 if(e.AUTH_ALLOW_REGISTRATION!=="false")throw Error("Public registration must remain disabled");
