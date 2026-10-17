@@ -53,11 +53,11 @@ assert.equal(nextVersion,"15.5.27","Change the reviewed Next.js version only as 
 assert.equal(lock.packages["node_modules/next"].version,nextVersion,
  "The locked Next.js version must match the reviewed patched package.");
 const nextConfig=fs.readFileSync("next.config.mjs","utf8");
-assert(!/experimental\\.ppr|\\bppr\\s*:|\\bcacheComponents\\s*:|\\buseCache\\s*:/.test(nextConfig),
+assert(!/experimental\.ppr|\bppr\s*:|\bcacheComponents\s*:|\buseCache\s*:/.test(nextConfig),
  "Do not enable PPR or Cache Components without explicit security assessment.");
 for(const file of ["Dockerfile",".github/workflows/build.yml"]){
  const value=fs.readFileSync(file,"utf8");
- assert(!/NEXT_PRIVATE_MINIMAL_MODE\\s*=\\s*1/.test(value),
+ assert(!/NEXT_PRIVATE_MINIMAL_MODE\s*=\s*1/.test(value),
   "Production build must not activate Next.js minimal mode without review.");
 }
 assert(docker.includes("3.5.8-r0")&&docker.includes("libcrypto3 libssl3"),
