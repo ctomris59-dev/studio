@@ -40,7 +40,7 @@ assert(source.includes('ws.st_mode & 0o022') && source.includes('cs.st_mode & 0o
 assert(source.includes('if len(sources) != 1'), "Ambiguous sourced env must be rejected.");
 assert(source.includes('BACKUP_ENV_FILE="$file" bash -c'),
  "Backup diagnosis must source the root wrapper's trusted shell env.");
-assert(source.includes('BACKUP_ENV_FILE="$envfile" bash -c'),
+assert(source.includes('BACKUP_ENV_FILE="$envfile" TARGET_DIR="$TARGET" BACKUP_FILE="$fresh" bash -c'),
  "Encrypted-backup authentication must use the exact shell-sourced passphrase.");
 assert(!source.includes('node --env-file="$file" - <<'),
  "Shell-format backup variables cannot be parsed reliably as dotenv.");
