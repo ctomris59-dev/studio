@@ -24,12 +24,68 @@ clean(){
  [ "$(gitapp branch --show-current)" = main ] || stop "Live checkout must be on main."
  gitapp merge-base --is-ancestor HEAD origin/main || stop "Live branch diverges from origin/main."
 }
+# Read the actual systemd ExecStart wrapper; never execute an unknown shell script to discover secrets.
+# The existing Contabo unit calls /usr/local/sbin/studiotasker-backup.sh, which sources
+# a separate credentials file. The earlier helper incorrectly fell back to .env.production.
 backup_env(){
- local f
- f="$(systemctl show "$BACKUP_SERVICE" -p EnvironmentFiles --value 2>/dev/null | awk '{print $1}')" || true
- if [ -n "$f" ] && [ -f "$f" ]; then printf '%s\n' "$f"
- elif [ -f /etc/studiotasker/studiotasker.env ]; then printf '%s\n' /etc/studiotasker/studiotasker.env
- else printf '%s\n' "$LIVE/.env.production"; fi
+ python3 - <<'PY'
+from pathlib import Path
+import os, re, stat, subprocess, sys, shlex
+
+def fail(message):
+    print("Backup config discovery stopped: " + message, file=sys.stderr)
+    sys.exit(2)
+
+try:
+    unit = subprocess.check_output(
+        ["systemctl", "show", "studiotasker-backup.service", "-p", "ExecStart", "--value"],
+        text=True, timeout=5
+    )
+    # systemctl ExecStart uses "{ path=... ; argv[]=... ; ... }" representation.
+    m = re.search(r"(?:^|[\s{])path=(/[^\s;{}]+)", unit)
+    if m:
+        wrapper = Path(m.group(1))
+    else:
+        # A regular unit may instead set ExecStart directly.
+        m = re.search(r"argv\[\]=([^;]+)", unit)
+        args = shlex.split(m.group(1).strip()) if m else []
+        wrapper = Path(args[0]) if args and args[0].startswith("/") else None
+    if wrapper is None:
+        fail("Cannot identify service ExecStart executable.")
+    if wrapper.suffix != ".sh" or not str(wrapper).startswith("/usr/local/sbin/"):
+        fail("Service does not use a supported locally installed root backup wrapper.")
+    ws = wrapper.stat()
+    if not stat.S_ISREG(ws.st_mode) or ws.st_uid != 0 or ws.st_mode & 0o022:
+        fail("Backup wrapper must be a root-owned, non-writable regular file.")
+    lines = wrapper.read_text().splitlines()
+    assigns = {}
+    sources = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        a = re.fullmatch(r'(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(["\x27]?)(/[^"\x27\s;]+)\2', stripped)
+        if a:
+            assigns[a.group(1)] = a.group(3)
+        s = re.fullmatch(r'(?:source|\.)\s+(["\x27]?)([^"\x27\s;]+)\1(?:\s*#.*)?', stripped)
+        if s:
+            candidate = s.group(2)
+            variable = re.fullmatch(r'\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?', candidate)
+            if variable:
+                candidate = assigns.get(variable.group(1), "")
+            sources.append(candidate)
+    if len(sources) != 1 or not sources[0].startswith("/"):
+        fail("Expected exactly one literal absolute source file in backup wrapper; cannot infer safely.")
+    config = Path(sources[0])
+    cs = config.stat()
+    if not stat.S_ISREG(cs.st_mode) or cs.st_mode & 0o022:
+        fail("Sourced config must be a regular file without group/other write permission.")
+    if cs.st_uid != 0:
+        fail("Sourced config must be root-owned.")
+    print(str(config))
+except (OSError, ValueError, subprocess.SubprocessError, UnicodeError) as e:
+    fail(type(e).__name__ + " inspecting backup service configuration (details withheld).")
+PY
 }
 doctor(){
  check
