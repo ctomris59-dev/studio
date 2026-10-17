@@ -26,6 +26,15 @@ RUN set -eux; \
  test -n "$zlib_version"; \
  apk version -t "$zlib_version" "1.3.2-r1"; \
  test "$(apk version -t "$zlib_version" "1.3.2-r1")" != "<"
+# Reject build images with unpatched Alpine 3.24 OpenSSL libraries.
+# The currently reviewed CVE-2026-14456/14457 fix is 3.5.8-r0 or newer.
+RUN set -eux; \
+ for library in libcrypto3 libssl3; do \
+   library_version="$(apk list --installed "$library" | sed -n "s/^${library}-\\([^ ]*\\).*/\\1/p")"; \
+   echo "Installed Alpine $library: $library_version"; \
+   test -n "$library_version"; \
+   test "$(apk version -t "$library_version" "3.5.8-r0")" != "<"; \
+ done
 RUN set -eux; \
  rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx; \
  ! command -v npm; \
