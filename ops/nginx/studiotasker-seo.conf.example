@@ -1,5 +1,8 @@
 # Example SEO-observable reverse proxy configuration.
 # Replace certificate and upstream values for the real server.
+# This is a TEMPLATE, not the installed /etc/nginx configuration. Audit before deploying.
+# HTTP/2 is explicitly configured on both TLS virtual hosts; ensure the running
+# Nginx was built with the HTTP/2 module and actually advertises h2 via ALPN.
 
 log_format studiotasker_seo '$time_iso8601\t$remote_addr\t$host\t$request_method\t$uri\t$args\t$status\t$body_bytes_sent\t$http_user_agent\t$request_time\t$sent_http_location';
 
@@ -16,6 +19,10 @@ server {
     access_log /var/log/nginx/studiotasker-seo.log studiotasker_seo;
     # ssl_certificate ...
     # ssl_certificate_key ...
+    # Even a HTTPS 308 redirect must advertise HSTS for the apex host.
+    # Do not add includeSubDomains/preload without verifying every subdomain.
+    # The canonical www upstream emits its own HSTS; do not duplicate it here.
+    add_header Strict-Transport-Security "max-age=31536000" always;
     return 308 https://www.studiotasker.com$request_uri;
 }
 
