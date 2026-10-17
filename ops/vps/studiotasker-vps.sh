@@ -114,7 +114,7 @@ backup_debug(){
  local file
  file="$(backup_env)"
  [ -r "$file" ] || stop "Backup configuration not readable."
- say "Reproduce pg_dump error without writing a backup; database remains unchanged."
+ say "Diagnose pg_dump with stdout discarded (not --file=/dev/null, which fails fsync). Database unchanged."
  # The root-owned file is the SAME shell fragment trusted by the existing
  # systemd backup wrapper. A dotenv parser cannot evaluate shell exports or
  # variable references and falsely reported BACKUP_DATABASE_URL missing.
@@ -134,7 +134,7 @@ const env={...process.env,PGHOST:decodeURIComponent(url.hostname),PGPORT:url.por
  PGUSER:decodeURIComponent(url.username),PGPASSWORD:decodeURIComponent(url.password),
  PGDATABASE:decodeURIComponent(url.pathname.slice(1))};
 if(url.searchParams.get("sslmode"))env.PGSSLMODE=url.searchParams.get("sslmode");
-const p=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges","--file=/dev/null"],
+const p=spawn("pg_dump",["--format=custom","--no-owner","--no-privileges"],
  {env,stdio:["ignore","ignore","pipe"]});
 let err="";
 p.stderr.on("data",b=>{err+=String(b).slice(0,12000-err.length)});
