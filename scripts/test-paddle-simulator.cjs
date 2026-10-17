@@ -53,6 +53,11 @@ try{
  const accepted=parse(event(simulationId));
  assert(accepted&&accepted.isTestMode===true&&accepted.studioId===studioId&&
   accepted.priceId===monthly&&accepted.status==="active","Local sandbox should accept Paddle simulated IDs");
+ process.env.PUBLIC_APP_ORIGIN="  http://127.0.0.1:3004 \n";
+ const paddedOrigin=parse(event(simulationId));
+ assert(paddedOrigin&&paddedOrigin.isTestMode===true&&paddedOrigin.studioId===studioId,
+  "Local sandbox should tolerate whitespace around PUBLIC_APP_ORIGIN");
+ process.env.PUBLIC_APP_ORIGIN="http://127.0.0.1:3004";
  assert.equal(parse(event("ntfsimevt_"+"G".repeat(26))),null,"Malformed event IDs must be rejected");
  const badPrice=event(simulationId);badPrice.data.items[0].price.id="pri_"+"z".repeat(26);
  assert.equal(parse(badPrice),null,"Unknown price must never activate an entitlement");
