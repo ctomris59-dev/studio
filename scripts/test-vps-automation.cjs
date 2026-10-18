@@ -102,9 +102,13 @@ const valid={
  // Privileged credentials must not be included in public app configuration.
 };
 function preflight(overrides={}){
+ const env={...process.env,...valid,...overrides};
+ // CI uses a separate migration URL to initialize its disposable test DB.
+ // The production release intentionally forbids inheriting such a credential.
+ if(!Object.prototype.hasOwnProperty.call(overrides,"MIGRATION_DATABASE_URL"))
+  delete env.MIGRATION_DATABASE_URL;
  return spawnSync(process.execPath,["-e",deployBlock[1]],{
-  env:{...process.env,...valid,...overrides},
-  encoding:"utf8",timeout:5000
+  env,encoding:"utf8",timeout:5000
  });
 }
 assert.equal(preflight().status,0,"Sandbox mode must permit code releases during Live approval.");
