@@ -61,6 +61,32 @@ assert(source.includes('systemctl start "$BACKUP_SERVICE"'),
 assert(!source.includes('systemctl start "$BACKUP_SERVICE" || stop "Backup service failed. Nothing was deployed."'),
  "Do not run the unpatched live backup code before deployment.");
 
+
+assert(source.includes('MIGRATOR_SECRETS=/root/studiotasker-db-secrets'),
+ "Use the protected migrator credential file, never guess admin credentials.");
+assert(source.includes('migrator_secrets_check')&&source.includes("= 600"),
+ "Require root-owned 0600 migrator secrets.");
+assert(source.includes(' run_migrations\n old='),
+ "Run isolated migrations after confirmation and before the application code switch.");
+assert(source.includes('run-vps-migrations.cjs'),
+ "Require temporary migrator-only child process.");
+assert(!source.includes("app bash -c 'cd \"$1\" && node --env-file=.env.production db/migrate.cjs'"),
+ "Do not run schema migrations with runtime app credentials.");
+assert(source.includes('["MIGRATION_DATABASE_URL","MIG_DB_PASS","APP_DB_PASS"]'),
+ "Reject privileged database secrets in PM2 saved environment.");
+const {migratorUrl}=require("./run-vps-migrations.cjs");
+const appUrl="postgresql://studiotasker_app:runtime-only@127.0.0.1:5432/studiotasker?sslmode=disable";
+const migratedUrl=migratorUrl(appUrl,"secure?not&plain=encoded_password_123456789");
+const parsed=new URL(migratedUrl);
+assert.equal(parsed.hostname,"127.0.0.1");
+assert.equal(parsed.pathname,"/studiotasker");
+assert.equal(parsed.username,"studiotasker_migrator");
+assert.equal(decodeURIComponent(parsed.password),"secure?not&plain=encoded_password_123456789");
+assert.equal(parsed.search,"?sslmode=disable");
+assert(!migratedUrl.includes("runtime-only"));
+assert.throws(()=>migratorUrl(appUrl,"short"),/password missing or too short/);
+assert.throws(()=>migratorUrl("https://example.invalid/db","a".repeat(32)),/Application database location/);
+
 assert(!source.includes('else printf \'%s\\n\' "$LIVE/.env.production"'),
  "Must not silently fall back to app env for root-wrapper backups.");
 
@@ -73,7 +99,7 @@ const valid={
  BILLING_ALLOW_SANDBOX_TEST:"false",
  PADDLE_ENV:"sandbox",NEXT_PUBLIC_PADDLE_ENV:"sandbox",
  LAUNCH_PADDLE_ACCOUNT_APPROVED:"false",
- MIGRATION_DATABASE_URL:"postgresql://example.invalid/no-connection-is-made"
+ // Privileged credentials must not be included in public app configuration.
 };
 function preflight(overrides={}){
  return spawnSync(process.execPath,["-e",deployBlock[1]],{
@@ -89,7 +115,7 @@ for(const [label,overrides] of Object.entries({
  "client/server mismatch":{NEXT_PUBLIC_PADDLE_ENV:"production"},
  "false Live approval claim":{LAUNCH_PADDLE_ACCOUNT_APPROVED:"true"},
  "unsupported Paddle environment":{PADDLE_ENV:"unknown"},
- "missing migration role":{MIGRATION_DATABASE_URL:""}
+ "globally exposed admin URL":{MIGRATION_DATABASE_URL:"postgresql://bad.example/db"}
 })){
  assert.notEqual(preflight(overrides).status,0,label+" must fail closed.");
 }
