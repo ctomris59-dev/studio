@@ -8,6 +8,7 @@ OWNER=studiotasker
 SERVICE=studiotasker
 BACKUP_SERVICE=studiotasker-backup.service
 BACKUP_DIR=/var/backups/studiotasker
+MIGRATOR_SECRETS=/root/studiotasker-db-secrets
 say(){ printf '\n[StudioTasker] %s\n' "$*"; }
 stop(){ printf '\n[STOP] %s\n' "$*" >&2; exit 1; }
 app(){ runuser -u "$OWNER" -- "$@"; }
@@ -265,6 +266,29 @@ staged_backup(){
  ' || stop "Encrypted backup authentication failed; no deployment."
  say "Fresh authenticated archive created and verified using prepared release."
 }
+migrator_secrets_check(){
+ [ -f "$MIGRATOR_SECRETS" ] && [ ! -L "$MIGRATOR_SECRETS" ] ||
+   stop "Dedicated migrator secrets file is missing or is a symbolic link."
+ [ "$(stat -c '%u' "$MIGRATOR_SECRETS")" = 0 ] &&
+ [ "$(stat -c '%a' "$MIGRATOR_SECRETS")" = 600 ] ||
+   stop "Migrator secrets must be root-owned with mode 0600."
+}
+run_migrations(){
+ migrator_secrets_check
+ say "Running forward-only migrations using root-only secret in an isolated child; never exporting the admin URL to PM2."
+ MIGRATOR_SECRET_FILE="$MIGRATOR_SECRETS" PREPARED_RELEASE="$TARGET" APP_USER="$OWNER" bash -c '
+   set -euo pipefail
+   set -a
+   . "$MIGRATOR_SECRET_FILE"
+   set +a
+   [ -n "${MIG_DB_PASS:-}" ] || {
+     echo "STOP: MIG_DB_PASS missing from root-only migrator secret file." >&2
+     exit 2
+   }
+   exec node --env-file="$PREPARED_RELEASE/.env.production" \
+     "$PREPARED_RELEASE/scripts/run-vps-migrations.cjs" "$PREPARED_RELEASE" "$APP_USER"
+ '
+}
 deploy(){
  check; clean; ready_release
  [ "$(gitapp rev-parse HEAD)" != "$(cat "$TARGET/.revision")" ] || stop "Already on the target revision."
@@ -277,6 +301,9 @@ process.stdin.on("end",()=>{
  const matches=JSON.parse(content).filter(p=>p.name==="studiotasker");
  if(matches.length!==1)throw Error("Expected exactly one production PM2 app");
  const env=matches[0].pm2_env||{};
+ for(const key of ["MIGRATION_DATABASE_URL","MIG_DB_PASS","APP_DB_PASS"]){
+  if(Object.prototype.hasOwnProperty.call(env,key))throw Error("Privileged database secret leaked into PM2: "+key);
+ }
  for(const key of ["DATABASE_URL","PUBLIC_APP_ORIGIN","PADDLE_ENV","NEXT_PUBLIC_PADDLE_ENV",
   "PADDLE_API_KEY","NEXT_PUBLIC_PADDLE_CLIENT_TOKEN","PADDLE_WEBHOOK_SECRET"]){
   if(Object.prototype.hasOwnProperty.call(env,key)&&String(env[key])!==String(process.env[key])){
@@ -310,16 +337,17 @@ if(e.PADDLE_ENV==="sandbox"){
 }else{
  throw Error("Unrecognized PADDLE_ENV. Expected sandbox or production.");
 }
-if(!e.MIGRATION_DATABASE_URL)
- throw Error("MIGRATION_DATABASE_URL missing. Do not guess admin credentials.");
+if(e.MIGRATION_DATABASE_URL)
+ throw Error("Never store or export MIGRATION_DATABASE_URL to the deployment environment; the migrator reads root-only credentials in an isolated process.");
 NODE
+ migrator_secrets_check
  staged_backup
  local old rollback confirm failed=0
  say "Database migrations are FORWARD-ONLY. Code rollback will not reverse schema changes."
  printf 'Type DEPLOY-STUDIOTASKER to approve migration and brief restart: '
  read -r confirm </dev/tty
  [ "$confirm" = DEPLOY-STUDIOTASKER ] || stop "Cancelled, no migrations or service modifications."
- app bash -c 'cd "$1" && node --env-file=.env.production db/migrate.cjs' _ "$TARGET"
+ run_migrations
  old="$(gitapp rev-parse HEAD)"
  rollback="$RELEASES/rollback-$(date -u +%Y%m%dT%H%M%S)-$$"
  install -d -m 700 -o "$OWNER" -g "$OWNER" "$rollback"
@@ -371,7 +399,7 @@ StudioTasker Contabo VPS assistant (run as root):
   configure    Prompt privately for LIVE Paddle keys and webhook secret
   prepare      Fetch, test, build new version in an ISOLATED folder
   backup       Fresh encrypted backup using VERIFIED prepared release; no live changes
-  deploy       Fresh prepared-code backup + migration + app upgrade + health + rollback\n               Supports Sandbox while Paddle Live approval is pending
+  deploy       Fresh backup + isolated root-secret DB migration + app upgrade + health\n               Supports Sandbox while Paddle Live approval is pending
 No command opens registration, claims Paddle approval or deletes databases.
 EOF
 }

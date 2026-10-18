@@ -54,6 +54,14 @@ The tool atomically updates `/var/www/studio/.env.production` preserving ownersh
 
 If any precondition is missing, it stops. Do **not** disable checks or substitute the older October 11 backups for a new verified backup.
 
+## Root-only migrator credentials (2026-10-18)
+
+The VPS already has a dedicated PostgreSQL migration role `studiotasker_migrator`. Its credential is stored in a **root-owned mode 0600** `/root/studiotasker-db-secrets` file as `MIG_DB_PASS`; this role and file were created during the original October 2026 server setup. `MIGRATION_DATABASE_URL` was intentionally removed from the live `.env.production` and saved PM2 environment after a credential-leak incident. **Do not add it back**, export it globally in your interactive shell, paste it into chat, or reuse the app/backup database user.
+
+The reviewed deployment helper now rejects this privileged URL in the persistent application environment or PM2 saved environment. It validates ownership and mode of the root-only file, and after the existing fresh-backup and typed-confirmation gates launches a **short-lived child process**. That child constructs the migration URL from the already configured app database host/name and the dedicated migrator role/password; only the `db/migrate.cjs` child receives `MIGRATION_DATABASE_URL`. Before restarting PM2 the privileged environment is gone. The actual `MIG_DB_PASS` value is not printed or committed.
+
+If the root-only secret is absent, outdated after password rotation, or the database role lacks DDL rights, migrations stop before the live PM2 process is touched. Restore the original root-only secret or correct the dedicated migrator credentials; never weaken the privilege boundary. The release was rebuilt and re-backed up after this helper change.
+
 ## Release sequencing: code first, Paddle later
 
 1. While Paddle is **In Review**, keep the current Sandbox server/client flags and **do not** enable local/Sandbox test events or registration on the public website. Run `doctor` and `prepare`, then run `backup` to create and authenticate a fresh encrypted backup using the patched prepared code. Verify independent recoverability before running `deploy`, which makes its own fresh backup first. This ships security/code changes without accepting payments.
