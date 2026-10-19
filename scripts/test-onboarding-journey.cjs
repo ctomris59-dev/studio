@@ -4,6 +4,7 @@ const fs=require("node:fs");
 
 const client=fs.readFileSync("app/workspace/workspace-client.tsx","utf8");
 const billing=fs.readFileSync("app/workspace/billing-panel.tsx","utf8");
+const checkout=fs.readFileSync("app/checkout/checkout-client.tsx","utf8");
 const register=fs.readFileSync("app/api/auth/register/route.ts","utf8");
 const subscription=fs.readFileSync("app/api/studio/subscription/route.ts","utf8");
 const webhook=fs.readFileSync("app/api/billing/paddle-webhook/route.ts","utf8");
@@ -40,6 +41,8 @@ contains(gate,'"/api/studio/subscription"',"Billing endpoints must remain access
 contains(billing,'body.subscription?.enabled&&onActivated',"Enable the workspace only after server-side entitlement confirmation");
 contains(billing,'if(params.get("billing")!=="success")',"Return from Paddle must activate confirmation polling");
 contains(billing,'const successPath="/workspace?billing=success&plan="+plan',"Paddle redirect must retain the plan");
+contains(billing,'successUrl:new URL(successPath,window.location.origin).toString()',"Paddle checkout success URL must be absolute");
+contains(checkout,'successUrl:new URL("/workspace?billing=success",window.location.origin).toString()',"Standalone Paddle checkout success URL must also be absolute");
 contains(billing,'event.name==="checkout.completed"',"Successful checkout must show the confirmation flow");
 assert(!billing.includes("setBillingAccess(\"active\")"),"Paddle UI must never bypass server entitlement");
 
