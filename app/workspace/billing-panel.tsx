@@ -74,7 +74,7 @@ export function BillingPanel({initialPlan,onActivated}:{initialPlan:LegalPlan|nu
       if(event.name==="checkout.completed"){
        setNote("Payment received. Confirming your subscription securely…");
        window.location.assign("/workspace?billing=success&plan="+checkoutPlanRef.current);
-      }else if(event.name==="checkout.error"||event.name==="checkout.payment.error")
+      }else if(event.name==="checkout.error"||event.name==="checkout.payment.error"||event.name==="checkout.payment.failed")
        setNote("Payment was not completed. Please retry securely.");
      }
     }));
@@ -83,7 +83,7 @@ export function BillingPanel({initialPlan,onActivated}:{initialPlan:LegalPlan|nu
    if(!paddle)throw new Error("Paddle checkout could not be initialized.");
    paddle.Checkout.open({
     transactionId:body.transactionId,
-    settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:successPath}
+    settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:new URL(successPath,window.location.origin).toString()}
    });
    setNote("Secure checkout opened with Paddle. Access activates only after a verified Paddle webhook confirms the subscription.");
   }catch(e){setNote(e instanceof Error?e.message:"Could not start checkout.")}
