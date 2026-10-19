@@ -40,6 +40,7 @@ const modes:{mode:AuthMode;name:string}[]=[{mode:"login",name:"Sign in"},{mode:"
 export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boolean}){
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
  const [mode,setMode]=useState<AuthMode>("login"),[token,setToken]=useState(""),[busy,setBusy]=useState(false),[note,setNote]=useState(""),[pendingPlan,setPendingPlan]=useState<"monthly"|"annual"|null>(null),[registrationLegalAccepted,setRegistrationLegalAccepted]=useState(false);
+ const [billingAccess,setBillingAccess]=useState<"checking"|"payment_required"|"active"|"unavailable">("checking");
  const [trustDevice,setTrustDevice]=useState(false);
  const [turnstileToken,setTurnstileToken]=useState("");
  const [turnstileReset,setTurnstileReset]=useState(0);
@@ -47,6 +48,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
  const [editing,setEditing]=useState<string|null>(null),[editForm,setEditForm]=useState({name:"",notes:"",stage:"New",tags:"",waiverStatus:"not_required",relatedContactName:"",relatedContactRole:"",relatedContactEmail:"",relatedContactPhone:""});
  const [settings,setSettings]=useState<StudioSettings>(defaultSettings),[view,setView]=useState<OwnerView>("today"),[logoVersion,setLogoVersion]=useState(0);
  const initializedView=useRef(false);
+ const attemptedVerification=useRef<string>("");
  const [archivedRecords,setArchivedRecords]=useState<{id:string;full_name:string}[]>([]);
  const [contactSearch,setContactSearch]=useState(""),[appliedContactSearch,setAppliedContactSearch]=useState("");
  const [contactPages,setContactPages]=useState<Record<ContactKind,ContactPage>>({lead:emptyContactPage(),member:emptyContactPage()});
@@ -86,8 +88,26 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
 
  async function load(){
   const res=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
-  if(!res.ok){setUser(null);setStudio(null);setPeople([]);initializedView.current=false;return}
+  if(!res.ok){setUser(null);setStudio(null);setPeople([]);setBillingAccess("checking");initializedView.current=false;return}
   const body=await res.json();setUser(body.user);setStudio(body.studio);
+  // A newly verified owner has an account but no paid entitlement yet.
+  // Resolve the billing gate BEFORE requesting normal studio APIs: those
+  // deliberately return HTTP 402 until a verified Paddle event activates access.
+  try{
+   const response=await fetch("/api/studio/subscription",{credentials:"same-origin",cache:"no-store"});
+   if(!response.ok)throw new Error("Subscription status unavailable.");
+   const billing=await response.json();
+   if(!billing.subscription?.enabled){
+    setBillingAccess("payment_required");setPeople([]);initializedView.current=false;
+    setContactPages({lead:emptyContactPage(),member:emptyContactPage()});
+    return;
+   }
+  }catch{
+   setBillingAccess("unavailable");setPeople([]);
+   setNote("Could not confirm your subscription status. Please retry.");
+   return;
+  }
+  setBillingAccess("active");
   if(["owner","manager","receptionist","instructor"].includes(body.user.role)){
    const response=await fetch("/api/studio/settings",{credentials:"same-origin",cache:"no-store"});
    if(response.ok){const config=await response.json();setSettings(config.studio);setStudio((v:Studio|null)=>v?{...v,name:config.studio.name}:v);
@@ -103,8 +123,29 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   const search=new URLSearchParams(window.location.search),requestedPlan=search.get("plan"),requestedMode=search.get("mode");if(requestedPlan==="monthly"||requestedPlan==="annual")setPendingPlan(requestedPlan);if(requestedMode==="register"&&registrationEnabled){setMode("register");if(requestedPlan!=="monthly"&&requestedPlan!=="annual")setPendingPlan("monthly")}
   const qs=new URLSearchParams(window.location.hash.replace(/^#/,""));if(window.location.hash)window.history.replaceState(null,"",window.location.pathname+window.location.search);
   for(const name of ["verify","reset"] as const){const found=qs.get(name);if(found){setMode(name);setToken(found);break}}
-  void load().catch(()=>setNote("Could not check your workspace session."));
+  void load().catch(()=>{setBillingAccess("unavailable");setNote("Could not check your workspace session.");});
  },[]);
+ // Verification links are one-click: the fragment token is consumed automatically.
+ // Preserve ?plan=annual across verification, login and checkout.
+ useEffect(()=>{
+  if(mode!=="verify"||!token||attemptedVerification.current===token)return;
+  attemptedVerification.current=token;
+  setBusy(true);setNote("Verifying your email…");
+  void (async()=>{
+   try{
+    const response=await fetch("/api/auth/verify",{
+     method:"POST",credentials:"same-origin",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({token})
+    });
+    const body=await response.json().catch(()=>({}));
+    if(!response.ok){setNote(body.error||"Could not verify your email. You can retry below.");return}
+    setMode("login");setToken("");
+    setNote("Email verified. Sign in to complete your StudioTasker subscription.");
+   }catch{setNote("Verification unavailable. You can retry below.");}
+   finally{setBusy(false)}
+  })();
+ },[mode,token]);
 
  async function submitAuth(event:FormEvent<HTMLFormElement>){
   event.preventDefault();setBusy(true);setNote("");
@@ -118,7 +159,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    if(!res.ok){setNote(body.error||"Unable to complete your request.");return}
    setForm(prev=>({...prev,password:""}));
    if(mode==="login"){initializedView.current=false;await load();if(pendingPlan)setView("settings");setNote(pendingPlan?"Signed in. Complete your "+pendingPlan+" StudioTasker subscription below.":"Signed in successfully.")}
-   else{setNote(body.notice||"Request accepted.");if(["verify","reset"].includes(mode)){setMode("login");setToken("");window.history.replaceState(null,"","/workspace")}if(mode==="register"){setRegistrationLegalAccepted(false);setMode("login")}}
+   else{setNote(body.notice||"Request accepted.");if(["verify","reset"].includes(mode)){setMode("login");setToken("");window.history.replaceState(null,"",window.location.pathname+window.location.search)}if(mode==="register"){setRegistrationLegalAccepted(false);setMode("login")}}
   }catch{setNote("Request failed. Please try again in a moment.")}finally{setBusy(false)}
  }
  async function addPerson(event:FormEvent<HTMLFormElement>){
@@ -219,6 +260,24 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions",resend:"Send verification link"}[mode]}</button>
   </form>
   {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}
+ </main>;
+
+ // Unpaid studios must only see account/billing actions, not a broken
+ // workspace shell with empty settings after 402 responses.
+ if(billingAccess!=="active")return <main id="main-content" tabIndex={-1} className="rd-workspace-card rd-auth-card">
+  <header className="rd-workspace-header"><Link href="/" className="rd-wordmark"><StudioTaskerMark className="rd-logo-mark"/>studio<b>tasker.</b></Link></header>
+  <h1 className="rd-auth-heading">{billingAccess==="payment_required"?"Activate your studio":"Checking studio access"}</h1>
+  <p className="rd-tiny">{studio?.name||"Your studio"} · {user.email}</p>
+  {note&&<p className="rd-feedback" role="status">{note}</p>}
+  {billingAccess==="payment_required"?(user.role==="owner"?<>
+    <p>Your account is ready. Complete your StudioTasker subscription to unlock studio management and start the 5-step setup.</p>
+    <BillingPanel initialPlan={pendingPlan} onActivated={()=>void load().catch(()=>setNote("Could not refresh your studio access."))}/>
+   </>:<p>Your studio subscription is not active. Please ask the studio owner to complete billing.</p>):
+   <p>We could not confirm your subscription. No payment or account changes have been made.</p>}
+  <div className="rd-contact-actions">
+   <button type="button" onClick={()=>void load().catch(()=>setNote("Could not refresh your studio access."))}>Refresh account status</button>
+   <button type="button" onClick={()=>void logout()}>Sign out</button>
+  </div>
  </main>;
 
  const canContacts=["owner","manager","receptionist"].includes(user.role),canEdit=["owner","manager"].includes(user.role);
