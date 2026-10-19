@@ -21,6 +21,7 @@ export function BillingPanel({initialPlan,onActivated}:{initialPlan:LegalPlan|nu
  const [note,setNote]=useState("");
  const paddleRef=useRef<Promise<Paddle|undefined>|null>(null);
  const activationNotified=useRef(false);
+ const checkoutPlanRef=useRef<LegalPlan>(initialPlan||"monthly");
 
  async function load(){
   const res=await fetch("/api/studio/subscription",{credentials:"same-origin",cache:"no-store"});
@@ -51,6 +52,7 @@ export function BillingPanel({initialPlan,onActivated}:{initialPlan:LegalPlan|nu
   if(!state?.checkoutConfigured){setNote("Secure Paddle checkout is not configured yet.");return}
   const alreadyAccepted=Boolean(state.legal.accepted[plan]);
   const successPath="/workspace?billing=success&plan="+plan;
+  checkoutPlanRef.current=plan;
   if(!alreadyAccepted&&!accepted){setNote("Review and accept the current legal terms before checkout.");return}
   setBusy(true);setNote("");
   try{
@@ -71,7 +73,7 @@ export function BillingPanel({initialPlan,onActivated}:{initialPlan:LegalPlan|nu
      eventCallback:(event)=>{
       if(event.name==="checkout.completed"){
        setNote("Payment received. Confirming your subscription securely…");
-       window.location.assign(successPath);
+       window.location.assign("/workspace?billing=success&plan="+checkoutPlanRef.current);
       }else if(event.name==="checkout.error"||event.name==="checkout.payment.error")
        setNote("Payment was not completed. Please retry securely.");
      }
