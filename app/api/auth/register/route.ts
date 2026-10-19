@@ -46,7 +46,11 @@ export async function POST(request:NextRequest){
    await client.query("INSERT INTO subscriptions(studio_id) VALUES($1)",[studio.rows[0].id]);
    await recordLegalAcceptance(client,{request,studioId:studio.rows[0].id,userId:u.rows[0].id,plan,source:"registration"});
    const challenge=await newChallenge(client,{purpose:"verify_email",email,userId:u.rows[0].id,hours:24});
-   await queueMessage(client,email,"verify_email",{url:origin+"/workspace#verify="+encodeURIComponent(challenge.secret),studioName});
+   // The verification email must retain the chosen paid plan across devices.
+   const verificationUrl=new URL("/workspace",origin);
+   verificationUrl.searchParams.set("plan",plan);
+   verificationUrl.hash="verify="+encodeURIComponent(challenge.secret);
+   await queueMessage(client,email,"verify_email",{url:verificationUrl.toString(),studioName});
   });
   return successResponse({ok:true,notice:"If this email address is eligible, check your inbox for the next account step."},202);
  }catch(e){
