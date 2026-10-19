@@ -188,6 +188,12 @@ async function main(){
   const staffMe=await call("/api/auth/me",{cookie:accepted.cookie});
   assert.equal(staffMe.status,200);
   assert.equal(staffMe.data.user.role,"receptionist");
+  const receptionistBilling=await call("/api/studio/subscription",{cookie:accepted.cookie});
+  assert.equal(receptionistBilling.status,200,"Receptionist must be able to bootstrap billing-gated workspace.");
+  assert.equal(receptionistBilling.data.subscription.enabled,false);
+  assert.equal(receptionistBilling.data.provider,undefined,"Staff must not see Paddle customer IDs.");
+  assert.equal(receptionistBilling.data.legal,undefined,"Staff must not see owner billing consent.");
+
   assert.equal(staffMe.data.studio.id,studioA);
   assert.equal((await call("/api/studio/invitations",{method:"POST",cookie:accepted.cookie,body:{email:"staff2-"+unique+"@example.com",role:"manager"}})).status,403);
   assert.equal((await call("/api/auth/staff-invite/accept",{method:"POST",body:{token:staffToken,studio:staffStudio,password}})).status,400,"An invitation must not be reusable.");
@@ -234,6 +240,11 @@ async function main(){
   const coachLogin=await call("/api/auth/login",{method:"POST",body:{email:instructorEmail,password}});
   assert.equal(coachLogin.status,200);
   assert.equal((await call("/api/auth/me",{cookie:coachLogin.cookie})).status,200);
+  const instructorBilling=await call("/api/studio/subscription",{cookie:coachLogin.cookie});
+  assert.equal(instructorBilling.status,200,"Instructor must be able to bootstrap billing-gated workspace.");
+  assert.equal(instructorBilling.data.subscription.enabled,false);
+  assert.equal(instructorBilling.data.provider,undefined,"Instructor cannot see Paddle customer IDs.");
+
   assert.equal((await call("/api/studio/people",{cookie:coachLogin.cookie})).status,403);
   assert.equal((await call("/api/studio/people",{method:"POST",cookie:coachLogin.cookie,body:{kind:"lead",name:"No Access",email:"no-access-"+unique+"@example.com"}})).status,403);
 
