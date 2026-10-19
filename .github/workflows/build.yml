@@ -110,6 +110,8 @@ jobs:
         run: npm run test:timezone
       - name: Test commercial registration release gate
         run: npm run test:release
+      - name: Check paid onboarding and Paddle handoff
+        run: npm run test:onboarding-journey
       - name: Regression test Paddle simulator events and production rejection
         run: npm run test:paddle:simulation
       - name: Validate guarded VPS maintenance assistant
