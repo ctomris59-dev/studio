@@ -273,7 +273,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     <p>Your account is ready. Complete your StudioTasker subscription to unlock studio management and start the 5-step setup.</p>
     <BillingPanel initialPlan={pendingPlan} onActivated={()=>void load().catch(()=>setNote("Could not refresh your studio access."))}/>
    </>:<p>Your studio subscription is not active. Please ask the studio owner to complete billing.</p>):
-   <p>We could not confirm your subscription. No payment or account changes have been made.</p>}
+   <p>{billingAccess==="checking"?"Checking your account and subscription…":"We could not confirm your subscription. No payment or account changes have been made."}</p>}
   <div className="rd-contact-actions">
    <button type="button" onClick={()=>void load().catch(()=>setNote("Could not refresh your studio access."))}>Refresh account status</button>
    <button type="button" onClick={()=>void logout()}>Sign out</button>
