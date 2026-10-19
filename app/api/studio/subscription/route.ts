@@ -10,8 +10,12 @@ export const runtime="nodejs";
 
 export async function GET(request:NextRequest){
  try{
-  const result=await authenticated(request,["owner","manager"],async(client,auth)=>{
+  const result=await authenticated(request,["owner","manager","receptionist","instructor"],async(client,auth)=>{
    const subscription=await entitlement(client,auth.studioId);
+   // Staff need the access gate result to load their workspace, but should
+   // never receive provider customer IDs or billing/legal acceptance details.
+   if(auth.role==="instructor"||auth.role==="receptionist")
+    return {subscription,limited:true as const};
    // Serialize queries on one PostgreSQL client (pg disallows concurrent queries).
    const monthly=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly");
    const annual=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"annual");
@@ -21,6 +25,7 @@ export async function GET(request:NextRequest){
    return {subscription,provider:provider.rows[0]||null,legal:{accepted:{monthly,annual},versions:LEGAL_VERSIONS,acceptanceText:LEGAL_ACCEPTANCE_TEXT}};
   });
   if(!result.access.ok)return errorResponse(result.access.status,result.access.message);
+  if(result.value&&"limited" in result.value)return successResponse({subscription:result.value.subscription});
   return successResponse({...result.value,checkoutConfigured:paddleCheckoutConfigured(),billingProvider:"Paddle"});
  }catch{return backendError()}
 }

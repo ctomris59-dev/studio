@@ -131,14 +131,17 @@ async function main(){
   assert.equal(badOrigin.status,403);
   const unique=randomUUID().replace(/-/g,"");
   const password="Test Password 34! "+unique.slice(0,5);
-  async function register(prefix){
+  async function register(prefix,plan="monthly"){
    const email=prefix+"-"+unique+"@example.com";
-   const res=await call("/api/auth/register",{method:"POST",body:{email,password,studioName:prefix+" Studio",focus:"Pilates",...LEGAL}});
+   const res=await call("/api/auth/register",{method:"POST",body:{email,password,studioName:prefix+" Studio",focus:"Pilates",...LEGAL,plan}});
    assert.equal(res.status,202,JSON.stringify(res.data));
    assert.equal((await call("/api/auth/login",{method:"POST",body:{email,password}})).status,401,"Unverified users cannot sign in.");
    const emailRow=await admin.query("SELECT payload->>'url' AS url FROM mail_outbox WHERE recipient_email=$1 AND template='verify_email' ORDER BY created_at DESC LIMIT 1",[email]);
    assert.equal(emailRow.rowCount,1,"A verification notification should be queued.");
-   const verifyToken=new URLSearchParams(new URL(emailRow.rows[0].url).hash.slice(1)).get("verify");
+   const verifyLink=new URL(emailRow.rows[0].url);
+   assert.equal(verifyLink.searchParams.get("plan"),plan,"Email verification must retain selected subscription plan.");
+   assert.equal(verifyLink.pathname,"/workspace");
+   const verifyToken=new URLSearchParams(verifyLink.hash.slice(1)).get("verify");
    const verified=await call("/api/auth/verify",{method:"POST",body:{token:verifyToken}});
    assert.equal(verified.status,200,JSON.stringify(verified.data));
    assert.equal((await call("/api/auth/verify",{method:"POST",body:{token:verifyToken}})).status,400,"Verification links must be single-use.");
@@ -154,10 +157,16 @@ async function main(){
    assert.equal(account.data.user.email,email);
    assert.equal(account.data.user.role,"owner");
    const acceptance=await admin.query("SELECT terms_version,dpa_version,privacy_version,plan,price_cents,ip_hash FROM legal_acceptances WHERE studio_id=$1 AND user_id=$2",[account.data.studio.id,account.data.user.id]);
-   assert.equal(acceptance.rowCount,1,"Registration must record legal clickwrap evidence.");assert.equal(acceptance.rows[0].plan,"monthly");assert.equal(acceptance.rows[0].price_cents,3990);assert.equal(acceptance.rows[0].ip_hash.length,64);
+   assert.equal(acceptance.rowCount,1,"Registration must record legal clickwrap evidence.");assert.equal(acceptance.rows[0].plan,plan);assert.equal(acceptance.rows[0].price_cents,plan==="annual"?40680:3990);assert.equal(acceptance.rows[0].ip_hash.length,64);
    return {email,cookie:login.cookie,studioId:account.data.studio.id,userId:account.data.user.id};
   }
-  const a=await register("alpine");const b=await register("bluebird");
+  const a=await register("alpine");const b=await register("bluebird","annual");
+  for(const [label,account] of [["monthly",a],["annual",b]]){
+   const billing=await call("/api/studio/subscription",{cookie:account.cookie});
+   assert.equal(billing.status,200,label+" account must reach billing before payment.");
+   assert.equal(billing.data.subscription.enabled,false,label+" account must not have paid access before a verified Paddle webhook.");
+   assert.equal(billing.data.checkoutConfigured,true,"CI sandbox billing fixture must be configured.");
+  }
   studioA=a.studioId;studioB=b.studioId;ownerA=a.userId;ownerB=b.userId;
   const duplicate=await call("/api/auth/register",{method:"POST",body:{email:a.email,password,studioName:"Duplicate Studio",focus:"Pilates",...LEGAL}});
   assert.equal(duplicate.status,202,"Existing account registration must not reveal existence.");
@@ -179,6 +188,12 @@ async function main(){
   const staffMe=await call("/api/auth/me",{cookie:accepted.cookie});
   assert.equal(staffMe.status,200);
   assert.equal(staffMe.data.user.role,"receptionist");
+  const receptionistBilling=await call("/api/studio/subscription",{cookie:accepted.cookie});
+  assert.equal(receptionistBilling.status,200,"Receptionist must be able to bootstrap billing-gated workspace.");
+  assert.equal(receptionistBilling.data.subscription.enabled,false);
+  assert.equal(receptionistBilling.data.provider,undefined,"Staff must not see Paddle customer IDs.");
+  assert.equal(receptionistBilling.data.legal,undefined,"Staff must not see owner billing consent.");
+
   assert.equal(staffMe.data.studio.id,studioA);
   assert.equal((await call("/api/studio/invitations",{method:"POST",cookie:accepted.cookie,body:{email:"staff2-"+unique+"@example.com",role:"manager"}})).status,403);
   assert.equal((await call("/api/auth/staff-invite/accept",{method:"POST",body:{token:staffToken,studio:staffStudio,password}})).status,400,"An invitation must not be reusable.");
@@ -225,6 +240,11 @@ async function main(){
   const coachLogin=await call("/api/auth/login",{method:"POST",body:{email:instructorEmail,password}});
   assert.equal(coachLogin.status,200);
   assert.equal((await call("/api/auth/me",{cookie:coachLogin.cookie})).status,200);
+  const instructorBilling=await call("/api/studio/subscription",{cookie:coachLogin.cookie});
+  assert.equal(instructorBilling.status,200,"Instructor must be able to bootstrap billing-gated workspace.");
+  assert.equal(instructorBilling.data.subscription.enabled,false);
+  assert.equal(instructorBilling.data.provider,undefined,"Instructor cannot see Paddle customer IDs.");
+
   assert.equal((await call("/api/studio/people",{cookie:coachLogin.cookie})).status,403);
   assert.equal((await call("/api/studio/people",{method:"POST",cookie:coachLogin.cookie,body:{kind:"lead",name:"No Access",email:"no-access-"+unique+"@example.com"}})).status,403);
 

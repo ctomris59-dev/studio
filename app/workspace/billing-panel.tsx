@@ -13,19 +13,25 @@ type BillingState={
  billingProvider:string;
 };
 
-export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
+export function BillingPanel({initialPlan,onActivated}:{initialPlan:LegalPlan|null;onActivated?:()=>void}){
  const [state,setState]=useState<BillingState|null>(null);
  const [plan,setPlan]=useState<LegalPlan>(initialPlan||"monthly");
  const [accepted,setAccepted]=useState(false);
  const [busy,setBusy]=useState(false);
  const [note,setNote]=useState("");
  const paddleRef=useRef<Promise<Paddle|undefined>|null>(null);
+ const activationNotified=useRef(false);
+ const checkoutPlanRef=useRef<LegalPlan>(initialPlan||"monthly");
 
  async function load(){
   const res=await fetch("/api/studio/subscription",{credentials:"same-origin",cache:"no-store"});
   const body=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(body.error||"Could not load subscription status.");
   setState(body);
+  if(body.subscription?.enabled&&onActivated&&!activationNotified.current){
+   activationNotified.current=true;
+   onActivated();
+  }
  }
  useEffect(()=>{
   const params=new URLSearchParams(window.location.search);
@@ -37,7 +43,7 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
    try{await load()}catch(e){if(!cancelled)setNote(e instanceof Error?e.message:"Subscription status unavailable.")}
   };
   void refresh();
-  const interval=window.setInterval(()=>{if(attempts++>=16){window.clearInterval(interval);return}void refresh()},3000);
+  const interval=window.setInterval(()=>{if(attempts++>=16){window.clearInterval(interval);setNote("Confirmation is taking longer than expected. Use Refresh subscription status or contact support if you were charged.");return}void refresh()},3000);
   return ()=>{cancelled=true;window.clearInterval(interval)};
  },[]);
  useEffect(()=>{setAccepted(false)},[plan]);
@@ -45,6 +51,8 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
  async function startCheckout(){
   if(!state?.checkoutConfigured){setNote("Secure Paddle checkout is not configured yet.");return}
   const alreadyAccepted=Boolean(state.legal.accepted[plan]);
+  const successPath="/workspace?billing=success&plan="+plan;
+  checkoutPlanRef.current=plan;
   if(!alreadyAccepted&&!accepted){setNote("Review and accept the current legal terms before checkout.");return}
   setBusy(true);setNote("");
   try{
@@ -61,14 +69,21 @@ export function BillingPanel({initialPlan}:{initialPlan:LegalPlan|null}){
    if(!paddleRef.current){
     paddleRef.current=import("@paddle/paddle-js").then(({initializePaddle})=>initializePaddle({
      token:body.clientToken,
-     environment:body.environment==="sandbox"?"sandbox":"production"
+     environment:body.environment==="sandbox"?"sandbox":"production",
+     eventCallback:(event)=>{
+      if(event.name==="checkout.completed"){
+       setNote("Payment received. Confirming your subscription securely…");
+       window.location.assign("/workspace?billing=success&plan="+checkoutPlanRef.current);
+      }else if(event.name==="checkout.error"||event.name==="checkout.payment.error"||event.name==="checkout.payment.failed")
+       setNote("Payment was not completed. Please retry securely.");
+     }
     }));
    }
    const paddle=await paddleRef.current;
    if(!paddle)throw new Error("Paddle checkout could not be initialized.");
    paddle.Checkout.open({
     transactionId:body.transactionId,
-    settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:"/workspace?billing=success"}
+    settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:new URL(successPath,window.location.origin).toString()}
    });
    setNote("Secure checkout opened with Paddle. Access activates only after a verified Paddle webhook confirms the subscription.");
   }catch(e){setNote(e instanceof Error?e.message:"Could not start checkout.")}

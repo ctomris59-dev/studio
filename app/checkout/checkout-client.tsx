@@ -26,14 +26,14 @@ export default function CheckoutClient(){
     token,environment,
     eventCallback:(event)=>{
      if(event.name==="checkout.completed")setStatus("Payment received. Paddle is confirming your subscription.");
-     else if(event.name==="checkout.error"||event.name==="checkout.payment.error")setStatus("Checkout could not continue. Please try again.");
+     else if(event.name==="checkout.error"||event.name==="checkout.payment.error"||event.name==="checkout.payment.failed")setStatus("Checkout could not continue. Please try again.");
     }
    }));
   }
   void paddleRef.current.then(paddle=>{
    if(!paddle){setStatus("Secure checkout could not be initialized.");return}
    setStatus("Secure checkout ready.");
-   paddle.Checkout.open({transactionId,settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:"/workspace?billing=success"}});
+   paddle.Checkout.open({transactionId,settings:{displayMode:"overlay",variant:"one-page",theme:"light",locale:"en",successUrl:new URL("/workspace?billing=success",window.location.origin).toString()}});
   }).catch(()=>setStatus("Secure checkout could not be initialized."));
  },[transactionId]);
 
