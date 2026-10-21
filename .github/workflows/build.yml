@@ -94,6 +94,8 @@ jobs:
         run: npm run test:jsonld
       - name: Lint reviewed JSON-LD and security test sources
         run: npm run lint
+      - name: Lint full application and server sources
+        run: npm run lint:all
       - name: Lint public security and reviewed HTML sources
         run: npm run lint:security
       - name: Typecheck standalone TypeScript sources
