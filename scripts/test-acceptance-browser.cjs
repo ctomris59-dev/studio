@@ -13,7 +13,7 @@ async function api(route,options={}){
 }
 async function server(startRegistration){
  const logs=[];
- const p=spawn(process.execPath,["node_modules/next/dist/bin/next","start","-p","3192","-H","127.0.0.1"],{env:{...process.env,NODE_ENV:"production",PUBLIC_APP_ORIGIN:HOST,BILLING_ALLOW_LOCAL_TEST:"true",AUTH_ALLOW_REGISTRATION:startRegistration?"true":"false"},stdio:["ignore","pipe","pipe"]});
+ const p=spawn(process.execPath,["node_modules/next/dist/bin/next","start","-p","3192","-H","127.0.0.1"],{env:{...process.env,NODE_ENV:"production",PUBLIC_APP_ORIGIN:HOST,BILLING_ALLOW_LOCAL_TEST:"true",BILLING_ENFORCEMENT:"required",AUTH_ALLOW_REGISTRATION:startRegistration?"true":"false"},stdio:["ignore","pipe","pipe"]});
  p.stdout.on("data",v=>{if(logs.length<50)logs.push(String(v))});p.stderr.on("data",v=>{if(logs.length<50)logs.push(String(v))});
  for(let i=0;i<100;i++){if(p.exitCode!==null)throw Error("Next quit: "+logs.join("").slice(-1500));try{if((await fetch(HOST+"/workspace")).status===200)return p}catch{}await pause(200)}
  p.kill();throw Error("Server timeout "+logs.join("").slice(-1800));
@@ -85,6 +85,7 @@ async function main(){
    const cookie="__Host-studiotasker_session="+session.value;
    const pre=await api("/api/studio/subscription",{cookie});
    check(pre.status===200&&pre.data.subscription.enabled===false,plan+" unpaid entitlement remains disabled");
+   check((await api("/api/studio/onboarding",{cookie})).status===402,plan+" production-style billing gate blocks unpaid studio operations");
    const event={event_id:"evt_"+randomBytes(13).toString("hex"),event_type:"subscription.created",occurred_at:new Date().toISOString(),data:{
     id:"sub_"+randomBytes(13).toString("hex"),status:"active",customer_id:"ctm_"+randomBytes(13).toString("hex"),updated_at:new Date().toISOString(),
     current_billing_period:{starts_at:new Date().toISOString(),ends_at:new Date(Date.now()+32*86400000).toISOString()},
