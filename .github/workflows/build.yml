@@ -124,6 +124,8 @@ jobs:
         run: npm run test:api
       - name: Real Chromium mobile and typography smoke
         run: npm run test:browser
+      - name: Chromium customer acceptance (closed/open signup, both plans, signed billing, onboarding)
+        run: npm run test:acceptance:browser
 
   runtime-image:
     name: Full Docker runtime, read-only and reduced-privilege smoke

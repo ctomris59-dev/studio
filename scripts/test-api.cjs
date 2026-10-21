@@ -193,6 +193,15 @@ async function main(){
   assert.equal(receptionistBilling.data.subscription.enabled,false);
   assert.equal(receptionistBilling.data.provider,undefined,"Staff must not see Paddle customer IDs.");
   assert.equal(receptionistBilling.data.legal,undefined,"Staff must not see owner billing consent.");
+  // Upgrading an existing staff member to manager must never disclose
+  // Paddle customer IDs or legal acceptance from the owner account.
+  await admin.query("UPDATE studio_users SET role='manager' WHERE user_id=$1 AND studio_id=$2",[staffMe.data.user.id,studioA]);
+  const managerBilling=await call("/api/studio/subscription",{cookie:accepted.cookie});
+  assert.equal(managerBilling.status,200);
+  assert.equal(managerBilling.data.provider,undefined,"Manager must not see Paddle billing identifiers.");
+  assert.equal(managerBilling.data.legal,undefined,"Manager must not see owner legal consent.");
+  await admin.query("UPDATE studio_users SET role='receptionist' WHERE user_id=$1 AND studio_id=$2",[staffMe.data.user.id,studioA]);
+
 
   assert.equal(staffMe.data.studio.id,studioA);
   assert.equal((await call("/api/studio/invitations",{method:"POST",cookie:accepted.cookie,body:{email:"staff2-"+unique+"@example.com",role:"manager"}})).status,403);
