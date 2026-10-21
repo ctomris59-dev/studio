@@ -6,6 +6,7 @@
 
 - Release baseline before acceptance: `33aa15ed71c72fa6714d4d0f83799056466beb1b` (2026-10-21).
 - RC source: the final GitHub `main` commit after the acceptance PR is merged; record the full immutable SHA in the handoff.
+- `ops/vps/studiotasker-vps.sh prepare` requires an explicit `STUDIOTASKER_RELEASE_SHA` (full 40-character lowercase SHA) matching fetched `origin/main`. A newer or different main commit must **not** silently replace the already approved build. Re-review and re-run CI for any later commit.
 - Lock `package-lock.json` and resolve dependencies only with `npm ci`; no dependency upgrades during RC.
 - No migrations or changes to live user data are planned by this acceptance work.
 - Never assume "green CI" is equivalent to live payment or disaster recovery certification.
