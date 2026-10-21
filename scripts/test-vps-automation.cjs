@@ -32,6 +32,10 @@ for(const guard of [
 }
 assert(!source.includes("AUTH_ALLOW_REGISTRATION:\"true\""),
  "Deployment helper must not enable public registrations.");
+assert(source.includes('[[ "$expected" =~ ^[0-9a-f]{40}$ ]]'),
+ "Pre-deploy must require an explicit 40-character, approved release SHA.");
+assert(source.includes('[ "$revision" = "$expected" ]'),
+ "Pre-deploy must reject remote main if it differs from the operator-approved commit.");
 assert(!source.includes("curl | bash"),
  "Do not download and execute unaudited remote scripts.");
 assert(source.includes('systemctl", "show", "studiotasker-backup.service"'),
