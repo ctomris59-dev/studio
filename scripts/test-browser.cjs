@@ -55,7 +55,7 @@ async function main(){
   const paths=["/","/start","/contact","/app-demo","/yoga-studio-software","/legal/security","/workspace"];
   for(const width of [1280,1200,1024,820,761,760,390,320]){
    await peer.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
-   for(const route of (width===1280||width===390?paths:width===320?["/","/pilates-studio-software"]:["/"])){
+   for(const route of (width===1280||width===390?paths:width===320?["/","/workspace","/pilates-studio-software"]:["/"])){
     const url=HOST+route;
     const res=await fetch(url);assert.equal(res.status,200,route+" server render failed");
     await peer.send("Page.navigate",{url});
@@ -131,13 +131,19 @@ async function main(){
      const ui=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
       const forgot=document.querySelector('#auth-tab-forgot');
       if(!forgot)return {exists:false};
+      const trust=document.querySelector('.rd-trust-device input[type="checkbox"]');
+      const trustText=document.querySelector('.rd-trust-device > span');
+      const c=trust?.getBoundingClientRect(),t=trustText?.getBoundingClientRect();
       forgot.click();
       await new Promise(resolve=>setTimeout(resolve,300));
-      return {exists:true,selected:forgot.getAttribute('aria-selected'),text:document.querySelector('#main-content h1')?.textContent};
+      return {exists:true,selected:forgot.getAttribute('aria-selected'),text:document.querySelector('#main-content h1')?.textContent,
+       checkboxWidth:c?.width,checkboxHeight:c?.height,trustAligned:!!c&&!!t&&Math.abs(c.top-t.top)<10};
      })()`});
      const interaction=ui.result?.value;
-     assert(interaction?.exists&&interaction.selected==="true"&&/account access/i.test(interaction.text||""),
+     assert(interaction?.exists&&interaction.selected==="true"&&/reset your password/i.test(interaction.text||""),
       "Workspace React tab did not hydrate under strict nonce CSP: "+JSON.stringify(interaction));
+     assert(interaction.checkboxWidth>=16&&interaction.checkboxWidth<=22&&interaction.checkboxHeight>=16&&interaction.checkboxHeight<=22&&interaction.trustAligned,
+      "Workspace trusted-device checkbox must be compact and aligned: "+JSON.stringify(interaction));
     }
     assert(result.total>=1,route+" did not render text");
     if(route!=="/legal/security"){
@@ -146,6 +152,18 @@ async function main(){
      assert.equal(result.h1Count,1,route+" should contain one main page heading");
     }
     assert.equal(result.horizontalOverflow,false,route+" must not overflow the viewport after font-size changes.");
+    if(route==="/workspace"&&(width===390||width===320)){
+     const compact=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
+      const root=document.querySelector(".rd-auth-shell");
+      const trust=document.querySelector(".rd-trust-device input[type=checkbox]");
+      return {found:!!root,columns:root?getComputedStyle(root).gridTemplateColumns:"",
+       size:trust?{width:trust.getBoundingClientRect().width,height:trust.getBoundingClientRect().height}:null};
+     })()`});
+     const c=compact.result?.value;
+     assert(c?.found&&c.columns.split(" ").length===1, "Mobile workspace must stack the auth layout: "+JSON.stringify(c));
+     assert(c?.size?.width>=16&&c.size.width<=22&&c.size.height>=16&&c.size.height<=22,
+      "Mobile trusted-device checkbox must remain compact: "+JSON.stringify(c));
+    }
     if(route==="/"&&width===1280){
      for(const [label,ratio] of Object.entries(result.firstScreenContrast||{})){
       assert(ratio!==null&&ratio>=4.5,
