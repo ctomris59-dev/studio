@@ -12,9 +12,9 @@ export async function GET(request:NextRequest){
  try{
   const result=await authenticated(request,["owner","manager","receptionist","instructor"],async(client,auth)=>{
    const subscription=await entitlement(client,auth.studioId);
-   // Staff need the access gate result to load their workspace, but should
-   // never receive provider customer IDs or billing/legal acceptance details.
-   if(auth.role==="instructor"||auth.role==="receptionist")
+   // Only owners may view provider identifiers or legal/billing acceptance.
+   // Managers, receptionists and instructors need only subscription access.
+   if(auth.role!=="owner")
     return {subscription,limited:true as const};
    // Serialize queries on one PostgreSQL client (pg disallows concurrent queries).
    const monthly=await hasCurrentLegalAcceptance(client,auth.studioId,auth.userId,"monthly");
