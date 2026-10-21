@@ -42,5 +42,19 @@ export default defineConfig([
    "jsx-a11y/click-events-have-key-events":"warn",
    "jsx-a11y/no-static-element-interactions":"warn"
   }
+ },
+ // These test-only harnesses transpile trusted, first-party TypeScript modules
+ // using Function to exercise exports without bundling Next.js.
+ // Keep no-new-func enforced for all shipped application and server code.
+ {
+  files:[
+   "scripts/test-auth.cjs",
+   "scripts/test-csv.cjs",
+   "scripts/test-demo-auth.cjs",
+   "scripts/test-paddle-simulator.cjs",
+   "scripts/test-release.cjs",
+   "scripts/test-timezone.cjs"
+  ],
+  rules:{"no-new-func":"off"}
  }
 ]);

@@ -31,7 +31,7 @@ The script is checked out of the verified Git history into a root-only file befo
 bash /root/studiotasker-vps.sh doctor
 bash /root/studiotasker-vps.sh backup-debug
 bash /root/studiotasker-vps.sh configure
-bash /root/studiotasker-vps.sh prepare
+STUDIOTASKER_RELEASE_SHA='PASTE_APPROVED_40_CHARACTER_COMMIT_SHA_HERE' bash /root/studiotasker-vps.sh prepare
 bash /root/studiotasker-vps.sh backup
 bash /root/studiotasker-vps.sh deploy
 ```
