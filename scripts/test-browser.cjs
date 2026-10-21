@@ -131,11 +131,11 @@ async function main(){
      const ui=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
       const forgot=document.querySelector('#auth-tab-forgot');
       if(!forgot)return {exists:false};
-      forgot.click();
-      await new Promise(resolve=>setTimeout(resolve,300));
       const trust=document.querySelector('.rd-trust-device input[type="checkbox"]');
       const trustText=document.querySelector('.rd-trust-device > span');
       const c=trust?.getBoundingClientRect(),t=trustText?.getBoundingClientRect();
+      forgot.click();
+      await new Promise(resolve=>setTimeout(resolve,300));
       return {exists:true,selected:forgot.getAttribute('aria-selected'),text:document.querySelector('#main-content h1')?.textContent,
        checkboxWidth:c?.width,checkboxHeight:c?.height,trustAligned:!!c&&!!t&&Math.abs(c.top-t.top)<10};
      })()`});
