@@ -110,10 +110,15 @@ async function main(){
    async function webhook(secret){const sign=createHmac("sha256",secret).update(ts+":"+body).digest("hex");const r=await fetch(HOST+"/api/billing/paddle-webhook",{method:"POST",headers:{"Content-Type":"application/json","Paddle-Signature":"ts="+ts+";h1="+sign},body});return{status:r.status,data:await r.json()}}
    check((await webhook("invalid-test-secret")).status===401,plan+" bad webhook signature rejected");
    check((await api("/api/studio/subscription",{cookie})).data.subscription.enabled===false,plan+" invalid webhook does not activate paid workspace");
+   // Reproduce the actual asynchronous Paddle handoff: return to the
+   // confirmation URL BEFORE the signed webhook reaches the server.
+   await navigate("/workspace?billing=success&plan="+plan);
+   await waitText(".rd-billing-panel .rd-feedback","Payment submitted");
+   check(!(await exists(".rd-live-shell")),plan+" delayed webhook keeps user on confirmation, not dashboard");
    const paid=await webhook(process.env.PADDLE_WEBHOOK_SECRET);
    check(paid.status===200&&paid.data.processed===true,plan+" signed webhook activates paid studio");
    check((await webhook(process.env.PADDLE_WEBHOOK_SECRET)).data.processed===false,plan+" duplicate webhook idempotent");
-   await navigate("/workspace?billing=success&plan="+plan);
+   // The mounted billing panel must poll and transition without a reload.
    await waitText("#quick-start-title","5-step quick start");
    check(await exists(".rd-live-shell"),plan+" first paid workspace is visible");
    const pending=await api("/api/studio/onboarding",{cookie});
