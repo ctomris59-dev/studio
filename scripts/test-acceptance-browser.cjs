@@ -55,6 +55,9 @@ async function main(){
   check((await api("/api/auth/register",{method:"POST",body:{email:"unavailable@example.test"}})).status===403,"Closed registration rejects API POST");
   await stop(next);next=null;await pause(500);
   next=await server(true);
+  await navigate("/workspace?plan=annual#verify=invalid");
+  await waitText(".rd-feedback","Invalid verification token");
+  check(await exists("#auth-form"),"Expired or malformed verification token shows recoverable account form");
   for(const plan of ["annual","monthly"]){
    const nonce=randomBytes(8).toString("hex");
    const email="accept-"+plan+"-"+nonce+"@example.test",password="CI-Test-"+randomBytes(16).toString("hex")+"!",studioName="Acceptance "+plan+" "+nonce;
@@ -62,8 +65,21 @@ async function main(){
    check(await exists("#auth-tab-register"),plan+" registration tab opens");
    check((await evalJs("document.querySelector('#auth-tab-register')?.getAttribute('aria-selected')"))==="true",plan+" correct signup tab is active");
    check((await evalJs('Array.from(document.querySelectorAll("select")).map(x=>x.value)')).includes(plan),plan+" preselected plan survives navigation");
-   const registered=await api("/api/auth/register",{method:"POST",body:{email,password,studioName,focus:"Pilates",timezone:"Europe/Berlin",plan,termsVersion:"2026-10-09.1",dpaVersion:"2026-10-09.1",privacyVersion:"2026-10-09.1",cancellationVersion:"2026-10-09.1",legalAccepted:true}});
-   check(registered.status===202,plan+" registration accepted");
+   await peer.send("Emulation.setDeviceMetricsOverride",{width:320,height:720,deviceScaleFactor:1,mobile:true});
+   await navigate("/workspace?mode=register&plan="+plan);
+   const signupMobile=await evalJs("({overflow:document.documentElement.scrollWidth>innerWidth+4,main:document.querySelectorAll('main').length})");
+   check(!signupMobile.overflow&&signupMobile.main===1,plan+" 320px open signup form is usable");
+   await peer.send("Emulation.clearDeviceMetricsOverride");
+   await navigate("/workspace?mode=register&plan="+plan);
+   // Submit the actual React registration form in Chrome, not only a
+   // forged HTTP request. All data is synthetic and delivery is queued locally.
+   await fill('#auth-form input:not([type])',studioName);
+   await fill('input[type="email"]',email);
+   await fill('input[type="password"]',password);
+   await evalJs("document.querySelector('.rd-legal-consent input[type=checkbox]').click();true");
+   await evalJs("document.querySelector('#auth-form').requestSubmit();true");
+   await waitText(".rd-feedback","If this email address is eligible");
+   check((await text(".rd-auth-heading")).includes("Welcome back"),plan+" React registration submitted and returned to sign in");
    const found=await admin.query("SELECT s.id AS studio_id,(SELECT payload->>'url' FROM mail_outbox WHERE recipient_email=$1 AND template='verify_email' ORDER BY created_at DESC LIMIT 1) AS link FROM studios s JOIN studio_users su ON su.studio_id=s.id JOIN app_users u ON u.id=su.user_id WHERE u.email=$1",[email]);
    check(found.rowCount===1&&!!found.rows[0].link,plan+" verification email queued");
    const studioId=found.rows[0].studio_id,verify=new URL(found.rows[0].link);
