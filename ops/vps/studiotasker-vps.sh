@@ -152,10 +152,15 @@ NODE
 prepare(){
  check; clean
  say "Fetching changes as $OWNER, without changing the running checkout"
+ local expected="${STUDIOTASKER_RELEASE_SHA:-}"
+ [[ "$expected" =~ ^[0-9a-f]{40}$ ]] ||
+  stop "Set STUDIOTASKER_RELEASE_SHA to the exact 40-character CI-approved commit before prepare."
  gitapp fetch origin main
  clean
  local revision short dest
  revision="$(gitapp rev-parse origin/main)"
+ [ "$revision" = "$expected" ] ||
+  stop "Remote main differs from the approved commit. Review the new commit and CI before preparing a release."
  short="$(gitapp rev-parse --short origin/main)"
  install -d -m 700 -o "$OWNER" -g "$OWNER" "$RELEASES"
  dest="$RELEASES/prepared-$short-$(date -u +%Y%m%dT%H%M%S)-$$"
