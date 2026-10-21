@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useRef,useState,type CSSProperties,type FormEvent} from "react";
+import {useEffect,useRef,useState,type CSSProperties,type FormEvent,type ReactNode} from "react";
 import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Settings2,Target,Trash2,Users} from "lucide-react";
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {TurnstileChallenge} from "../../components/turnstile-challenge";
@@ -36,6 +36,30 @@ const defaultSettings:StudioSettings={name:"",focus:"Pilates",timezone:"UTC",acc
  lateCancelRefundCredit:false,noShowRefundCredit:false,privacyPolicyUrl:"",onboardingCompleted:false,hasLogo:false};
 const singularTerm=(term:string)=>term.endsWith("ies")?term.slice(0,-3)+"y":term.endsWith("sses")?term.slice(0,-2):term.endsWith("s")?term.slice(0,-1):term;
 const modes:{mode:AuthMode;name:string}[]=[{mode:"login",name:"Sign in"},{mode:"forgot",name:"Forgot password"},{mode:"resend",name:"Resend verification"}];
+
+function WorkspaceAuthShell({children}:{children:ReactNode}){
+ return <main id="main-content" tabIndex={-1} className="rd-auth-experience">
+  <div className="rd-auth-shell">
+   <aside className="rd-auth-aside" aria-label="StudioTasker">
+    <Link href="/" className="rd-auth-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
+    <div className="rd-auth-aside-body">
+     <p className="rd-auth-overline">THE STUDIO OPERATING SYSTEM</p>
+     <h2>LESS ADMIN.<br/><em>MORE MOVEMENT.</em></h2>
+     <p className="rd-auth-aside-lede">Your members, classes and bookings. One calmer place to run your studio.</p>
+     <ol className="rd-auth-journey" aria-label="How StudioTasker works">
+      <li><span>01</span><strong>Choose your plan</strong></li>
+      <li><span>02</span><strong>Create & verify your account</strong></li>
+      <li><span>03</span><strong>Checkout securely with Paddle</strong></li>
+      <li><span>04</span><strong>Set up your studio</strong></li>
+     </ol>
+    </div>
+    <div className="rd-auth-aside-footer"><span className="rd-auth-quiet-dot" aria-hidden="true"/> Private workspace for your studio team</div>
+   </aside>
+   <div className="rd-auth-content">{children}</div>
+  </div>
+  <div className="rd-auth-meta"><span>StudioTasker · Built for independent studios</span><span><Link href="/legal/privacy">Privacy</Link><Link href="/legal/terms">Terms</Link><Link href="/app-demo">Explore demo</Link></span></div>
+ </main>;
+}
 
 export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boolean}){
  const [user,setUser]=useState<User|null>(null),[studio,setStudio]=useState<Studio|null>(null),[people,setPeople]=useState<Person[]>([]);
@@ -231,9 +255,16 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
   }catch(error){setNote(error instanceof Error?error.message:"Sign-out failed.")}
  }
 
- if(!user)return <main id="main-content" tabIndex={-1} className="rd-workspace-card rd-auth-card">
-  <h1 className="rd-auth-heading">{mode==="login"?"Sign in to StudioTasker":mode==="register"?"Create your studio account":"StudioTasker account access"}</h1>
-  {pendingPlan&&<div className="rd-purchase-intent"><b>{pendingPlan==="annual"?"ANNUAL PLAN · $406.80/YEAR · SAVE 15%":"MONTHLY PLAN · $39.90/MONTH"}</b><span>{registrationEnabled?"Create your studio account or sign in to continue to subscription checkout.":"You selected this plan. Sign in if you already have an account; new studio signup will be available when account creation is enabled."}</span></div>}
+ if(!user)return <WorkspaceAuthShell>
+  <p className="rd-auth-form-kicker">STUDIO WORKSPACE</p>
+  <h1 className="rd-auth-heading">{mode==="login"?"Welcome back.":mode==="register"?"Create your studio.":mode==="forgot"?"Reset your password.":mode==="resend"?"Verify your email.":mode==="reset"?"Set a new password.":mode==="verify"?"Confirm your email.":"Account access."}</h1>
+  <p className="rd-auth-intro">{mode==="register"?"A few details and you're on your way to a better studio day.":mode==="login"?"Sign in to manage your classes, members and studio in one place.":mode==="forgot"?"We'll send a secure password reset link to your email.":mode==="resend"?"Request a new verification link for your studio account.":"Secure account access for your StudioTasker workspace."}</p>
+  {pendingPlan&&<div className="rd-purchase-intent" role="status">
+   <span className="rd-plan-mark" aria-hidden="true">✓</span>
+   <div><span className="rd-plan-eyebrow">YOUR SELECTED PLAN</span><b>{pendingPlan==="annual"?"Annual · $406.80/year":"Monthly · $39.90/month"}</b>
+   <small>{registrationEnabled?"Your choice stays with you through account creation and checkout.":"Existing customers can sign in. New studio registration isn't open yet."}</small></div>
+   {pendingPlan==="annual"&&<span className="rd-plan-saving">SAVE 15%</span>}
+  </div>}
   {note&&<p className="rd-feedback" role="status">{note}</p>}
   <div className="rd-tab-buttons" role="tablist" aria-label="Account actions" onKeyDown={event=>{
     if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
@@ -248,26 +279,26 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     className={mode===next?"active":""} onClick={()=>{setMode(next);setNote("")}}>{name}</button>)}{registrationEnabled&&
     <button id="auth-tab-register" type="button" role="tab" aria-selected={mode==="register"} aria-controls="auth-form" tabIndex={mode==="register"?0:-1}
      className={mode==="register"?"active":""} onClick={()=>{setMode("register");setPendingPlan(p=>p||"monthly");setNote("")}}>Create studio</button>}</div>
-  <form className="rd-form" id="auth-form" role="tabpanel"
+  <form className="rd-form rd-auth-form" id="auth-form" role="tabpanel"
    aria-labelledby={mode==="verify"||mode==="reset"?undefined:"auth-tab-"+mode} onSubmit={submitAuth}>
    {["verify","reset"].includes(mode)&&<p className="rd-tiny">{mode==="verify"?"Verify your email to activate your account.":"Choose a new password. Existing sessions will be revoked."}</p>}
    {mode==="register"&&<><label>Studio name<input required minLength={2} maxLength={100} value={form.studioName} onChange={e=>setForm({...form,studioName:e.target.value})}/></label><label>Studio type<select value={form.focus} onChange={e=>setForm({...form,focus:e.target.value})}>{STUDIO_FOCUSES.map(f=><option key={f}>{f}</option>)}</select></label></>}
    {["login","register","forgot","resend"].includes(mode)&&<label>Email<input type="email" autoComplete="username" required value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>}
    {["login","register","reset"].includes(mode)&&<label>{mode==="login"?"Password":"New password (minimum 12 characters)"}<input type="password" autoComplete={mode==="login"?"current-password":"new-password"} minLength={mode==="login"?1:12} maxLength={128} required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>}
-   {mode==="login"&&<label className="rd-trust-device"><input type="checkbox" checked={trustDevice} onChange={e=>setTrustDevice(e.target.checked)}/><span>Trust this device for 30 days (only on your own computer). Uncheck on shared devices; signing out removes this trust.</span></label>}
+   {mode==="login"&&<label className="rd-trust-device"><input type="checkbox" checked={trustDevice} onChange={e=>setTrustDevice(e.target.checked)}/><span><strong>Trust this device for 30 days</strong><small>Only on your personal device. Signing out removes this trust.</small></span></label>}
    {mode==="register"&&<><label>Studio timezone<TimezoneSelect value={form.timezone} onChange={timezone=>setForm(v=>({...v,timezone}))}/></label><label>Subscription plan<select value={pendingPlan||"monthly"} onChange={e=>setPendingPlan(e.target.value as "monthly"|"annual")}><option value="monthly">Monthly · $39.90/month</option><option value="annual">Annual · $406.80/year · save 15%</option></select></label><label className="rd-legal-consent"><input type="checkbox" required checked={registrationLegalAccepted} onChange={e=>setRegistrationLegalAccepted(e.target.checked)}/><span>{LEGAL_ACCEPTANCE_TEXT} <Link href="/legal/terms" target="_blank">Terms of Service</Link> · <Link href="/legal/cancellation" target="_blank">Cancellation & Refund</Link> · <Link href="/legal/dpa" target="_blank">DPA</Link></span></label><p className="rd-tiny">Before account creation, please read the <Link href="/legal/privacy" target="_blank">Privacy Policy</Link> and, where Turkish Law No. 6698 applies, the <Link href="/legal/turkiye-privacy" target="_blank">Türkiye Privacy Notice (KVKK)</Link>. These notices are provided for transparency and are not a request for consent to core service processing.</p></>}
    {["register","forgot","resend"].includes(mode)&&<TurnstileChallenge onToken={setTurnstileToken} resetKey={turnstileReset}/>}
    <button className="rd-primary" disabled={busy||(mode==="register"&&!registrationLegalAccepted)}>{busy?"Please wait…":{login:"Sign in",register:"Create and verify studio",verify:"Verify email",reset:"Reset password",forgot:"Send reset instructions",resend:"Send verification link"}[mode]}</button>
   </form>
-  {!registrationEnabled&&<p className="rd-tiny">Studio signup is temporarily unavailable here. Existing customers can still sign in.</p>}
- </main>;
+  {!registrationEnabled&&<div className="rd-auth-closed"><strong>New studio registrations are temporarily closed.</strong><span>Existing customers can sign in. Exploring? <Link href="/app-demo">Try the interactive demo →</Link></span></div>}
+ </WorkspaceAuthShell>;
 
  // Unpaid studios must only see account/billing actions, not a broken
  // workspace shell with empty settings after 402 responses.
- if(billingAccess!=="active")return <main id="main-content" tabIndex={-1} className="rd-workspace-card rd-auth-card">
-  <header className="rd-workspace-header"><Link href="/" className="rd-wordmark"><StudioTaskerMark className="rd-logo-mark"/>studio<b>tasker.</b></Link></header>
-  <h1 className="rd-auth-heading">{billingAccess==="payment_required"?"Activate your studio":"Checking studio access"}</h1>
-  <p className="rd-tiny">{studio?.name||"Your studio"} · {user.email}</p>
+ if(billingAccess!=="active")return <WorkspaceAuthShell>
+  <p className="rd-auth-form-kicker">YOUR STUDIO ACCOUNT</p>
+  <h1 className="rd-auth-heading">{billingAccess==="payment_required"?"One last step.":"Checking your access."}</h1>
+  <p className="rd-auth-intro">{studio?.name||"Your studio"} · {user.email}</p>
   {note&&<p className="rd-feedback" role="status">{note}</p>}
   {billingAccess==="payment_required"?(user.role==="owner"?<>
     <p>Your account is ready. Complete your StudioTasker subscription to unlock studio management and start the 5-step setup.</p>
@@ -278,7 +309,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
    <button type="button" onClick={()=>void load().catch(()=>setNote("Could not refresh your studio access."))}>Refresh account status</button>
    <button type="button" onClick={()=>void logout()}>Sign out</button>
   </div>
- </main>;
+ </WorkspaceAuthShell>;
 
  const canContacts=["owner","manager","receptionist"].includes(user.role),canEdit=["owner","manager"].includes(user.role);
  const prefs:WorkspacePreferences={timezone:settings.timezone,timeFormat:settings.timeFormat,classTerm:settings.classTerm,memberTerm:settings.memberTerm,creditTerm:settings.creditTerm,
