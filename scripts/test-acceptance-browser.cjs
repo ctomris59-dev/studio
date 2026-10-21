@@ -119,6 +119,12 @@ async function main(){
    const mobile=await evalJs('({overflow:document.documentElement.scrollWidth>innerWidth+4,landmarks:document.querySelectorAll("main").length})');
    check(!mobile.overflow&&mobile.landmarks===1,plan+" logged-in 390px mobile layout no overflow");
    await peer.send("Emulation.clearDeviceMetricsOverride");
+   // Ensure each plan starts with a genuinely unauthenticated browser,
+   // not the previous paying studio's session.
+   const signedOut=await api("/api/auth/logout",{method:"POST",cookie});
+   check(signedOut.status===200,plan+" sign-out revokes browser session");
+   await navigate("/workspace");
+   check((await text(".rd-auth-heading")).includes("Welcome back"),plan+" signed-out browser returns to login");
    console.log("ACCEPTANCE JOURNEY COMPLETED",plan);
   }
   console.log("ACCEPTANCE_BROWSER_PASSED:",passed);
@@ -126,7 +132,12 @@ async function main(){
   await stop(next);if(peer)peer.close();child.kill("SIGTERM");
   if(accounts.length){try{await admin.query("DELETE FROM studios WHERE id=ANY($1::uuid[])",[accounts.map(a=>a.studioId)])}catch(e){console.warn("Cleanup studios:",e.message)}}
   for(const a of accounts){try{await admin.query("DELETE FROM app_users WHERE email=$1",[a.email])}catch(e){console.warn("Cleanup user:",e.message)}}
-  await admin.end();fs.rmSync(profile,{recursive:true,force:true});
+  await admin.end();
+  // Chrome may still be flushing its profile for a few hundred ms after SIGTERM.
+  // The CI runner is ephemeral; never hide an assertion failure with an rm race.
+  await pause(850);
+  try{fs.rmSync(profile,{recursive:true,force:true,maxRetries:12,retryDelay:200})}
+  catch(e){console.warn("Chrome profile cleanup warning:",e.code||e.message)}
  }
 }
 main().catch(e=>{console.error("ACCEPTANCE BROWSER FAILED:",e.stack||String(e));process.exitCode=1});
