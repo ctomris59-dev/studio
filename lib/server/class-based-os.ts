@@ -1,6 +1,8 @@
 import {literalLikePattern} from "./sql-search";
 import {randomUUID as cryptoRandomUUID} from "node:crypto";
 import "server-only";
+import {refundBookingCredit} from "./booking-credits";
+import {fillWaitlist,lockStudioOperations} from "./waitlist-policy";
 import type {PoolClient} from "pg";
 import type {Authenticated} from "./auth";
 import {cancelClassBooking,StudioOperationError,validUUID,parseClass} from "./studio-booking";
@@ -79,7 +81,7 @@ export async function assignSpotToBooking<T extends {id:string;status:string}>(c
  const spot=integer(spotNumber,1,config.spot_count||100);
  if(spot===null)fail(400,"Choose a valid "+config.spot_label.toLowerCase()+" number.");
  const occupied=await client.query(
-  "SELECT 1 FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status='booked' AND spot_number=$3 AND id<>$4 LIMIT 1",
+  "SELECT 1 FROM bookings WHERE studio_id=$1 AND session_id=$2 AND (status='booked' OR (status='waitlisted' AND offer_expires_at>now())) AND spot_number=$3 AND id<>$4 LIMIT 1",
   [studioId,sessionId,spot,booking.id]);
  if(occupied.rowCount)fail(409,"That "+config.spot_label.toLowerCase()+" is already booked.");
  await client.query("UPDATE bookings SET spot_number=$3 WHERE studio_id=$1 AND id=$2",[studioId,booking.id,spot]);
@@ -89,49 +91,17 @@ export async function assignSpotToBooking<T extends {id:string;status:string}>(c
 export async function listBookingsExtended(client:PoolClient,studioId:string,sessionId:string){
  if(!validUUID(sessionId))fail(400,"Invalid class identifier.");
  const result=await client.query(
-  "SELECT b.id,b.session_id,b.member_id,b.status,b.queue_number,b.booked_at,b.attended_at,b.spot_number,b.cancellation_type,b.no_show_at,p.full_name AS member_name FROM bookings b JOIN people p ON p.id=b.member_id AND p.studio_id=b.studio_id WHERE b.studio_id=$1 AND b.session_id=$2::uuid AND b.status IN('booked','waitlisted') ORDER BY CASE WHEN b.status='booked' THEN 0 ELSE 1 END,b.spot_number ASC NULLS LAST,b.queue_number ASC NULLS LAST,b.booked_at ASC,b.id ASC LIMIT 300",
+  "SELECT b.id,b.session_id,b.member_id,b.status,b.queue_number,b.booked_at,b.attended_at,b.spot_number,b.cancellation_type,b.no_show_at,b.offer_expires_at,b.offer_closed,p.full_name AS member_name FROM bookings b JOIN people p ON p.id=b.member_id AND p.studio_id=b.studio_id WHERE b.studio_id=$1 AND b.session_id=$2::uuid AND b.status IN('booked','waitlisted') ORDER BY CASE WHEN b.status='booked' THEN 0 ELSE 1 END,b.spot_number ASC NULLS LAST,b.queue_number ASC NULLS LAST,b.booked_at ASC,b.id ASC LIMIT 300",
   [studioId,sessionId]);
  return result.rows;
 }
 
-async function changeCredits(client:PoolClient,studioId:string,memberId:string,delta:number){
- const updated=await client.query<{credits:number|null}>(
-  "UPDATE people SET credits=CASE WHEN credits IS NULL THEN NULL ELSE credits+$3 END,updated_at=now() WHERE id=$1 AND studio_id=$2 AND (credits IS NULL OR (credits+$3 BETWEEN 0 AND 1000000)) RETURNING credits",
-  [memberId,studioId,delta]);
- if(!updated.rowCount)fail(409,"The member does not have enough class credits.");
- return updated.rows[0].credits;
-}
-async function eligibleWaitlistMember(client:PoolClient,studioId:string,memberId:string,classDay:string){
- const row=await client.query<{credits:number|null}>(
-  "SELECT credits FROM people WHERE studio_id=$1 AND id=$2 AND kind='member' AND archived_at IS NULL AND member_status='Active' AND package_status='Confirmed' AND (start_date IS NULL OR start_date<=$3::date) AND (expiry_date IS NULL OR expiry_date>=$3::date) AND (credits IS NULL OR credits>0) AND (NOT (SELECT waiver_required FROM studios WHERE id=$1) OR waiver_status='signed') FOR UPDATE",
-  [studioId,memberId,classDay]);
- return row.rows[0]||null;
-}
-async function promoteWaitlist(client:PoolClient,auth:Authenticated,session:{id:string;starts_at:Date;timezone:string;spot_booking_enabled:boolean},vacatedSpot:number|null){
- const day=await client.query<{local_day:string}>("SELECT ($1::timestamptz AT TIME ZONE $2)::date::text AS local_day",[session.starts_at,session.timezone]);
- const waiting=await client.query<{id:string;member_id:string}>(
-  "SELECT id,member_id FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status='waitlisted' ORDER BY queue_number ASC NULLS LAST,booked_at ASC,id ASC LIMIT 300",
-  [auth.studioId,session.id]);
- for(const next of waiting.rows){
-  const member=await eligibleWaitlistMember(client,auth.studioId,next.member_id,day.rows[0].local_day);
-  if(!member)continue;
-  if(member.credits!==null)await changeCredits(client,auth.studioId,next.member_id,-1);
-  await client.query("UPDATE bookings SET status='booked',spot_number=$3 WHERE studio_id=$1 AND id=$2 AND status='waitlisted'",
-   [auth.studioId,next.id,session.spot_booking_enabled?vacatedSpot:null]);
-  if(member.credits!==null)await client.query(
-   "INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by) VALUES($1,$2,$3,-1,'class_booking',$4)",
-   [auth.studioId,next.member_id,next.id,auth.userId]);
-  await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action) VALUES($1,$2,$3,'booking.promoted')",
-   [auth.studioId,next.member_id,auth.userId]);
-  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes,source_key)
-   VALUES($1,$2,'Notify member: promoted from waitlist',now(),'General',$3,$4) ON CONFLICT DO NOTHING`,
-   [auth.studioId,next.member_id,"Class "+session.id+" booking "+next.id,"waitlist_promoted:"+next.id]);
-  return {id:next.id,memberId:next.member_id,spotNumber:session.spot_booking_enabled?vacatedSpot:null};
- }
- return null;
+async function promoteWaitlist(client:PoolClient,auth:Authenticated,session:{id:string;starts_at?:Date;timezone?:string;spot_booking_enabled?:boolean},_vacatedSpot:number|null){
+ return (await fillWaitlist(client,auth,session.id)).find(x=>x.status==='booked')||null;
 }
 
 export async function cancelBookingWithRules(client:PoolClient,auth:Authenticated,bookingId:string){
+ await lockStudioOperations(client,auth.studioId);
  if(!validUUID(bookingId))fail(400,"Invalid booking identifier.");
  // Keep booking cancellations in the same lock order as reservations.
  const lookup=await client.query<{session_id:string}>("SELECT session_id FROM bookings WHERE studio_id=$1 AND id=$2",[auth.studioId,bookingId]);
@@ -151,26 +121,19 @@ export async function cancelBookingWithRules(client:PoolClient,auth:Authenticate
  if(!late){
   const result=await cancelClassBooking(client,auth,bookingId);
   await client.query("UPDATE bookings SET cancellation_type='standard' WHERE studio_id=$1 AND id=$2",[auth.studioId,bookingId]);
-  if(result.promoted&&b.spot_booking_enabled&&b.spot_number!==null)
-   await client.query("UPDATE bookings SET spot_number=$3 WHERE studio_id=$1 AND id=$2",[auth.studioId,result.promoted.id,b.spot_number]);
+
   return {...result,cancellationType:"standard"};
  }
- await client.query("UPDATE bookings SET status='cancelled',cancelled_at=now(),cancellation_type='late' WHERE studio_id=$1 AND id=$2",[auth.studioId,bookingId]);
- if(b.status==="booked"&&b.late_cancel_refund_credit){
-  const debit=await client.query<{id:string}>("SELECT id FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_booking' LIMIT 1",[auth.studioId,bookingId]);
-  if(debit.rowCount){
-   await changeCredits(client,auth.studioId,b.member_id,1);
-   await client.query("INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,reversal_of,created_by) VALUES($1,$2,$3,1,'class_refund',$4,$5)",
-    [auth.studioId,b.member_id,bookingId,debit.rows[0].id,auth.userId]);
-  }
- }
+ await client.query("UPDATE bookings SET status='cancelled',cancelled_at=now(),offer_expires_at=NULL,cancellation_type='late' WHERE studio_id=$1 AND id=$2",[auth.studioId,bookingId]);
+ if(b.status==="booked"&&b.late_cancel_refund_credit)await refundBookingCredit(client,auth,b.member_id,bookingId);
  await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,'booking.cancelled_late',jsonb_build_object('creditRefunded',$4::boolean))",
   [auth.studioId,b.member_id,auth.userId,b.late_cancel_refund_credit]);
- const promoted=b.status==="booked"?await promoteWaitlist(client,auth,{id:b.session_id,starts_at:b.starts_at,timezone:b.timezone,spot_booking_enabled:b.spot_booking_enabled},b.spot_number):null;
+ const promoted=await promoteWaitlist(client,auth,{id:b.session_id,starts_at:b.starts_at,timezone:b.timezone,spot_booking_enabled:b.spot_booking_enabled},b.spot_number);
  return {id:b.id,status:"cancelled",alreadyCancelled:false,promoted,cancellationType:"late",creditRefunded:b.late_cancel_refund_credit};
 }
 
 export async function setBookingNoShow(client:PoolClient,auth:Authenticated,bookingId:string,noShow:boolean,reason?:string){
+ await lockStudioOperations(client,auth.studioId);
  if(!validUUID(bookingId))fail(400,"Invalid booking identifier.");
  if(!noShow&&(!reason||reason.trim().length<5||reason.length>200))fail(400,"Provide a reason for a no-show correction.");
  const row=await client.query<{member_id:string;status:string;attended_at:Date|null;no_show_at:Date|null;starts_at:Date;no_show_refund_credit:boolean}>(
@@ -184,11 +147,17 @@ export async function setBookingNoShow(client:PoolClient,auth:Authenticated,book
  if(Date.now()<start)fail(409,"No-show can only be recorded after the class starts.");
  if(Date.now()>start+30*86400000)fail(409,"No-show can only be changed within 30 days.");
  if(Boolean(b.no_show_at)===noShow)return {id:bookingId,noShow,alreadyApplied:true};
- const debit=await client.query<{id:string}>("SELECT id FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_booking' LIMIT 1",[auth.studioId,bookingId]);
+ const debit=await client.query<{id:string;credit_cycle:number;rollover_amount:number}>("SELECT id,credit_cycle,rollover_amount FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_booking' LIMIT 1",[auth.studioId,bookingId]);
  if(b.no_show_refund_credit&&debit.rowCount){
-  await changeCredits(client,auth.studioId,b.member_id,noShow?1:-1);
-  await client.query("INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by) VALUES($1,$2,$3,$4,$5,$6)",
-   [auth.studioId,b.member_id,bookingId,noShow?1:-1,noShow?"no_show_refund":"no_show_refund_reversal",auth.userId]);
+  const cycle=await client.query("SELECT 1 FROM credit_ledger l JOIN people p ON p.id=l.member_id AND p.studio_id=l.studio_id WHERE l.id=$1 AND l.credit_cycle=p.credit_cycle",[debit.rows[0].id]);
+  if(!cycle.rowCount)fail(409,"The package has been renewed. Use an audited credit adjustment for this historical no-show.");
+  const d=debit.rows[0];
+  const changed=await client.query(`UPDATE people SET credits=credits+$3,
+   rollover_credits=CASE WHEN $3>0 THEN rollover_credits+$4 ELSE greatest(0,rollover_credits-$4) END,updated_at=now()
+   WHERE studio_id=$1 AND id=$2 AND credits+$3 BETWEEN 0 AND 1000000 RETURNING id`,[auth.studioId,b.member_id,noShow?1:-1,d.rollover_amount]);
+  if(!changed.rowCount)fail(409,"The member does not have enough class credits.");
+  await client.query("INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by,credit_cycle,rollover_amount) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
+   [auth.studioId,b.member_id,bookingId,noShow?1:-1,noShow?"no_show_refund":"no_show_refund_reversal",auth.userId,d.credit_cycle,d.rollover_amount]);
  }
  await client.query("UPDATE bookings SET no_show_at=$3 WHERE studio_id=$1 AND id=$2",[auth.studioId,bookingId,noShow?new Date().toISOString():null]);
  await client.query("INSERT INTO activity_log(studio_id,person_id,actor_id,action,details) VALUES($1,$2,$3,$4,$5::jsonb)",
@@ -208,6 +177,8 @@ export async function reviseClass(client:PoolClient,auth:Authenticated,classId:s
  const old=current.rows[0];
  if(old.status!=="scheduled")fail(409,"Cancelled classes cannot be edited.");
  if(new Date(old.starts_at).getTime()<=Date.now())fail(409,"Started classes cannot be edited.");
+ const holds=await client.query("SELECT 1 FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status='waitlisted' AND offer_expires_at>now() LIMIT 1",[auth.studioId,classId]);
+ if(holds.rowCount)fail(409,"Confirm or release active waitlist holds before editing this class.");
  const merged:Record<string,unknown>={title:old.title,instructor:old.instructor,room:old.room,startsAt:new Date(old.starts_at).toISOString(),
   durationMinutes:old.duration_minutes,capacity:old.capacity,bookingCutoffHours:old.booking_cutoff_hours,cancelCutoffHours:old.cancel_cutoff_hours,
   classFormat:old.class_format,level:old.level,programLabel:old.program_label,spotBookingEnabled:old.spot_booking_enabled,spotLabel:old.spot_label,
@@ -236,7 +207,7 @@ export async function reviseClass(client:PoolClient,auth:Authenticated,classId:s
    if(meta.spotBookingEnabled){
     const free=await client.query<{spot:number}>(`SELECT n::int AS spot FROM generate_series(1,$3::int) n
      WHERE NOT EXISTS (SELECT 1 FROM bookings b WHERE b.studio_id=$1
-       AND b.session_id=$2 AND b.status='booked' AND b.spot_number=n)
+       AND b.session_id=$2 AND (b.status='booked' OR (b.status='waitlisted' AND b.offer_expires_at>now())) AND b.spot_number=n)
      ORDER BY n LIMIT 1`,[auth.studioId,classId,meta.spotCount]);
     if(!free.rowCount)break;
     spot=free.rows[0].spot;
@@ -262,6 +233,7 @@ export async function reviseClass(client:PoolClient,auth:Authenticated,classId:s
 }
 
 export async function cancelEntireClass(client:PoolClient,auth:Authenticated,classId:string){
+ await lockStudioOperations(client,auth.studioId);
  if(!validUUID(classId))fail(400,"Invalid class identifier.");
  const found=await client.query<{id:string;status:string;starts_at:Date;title:string;room:string}>("SELECT id,status,starts_at,title,room FROM class_sessions WHERE id=$1 AND studio_id=$2 FOR UPDATE",[classId,auth.studioId]);
  if(!found.rowCount)fail(404,"Class not found.");
@@ -273,17 +245,11 @@ export async function cancelEntireClass(client:PoolClient,auth:Authenticated,cla
  let refunded=0;
  for(const b of bookings.rows){
   if(b.status!=="booked")continue;
-  const charge=await client.query<{id:string}>("SELECT id FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_booking' LIMIT 1",[auth.studioId,b.id]);
-  if(!charge.rowCount)continue;
-  const already=await client.query("SELECT 1 FROM credit_ledger WHERE studio_id=$1 AND booking_id=$2 AND reason='class_refund' LIMIT 1",[auth.studioId,b.id]);
-  if(already.rowCount)continue;
-  await client.query("UPDATE people SET credits=CASE WHEN credits IS NULL THEN NULL ELSE credits+1 END,updated_at=now() WHERE studio_id=$1 AND id=$2",[auth.studioId,b.member_id]);
-  await client.query("INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,reversal_of,created_by) VALUES($1,$2,$3,1,'class_refund',$4,$5)",
-   [auth.studioId,b.member_id,b.id,charge.rows[0].id,auth.userId]);
-  refunded++;
+  if(await refundBookingCredit(client,auth,b.member_id,b.id))refunded++;
  }
- await client.query("UPDATE bookings SET status='cancelled',cancelled_at=now(),cancellation_type='standard' WHERE studio_id=$1 AND session_id=$2 AND status IN('booked','waitlisted')",[auth.studioId,classId]);
+ await client.query("UPDATE bookings SET status='cancelled',cancelled_at=now(),offer_expires_at=NULL,cancellation_type='standard' WHERE studio_id=$1 AND session_id=$2 AND status IN('booked','waitlisted')",[auth.studioId,classId]);
  await client.query("UPDATE class_sessions SET status='cancelled',cancelled_at=now() WHERE studio_id=$1 AND id=$2",[auth.studioId,classId]);
+ await fillWaitlist(client,auth,classId);
  const notification=await client.query<{label:string}>(`SELECT
    left($2::text,70)||' · '||to_char($3::timestamptz AT TIME ZONE timezone,'YYYY-MM-DD HH24:MI')||
    ' ('||left($4::text,24)||')' AS label FROM studios WHERE id=$1`,

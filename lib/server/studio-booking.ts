@@ -1,4 +1,6 @@
 import "server-only";
+import {debitBookingCredit,refundBookingCredit} from "./booking-credits";
+import {fillWaitlist,lockStudioOperations} from "./waitlist-policy";
 import type {PoolClient} from "pg";
 import type {Authenticated} from "./auth";
 import {randomUUID} from "node:crypto";
@@ -107,6 +109,7 @@ type LockedClass={
 };
 async function lockClass(client:PoolClient,studioId:string,sessionId:string):Promise<LockedClass>{
  if(!validUUID(sessionId))fail(400,"Invalid class identifier.");
+ await lockStudioOperations(client,studioId);
  const found=await client.query<LockedClass>(`
  SELECT c.id,c.title,c.starts_at,c.duration_minutes,c.capacity,c.booking_cutoff_hours,c.cancel_cutoff_hours,c.status,
    st.timezone
@@ -136,20 +139,13 @@ const eligible=(m:Member,onDay:string)=>
  m.member_status==="Active"&&m.package_status==="Confirmed"&&
  (!m.start_date||m.start_date<=onDay)&&(!m.expiry_date||m.expiry_date>=onDay)&&
  (m.credits===null||m.credits>0);
-async function changeCredits(client:PoolClient,studioId:string,memberId:string,delta:number){
- const updated=await client.query<{credits:number|null}>(`
- UPDATE people SET credits=CASE WHEN credits IS NULL THEN NULL ELSE credits+$3 END,updated_at=now()
- WHERE id=$1 AND studio_id=$2 AND (credits IS NULL OR (credits+$3 BETWEEN 0 AND 1000000))
- RETURNING credits`,[memberId,studioId,delta]);
- if(!updated.rowCount)fail(409,"The member does not have enough class credits.");
- return updated.rows[0].credits;
-}
 
 export async function reserveClass(client:PoolClient,auth:Authenticated,sessionId:string,memberId:string){
  if(!validUUID(memberId))fail(400,"Invalid member identifier.");
  const session=await lockClass(client,auth.studioId,sessionId);
  if(session.status!=="scheduled")fail(409,"This class has been cancelled.");
  if(cutoffPassed(session.starts_at,session.booking_cutoff_hours))fail(409,"Bookings for this class are closed.");
+ await fillWaitlist(client,auth,sessionId);
  const member=await lockedMember(client,auth.studioId,memberId);
  const waiver=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
  if(waiver.rows[0]?.waiver_required&&member.waiver_status!=="signed")fail(409,"A signed waiver is required before booking.");
@@ -161,7 +157,7 @@ export async function reserveClass(client:PoolClient,auth:Authenticated,sessionI
  if(existing.rowCount)return {...existing.rows[0],alreadyExists:true};
  if(!eligible(member,date))fail(409,"Member needs an active, confirmed and valid class pass.");
  const count=await client.query<{total:number}>(`
- SELECT COUNT(*)::int AS total FROM bookings WHERE studio_id=$1 AND session_id=$2 AND status='booked'`,[auth.studioId,sessionId]);
+ SELECT COUNT(*)::int AS total FROM bookings WHERE studio_id=$1 AND session_id=$2 AND (status='booked' OR (status='waitlisted' AND offer_expires_at>now()))`,[auth.studioId,sessionId]);
  const full=count.rows[0].total>=session.capacity;
  if(full){
   const next=await client.query<{position:number}>(`
@@ -176,13 +172,10 @@ export async function reserveClass(client:PoolClient,auth:Authenticated,sessionI
     VALUES($1,$2,$3,'booking.waitlisted')`,[auth.studioId,memberId,auth.userId]);
   return {...row.rows[0],alreadyExists:false};
  }
- if(member.credits!==null)await changeCredits(client,auth.studioId,memberId,-1);
  const row=await client.query<{id:string;status:string}>(`
  INSERT INTO bookings(studio_id,session_id,member_id,status)
  VALUES($1,$2,$3,'booked') RETURNING id,status`,[auth.studioId,sessionId,memberId]);
- if(member.credits!==null)await client.query(`
- INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by)
- VALUES($1,$2,$3,-1,'class_booking',$4)`,[auth.studioId,memberId,row.rows[0].id,auth.userId]);
+ await debitBookingCredit(client,auth,memberId,row.rows[0].id);
  await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
  VALUES($1,$2,$3,'booking.confirmed')`,[auth.studioId,memberId,auth.userId]);
  return {...row.rows[0],alreadyExists:false};
@@ -202,51 +195,12 @@ export async function cancelClassBooking(client:PoolClient,auth:Authenticated,bo
  if(booking.attended_at)fail(409,"Checked-in bookings cannot be cancelled. Correct attendance first.");
  if(cutoffPassed(session.starts_at,session.cancel_cutoff_hours))fail(409,"Cancellation deadline has passed.");
  await client.query(`
- UPDATE bookings SET status='cancelled',cancelled_at=now()
+ UPDATE bookings SET status='cancelled',cancelled_at=now(),offer_expires_at=NULL
  WHERE id=$1 AND studio_id=$2`,[bookingId,auth.studioId]);
- if(booking.status==="booked"){
-  const previous=await client.query(`
-   SELECT id FROM credit_ledger
-   WHERE studio_id=$1 AND booking_id=$2 AND reason='class_booking' LIMIT 1`,
-   [auth.studioId,bookingId]);
-  if(previous.rowCount){
-   await changeCredits(client,auth.studioId,booking.member_id,1);
-   await client.query(`
-    INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,reversal_of,created_by)
-    VALUES($1,$2,$3,1,'class_refund',$4,$5)`,
-    [auth.studioId,booking.member_id,bookingId,previous.rows[0].id,auth.userId]);
-  }
- }
+ if(booking.status==="booked")await refundBookingCredit(client,auth,booking.member_id,bookingId);
  await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
  VALUES($1,$2,$3,'booking.cancelled')`,[auth.studioId,booking.member_id,auth.userId]);
- // Cancelled waitlist entries must never trigger a promotion.
- if(booking.status!=="booked")return {id:booking.id,status:"cancelled",alreadyCancelled:false,promoted:null};
- const classDay=await studioDate(client,session.timezone,session.starts_at);
- const waiting=await client.query<{id:string;member_id:string}>(`
- SELECT id,member_id FROM bookings
- WHERE studio_id=$1 AND session_id=$2 AND status='waitlisted'
- ORDER BY queue_number ASC NULLS LAST,booked_at ASC,id ASC LIMIT 300`,[auth.studioId,find.rows[0].session_id]);
- let promoted:null|{id:string;memberId:string}=null;
- for(const next of waiting.rows){
-  const member=await lockedMember(client,auth.studioId,next.member_id);
-  const settings=await client.query<{waiver_required:boolean}>("SELECT waiver_required FROM studios WHERE id=$1",[auth.studioId]);
-  if(settings.rows[0]?.waiver_required&&member.waiver_status!=="signed")continue;
-  if(!eligible(member,classDay))continue;
-  if(member.credits!==null)await changeCredits(client,auth.studioId,next.member_id,-1);
-  await client.query(`
-   UPDATE bookings SET status='booked'
-   WHERE studio_id=$1 AND id=$2 AND status='waitlisted'`,[auth.studioId,next.id]);
-  if(member.credits!==null)await client.query(`
-   INSERT INTO credit_ledger(studio_id,member_id,booking_id,delta,reason,created_by)
-   VALUES($1,$2,$3,-1,'class_booking',$4)`,[auth.studioId,next.member_id,next.id,auth.userId]);
-  await client.query(`INSERT INTO activity_log(studio_id,person_id,actor_id,action)
-   VALUES($1,$2,$3,'booking.promoted')`,[auth.studioId,next.member_id,auth.userId]);
-  await client.query(`INSERT INTO followup_tasks(studio_id,person_id,title,due_at,category,notes,source_key)
-   VALUES($1,$2,'Notify member: promoted from waitlist',now(),'General',$3,$4) ON CONFLICT DO NOTHING`,
-   [auth.studioId,next.member_id,"Class "+session.id+" booking "+next.id,"waitlist_promoted:"+next.id]);
-  promoted={id:next.id,memberId:next.member_id};
-  break;
- }
+ const promoted=(await fillWaitlist(client,auth,session.id)).find(x=>x.status==='booked')||null;
  return {id:booking.id,status:"cancelled",alreadyCancelled:false,promoted};
 }
 
@@ -263,6 +217,7 @@ export async function listBookings(client:PoolClient,studioId:string,sessionId:s
 }
 
 export async function setClassAttendance(client:PoolClient,auth:Authenticated,bookingId:string,present:boolean,reason?:string){
+ await lockStudioOperations(client,auth.studioId);
  if(!validUUID(bookingId))fail(400,"Invalid booking identifier.");
  if(!present&&!validText(reason,200,5))fail(400,"Provide a reason for an attendance correction.");
  const found=await client.query<{id:string;member_id:string;starts_at:Date;status:string;attended_at:Date|null}>(`

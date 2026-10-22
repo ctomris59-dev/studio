@@ -9,7 +9,7 @@ async function verifyRuntimeRole(p:Pool):Promise<void>{
  const role=result.rows[0];
  if(!role||role.rolsuper||role.rolbypassrls||!role.rolcanlogin)
   throw new Error("UNSAFE_DATABASE_RUNTIME_ROLE");
- const required=["people","class_sessions","bookings","credit_ledger","followup_tasks","activity_log","subscriptions","studio_staff","staff_invitations"];
+ const required=["people","class_sessions","bookings","credit_ledger","followup_tasks","activity_log","subscriptions","studio_staff","staff_invitations","recurring_reservations","recurring_booking_attempts","package_renewals","studio_waiver_documents","member_waiver_records"];
  const tables=await p.query<{relname:string;relrowsecurity:boolean;relforcerowsecurity:boolean;table_owner:string}>(`
   SELECT c.relname,c.relrowsecurity,c.relforcerowsecurity,pg_get_userbyid(c.relowner) AS table_owner
   FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace

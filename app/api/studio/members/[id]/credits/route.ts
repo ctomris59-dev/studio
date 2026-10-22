@@ -30,7 +30,7 @@ export async function POST(request:NextRequest,context:{params:Promise<{id:strin
    const newCredits=m.rows[0].credits+delta;
    if(newCredits<0||newCredits>1000000)throw new StudioOperationError(409,"Adjustment exceeds available credits or limit.");
    const updated=await client.query<{credits:number}>(`
-    UPDATE people SET credits=$3,updated_at=now()
+    UPDATE people SET rollover_credits=greatest(0,rollover_credits+least(0,$3-credits)),credits=$3,updated_at=now()
     WHERE studio_id=$1 AND id=$2 RETURNING credits`,[auth.studioId,id,newCredits]);
    const ledger=await client.query<{id:string}>(`
     INSERT INTO credit_ledger(studio_id,member_id,delta,reason,request_key,created_by)

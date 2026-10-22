@@ -16,7 +16,7 @@ type ClassRow={
  booked_count:number;waitlist_count:number;
 };
 type Member={id:string;full_name:string;package_status:string|null;credits:number|null;member_status:string|null};
-type Booking={id:string;session_id:string;member_id:string;member_name:string;status:"booked"|"waitlisted";queue_number:number|null;attended_at:string|null;spot_number:number|null;no_show_at:string|null};
+type Booking={offer_expires_at:string|null;id:string;session_id:string;member_id:string;member_name:string;status:"booked"|"waitlisted";queue_number:number|null;attended_at:string|null;spot_number:number|null;no_show_at:string|null};
 type Staff={id:string;display_name:string;role:string;availability_notes:string;active:boolean};
 type Insights={
  periodDays:number;
@@ -40,6 +40,8 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  const canManage=["owner","manager"].includes(role),canBook=["owner","manager","receptionist"].includes(role);
  const [classes,setClasses]=useState<ClassRow[]>([]),[members,setMembers]=useState<Member[]>([]),[bookings,setBookings]=useState<Booking[]>([]),[staff,setStaff]=useState<Staff[]>([]);
  const [insights,setInsights]=useState<Insights|null>(null),[selectedClass,setSelectedClass]=useState(""),[selectedMember,setSelectedMember]=useState(""),[selectedSpot,setSelectedSpot]=useState("");
+ const [externalRevision,setExternalRevision]=useState(0);
+ useEffect(()=>{const fn=()=>setExternalRevision(v=>v+1);window.addEventListener("studio-operations-changed",fn);return()=>window.removeEventListener("studio-operations-changed",fn)},[]);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const [loading,setLoading]=useState(true),[bookingsLoading,setBookingsLoading]=useState(false);
  const [classSearch,setClassSearch]=useState(""),[classHasMore,setClassHasMore]=useState(false),[classOffset,setClassOffset]=useState(0);
@@ -60,9 +62,9 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
  });
 
  const selected=classes.find(c=>c.id===selectedClass);
- const occupiedSpots=useMemo(()=>new Set(bookings.filter(b=>b.status==="booked"&&b.spot_number!==null).map(b=>Number(b.spot_number))),[bookings]);
+ const occupiedSpots=useMemo(()=>new Set(bookings.filter(b=>(b.status==="booked"||Boolean(b.offer_expires_at&&new Date(b.offer_expires_at).getTime()>Date.now()))&&b.spot_number!==null).map(b=>Number(b.spot_number))),[bookings]);
  const classStarted=selected?Date.now()>=new Date(selected.starts_at).getTime():false;
- useEffect(()=>{setEditingClass(false)},[selectedClass]);
+ useEffect(()=>{setEditingClass(false)},[selectedClass,externalRevision]);
  const isFull=selected?selected.booked_count>=selected.capacity:false;
 
  const refresh=useCallback(async()=>{
@@ -79,7 +81,7 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
   setSelectedMember(v=>m.members.some(item=>item.id===v)?v:m.members[0]?.id||"");
   if(section==="insights")setInsights(await api<Insights>("/api/studio/insights"));
   }finally{setLoading(false)}
- },[section,canBook,debouncedClassSearch,debouncedMemberSearch]);
+ },[section,canBook,debouncedClassSearch,debouncedMemberSearch,externalRevision]);
  useEffect(()=>{void refresh().catch(e=>setMessage(e instanceof Error?e.message:"Could not load operations."))},[refresh]);
  useEffect(()=>{setSchedule(v=>({...v,room:preferences.defaultRoom,durationMinutes:preferences.defaultClassDuration,capacity:preferences.defaultClassCapacity,classFormat:preferences.defaultClassFormat,spotBookingEnabled:preferences.spotBookingEnabled,spotLabel:preferences.equipmentLabel,spotCount:preferences.defaultSpotCount}))},[preferences.defaultRoom,preferences.defaultClassDuration,preferences.defaultClassCapacity,preferences.defaultClassFormat,preferences.spotBookingEnabled,preferences.equipmentLabel,preferences.defaultSpotCount]);
  useEffect(()=>{
@@ -91,7 +93,7 @@ export function ClassBasedOperations({role,section,preferences}:{role:string;sec
    .catch(()=>{if(!obsolete)setBookings([])})
    .finally(()=>{if(!obsolete)setBookingsLoading(false)});
   return ()=>{obsolete=true};
- },[selectedClass]);
+ },[selectedClass,externalRevision]);
  useEffect(()=>{
   if(!selected?.spot_booking_enabled||isFull){setSelectedSpot("");return}
   const max=selected.spot_count||selected.capacity;
