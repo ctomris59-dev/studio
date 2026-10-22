@@ -12,10 +12,17 @@ module.exports = async function ({
   peer,
 }) {
   const panel = 'section[aria-label="Staff operations"]';
-  const click = async (text) =>
-    evalJs(
-      `(()=>{const b=Array.from(document.querySelectorAll(${JSON.stringify(panel + " button")})).find(x=>x.textContent.trim()===${JSON.stringify(text)});if(!b||b.disabled)throw Error('Button unavailable: '+${JSON.stringify(text)});b.click();return true})()`,
-    );
+  const click = async (text) => {
+    const selector = `(()=>{const b=Array.from(document.querySelectorAll(${JSON.stringify(panel + " button")})).find(x=>x.textContent.trim()===${JSON.stringify(text)});return Boolean(b&&!b.disabled)})()`;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      if (await evalJs(selector))
+        return evalJs(
+          `(()=>{const b=Array.from(document.querySelectorAll(${JSON.stringify(panel + " button")})).find(x=>x.textContent.trim()===${JSON.stringify(text)});b.click();return true})()`,
+        );
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+    throw Error("Button stayed unavailable: " + text);
+  };
   const tab = async (name) => {
     await evalJs(
       `Array.from(document.querySelectorAll('nav[aria-label="Studio workspace"] button')).find(x=>x.textContent.trim()===${JSON.stringify(name)}).click();true`,
