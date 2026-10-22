@@ -15,7 +15,7 @@ export function MarketingMobileMenu(){
   <summary aria-label="Open main navigation">Menu</summary>
   <nav aria-label="Mobile and tablet navigation">
    <a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a>
-   <a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a>
+   <a href="#product-tour">Product tour</a><a href="#features">Software</a><a href="#why">Why StudioTasker</a>
    <Link href="/contact">Contact</Link><Link href="/workspace">Customer sign in</Link>
    <Link href="/app-demo">Try demo</Link><Link href="/start">Start StudioTasker</Link>
   </nav>

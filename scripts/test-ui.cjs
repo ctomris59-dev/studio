@@ -25,6 +25,7 @@ assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
 assert(homepage.includes("Timed waitlist holds and safe reservation moves")&&homepage.includes("Capped credit rollover and versioned waiver records"),"Homepage pricing summary must surface the new owner-workspace capabilities.");
+assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; insights")&&homepage.includes("Bookings &amp; attendance")&&homepage.includes("Team &amp; studio setup")&&homepage.includes("CSV preview and import"),"Homepage must present the main software areas as a scannable feature overview.");
 assert(demo.includes("function OperationsPreview()")&&demo.includes('aria-expanded={open===index}')&&demo.includes("Recurring reservations")&&demo.includes("Bulk class changes"),"Owner demo must expose inspectable studio operations workflows.");
 assert(css.includes(":focus-visible")&&css.includes("@media"),"Responsive focus states must be defined");
 assert(headers.includes("Content-Security-Policy")&&headers.includes("Strict-Transport-Security")&&headers.includes("frame-ancestors 'none'"),"All application surfaces must have browser security headers.");

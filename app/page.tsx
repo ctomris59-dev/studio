@@ -3,7 +3,7 @@ import type {Metadata} from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Activity, ArrowRight, ArrowUpRight, Check, Clock3,
+  Activity, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check, CheckCircle2, Clock3,
   CreditCard, Dumbbell, HeartPulse, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
@@ -91,7 +91,7 @@ export default function HomePage() {
       <header className="ed-header">
         <div className="ed-container ed-nav">
           <Identity/>
-          <nav aria-label="Main navigation"><a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a><a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
+          <nav aria-label="Main navigation"><a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a><a href="#product-tour">Product tour</a><a href="#features">Software</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
           <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">BUY NOW · $39.90 <ArrowUpRight size={16}/></Link></div>
           <MarketingMobileMenu/>
         </div>
@@ -211,6 +211,27 @@ export default function HomePage() {
               <p>Move through five areas an owner actually checks: daily priorities, member context, the class schedule, staff follow-up and the operational workflows that keep bookings and package records in sync.</p>
             </div>
             <ProductTourTabs/>
+          </div>
+        </section>
+
+        <section className="ed-capabilities" id="features" aria-labelledby="features-title">
+          <div className="ed-container">
+            <div className="ed-section-heading ed-section-heading-split">
+              <div><span className="ed-overline">THE STUDIO WORKSPACE</span><h2 id="features-title">Everything behind<br/><em>a better class day.</em></h2></div>
+              <p>One owner and staff workspace for the daily running of an independent studio—from first enquiry and class planning to attendance, credits and follow-up.</p>
+            </div>
+            <div className="ed-capability-grid">
+              <article><span>01</span><Clock3 size={23}/><h3>Today &amp; insights</h3><p>See today&apos;s classes, bookings, occupancy, waitlists and explainable signals for trials, renewals, inactivity and package reviews.</p></article>
+              <article><span>02</span><Users size={23}/><h3>Leads &amp; member records</h3><p>Track lead stages, trial progress, searchable member profiles, tags, notes, waiver status and related or emergency contacts.</p></article>
+              <article><span>03</span><CalendarDays size={23}/><h3>Classes &amp; schedules</h3><p>Create one-off or weekly recurring classes; manage instructors, substitutes, rooms, capacity, class formats and numbered equipment spots.</p></article>
+              <article><span>04</span><Activity size={23}/><h3>Bookings &amp; attendance</h3><p>Manage reservations, timed waitlist holds, safe booking moves, check-ins, cancellations, no-shows and bulk schedule changes.</p></article>
+              <article><span>05</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Set internal package entitlements and validity, record audited credit adjustments, apply capped one-cycle rollover and retain versioned waiver acceptance.</p></article>
+              <article><span>06</span><ShieldCheck size={23}/><h3>Team &amp; studio setup</h3><p>Invite staff with role-based access, customize studio identity and terminology, set timezone and class defaults, then start with an optional CSV preview and import.</p></article>
+              <article><span>07</span><Check size={23}/><h3>Follow-up workflows</h3><p>Turn trials, renewals and member activity into visible tasks with due dates, outcomes and clear next steps for the studio team.</p></article>
+              <article><span>08</span><CreditCard size={23}/><h3>Studio-owned payments</h3><p>Keep customer payment arrangements with your studio. StudioTasker tracks operational entitlements and bills the studio only for its software subscription.</p></article>
+              <article><span>09</span><BarChart3 size={23}/><h3>Portable studio data</h3><p>Import existing member and lead records with a preview, and export the studio&apos;s records when you need a copy.</p></article>
+            </div>
+            <p className="ed-capability-note">Staff tools for the business that runs classes. Member-facing booking and payment processing are not part of this workspace.</p>
           </div>
         </section>
 
