@@ -190,6 +190,12 @@ async function main(){
     // Sub-page typography may intentionally use a system font for controls,
     // but the content should not silently fall back across the whole page.
     assert(result.unknown<result.total,route+" has no text using registered font families");
+    if(route==="/"&&(width===1280||width===390)){
+      const shot=await peer.send("Page.captureScreenshot",{format:"png",captureBeyondViewport:true,fromSurface:true});
+      const dir=path.join(process.cwd(),"artifacts","homepage");
+      fs.mkdirSync(dir,{recursive:true});
+      fs.writeFileSync(path.join(dir,"homepage-"+width+".png"),Buffer.from(shot.data,"base64"));
+    }
     console.log("Browser",width,route,"elements",result.total,"unregistered",result.unknown);
    }
   }
