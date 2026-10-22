@@ -24,6 +24,8 @@ assert(classUI.includes("Edit selected class")&&classUI.includes("Cancel entire 
 assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),"Class modification requires tenant-scoped endpoints");
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
+assert(homepage.includes("Timed waitlist holds and safe reservation moves")&&homepage.includes("Capped credit rollover and versioned waiver records"),"Homepage pricing summary must surface the new owner-workspace capabilities.");
+assert(demo.includes("function OperationsPreview()")&&demo.includes('aria-expanded={open===index}')&&demo.includes("Recurring reservations")&&demo.includes("Bulk class changes"),"Owner demo must expose inspectable studio operations workflows.");
 assert(css.includes(":focus-visible")&&css.includes("@media"),"Responsive focus states must be defined");
 assert(headers.includes("Content-Security-Policy")&&headers.includes("Strict-Transport-Security")&&headers.includes("frame-ancestors 'none'"),"All application surfaces must have browser security headers.");
 assert(inviteUI.includes("Email staff invitation")&&inviteAPI.includes('["owner"]'),"Staff invitations must be owner-controlled and available in the workspace.");

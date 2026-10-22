@@ -355,7 +355,7 @@
 
 .ed-product-tour{padding:82px 0 88px;background:#fffefa;border-top:1px solid #17203c;border-bottom:1px solid #17203c}
 .ed-tour-tabs{border:2px solid #17203c;box-shadow:10px 10px 0 #334bdd;background:#f4f0e7}
-.ed-tour-tablist{display:grid;grid-template-columns:repeat(4,1fr);background:#17203c}
+.ed-tour-tablist{display:grid;grid-template-columns:repeat(5,1fr);background:#17203c}
 .ed-tour-tablist button{min-height:62px;border:0;border-right:1px solid #59627c;background:#17203c;color:#fff;padding:12px 15px;display:flex;align-items:center;justify-content:center;gap:9px;font:700 12px var(--studio-mono),monospace;cursor:pointer}
 .ed-tour-tablist button:last-child{border-right:0}
 .ed-tour-tablist button.active{background:var(--ed-lime);color:#17203c}

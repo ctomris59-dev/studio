@@ -1,12 +1,13 @@
 "use client";
 import {useRef,useState,type KeyboardEvent} from "react";
-import {ArrowRight,CalendarDays,CheckCircle2,Clock3,Users} from "lucide-react";
+import {ArrowRight,CalendarDays,CheckCircle2,Clock3,Users,Repeat2,ShieldCheck} from "lucide-react";
 
 const tabs=[
  {id:"today",label:"Today",icon:Clock3,title:"Know what needs attention.",text:"Trials, renewals, inactive members, package gaps and open seats surface with the reason they appeared.",metrics:[["PRIORITIES","05"],["HIGH","02"],["OPEN SEATS","06"]],rows:[["Trial needs a next step","Mia attended yesterday"],["Renewal opportunity","Oliver has 1 credit left"],["Member may be drifting","Emma has not visited in 24 days"]]},
  {id:"members",label:"Members",icon:Users,title:"Keep member context together.",text:"Member details, package entitlements, status and attendance history stay in one clear studio record.",metrics:[["ACTIVE","118"],["TRIALS","09"],["FOLLOW-UPS","05"]],rows:[["Mia R.","Trial · attended yesterday"],["Oliver K.","Active · 1 credit remaining"],["Emma L.","Active · last visit 24 days ago"]]},
  {id:"classes",label:"Classes",icon:CalendarDays,title:"Run the class day clearly.",text:"See coach, room, capacity, bookings and attendance without rebuilding the day in a spreadsheet.",metrics:[["CLASSES","08"],["BOOKINGS","42"],["CAPACITY","84%"]],rows:[["07:30 · Morning Flow","6 / 8 booked"],["09:00 · Reformer Foundations","8 / 8 booked"],["17:30 · Evening Reset","7 / 8 booked"]]},
- {id:"followups",label:"Follow-ups",icon:CheckCircle2,title:"Turn signals into staff actions.",text:"Create clear follow-up tasks from trials, renewals and inactivity. StudioTasker explains the signal; your team decides what happens next.",metrics:[["OPEN","05"],["DUE TODAY","03"],["DONE","12"]],rows:[["Mia R.","Follow up after trial"],["Oliver K.","Renewal reminder"],["Emma L.","Check in after inactivity"]]}
+ {id:"followups",label:"Follow-ups",icon:CheckCircle2,title:"Turn signals into staff actions.",text:"Create clear follow-up tasks from trials, renewals and inactivity. StudioTasker explains the signal; your team decides what happens next.",metrics:[["OPEN","05"],["DUE TODAY","03"],["DONE","12"]],rows:[["Mia R.","Follow up after trial"],["Oliver K.","Renewal reminder"],["Emma L.","Check in after inactivity"]]},
+ {id:"operations",label:"Operations",icon:Repeat2,title:"Handle the exceptions cleanly.",text:"Give the studio team practical controls for waitlist holds, reservation moves, recurring bookings, bulk class changes, and package and waiver records.",metrics:[["WAITLIST","HELD"],["CHANGES","ATOMIC"],["CREDITS","CAPPED"]],rows:[["Waitlist hold","Temporary seat offer with expiry"],["Move reservation","Update the booking as one change"],["Repeat & bulk edit","Review conflicts before applying"],["Package & waiver","Capped rollover · versioned consent"]]}
 ];
 
 export default function ProductTourTabs(){

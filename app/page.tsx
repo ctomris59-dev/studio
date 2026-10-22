@@ -190,7 +190,7 @@ export default function HomePage() {
               <div className="ed-price-light">
                 <div className="ed-price-features">
                   <span className="ed-price-include">WHAT&apos;S INCLUDED</span>
-                {["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","Optional CSV import with preview","Studio-managed class packages & credits","Classes, attendance and follow-up workflows","Studio branding and terminology","Studio timezone and class defaults"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}
+                {["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","Optional CSV import with preview","Studio-managed class packages & credits","Timed waitlist holds and safe reservation moves","Recurring member reservations and bulk class changes","Capped credit rollover and versioned waiver records","Classes, attendance and follow-up workflows","Studio branding and terminology","Studio timezone and class defaults"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}
                 </div>
                 <div className="ed-price-ready">
                   <span className="ed-price-ready-label">YOUR STUDIO. YOUR RULES.</span>
@@ -208,7 +208,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-section-heading ed-section-heading-split">
               <div><span className="ed-overline">03 / PRODUCT TOUR</span><h2 id="product-tour-title">See the work.<br/><em>Not a feature dump.</em></h2></div>
-              <p>Move through the four areas an owner actually checks: what needs attention, who the members are, what is happening in classes and what the team should follow up.</p>
+              <p>Move through five areas an owner actually checks: daily priorities, member context, the class schedule, staff follow-up and the operational workflows that keep bookings and package records in sync.</p>
             </div>
             <ProductTourTabs/>
           </div>
