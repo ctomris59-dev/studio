@@ -1288,8 +1288,11 @@
  .ed-contact-refined .ed-contact-cta-grid{gap:23px}
 }
 @media(max-width:440px){
- .ed-studio-type-grid{grid-template-columns:1fr}
- .ed-studio-type-grid article{min-height:0}
+ .ed-studio-type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ed-studio-type-grid article{min-height:204px;padding:16px 11px}
+ .ed-studio-type-grid h3{font-size:20px}
+ .ed-studio-type-grid a{min-height:42px;display:inline-flex;align-items:center}
+ .ed-studio-type-grid p{font-size:13px;line-height:1.5}
  .ed-hero-consolidated .ed-hero-photo{min-height:510px}
  .ed-hero-reassurance{font-size:10px}
  .ed-hero-consolidated .ed-preview-intro h2{font-size:39px}
@@ -1298,3 +1301,12 @@
 /* Inline support links should not inherit the large CTA anchor styling. */
 .ed-contact-refined .ed-contact-actions>p a{display:inline;min-height:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:700px){.ed-hero-consolidated .ed-hero-canvas .ed-preview-dashboard{max-width:100%}}
+
+/* Mobile acquisition: the detailed class rows live in the product tour below. */
+@media(max-width:700px){
+ .ed-hero-consolidated .ed-preview-schedule-title,
+ .ed-hero-consolidated .ed-preview-classes{display:none}
+ .ed-hero-consolidated .ed-preview-intro{margin-bottom:18px}
+ .ed-hero-consolidated .ed-preview-body{padding-bottom:20px}
+ .ed-faq-list summary{min-height:44px;align-items:center}
+}
