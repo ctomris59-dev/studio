@@ -1242,8 +1242,11 @@
 @media(max-width:1200px){
  .ed-studio-type-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
  .ed-studio-type-grid article{border-bottom:1px solid #c9c6be}
- .ed-hero-consolidated{width:calc(100% - 52px)}
+ .ed-hero-consolidated{width:calc(100% - 104px)}
  .ed-hero-consolidated>.ed-hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+@media(max-width:1000px){
+ .ed-hero-consolidated{width:calc(100% - 52px)}
 }
 @media(max-width:950px){
  .ed-hero-consolidated>.ed-hero-grid{grid-template-columns:minmax(0,1fr)}
