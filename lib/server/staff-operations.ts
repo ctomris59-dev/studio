@@ -66,10 +66,10 @@ async function moveBooking(client: PoolClient, auth: Authenticated, body: Record
     status: string;
     spot_booking_enabled: boolean;
     spot_count: number;
-    day: string;
+    local_day: string;
     waiver_required: boolean;
   }>(
-    `SELECT c.*,(c.starts_at AT TIME ZONE s.timezone)::date::text day,s.waiver_required FROM class_sessions c JOIN studios s ON s.id=c.studio_id WHERE c.studio_id=$1 AND c.id=ANY($2::uuid[]) ORDER BY c.id FOR UPDATE OF c`,
+    `SELECT c.*,(c.starts_at AT TIME ZONE s.timezone)::date::text AS local_day,s.waiver_required FROM class_sessions c JOIN studios s ON s.id=c.studio_id WHERE c.studio_id=$1 AND c.id=ANY($2::uuid[]) ORDER BY c.id FOR UPDATE OF c`,
     [auth.studioId, [b.session_id, targetId]],
   );
   const source = sessions.rows.find((x) => x.id === b.session_id),
@@ -94,7 +94,7 @@ async function moveBooking(client: PoolClient, auth: Authenticated, body: Record
  AND p.member_status='Active' AND p.package_status='Confirmed' AND (p.start_date IS NULL OR p.start_date<=$3::date)
  AND (p.expiry_date IS NULL OR p.expiry_date>=$3::date) AND (NOT $4::boolean OR p.waiver_status='signed')
  AND (p.credits IS NULL OR EXISTS(SELECT 1 FROM credit_ledger l WHERE l.studio_id=p.studio_id AND l.booking_id=$5 AND l.reason='class_booking' AND l.credit_cycle=p.credit_cycle)) FOR UPDATE`,
-    [auth.studioId, b.member_id, target!.day, target!.waiver_required, bookingId],
+    [auth.studioId, b.member_id, target!.local_day, target!.waiver_required, bookingId],
   );
   if (!member.rowCount)
     fail(409, "The existing booking credit is not valid for the destination class.");
@@ -153,10 +153,10 @@ async function offerDecision(
     status: string;
     offer_expires_at: Date | null;
     starts_at: Date;
-    day: string;
+    local_day: string;
     waiver_required: boolean;
   }>(
-    `SELECT b.*,c.starts_at,(c.starts_at AT TIME ZONE s.timezone)::date::text day,s.waiver_required
+    `SELECT b.*,c.starts_at,(c.starts_at AT TIME ZONE s.timezone)::date::text AS local_day,s.waiver_required
  FROM bookings b JOIN class_sessions c ON c.studio_id=b.studio_id AND c.id=b.session_id JOIN studios s ON s.id=b.studio_id
  WHERE b.studio_id=$1 AND b.id=$2 AND c.status='scheduled' FOR UPDATE OF c,b`,
     [auth.studioId, bookingId],
@@ -176,7 +176,7 @@ async function offerDecision(
       `SELECT 1 FROM people WHERE studio_id=$1 AND id=$2 AND archived_at IS NULL AND member_status='Active' AND package_status='Confirmed'
    AND (start_date IS NULL OR start_date<=$3::date) AND (expiry_date IS NULL OR expiry_date>=$3::date)
    AND (NOT $4::boolean OR waiver_status='signed') FOR UPDATE`,
-      [auth.studioId, b.member_id, b.day, b.waiver_required],
+      [auth.studioId, b.member_id, b.local_day, b.waiver_required],
     );
     if (!eligible.rowCount)
       fail(409, "Member is no longer eligible. Decline the offer to release the place.");
@@ -275,8 +275,8 @@ async function createRecurring(
   const memberId = id(body.memberId),
     anchorId = id(body.sessionId),
     end = date(body.endDate);
-  const anchor = await client.query<{ day: string; series_id: string | null; starts_at: Date }>(
-    "SELECT c.series_id,c.starts_at,(c.starts_at AT TIME ZONE s.timezone)::date::text day FROM class_sessions c JOIN studios s ON s.id=c.studio_id WHERE c.studio_id=$1 AND c.id=$2 AND c.status='scheduled'",
+  const anchor = await client.query<{ local_day: string; series_id: string | null; starts_at: Date }>(
+    "SELECT c.series_id,c.starts_at,(c.starts_at AT TIME ZONE s.timezone)::date::text AS local_day FROM class_sessions c JOIN studios s ON s.id=c.studio_id WHERE c.studio_id=$1 AND c.id=$2 AND c.status='scheduled'",
     [auth.studioId, anchorId],
   );
   if (!anchor.rowCount || !anchor.rows[0].series_id)
@@ -284,8 +284,8 @@ async function createRecurring(
   const a = anchor.rows[0];
   if (
     new Date(a.starts_at).getTime() <= Date.now() ||
-    end < a.day ||
-    Date.parse(end) - Date.parse(a.day) > 84 * 86400000
+    end < a.local_day ||
+    Date.parse(end) - Date.parse(a.local_day) > 84 * 86400000
   )
     fail(400, "Choose an end date within 12 weeks of the selected class.");
   const m = await client.query(
@@ -466,11 +466,11 @@ async function waiver(client: PoolClient, auth: Authenticated, body: Record<stri
     [auth.studioId, documentId],
   );
   if (!doc.rowCount) fail(404, "Document not found.");
-  const today = await client.query<{ day: string }>(
-    "SELECT (now() AT TIME ZONE timezone)::date::text day FROM studios WHERE id=$1",
+  const today = await client.query<{ local_day: string }>(
+    "SELECT (now() AT TIME ZONE timezone)::date::text AS local_day FROM studios WHERE id=$1",
     [auth.studioId],
   );
-  if (acceptedOn > today.rows[0].day) fail(400, "Acceptance cannot be dated in the future.");
+  if (acceptedOn > today.rows[0].local_day) fail(400, "Acceptance cannot be dated in the future.");
   const row = await client.query(
     `INSERT INTO member_waiver_records(studio_id,member_id,document_id,evidence_reference,accepted_on,recorded_by)
  VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(studio_id,member_id,document_id) DO NOTHING RETURNING id`,
