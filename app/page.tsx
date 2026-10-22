@@ -3,7 +3,7 @@ import type {Metadata} from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Activity, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check, CheckCircle2, Clock3,
+  Activity, ArrowRight, ArrowUpRight, CalendarDays, CheckCircle2, Clock3,
   CreditCard, Dumbbell, HeartPulse, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
@@ -87,128 +87,53 @@ export default function HomePage() {
   return (
     <div className="editorial"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
       <JsonLd data={websiteJsonLd()}/>
-      <div className="ed-topline"><div className="ed-container"><span>SOFTWARE FOR THE SPACE YOU&apos;VE BUILT.</span><span>INDEPENDENT STUDIOS · USA · CANADA · UK · EUROPE · INTERNATIONAL <span className="ed-star"><Activity size={12}/></span></span></div></div>
+      <div className="ed-topline"><div className="ed-container"><span>LESS ADMIN. MORE MOVEMENT.</span><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE <span className="ed-star"><Activity size={12}/></span></span></div></div>
       <header className="ed-header">
         <div className="ed-container ed-nav">
           <Identity/>
-          <nav aria-label="Main navigation"><a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a><a href="#product-tour">Product tour</a><a href="#features">Software</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
-          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">BUY NOW · $39.90 <ArrowUpRight size={16}/></Link></div>
+          <nav aria-label="Main navigation"><a href="#product-tour">Product tour</a><a href="#features">Features</a><a href="#studio-types">Studio types</a><a href="#pricing">Pricing</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
+          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">VIEW PLANS · $39.90 <ArrowUpRight size={16}/></Link></div>
           <MarketingMobileMenu/>
         </div>
       </header>
 
       <main id="main-content" tabIndex={-1}>
-        <section className="ed-impact-band ed-impact-band-first" aria-labelledby="impact-band-title">
-          <div className="ed-container">
-            <div className="ed-impact-card">
-              <Image
-                src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"
-                alt=""
-                width={1800}
-                height={1200}
-                priority
-                fetchPriority="high"
-                sizes="(max-width: 760px) 100vw, 1360px"
-              />
-              <div className="ed-impact-price-options" aria-label="StudioTasker pricing plans">
-                <Link href="/start?plan=monthly" className="ed-impact-price-option ed-impact-price-monthly" aria-label="Choose monthly plan, $39.90 per month">
-                  <span>MONTHLY PLAN</span>
-                  <strong>$39.90 / MONTH</strong>
-                  <small>PAY MONTH TO MONTH</small>
-                  <ArrowUpRight size={18} aria-hidden="true"/>
-                </Link>
-                <Link href="/start?plan=annual" className="ed-impact-price-option ed-impact-price-annual" aria-label="Choose yearly plan, $33.90 per month equivalent, billed $406.80 annually">
-                  <span>YEARLY PLAN · SAVE 15%</span>
-                  <strong>$33.90 / MONTH</strong>
-                  <small>$406.80 BILLED YEARLY</small>
-                  <ArrowUpRight size={18} aria-hidden="true"/>
-                </Link>
-              </div>
-              <div className="ed-impact-overlay">
-                <span className="ed-impact-kicker">BUILT FOR ACTIVE STUDIOS</span>
-                <h1 id="impact-band-title">Designed for the work behind every class.</h1>
-                <p>Bookings, packages, check-ins and follow-ups in one clear studio system.</p>
-                <Link className="ed-impact-cta" href="/app-demo?tour=1">EXPLORE THE DEMO <ArrowUpRight size={18}/></Link>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section className="ed-hero" aria-labelledby="main-heading">
+        <section className="ed-hero ed-hero-consolidated" aria-labelledby="main-heading">
           <div className="ed-container ed-hero-grid">
-            <div className="ed-hero-copy">
-              <div className="ed-hero-brand">
-                <span className="ed-hero-brand-icon"><StudioTaskerMark/></span>
-                <div><strong>StudioTasker</strong><small>GLOBAL STUDIO MANAGEMENT SOFTWARE</small></div>
-              </div>
-              <div className="ed-index">PILATES · YOGA · BARRE · BOUTIQUE FITNESS</div>
-              <div className="ed-hero-content">
-                <h2 id="main-heading">YOUR<br/>STUDIO.<br/><em>IN SYNC.</em></h2>
-                <div className="ed-hero-under">
-                <p>StudioTasker keeps member relationships, classes, package entitlements and follow-ups in one place for independent studios worldwide.</p>
-                <div className="ed-hero-action-stack">
-                  <Link className="ed-buy-cta ed-buy-cta-solo" href="/start"><span className="ed-buy-only">ONLY $39.90 / MONTH</span><strong>START STUDIOTASKER</strong><ArrowUpRight size={22}/></Link>
-                  <div className="ed-hero-quick-links">
-                    <Link className="ed-demo-compact" href="/app-demo?tour=1"><span>WATCH 90-SEC DEMO</span><small>No sign-up</small><ArrowRight size={16}/></Link>
-                    <Link className="ed-annual-compact" href="/start?plan=annual"><span>ANNUAL · $33.90/MO</span><small>SAVE $72/YEAR</small><ArrowUpRight size={16}/></Link>
-                  </div>
+            <div className="ed-hero-copy ed-hero-photo">
+              <Image className="ed-hero-image"
+                src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"
+                alt="" width={1200} height={1200} priority fetchPriority="high"
+                sizes="(max-width: 850px) 100vw, 700px"
+              />
+              <div className="ed-hero-inner">
+                <span className="ed-hero-eyebrow">STUDIOTASKER / INDEPENDENT STUDIO SOFTWARE</span>
+                <h1 id="main-heading">Less admin.<br/><em>More movement.</em></h1>
+                <p>Classes, members, bookings, packages and follow-ups - all in one clear workspace for your studio team.</p>
+                <div className="ed-hero-primary-actions">
+                  <Link href="/app-demo?tour=1" className="ed-hero-demo">TRY THE INTERACTIVE DEMO <ArrowUpRight size={18}/></Link>
+                  <a href="#pricing" className="ed-hero-plans">SEE SIMPLE PRICING <ArrowRight size={17}/></a>
                 </div>
-                </div>
+                <span className="ed-hero-reassurance">NO SIGN-UP TO EXPLORE THE DEMO · FROM $39.90/MONTH</span>
               </div>
             </div>
             <div className="ed-hero-canvas">
               <div className="ed-preview-intro">
-                <span className="ed-preview-eyebrow">STUDIOTASKER / PRODUCT PREVIEW</span>
-                <h2>See your studio in one clear view.</h2>
-                
+                <span className="ed-preview-eyebrow">A DAY AT YOUR STUDIO / SAMPLE DATA</span>
+                <h2>See the day.<br/>Stay in control.</h2>
+                <p>From the morning schedule to the next follow-up, see what needs your attention.</p>
               </div>
               <PreviewDashboard/>
-              
-            </div>
-          </div>
-          <div className="ed-hero-end ed-container"><span>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</span><a href="#pricing">SEE PRICING <span>↓</span></a></div>
-        </section>
-
-        <section className="ed-studio-types" id="studio-types" aria-labelledby="studio-types-title">
-          <div className="ed-container">
-            <div className="ed-section-heading ed-section-heading-split">
-              <div><span className="ed-overline">01 / BUILT FOR YOUR KIND OF STUDIO</span><h2 id="studio-types-title">Different classes.<br/><em>Same daily pressure.</em></h2></div>
-              <p>StudioTasker is designed for independent class-based businesses that need clear scheduling, member context, package entitlements and follow-up without an enterprise sales process.</p>
-            </div>
-            <div className="ed-studio-type-grid">
-              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+name.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
-            </div>
-            <div className="ed-proof-strip"><strong>BUILT FOR INDEPENDENT STUDIOS WORLDWIDE</strong><span>USA · CANADA · UK · EUROPE · INTERNATIONAL</span><span>transparent pricing · no fake customer-logo wall</span></div>
-          </div>
-        </section>
-
-        <section className="ed-pricing" id="pricing">
-          <div className="ed-container">
-            <div className="ed-pricing-kicker"><span className="ed-overline">02 / PLAIN & SIMPLE</span></div>
-            <div className="ed-price-grid">
-              <div className="ed-price-dark"><div className="ed-price-top"><span>STUDIO ESSENTIAL</span><span>ONE STUDIO · FULL WORKSPACE</span></div><div className="ed-price-number"><span>$</span>39<sup>.90</sup><small> / MONTH</small></div><p>Monthly is the flexible option: full StudioTasker access at <strong>only $39.90/month</strong>.</p><div className="ed-annual-value"><span>BEST VALUE · ANNUAL</span><strong>$33.90/month</strong><p>$406.80 billed once yearly. <b>Save $72/year</b> versus 12 monthly payments. For a studio system you use week after week, annual means the lower effective price and one yearly renewal instead of monthly billing.</p></div><div className="ed-price-actions"><Link href="/start?plan=monthly">MONTHLY FLEXIBILITY · $39.90 <ArrowUpRight size={19}/></Link><Link href="/start?plan=annual">BEST VALUE · ANNUAL · $406.80/YEAR <ArrowUpRight size={19}/></Link><Link href="/app-demo">TRY DEMO FIRST <ArrowRight size={18}/></Link></div><p className="ed-price-disclaimer">Prices are in USD. Applicable taxes and the final total are displayed by Paddle before payment confirmation.</p></div>
-              <div className="ed-price-light">
-                <div className="ed-price-features">
-                  <span className="ed-price-include">WHAT&apos;S INCLUDED</span>
-                {["StudioTasker Today daily priorities","Follow-up opportunity signals","Lead and member CRM records","Optional CSV import with preview","Studio-managed class packages & credits","Timed waitlist holds and safe reservation moves","Recurring member reservations and bulk class changes","Capped credit rollover and versioned waiver records","Classes, attendance and follow-up workflows","Studio branding and terminology","Studio timezone and class defaults"].map(x=><div className="ed-price-item" key={x}><Check size={17}/>{x}</div>)}
-                </div>
-                <div className="ed-price-ready">
-                  <span className="ed-price-ready-label">YOUR STUDIO. YOUR RULES.</span>
-                  <h3>Make it yours.<br/>Keep things moving.</h3>
-                  <p>Personalize your workspace, add members one by one or import an existing list when it suits you.</p>
-                  <Link href="/app-demo?tour=1">EXPLORE THE WORKSPACE <ArrowUpRight size={18}/></Link>
-                </div>
-              </div>
             </div>
           </div>
         </section>
-
 
         <section className="ed-product-tour" id="product-tour" aria-labelledby="product-tour-title">
           <div className="ed-container">
             <div className="ed-section-heading ed-section-heading-split">
-              <div><span className="ed-overline">03 / PRODUCT TOUR</span><h2 id="product-tour-title">See the work.<br/><em>Not a feature dump.</em></h2></div>
-              <p>Move through five areas an owner actually checks: daily priorities, member context, the class schedule, staff follow-up and the operational workflows that keep bookings and package records in sync.</p>
+              <div><span className="ed-overline">01 / TAKE A LOOK INSIDE</span><h2 id="product-tour-title">Your studio.<br/><em>In full view.</em></h2></div>
+              <p>Explore five everyday areas: Today, Members, Classes, Follow-ups and Operations. Switch between the sample views to see how your team stays organized.</p>
             </div>
             <ProductTourTabs/>
           </div>
@@ -217,76 +142,114 @@ export default function HomePage() {
         <section className="ed-capabilities" id="features" aria-labelledby="features-title">
           <div className="ed-container">
             <div className="ed-section-heading ed-section-heading-split">
-              <div><span className="ed-overline">THE STUDIO WORKSPACE</span><h2 id="features-title">Everything behind<br/><em>a better class day.</em></h2></div>
-              <p>One owner and staff workspace for the daily running of an independent studio—from first enquiry and class planning to attendance, credits and follow-up.</p>
+              <div><span className="ed-overline">02 / EVERYTHING YOU NEED</span><h2 id="features-title">Powerful tools.<br/><em>One clear workspace.</em></h2></div>
+              <p>Plan classes, stay on top of members and handle the details without switching between disconnected tools.</p>
             </div>
             <div className="ed-capability-grid">
-              <article><span>01</span><Clock3 size={23}/><h3>Today &amp; insights</h3><p>See today&apos;s classes, bookings, occupancy, waitlists and explainable signals for trials, renewals, inactivity and package reviews.</p></article>
-              <article><span>02</span><Users size={23}/><h3>Leads &amp; member records</h3><p>Track lead stages, trial progress, searchable member profiles, tags, notes, waiver status and related or emergency contacts.</p></article>
-              <article><span>03</span><CalendarDays size={23}/><h3>Classes &amp; schedules</h3><p>Create one-off or weekly recurring classes; manage instructors, substitutes, rooms, capacity, class formats and numbered equipment spots.</p></article>
-              <article><span>04</span><Activity size={23}/><h3>Bookings &amp; attendance</h3><p>Manage reservations, timed waitlist holds, safe booking moves, check-ins, cancellations, no-shows and bulk schedule changes.</p></article>
-              <article><span>05</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Set internal package entitlements and validity, record audited credit adjustments, apply capped one-cycle rollover and retain versioned waiver acceptance.</p></article>
-              <article><span>06</span><ShieldCheck size={23}/><h3>Team &amp; studio setup</h3><p>Invite staff with role-based access, customize studio identity and terminology, set timezone and class defaults, then start with an optional CSV preview and import.</p></article>
-              <article><span>07</span><Check size={23}/><h3>Follow-up workflows</h3><p>Turn trials, renewals and member activity into visible tasks with due dates, outcomes and clear next steps for the studio team.</p></article>
-              <article><span>08</span><CreditCard size={23}/><h3>Studio-owned payments</h3><p>Keep customer payment arrangements with your studio. StudioTasker tracks operational entitlements and bills the studio only for its software subscription.</p></article>
-              <article><span>09</span><BarChart3 size={23}/><h3>Portable studio data</h3><p>Import existing member and lead records with a preview, and export the studio&apos;s records when you need a copy.</p></article>
+              <article><span>01 / DAILY CONTROL</span><Clock3 size={23}/><h3>Today &amp; follow-ups</h3><p>See bookings, capacity, priorities and explainable signals for trials, renewals and inactivity. Turn them into staff tasks with clear next steps.</p></article>
+              <article><span>02 / RELATIONSHIPS</span><Users size={23}/><h3>Members &amp; CRM</h3><p>Keep enquiries, lead stages, trial progress, searchable profiles, notes, contacts, attendance history and waiver status together.</p></article>
+              <article><span>03 / THE TIMETABLE</span><CalendarDays size={23}/><h3>Classes &amp; schedules</h3><p>Build one-off or recurring classes with instructors, substitutes, rooms, capacity, formats and numbered equipment spots.</p></article>
+              <article><span>04 / THE EXCEPTIONS</span><Activity size={23}/><h3>Bookings &amp; waitlists</h3><p>Manage check-ins, cancellations, no-shows, timed waitlist offers, safe reservation moves, recurring bookings and bulk class changes.</p></article>
+              <article><span>05 / ENTITLEMENTS</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Track package validity and usage, audited credit adjustments, capped one-cycle rollovers and versioned waiver acceptance.</p></article>
+              <article><span>06 / YOUR CONTROL</span><ShieldCheck size={23}/><h3>Team, branding &amp; data</h3><p>Use staff roles, studio branding, timezone and class defaults. Preview CSV imports and export your studio records when needed.</p></article>
             </div>
-            <p className="ed-capability-note">Staff tools for the business that runs classes. Member-facing booking and payment processing are not part of this workspace.</p>
+            <p className="ed-capability-note">Built for studio owners and staff. Public member booking links and member payment processing are not included.</p>
           </div>
         </section>
 
-        <section className="ed-why" id="why" aria-labelledby="why-title">
+        <section className="ed-studio-types" id="studio-types" aria-labelledby="studio-types-title">
           <div className="ed-container">
             <div className="ed-section-heading ed-section-heading-split">
-              <div><span className="ed-overline">04 / WHY STUDIOTASKER</span><h2 id="why-title">Useful software.<br/><em>Without the enterprise baggage.</em></h2></div>
-              <p>StudioTasker focuses on the operating layer of a studio. It does not try to become your bank, payment processor, marketing agency or consulting project.</p>
+              <div><span className="ed-overline">03 / MADE FOR YOUR STUDIO</span><h2 id="studio-types-title">Your kind of studio.<br/><em>Your way of working.</em></h2></div>
+              <p>From Pilates and yoga to fitness and dance, choose your studio type to see how StudioTasker fits your classes.</p>
             </div>
-            <div className="ed-why-grid">
-              <article><span>01</span><ShieldCheck size={24}/><h3>One clear price.</h3><p>$39.90 monthly, or $33.90/month with annual billing. No sales call required to see the price.</p></article>
-              <article><span>02</span><CreditCard size={24}/><h3>Keep your payments.</h3><p>Your member payments stay with the studio and its existing payment method. StudioTasker bills only for its software.</p></article>
-              <article><span>03</span><Clock3 size={24}/><h3>Know what needs attention.</h3><p>Explainable signals highlight trials, renewals, inactivity and open capacity. Staff decide the next action.</p></article>
-              <article><span>04</span><Users size={24}/><h3>Built for a small team.</h3><p>Clear member, class and follow-up workflows without requiring an implementation consultant or enterprise rollout.</p></article>
+            <div className="ed-studio-type-grid">
+              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+name.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
             </div>
           </div>
         </section>
 
-        <section className="ed-onboarding" id="onboarding" aria-labelledby="onboarding-title">
-          <div className="ed-container ed-onboarding-grid">
-            <div>
-              <span className="ed-overline">05 / SELF-SERVE ONBOARDING</span>
-              <h2 id="onboarding-title">Start without<br/><em>booking a setup call.</em></h2>
-              <p>Create the workspace yourself, import what you already have and keep the systems that do not need replacing.</p>
-              <div className="ed-onboarding-actions"><Link href="/start">START STUDIOTASKER <ArrowUpRight size={18}/></Link><Link href="/app-demo?tour=1">WATCH 90-SEC DEMO <ArrowRight size={17}/></Link></div>
+
+        <section className="ed-pricing ed-pricing-refined" id="pricing" aria-labelledby="pricing-title">
+          <div className="ed-container">
+            <div className="ed-section-heading ed-section-heading-split">
+              <div><span className="ed-overline">04 / SIMPLE PRICING</span><h2 id="pricing-title">One studio.<br/><em>One straightforward price.</em></h2></div>
+              <p>Every plan includes the full owner-and-staff workspace. Choose monthly flexibility or save with annual billing.</p>
             </div>
-            <div className="ed-onboarding-steps">
-              <article><b>01</b><div><strong>Create your studio</strong><p>Choose your plan, create your private workspace and set timezone, terminology and class defaults.</p></div><Check size={20}/></article>
-              <article><b>02</b><div><strong>Optional CSV import with preview</strong><p>Add members directly in StudioTasker. If you already have a list, CSV import is an optional shortcut. Preview the records before confirming.</p></div><Check size={20}/></article>
-              <article><b>03</b><div><strong>Keep your payment setup</strong><p>No member-payment migration is required because StudioTasker does not take over the studio&apos;s customer payments.</p></div><Check size={20}/></article>
-              <article><b>04</b><div><strong>Get to useful data fast</strong><p>The first setup is designed to take minutes, not a training programme. Add classes, members and follow-up rules as you go.</p></div><Check size={20}/></article>
+            <div className="ed-plan-grid">
+              <article className="ed-plan-card">
+                <span className="ed-plan-label">MONTHLY / FLEXIBLE</span>
+                <h3>Pay month to month.</h3>
+                <div className="ed-plan-amount"><strong>$39.90</strong><span>/ month</span></div>
+                <p>All StudioTasker features, with flexible monthly billing.</p>
+                <Link href="/start?plan=monthly">CHOOSE MONTHLY <ArrowUpRight size={18}/></Link>
+              </article>
+              <article className="ed-plan-card ed-plan-card-featured">
+                <span className="ed-plan-label">ANNUAL / SAVE ABOUT 15%</span>
+                <h3>Keep more in your studio.</h3>
+                <div className="ed-plan-amount"><strong>$33.90</strong><span>/ month equivalent</span></div>
+                <p>$406.80 billed once per year. Save $72 versus twelve monthly payments.</p>
+                <Link href="/start?plan=annual">CHOOSE ANNUAL <ArrowUpRight size={18}/></Link>
+              </article>
+            </div>
+            <p className="ed-plan-disclaimer">Pricing is in USD, per studio. Applicable taxes and final totals are shown by Paddle before checkout. Studio members pay your studio directly, outside StudioTasker.</p>
+          </div>
+        </section>
+
+
+        <section className="ed-why-setup" id="why" aria-labelledby="why-title">
+          <div className="ed-container">
+            <div className="ed-section-heading ed-section-heading-split">
+              <div><span className="ed-overline">05 / BUILT FOR INDEPENDENCE</span><h2 id="why-title">The essentials.<br/><em>Without the overhead.</em></h2></div>
+              <p>StudioTasker helps your team run the studio. It does not take over your members' payments or require an enterprise implementation.</p>
+            </div>
+            <div className="ed-value-grid">
+              <article><CreditCard size={24}/><h3>Keep your payments.</h3><p>Your existing member payment arrangements remain with your studio.</p></article>
+              <article><Users size={24}/><h3>Made for small teams.</h3><p>Clear role-based workflows for owners and staff, without a complex rollout.</p></article>
+              <article><ShieldCheck size={24}/><h3>Your studio. Your data.</h3><p>Configure your workspace, import with a preview and export records when needed.</p></article>
+            </div>
+            <div className="ed-setup-compact" id="onboarding">
+              <div>
+                <span className="ed-overline">SELF-SERVE SETUP</span>
+                <h3>Start simply.<br/><em>Grow at your pace.</em></h3>
+                <p>Create your workspace, add your members and start building your class schedule. No setup call required.</p>
+                <Link href="/app-demo?tour=1">EXPLORE FIRST <ArrowRight size={18}/></Link>
+              </div>
+              <ol>
+                <li><b>01</b><div><strong>Create your studio</strong><span>Choose a plan and set your timezone, terminology and class defaults.</span></div></li>
+                <li><b>02</b><div><strong>Add your records</strong><span>Enter members as you go or preview an optional CSV import.</span></div></li>
+                <li><b>03</b><div><strong>Run your classes</strong><span>Set up schedules, bookings, packages and staff follow-ups.</span></div></li>
+              </ol>
             </div>
           </div>
         </section>
 
         <section className="ed-faq" id="faq" aria-labelledby="faq-heading">
           <div className="ed-container ed-faq-grid">
-            <div><span className="ed-overline">06 / GOOD TO KNOW</span><h2 id="faq-heading">Clear answers.<br/><em>No fine print tricks.</em></h2><p>StudioTasker is subscription-based studio management software. You can explore the interactive demo first, then use your own private workspace for day-to-day studio operations.</p></div>
+            <div><span className="ed-overline">06 / QUESTIONS ANSWERED</span><h2 id="faq-heading">Before you begin.<br/><em>Know what to expect.</em></h2><p>Try the sample demo without creating an account. Here are the answers to the questions most studio owners ask before choosing a plan.</p></div>
             <div className="ed-faq-list">
               <details><summary>What kinds of studios is StudioTasker for?</summary><p>StudioTasker is designed for independent Pilates, yoga, barre, dance, gym, boutique fitness and other class-based studios. Studio name, logo, colors, terminology, class defaults and operating rules can be customized to fit the way your studio works.</p></details><details><summary>Where is StudioTasker available?</summary><p>StudioTasker is designed for independent studios in all international markets. The interface is English-first, pricing is shown in USD, and each studio can choose its own timezone, 12/24-hour clock and week-start preference.</p></details>
-              <details><summary>Can I use it for real customer bookings today?</summary><p>The interactive demo is available now. The private workspace is designed for staff-managed bookings, attendance, packages and follow-ups, but paid production onboarding will open only after operational and security checks are completed. There is no public member booking link or member payment checkout.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
+              <details><summary>Can I use StudioTasker for real bookings now?</summary><p>The interactive demo is available now. The private workspace is designed for staff-managed bookings, attendance, packages and follow-ups, but paid production onboarding will open only after operational and security checks are completed. There is no public member booking link or member payment checkout.</p></details><details><summary>What happens after I subscribe?</summary><p>You sign in to your private StudioTasker workspace, complete the guided setup, add or import your studio records, then customize your studio name, logo, primary color, terminology, class defaults and StudioTasker Today rules. Your studio&apos;s data and settings stay isolated inside its own workspace.</p></details>
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
               <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $33.90/month, billed as $406.80 for the year, about 15% less than paying monthly for 12 months. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
             </div>
           </div>
         </section>
-        <section className="ed-contact-cta" aria-labelledby="contact-cta-title">
+
+        <section className="ed-contact-cta ed-contact-refined" aria-labelledby="contact-cta-title">
           <div className="ed-container ed-contact-cta-grid">
-            <div><span className="ed-overline">QUESTIONS / SUPPORT</span><h2 id="contact-cta-title">Need a human?<br/><em>We&apos;re here.</em></h2><p>Product questions, account help, billing questions or feedback. Contact StudioTasker support directly.</p></div>
-            <div><a href="mailto:support@studiotasker.com">support@studiotasker.com <ArrowUpRight size={20}/></a><Link href="/contact">OPEN CONTACT FORM <ArrowRight size={18}/></Link></div>
+            <div><span className="ed-overline">READY TO EXPLORE?</span><h2 id="contact-cta-title">Less admin.<br/><em>More studio time.</em></h2><p>See the product in action with sample data before choosing a plan.</p></div>
+            <div className="ed-contact-actions">
+              <Link href="/app-demo?tour=1">TRY THE INTERACTIVE DEMO <ArrowUpRight size={18}/></Link>
+              <a href="#pricing">VIEW THE PLANS <ArrowRight size={18}/></a>
+              <p>Have a question? <Link href="/contact">Contact us</Link> or email <a href="mailto:support@studiotasker.com">support@studiotasker.com</a>.</p>
+            </div>
           </div>
         </section>
+
       </main>
-      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software for independent studios across supported international markets.</p></div><div className="ed-footer-nav"><Link href="/start">Buy StudioTasker</Link><a href="#pricing">Pricing</a><a href="#studio-types">Studio types</a><a href="#product-tour">Product tour</a><a href="#why">Why StudioTasker</a><a href="#onboarding">Self-serve onboarding</a><Link href="/workspace">Customer sign in</Link><Link href="/about">About</Link><Link href="/contact">Contact</Link><Link href="/legal">Legal & Trust</Link><Link href="/legal/privacy">Privacy Policy</Link><Link href="/legal/security">Security</Link></div></div>{op.configured&&<div className="ed-container"><p className="ed-price-disclaimer"><strong>Legal operator:</strong> {op.name} · {op.address}, {op.country} · {op.email} · {op.phone}. StudioTasker subscription orders are processed by Paddle as Merchant of Record.</p></div>}<div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · GLOBAL STUDIO MANAGEMENT SOFTWARE</span><span>USA · CANADA · UK · EUROPE · INTERNATIONAL <Activity className="ed-inline-sport" size={12}/></span></div></footer>
+      <footer className="ed-footer"><div className="ed-container ed-footer-main"><div><Identity inverse/><p>Thoughtfully uncomplicated studio software for independent studios across supported international markets.</p></div><div className="ed-footer-nav"><a href="#product-tour">Product tour</a><a href="#features">Features</a><a href="#studio-types">Studio types</a><a href="#pricing">Pricing</a><a href="#why">Why StudioTasker</a><a href="#onboarding">Self-serve onboarding</a><Link href="/workspace">Customer sign in</Link><Link href="/about">About</Link><Link href="/contact">Contact</Link><Link href="/legal">Legal & Trust</Link><Link href="/legal/privacy">Privacy Policy</Link><Link href="/legal/security">Security</Link></div></div>{op.configured&&<div className="ed-container"><p className="ed-price-disclaimer"><strong>Legal operator:</strong> {op.name} · {op.address}, {op.country} · {op.email} · {op.phone}. StudioTasker subscription orders are processed by Paddle as Merchant of Record.</p></div>}<div className="ed-container ed-footer-bottom"><span>© 2026 STUDIOTASKER · GLOBAL STUDIO MANAGEMENT SOFTWARE</span><span>USA · CANADA · UK · EUROPE · INTERNATIONAL <Activity className="ed-inline-sport" size={12}/></span></div></footer>
     </div>
   );
 }

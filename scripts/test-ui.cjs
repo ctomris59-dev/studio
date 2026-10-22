@@ -24,8 +24,12 @@ assert(classUI.includes("Edit selected class")&&classUI.includes("Cancel entire 
 assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),"Class modification requires tenant-scoped endpoints");
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
-assert(homepage.includes("Timed waitlist holds and safe reservation moves")&&homepage.includes("Capped credit rollover and versioned waiver records"),"Homepage pricing summary must surface the new owner-workspace capabilities.");
-assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; insights")&&homepage.includes("Bookings &amp; attendance")&&homepage.includes("Team &amp; studio setup")&&homepage.includes("CSV preview and import"),"Homepage must present the main software areas as a scannable feature overview.");
+assert(homepage.includes("timed waitlist offers")&&homepage.includes("capped one-cycle rollovers")&&homepage.includes("versioned waiver acceptance"),"Homepage feature overview must explain new owner-workspace capabilities.");
+assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; follow-ups")&&homepage.includes("Bookings &amp; waitlists")&&homepage.includes("Team, branding &amp; data")&&homepage.includes("Preview CSV imports"),"Homepage must present the main software areas as six readable feature groups.");
+assert.equal((homepage.match(/<h1\b/g)||[]).length,1,"Homepage must expose a single main H1.");
+assert(!homepage.includes('ed-impact-band')&&homepage.includes("ed-hero-consolidated"),"Homepage must not repeat two oversized introduction banners.");
+assert(homepage.indexOf('id="product-tour"')<homepage.indexOf('id="features"')&&homepage.indexOf('id="features"')<homepage.indexOf('id="pricing"'),"Product discovery should precede pricing.");
+assert(homepage.includes("SAMPLE DATA")&&homepage.includes("NO SIGN-UP TO EXPLORE THE DEMO"),"Homepage preview must be labeled as sample data.");
 assert(demo.includes("function OperationsPreview()")&&demo.includes('aria-expanded={open===index}')&&demo.includes("Recurring reservations")&&demo.includes("Bulk class changes"),"Owner demo must expose inspectable studio operations workflows.");
 assert(css.includes(":focus-visible")&&css.includes("@media"),"Responsive focus states must be defined");
 assert(headers.includes("Content-Security-Policy")&&headers.includes("Strict-Transport-Security")&&headers.includes("frame-ancestors 'none'"),"All application surfaces must have browser security headers.");
