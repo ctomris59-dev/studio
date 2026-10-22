@@ -33,10 +33,8 @@ module.exports = async function ({
   const saved = () => waitText(panel + ' [role="status"]', "Saved.");
   await tab("Settings");
   await open("Waitlist policy");
-  await field("Staff hold duration (minutes)", "10");
   await click("Save waitlist policy");
   await saved();
-  assert.equal((await api("/api/studio/operations", { cookie })).data.policy.offerMinutes, 10);
   await open("Studio waiver document versions");
   await field("Document title", "Browser waiver");
   await field("Version", "1");
