@@ -71,8 +71,8 @@ async function main(){
      ].map(face=>document.fonts.load(face)));
      const nodes=Array.from(document.querySelectorAll("h1,h2,h3,p,a,button,label,input")).filter(x=>x.getBoundingClientRect().width>0);
      const unknown=nodes.filter(x=>!fonts.some(name=>getComputedStyle(x).fontFamily.includes(name))).length;
-     const annual=document.querySelector(".ed-annual-compact");
-     const annualText=annual?.querySelector("span");
+     const annual=document.querySelector(".ed-plan-card-featured > a");
+     const annualText=annual;
      const rgb=value=>(value.match(/[0-9.]+/g)||[]).slice(0,3).map(Number);
      const lum=color=>{
       const n=rgb(color).map(x=>{const v=x/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});
@@ -90,8 +90,8 @@ async function main(){
      };
      const firstScreenContrast={
       topBar:solidContrast(".ed-topline"),
-      monthlyPlan:solidContrast(".editorial .ed-impact-price-monthly"),
-      yearlyPlan:solidContrast(".editorial .ed-impact-price-annual"),
+      heroDemo:solidContrast(".ed-hero-demo"),
+      annualPlan:solidContrast(".ed-plan-card-featured > a"),
       demoLink:solidContrast(".ed-nav-demo")
      };
      let annualContrast=null;
@@ -170,7 +170,7 @@ async function main(){
        "Homepage solid-color text fails WCAG AA contrast: "+label+" ratio="+ratio);
      }
      const photo=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
-      const img=document.querySelector(".ed-impact-card > img");
+      const img=document.querySelector(".ed-hero-photo > img");
       if(!img)return {found:false};
       try{
        await Promise.race([img.decode(),new Promise((_,reject)=>setTimeout(()=>reject(Error("Image load timed out")),12000))]);

@@ -1291,3 +1291,7 @@
  .ed-hero-reassurance{font-size:10px}
  .ed-hero-consolidated .ed-preview-intro h2{font-size:39px}
 }
+
+/* Inline support links should not inherit the large CTA anchor styling. */
+.ed-contact-refined .ed-contact-actions>p a{display:inline;min-height:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:700px){.ed-hero-consolidated .ed-hero-canvas .ed-preview-dashboard{max-width:100%}}

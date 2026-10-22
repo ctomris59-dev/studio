@@ -3,7 +3,7 @@ import type {Metadata} from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Activity, ArrowRight, ArrowUpRight, BarChart3, CalendarDays, Check, CheckCircle2, Clock3,
+  Activity, ArrowRight, ArrowUpRight, CalendarDays, CheckCircle2, Clock3,
   CreditCard, Dumbbell, HeartPulse, ShieldCheck, Users, Waves
 } from "lucide-react";
 import "./editorial.css";
@@ -110,7 +110,7 @@ export default function HomePage() {
               <div className="ed-hero-inner">
                 <span className="ed-hero-eyebrow">STUDIOTASKER / INDEPENDENT STUDIO SOFTWARE</span>
                 <h1 id="main-heading">Less admin.<br/><em>More movement.</em></h1>
-                <p>Classes, members, bookings, packages and follow-ups — all in one clear workspace for your studio team.</p>
+                <p>Classes, members, bookings, packages and follow-ups - all in one clear workspace for your studio team.</p>
                 <div className="ed-hero-primary-actions">
                   <Link href="/app-demo?tour=1" className="ed-hero-demo">TRY THE INTERACTIVE DEMO <ArrowUpRight size={18}/></Link>
                   <a href="#pricing" className="ed-hero-plans">SEE SIMPLE PRICING <ArrowRight size={17}/></a>
