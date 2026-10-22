@@ -53,7 +53,7 @@ assert(main>=0&&main<hero&&hero<tour&&tour<features&&features<studioTypes&&studi
 assert(home.includes('priority fetchPriority="high"'),"Above-the-fold hero image must be loaded at high priority.");
 assert(home.includes('src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"'),"Keep the existing first-party-approved Pexels photo.");
 assert(home.includes('<h1 id="main-heading">Less admin.<br/><em>More movement.</em></h1>'),"Primary value proposition must be a crawlable H1.");
-assert.equal((home.match(/<h1\\b/g)||[]).length,1,"Homepage must define exactly one H1.");
+assert.equal((home.match(/<h1\b/g)||[]).length,1,"Homepage must define exactly one H1.");
 assert(!home.includes("ed-impact-band"),"Two consecutive hero sections unnecessarily delay product discovery.");
 assert(home.includes('href="/start?plan=monthly"')&&home.includes('href="/start?plan=annual"'),"Both billing choices must be accessible from pricing.");
 assert(home.includes("$39.90")&&home.includes("$33.90")&&home.includes("$406.80"),"Pricing details must remain explicit.");

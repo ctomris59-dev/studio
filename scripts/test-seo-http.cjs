@@ -24,11 +24,11 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const tour=home.text.indexOf('id="product-tour"');
  assert(hero>=0&&tour>hero,"The combined photo/product hero must precede the walkthrough.");
  assert(home.text.includes('pexels-photo-2294400.jpeg'),"Hero photograph must appear in initial HTML.");
- const heroImage=(home.text.match(/<img\\b[^>]*>/gi)||[]).find(tag=>tag.includes("pexels-photo-2294400.jpeg"))||"";
+ const heroImage=(home.text.match(/<img\b[^>]*>/gi)||[]).find(tag=>tag.includes("pexels-photo-2294400.jpeg"))||"";
  assert(heroImage,"LCP hero photo must be visible in server HTML.");
  assert(/fetchpriority="high"/i.test(heroImage),"LCP image must be high priority.");
  assert(!/loading="lazy"/i.test(heroImage),"LCP image must not be lazy-loaded.");
- const homeH1s=home.text.match(/<h1\\b/g)||[];
+ const homeH1s=home.text.match(/<h1\b/g)||[];
  assert.equal(homeH1s.length,1,"Homepage must have one H1.");
  assert(home.text.includes('id="main-heading"')&&home.text.includes("Less admin."),"Hero benefit headline must be crawlable.");
  assert(home.text.includes('$39.90')&&home.text.includes('$406.80'),"Both plan prices must be crawlable.");
