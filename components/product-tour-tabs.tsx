@@ -35,9 +35,9 @@ export default function ProductTourTabs(){
      className={active===item.id?"active":""} onClick={()=>setActive(item.id)}><I size={17}/>{item.label}</button>})}
   </div>
   <div className="ed-tour-panel" id="tour-panel" role="tabpanel" aria-labelledby={"tour-tab-"+active} tabIndex={0}>
-   <div className="ed-tour-copy"><span className="ed-tour-icon"><Icon size={22}/></span><h3>{tab.title}</h3><p>{tab.text}</p><a href="/app-demo?tour=1">WATCH THE 90-SEC DEMO <ArrowRight size={16}/></a></div>
+   <div className="ed-tour-copy"><span className="ed-tour-icon"><Icon size={22}/></span><h3>{tab.title}</h3><p>{tab.text}</p><a href="/app-demo?tour=1">EXPLORE THE INTERACTIVE DEMO <ArrowRight size={16}/></a></div>
    <div className="ed-tour-ui">
-    <div className="ed-tour-ui-head"><div><strong>Willow Studio</strong><small>{tab.label.toUpperCase()} / SAMPLE WORKSPACE</small></div><span>LIVE PREVIEW ↗</span></div>
+    <div className="ed-tour-ui-head"><div><strong>Willow Studio</strong><small>{tab.label.toUpperCase()} / SAMPLE WORKSPACE</small></div><span>SAMPLE PREVIEW</span></div>
     <div className="ed-tour-metrics">{tab.metrics.map(([label,value])=><div key={label}><small>{label}</small><b>{value}</b></div>)}</div>
     <div className="ed-tour-rows">{tab.rows.map(([title,sub],i)=><div key={i}><span>{String(i+1).padStart(2,"0")}</span><div><b>{title}</b><small>{sub}</small></div><i>→</i></div>)}</div>
    </div>
