@@ -1499,3 +1499,66 @@
  .ed-plan-effective-total{font-size:10px}
  .ed-studio-type-grid p{font-size:13.5px}
 }
+
+
+/* Six wholly original fictional studio identity concepts, not testimonials. */
+.ed-sample-studios{background:#fffefa;border-top:1px solid #17203c;border-bottom:1px solid #17203c;padding:47px 0 33px}
+.ed-sample-studios-heading{max-width:900px;margin:0 auto 35px;text-align:center}
+.ed-sample-studios-kicker{font:700 11px/1.4 var(--studio-mono),monospace;color:#334bdd;letter-spacing:.13em}
+.ed-sample-studios-heading h2{font-family:var(--studio-heading),"Arial Narrow",sans-serif;font-size:clamp(37px,4.1vw,61px);line-height:1;letter-spacing:-.045em;margin:12px 0;color:#17203c}
+.ed-sample-studios-heading h2 em{font-style:normal;color:#334bdd}
+.ed-sample-studios-heading p{font-size:14px;line-height:1.55;color:#586274;max-width:625px;margin:0 auto}
+.ed-concept-logo-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin:0;padding:0;list-style:none;border-top:1px solid #dce0e7;border-bottom:1px solid #dce0e7}
+.ed-concept-logo{min-width:0;min-height:133px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:17px;padding:20px 7px 15px;color:#343740;filter:grayscale(1);transition:color .2s ease,background-color .2s ease}
+.ed-concept-logo+li{border-left:1px solid #dce0e7}
+.ed-concept-logo:hover{color:#17203c;background:#f4f5f8}
+.ed-concept-lockup{display:flex;gap:9px;align-items:center;justify-content:center;width:100%;min-width:0;min-height:61px}
+.ed-concept-emblem{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px}
+.ed-concept-emblem svg{display:block;width:100%;height:100%}
+.ed-concept-type{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;line-height:1}
+.ed-concept-type strong{font-family:var(--studio-heading),"Arial Narrow",sans-serif;font-weight:800;font-size:clamp(17px,1.7vw,27px);line-height:.95;letter-spacing:-.055em;white-space:nowrap}
+.ed-concept-type small{font-family:var(--studio-mono),monospace;font-weight:700;letter-spacing:.1em;font-size:9px;white-space:nowrap}
+.ed-concept-kind{font:700 9px/1.3 var(--studio-mono),monospace;letter-spacing:.055em;color:#697183;text-align:center}
+.ed-concept-willow .ed-concept-type strong{font-family:Georgia,serif;font-size:clamp(18px,1.8vw,28px);font-weight:400;letter-spacing:-.07em}
+.ed-concept-forma .ed-concept-type strong{font-weight:900;letter-spacing:-.085em}
+.ed-concept-northline .ed-concept-type strong{font-size:clamp(14px,1.35vw,22px);letter-spacing:-.045em}
+.ed-concept-motion .ed-concept-type strong{font-family:Georgia,serif;font-style:italic;font-weight:700;letter-spacing:-.08em}
+.ed-concept-orbit .ed-concept-type strong{letter-spacing:.055em;font-weight:800}
+.ed-concept-flow .ed-concept-type strong{font-weight:900;letter-spacing:.055em}
+.ed-sample-studios-disclosure{text-align:center;margin:16px auto 0;font:500 12px/1.5 var(--studio-sans),sans-serif;color:#626b7b}
+@media(max-width:1250px){
+ .ed-concept-logo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .ed-concept-logo:nth-child(4){border-left:0}
+ .ed-concept-logo:nth-child(n+4){border-top:1px solid #dce0e7}
+ .ed-concept-type strong{font-size:clamp(22px,2.5vw,32px)}
+ .ed-concept-willow .ed-concept-type strong{font-size:clamp(22px,2.5vw,32px)}
+ .ed-concept-northline .ed-concept-type strong{font-size:clamp(18px,2vw,27px)}
+}
+@media(max-width:700px){
+ .ed-sample-studios{padding:32px 0 23px}
+ .ed-sample-studios-heading{margin-bottom:20px}
+ .ed-sample-studios-heading h2{font-size:clamp(36px,9.3vw,49px)}
+ .ed-sample-studios-heading p{font-size:13.5px;max-width:450px}
+ .ed-concept-logo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ed-concept-logo{min-height:119px;gap:11px;padding:14px 5px 12px}
+ .ed-concept-logo:nth-child(n){border-left:0}
+ .ed-concept-logo:nth-child(2n){border-left:1px solid #dce0e7}
+ .ed-concept-logo:nth-child(n+3){border-top:1px solid #dce0e7}
+ .ed-concept-lockup{gap:6px}
+ .ed-concept-emblem{flex-basis:35px;width:35px;height:35px}
+ .ed-concept-type strong{font-size:clamp(17px,4.45vw,24px)}
+ .ed-concept-willow .ed-concept-type strong{font-size:clamp(17px,4.45vw,24px)}
+ .ed-concept-northline .ed-concept-type strong{font-size:clamp(14px,3.55vw,20px)}
+ .ed-concept-type small{font-size:8px}
+ .ed-concept-kind{font-size:9px}
+ .ed-sample-studios-disclosure{font-size:11px;max-width:320px;margin-top:15px}
+}
+@media(max-width:360px){
+ .ed-concept-emblem{flex-basis:29px;width:29px;height:29px}
+ .ed-concept-lockup{gap:4px}
+ .ed-concept-type strong{font-size:16px}
+ .ed-concept-northline .ed-concept-type strong{font-size:12.5px}
+ .ed-concept-willow .ed-concept-type strong{font-size:17px}
+ .ed-concept-kind{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){.ed-concept-logo{transition:none}}

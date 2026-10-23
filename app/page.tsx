@@ -9,6 +9,7 @@ import {
 import "./editorial.css";
 import { StudioTaskerMark } from "../components/studio-tasker-mark";
 import ProductTourTabs from "../components/product-tour-tabs";
+import SampleStudioLogos from "../components/sample-studio-logos";
 import {MarketingMobileMenu} from "../components/marketing-mobile-menu";
 import {JsonLd} from "../components/json-ld";
 import {websiteJsonLd} from "../lib/seo";
@@ -126,6 +127,18 @@ export default function HomePage() {
               </div>
               <PreviewDashboard/>
             </div>
+          </div>
+        </section>
+
+        <section className="ed-sample-studios" aria-labelledby="sample-studios-title">
+          <div className="ed-container">
+            <div className="ed-sample-studios-heading">
+              <span className="ed-sample-studios-kicker">STUDIO CONCEPTS / 01-06</span>
+              <h2 id="sample-studios-title">Every studio has <em>its own rhythm.</em></h2>
+              <p>Six fictional studio identities illustrating the spaces and workflows StudioTasker is made for.</p>
+            </div>
+            <SampleStudioLogos/>
+            <p className="ed-sample-studios-disclosure">Illustrative identities only. These are not customers, partners or endorsements.</p>
           </div>
         </section>
 
