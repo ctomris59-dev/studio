@@ -56,3 +56,21 @@
 .ct-status.is-success{background:#eef8e7;border-left-color:#4e8d4c}
 .ct-status.is-error{background:#fff0ec;border-left-color:#d75c3d}
 .ct-status a{text-decoration:underline;font-weight:700}
+
+
+/* Contact card remains useful when preview/server mail delivery is disabled. */
+.ct-delivery-mode{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 10px;margin:0 0 19px;padding:12px 14px;border:1px solid #c9d3ed;background:#f3f5ff;color:#17203c;font-size:13px;line-height:1.5}
+.ct-delivery-mode strong{font-weight:800}
+.ct-delivery-mode span{color:#45536f}
+.ct-form-actions{display:flex;align-items:stretch;gap:11px;margin-top:17px}
+.ct-form-actions>button{margin-top:0;min-height:51px}
+.ct-form-actions>button:first-child{flex:1 1 auto}
+.ct-form-card .ct-form-actions .ct-copy-message{width:auto;flex:0 0 auto;padding:11px 15px;background:#fffefa;box-shadow:none;justify-content:center;font-size:12px}
+.ct-form-card .ct-form-actions .ct-copy-message:hover{box-shadow:none}
+.ct-status.is-prepared{background:#eef0ff;border-left-color:#334bdd;line-height:1.55}
+.ct-form-note a{color:#334bdd;text-decoration:underline;text-underline-offset:2px;font-weight:700}
+@media(max-width:560px){
+ .ct-delivery-mode{padding:11px 12px;margin-bottom:15px}
+ .ct-form-actions{flex-wrap:wrap}
+ .ct-form-card .ct-form-actions .ct-copy-message{width:100%;flex:1 1 100%;min-height:44px}
+}
