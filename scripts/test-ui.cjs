@@ -36,6 +36,9 @@ assert(homepage.includes("All features. $39.90 billed monthly.")&&homepage.inclu
 const pricingCSS=read("app/start/start.css");
 const startPage=read("app/start/page.tsx");
 const plans=read("app/start/plan-selector.tsx");
+assert(startPage.indexOf("st-start-price-glance")<startPage.indexOf("st-start-availability")&&startPage.indexOf("st-start-availability")<startPage.indexOf("PlanSelector registrationOpen")&&startPage.indexOf("PlanSelector registrationOpen")<startPage.indexOf("st-start-postscript"),"Actual prices must precede secondary onboarding and global information");
+assert(startPage.includes("$39.90<small> / month")&&startPage.includes("$406.80<small> / year")&&startPage.includes("$33.90/month equivalent"),"Monthly and yearly actual prices must appear first");
+assert(plans.includes('id="monthly-plan"')&&plans.includes('id="annual-plan"'),"Quick-price navigation must target both plan cards");
 assert(homepage.includes("TOTAL YEARLY BILL · $406.80")&&homepage.includes("ed-pricing-assurance")&&homepage.includes('href="/legal/cancellation"'),"Homepage needs transparent billing total and verifiable trust links near pricing");
 assert(plans.includes("BILLED MONTHLY · $39.90 TOTAL")&&plans.includes("BILLED YEARLY · $406.80 TOTAL")&&plans.includes("/ month equivalent"),"Plans must distinguish annual effective monthly rate from actual yearly charge");
 assert(startPage.includes("st-start-trust")&&startPage.includes("Compare plans")&&startPage.includes('registrationOpen?"Create studio":"Explore demo"'),"Availability-aware steps and linked buyer trust must remain clear");
