@@ -1,0 +1,72 @@
+name: Homepage Lighthouse design audit
+on:
+  pull_request:
+    paths:
+      - 'app/page.tsx'
+      - 'app/editorial.css'
+      - 'components/product-tour-tabs.tsx'
+      - '.github/workflows/design-lighthouse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SITE_URL: https://www.studiotasker.com
+      AUTH_ALLOW_REGISTRATION: 'false'
+      PADDLE_ENV: sandbox
+      NEXT_PUBLIC_PADDLE_ENV: sandbox
+      BILLING_ALLOW_LOCAL_TEST: 'false'
+      BILLING_ALLOW_SANDBOX_TEST: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Build actual marketing website
+        run: npm run build
+      - name: Start isolated local production server
+        run: |
+          npm run start -- -H 127.0.0.1 -p 3222 > /tmp/studiotasker-lighthouse-server.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl --silent --fail http://127.0.0.1:3222/ > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo "Isolated marketing server failed readiness"
+          tail -30 /tmp/studiotasker-lighthouse-server.log
+          exit 1
+      - name: Run mobile and desktop Lighthouse
+        run: |
+          mkdir -p artifacts/lighthouse
+          npx --yes lighthouse@12.6.1 http://127.0.0.1:3222/ \
+            --quiet --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=artifacts/lighthouse/mobile.json
+          npx --yes lighthouse@12.6.1 http://127.0.0.1:3222/ \
+            --quiet --preset=desktop \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=artifacts/lighthouse/desktop.json
+          node - <<'NODE'
+          const fs=require('fs');
+          for(const form of ['mobile','desktop']){
+            const d=JSON.parse(fs.readFileSync('artifacts/lighthouse/'+form+'.json','utf8'));
+            const score=Object.fromEntries(Object.entries(d.categories).map(([k,v])=>[k,Math.round((v.score||0)*100)]));
+            console.log('LIGHTHOUSE '+form.toUpperCase()+': '+JSON.stringify(score));
+            console.log('Web Vitals '+form+': '+JSON.stringify(Object.fromEntries(['largest-contentful-paint','cumulative-layout-shift','total-blocking-time','speed-index'].map(k=>[k,d.audits[k]?.displayValue||'n/a']))));
+          }
+          NODE
+      - name: Save measured reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-lighthouse-mobile-desktop
+          path: artifacts/lighthouse/*.json
+          if-no-files-found: ignore
