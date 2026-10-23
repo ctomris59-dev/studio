@@ -188,8 +188,15 @@ export default function HomePage() {
                 <h3>Keep more in your studio.</h3>
                 <div className="ed-plan-amount"><strong>$33.90</strong><span>/ month equivalent</span></div>
                 <p>$406.80 billed yearly. Save $72 compared with monthly billing.</p>
+                <strong className="ed-plan-effective-total">TOTAL YEARLY BILL · $406.80</strong>
                 <Link href="/start?plan=annual">CHOOSE ANNUAL <ArrowUpRight size={18}/></Link>
               </article>
+            </div>
+            <div className="ed-pricing-assurance" aria-label="StudioTasker pricing and trust details">
+              <span><CheckCircle2 size={17}/> Same complete workspace with either plan</span>
+              <span><CheckCircle2 size={17}/> One subscription per studio</span>
+              <Link href="/legal/cancellation">Cancellation terms <ArrowUpRight size={15}/></Link>
+              <Link href="/legal/security">Security practices <ArrowUpRight size={15}/></Link>
             </div>
           </div>
         </section>

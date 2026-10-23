@@ -25,18 +25,25 @@ export default function StartPage(){
     </div>
     <h1>Choose a plan.<br/><em>{registrationOpen?"Create your studio.":"Explore before launch."}</em></h1>
     <p>Compare monthly or annual billing in USD, then take the guided product tour. When registrations open, studio owners can set up a private workspace with their timezone, logo, members and classes.</p>
-    <div className="st-start-steps">
-     <span><b>1</b> Choose plan</span><i/><span><b>2</b> Create studio</span><i/><span><b>3</b> Start using it</span>
+    <div className="st-start-steps" aria-label={registrationOpen?"Getting started":"Preview steps"}>
+     <span><b>1</b> Compare plans</span><i/><span><b>2</b> {registrationOpen?"Create studio":"Explore demo"}</span><i/><span><b>3</b> {registrationOpen?"Start using it":"Join when open"}</span>
     </div>
    </div>
    <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · International</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
 
    {!registrationOpen&&<div className="st-start-availability" role="status"><ShieldCheck size={21}/><div><strong>New studio subscriptions are not open yet.</strong><span>You can review plans and explore the 90-second demo now. No payment or account is required.</span></div></div>}
+   <div className="st-start-plan-summary"><ShieldCheck size={18}/><span>Both plans include the same studio features. Your choice only changes the billing period.</span></div>
    <Suspense fallback={<PlanCards selected="monthly" registrationOpen={registrationOpen}/>}>
     <PlanSelector registrationOpen={registrationOpen}/>
    </Suspense>
 
-   <div className="st-start-legal"><ShieldCheck size={18}/><span>Before creating a paid studio, review our <Link href="/legal/terms">Terms</Link>, <Link href="/legal/dpa">DPA</Link> and <Link href="/legal/privacy">Privacy Policy</Link>. Acceptance is recorded when you create or update your subscription.</span></div>
+   <div className="st-start-trust" aria-label="Pricing, data and support information">
+    <Link href="/legal/security"><ShieldCheck size={17}/> Security practices</Link>
+    <Link href="/legal/cancellation">Cancellation &amp; refunds</Link>
+    <Link href="/legal/privacy">Privacy policy</Link>
+    <Link href="/contact">Contact support</Link>
+   </div>
+   <div className="st-start-legal"><ShieldCheck size={18}/><span>Review our <Link href="/legal/terms">Terms</Link>, <Link href="/legal/dpa">DPA</Link> and <Link href="/legal/privacy">Privacy Policy</Link> before subscribing. Acceptance is recorded at account creation and subscription changes.</span></div>
    <div className="st-start-help">
     <ShieldCheck size={22}/>
     <div><b>Not ready to buy yet?</b><span>Try the full owner demo with sample data first. No account is required.</span></div>
