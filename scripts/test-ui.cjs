@@ -29,8 +29,8 @@ assert(tourTabs.includes("Previous product area")&&tourTabs.includes("Next produ
 assert(css.includes("grid-template-columns:repeat(12,minmax(0,1fr))")&&css.includes(".ed-studio-type-grid article:nth-child(n+5){grid-column:span 4"),"Desktop studio types must use balanced 4+3 grid");
 assert(homepage.includes('aria-label="Customer sign in">SIGN IN</Link>'),"Desktop sign-in label must remain clear without wrapping");
 assert(homepage.includes("All features. $39.90 billed monthly.")&&homepage.includes("$406.80 billed yearly."),"Pricing cards must explain billing periods without long notes");
-assert(homepage.includes("timed waitlist offers")&&homepage.includes("capped one-cycle rollovers")&&homepage.includes("versioned waiver acceptance"),"Homepage feature overview must explain new owner-workspace capabilities.");
-assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; follow-ups")&&homepage.includes("Bookings &amp; waitlists")&&homepage.includes("Team, branding &amp; data")&&homepage.includes("Preview CSV imports"),"Homepage must present the main software areas as six readable feature groups.");
+assert(homepage.includes("timed waitlists")&&homepage.includes("one-cycle rollovers")&&homepage.includes("versioned waivers"),"Homepage feature overview must explain new owner-workspace capabilities.");
+assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; follow-ups")&&homepage.includes("Bookings &amp; waitlists")&&homepage.includes("Team, branding &amp; data")&&homepage.includes("Preview imports"),"Homepage must present the main software areas as six readable feature groups.");
 assert.equal((homepage.match(/<h1\b/g)||[]).length,1,"Homepage must expose a single main H1.");
 assert(!homepage.includes('ed-impact-band')&&homepage.includes("ed-hero-consolidated"),"Homepage must not repeat two oversized introduction banners.");
 assert(homepage.indexOf('id="product-tour"')<homepage.indexOf('id="features"')&&homepage.indexOf('id="features"')<homepage.indexOf('id="pricing"'),"Product discovery should precede pricing.");

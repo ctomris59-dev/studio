@@ -182,6 +182,29 @@ async function main(){
      const status=photo.result?.value;
      assert(status?.found&&status.loaded,"Top homepage photograph must load through Next image optimization: "+JSON.stringify(status));
     }
+    if(route==="/"&&(width===1280||width===390)){
+     const visual=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+      const cards=[...document.querySelectorAll('.ed-studio-type-grid article')];
+      const rowTops=[...new Set(cards.map(c=>Math.round(c.getBoundingClientRect().top)))];
+      const cardRows=rowTops.map(top=>cards.filter(c=>Math.abs(c.getBoundingClientRect().top-top)<3).length);
+      const hint=document.querySelector('.ed-tour-discovery');
+      const next=hint?.querySelector('button[aria-label="Next product area"]');
+      const visible=!!hint&&getComputedStyle(hint).display!=='none';
+      const controlWidth=next?.getBoundingClientRect().width||0;
+      if(${width}===390&&next){next.click();await new Promise(r=>setTimeout(r,400));}
+      return {scrollHeight:document.documentElement.scrollHeight,cardRows,visible,controlWidth,
+        selected:document.querySelector('.ed-tour-tablist [aria-selected="true"]')?.textContent?.trim()};
+     })()`});
+     const m=visual.result?.value;
+     assert(m,"Homepage design geometry missing");
+     console.log("DESIGN ACCEPTANCE "+width+"px:",JSON.stringify(m));
+     if(width===1280)assert.deepEqual(m.cardRows,[4,3],"Studio types must be 4+3 on desktop");
+     if(width===390){
+      assert(m.visible&&m.controlWidth>=44,"Mobile tour controls must be visible and tappable");
+      assert.equal(m.selected,"Members","Mobile tour Next button must select Members");
+      assert(m.scrollHeight<9403,"Mobile page must be shorter than the prior 9403px design");
+     }
+    }
     if(route==="/"){
      assert(result.heroTop!==null&&result.heroTop<1000,"Primary H1 must appear before pricing.");
      assert(result.annualContrast!==null&&result.annualContrast>=4.5,"Annual CTA text must meet WCAG AA contrast, got "+result.annualContrast);
