@@ -24,6 +24,11 @@ assert(classUI.includes("Edit selected class")&&classUI.includes("Cancel entire 
 assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),"Class modification requires tenant-scoped endpoints");
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
+const tourTabs=read("components/product-tour-tabs.tsx");
+assert(tourTabs.includes("Previous product area")&&tourTabs.includes("Next product area")&&tourTabs.includes("AREA {activeIndex+1} OF {tabs.length}"),"Mobile product tour needs accessible explicit navigation");
+assert(css.includes("grid-template-columns:repeat(12,minmax(0,1fr))")&&css.includes(".ed-studio-type-grid article:nth-child(n+5){grid-column:span 4"),"Desktop studio types must use balanced 4+3 grid");
+assert(homepage.includes('aria-label="Customer sign in">SIGN IN</Link>'),"Desktop sign-in label must remain clear without wrapping");
+assert(homepage.includes("All features. $39.90 billed monthly.")&&homepage.includes("$406.80 billed yearly."),"Pricing cards must explain billing periods without long notes");
 assert(homepage.includes("timed waitlist offers")&&homepage.includes("capped one-cycle rollovers")&&homepage.includes("versioned waiver acceptance"),"Homepage feature overview must explain new owner-workspace capabilities.");
 assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; follow-ups")&&homepage.includes("Bookings &amp; waitlists")&&homepage.includes("Team, branding &amp; data")&&homepage.includes("Preview CSV imports"),"Homepage must present the main software areas as six readable feature groups.");
 assert.equal((homepage.match(/<h1\b/g)||[]).length,1,"Homepage must expose a single main H1.");
