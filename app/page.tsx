@@ -133,7 +133,7 @@ export default function HomePage() {
         <section className="ed-sample-studios" aria-labelledby="sample-studios-title">
           <div className="ed-container">
             <div className="ed-sample-studios-heading">
-              <span className="ed-sample-studios-kicker">STUDIO CONCEPTS / 01—06</span>
+              <span className="ed-sample-studios-kicker">STUDIO CONCEPTS / 01-06</span>
               <h2 id="sample-studios-title">Every studio has <em>its own rhythm.</em></h2>
               <p>Six fictional studio identities illustrating the spaces and workflows StudioTasker is made for.</p>
             </div>
