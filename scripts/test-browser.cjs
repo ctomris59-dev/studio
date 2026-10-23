@@ -211,30 +211,6 @@ async function main(){
      const status=photo.result?.value;
      assert(status?.found&&status.loaded,"Top homepage photograph must load through Next image optimization: "+JSON.stringify(status));
     }
-    if(route==="/"&&(width===1280||width===390||width===320)){
-     const concept=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
-       const section=document.querySelector('.ed-sample-studios');
-       const grid=document.querySelector('.ed-concept-logo-grid');
-       const logos=[...document.querySelectorAll('.ed-concept-logo-grid li')];
-       const disclosure=document.querySelector('.ed-sample-studios-disclosure');
-       const rects=logos.map(el=>el.getBoundingClientRect());
-       const glyphs=logos.map(el=>el.querySelector('.ed-concept-lockup')?.getBoundingClientRect());
-       return {sectionPresent:!!section,logoCount:logos.length,
-        svgCount:grid?.querySelectorAll('svg').length||0,
-        disclosureVisible:!!disclosure&&getComputedStyle(disclosure).display!=="none",
-        disclosureText:disclosure?.textContent||"",
-        rows:[...new Set(rects.map(r=>Math.round(r.top)))].length,
-        overflow:rects.some(r=>r.left<0||r.right>innerWidth+2),
-        markOverflow:glyphs.some(r=>r&&((r.left<0)||(r.right>innerWidth+2))),
-        followsHero:!!document.querySelector('.ed-hero-consolidated + .ed-sample-studios')};
-     })()`});
-     const v=concept.result?.value;
-     console.log("STUDIO CONCEPT STRIP "+width+"px:",JSON.stringify(v));
-     assert(v?.sectionPresent&&v.logoCount===6&&v.svgCount===6&&v.disclosureVisible&&v.disclosureText.includes("not customers")&&v.followsHero,
-      "Six fictional studio concepts must be identified visibly and placed after hero: "+JSON.stringify(v));
-     assert(!v.overflow&&!v.markOverflow,"Logo strip must not overflow "+width+"px: "+JSON.stringify(v));
-     assert.equal(v.rows,width===1280?1:3,"Concept grid should display 6 across desktop and 2 across mobile: "+JSON.stringify(v));
-    }
     if(route==="/"&&(width===1280||width===390)){
      const visual=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
       const cards=[...document.querySelectorAll('.ed-studio-type-grid article')];

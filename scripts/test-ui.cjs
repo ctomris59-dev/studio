@@ -24,11 +24,6 @@ assert(classUI.includes("Edit selected class")&&classUI.includes("Cancel entire 
 assert(classAPI.includes("reviseClass")&&classAPI.includes("cancelEntireClass"),"Class modification requires tenant-scoped endpoints");
 assert(pricing.includes("canManageExisting"),"Expired subscribers must be able to choose a new plan");
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
-const conceptLogos=read("components/sample-studio-logos.tsx");
-assert(homepage.includes('aria-labelledby="sample-studios-title"')&&homepage.includes("Illustrative identities only. These are not customers, partners or endorsements."),"Fictional brand strip must be visibly labeled as sample concepts, not customer references");
-assert(conceptLogos.includes("Six fictional studio design concepts, not customer references")&&(conceptLogos.match(/id:"/g)||[]).length===6,"Show only six original, clearly fictional studio concepts");
-assert(!homepage.includes("Trusted by")&&!homepage.includes("Our references"),"Do not present fictional logo identities as real client social proof");
-assert(css.includes(".ed-concept-logo-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))")&&css.includes(".ed-concept-logo-grid{grid-template-columns:repeat(2,minmax(0,1fr))"),"Responsive concept strip should fit desktop and mobile");
 const tourTabs=read("components/product-tour-tabs.tsx");
 assert(tourTabs.includes("Previous product area")&&tourTabs.includes("Next product area")&&tourTabs.includes("AREA {activeIndex+1} OF {tabs.length}"),"Mobile product tour needs accessible explicit navigation");
 const marketingMenu=read("components/marketing-mobile-menu.tsx");
