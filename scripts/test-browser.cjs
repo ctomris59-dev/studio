@@ -239,6 +239,41 @@ async function main(){
      assert(result.annualContrast!==null&&result.annualContrast>=4.5,"Annual CTA text must meet WCAG AA contrast, got "+result.annualContrast);
      if(width<=1200){assert(result.menuVisible&&result.menuLinks>=7,"Tablet/mobile nav missing at "+width+"px");assert(result.closesOnEscape,"Escape must close the main navigation");}
     }
+
+    if(route==="/start"&&width===1280){
+      const check=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
+        const note=document.querySelector(".st-start-availability");
+        const links=[...document.querySelectorAll(".st-plan-buy")];
+        return {closed:!!note,visible:note?getComputedStyle(note).display!=="none":false,
+         labels:links.map(x=>x.textContent.trim()),urls:links.map(x=>x.getAttribute('href'))};
+      })()`});
+      const v=check.result?.value;
+      assert(v?.closed&&v.visible&&v.urls.length===2&&v.urls.every(u=>u==="/app-demo?tour=1"),"No false purchase entry while studio registration is closed: "+JSON.stringify(v));
+    }
+    if(route==="/"&&(width===390||width===320)){
+      const cols=await peer.send("Runtime.evaluate",{returnByValue:true,expression:'getComputedStyle(document.querySelector(".ed-capability-grid")).gridTemplateColumns.split(" ").filter(Boolean).length'});
+      const count=cols.result?.value;
+      assert.equal(count,width===390?2:1,"Mobile feature overview must use 2 columns at 390px and 1 at 320px");
+    }
+    if(route==="/app-demo"&&width===1280){
+      await peer.send("Page.navigate",{url:HOST+"/app-demo?tour=1"});
+      await delay(1500);
+      const result=await peer.send("Runtime.evaluate",{returnByValue:true,awaitPromise:true,expression:`(async()=>{
+       const card=document.querySelector('.sad-tour-card');
+       const next=card?.querySelector('.sad-tour-actions button:last-child');
+       if(!card||!next)return {card:!!card,next:!!next};
+       next.click();
+       await new Promise(r=>setTimeout(r,250));
+       const tryBtn=document.querySelector('.sad-tour-try');
+       tryBtn?.click();
+       await new Promise(r=>setTimeout(r,350));
+       return {card:!!card,next:!!next,tryButton:!!tryBtn,
+        leadForm:!!document.querySelector('.sad-quick-form'),
+        status:document.querySelector('.sad-app-message')?.textContent||''};
+      })()`});
+      const v=result.result?.value;
+      assert(v?.card&&v?.next&&v?.tryButton&&v?.leadForm&&v.status.includes("Hands-on demo"),"Tour must lead from narration to actual fictional lead creation: "+JSON.stringify(v));
+    }
     // Sub-page typography may intentionally use a system font for controls,
     // but the content should not silently fall back across the whole page.
     assert(result.unknown<result.total,route+" has no text using registered font families");

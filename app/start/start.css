@@ -16,3 +16,10 @@
 
 .st-start-global{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 28px;padding:10px 12px;border:1px solid #c9ceda;background:#fffefa;color:#17203c}.st-start-global svg{color:#334bdd;flex:0 0 auto}.st-start-global span{font:800 12px var(--studio-mono),monospace;letter-spacing:.045em}.st-start-global small{color:#667086;font-size:12px;margin-left:auto}
 @media(max-width:700px){.st-start-global{align-items:flex-start}.st-start-global small{width:100%;margin-left:29px}}
+
+/* Honest availability state: only /start loads this stylesheet. */
+.st-start-availability{display:flex;align-items:flex-start;gap:14px;padding:15px 17px;margin:14px 0 24px;border:2px solid #17203c;background:#e7f982;color:#17203c}
+.st-start-availability>svg{flex:0 0 auto}
+.st-start-availability div{display:grid;gap:4px}
+.st-start-availability strong{font-size:15px}
+.st-start-availability span{font-size:13px;line-height:1.5}
