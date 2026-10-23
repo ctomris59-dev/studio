@@ -8,7 +8,7 @@ import {ArrowUpRight,Check} from "lucide-react";
 export function PlanCards({selected,registrationOpen}:{selected:"monthly"|"annual";registrationOpen:boolean}){
  return <>
    <div className="st-start-plans" aria-label="StudioTasker plans">
-    <article className={selected==="monthly"?"selected":""}>
+    <article id="monthly-plan" className={selected==="monthly"?"selected":""}>
      <div className="st-plan-head"><span>MONTHLY · FLEXIBLE</span>{selected==="monthly"&&<strong>SELECTED</strong>}</div>
      <div className="st-plan-price"><sup>$</sup>39<em>.90</em><small>/ month · USD</small></div>
      <p className="st-plan-charge">BILLED MONTHLY · $39.90 TOTAL</p>
@@ -17,7 +17,7 @@ export function PlanCards({selected,registrationOpen}:{selected:"monthly"|"annua
      <Link href={registrationOpen?"/workspace?mode=register&plan=monthly":"/app-demo?tour=1"} className="st-plan-buy">{registrationOpen?"START MONTHLY · $39.90":"EXPLORE MONTHLY PLAN IN DEMO"} <ArrowUpRight size={20}/></Link>
     </article>
 
-    <article className={"annual "+(selected==="annual"?"selected":"")}>
+    <article id="annual-plan" className={"annual "+(selected==="annual"?"selected":"")}>
      <div className="st-plan-head"><span>ANNUAL · BEST VALUE · SAVE $72/YEAR</span>{selected==="annual"&&<strong>SELECTED</strong>}</div>
      <div className="st-plan-price"><sup>$</sup>33<em>.90</em><small>/ month equivalent</small></div>
      <p className="st-plan-charge">BILLED YEARLY · $406.80 TOTAL</p>
