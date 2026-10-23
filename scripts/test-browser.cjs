@@ -241,6 +241,36 @@ async function main(){
     }
 
     if(route==="/start"&&(width===390||width===320||width===1280)){
+     const viewportChecks=width===1280?[[1280,900],[1440,768],[1756,880]]:[[width,844]];
+     for(const [vw,vh] of viewportChecks){
+      await peer.send("Emulation.setDeviceMetricsOverride",{width:vw,height:vh,deviceScaleFactor:1,mobile:vw<500});
+      await peer.send("Page.navigate",{url:HOST+"/start"});
+      await delay(550);
+      const measured=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
+       const glance=document.querySelector('.st-start-price-glance');
+       const links=[...glance.querySelectorAll('a')];
+       const cards=[...document.querySelectorAll('.st-start-plans article')];
+       const banner=document.querySelector('.st-start-availability');
+       const box=el=>el.getBoundingClientRect();
+       return {vh:innerHeight,glanceBottom:box(glance).bottom,prices:links.map(x=>x.textContent.trim()),
+        chargeBottom:cards.map(x=>box(x.querySelector('.st-plan-price')).bottom),
+        cardTop:cards.map(x=>box(x).top),hasBanner:!!banner,
+        bannerTop:banner?box(banner).top:null,links:links.map(x=>x.getAttribute('href')),
+        horizontalOverflow:document.documentElement.scrollWidth>innerWidth+1};
+      })()`});
+      const v=measured.result?.value;
+      console.log("PRICING FIRST FOLD "+vw+"x"+vh+": "+JSON.stringify(v));
+      assert(v?.prices.length===2&&v.prices[0].includes("$39.90")&&v.prices[1].includes("$406.80"),"Both actual subscription prices must appear immediately: "+JSON.stringify(v));
+      assert(v.glanceBottom<vh-12&&!v.horizontalOverflow,"First-screen prices must fit without overflow: "+JSON.stringify(v));
+      assert(v.links[0]==="#monthly-plan"&&v.links[1]==="#annual-plan","Quick pricing links must target real cards");
+      assert(v.hasBanner&&v.bannerTop<v.cardTop[0],"Closed registration notice must remain before cards");
+      if(vw>=1024)assert(v.chargeBottom.every(y=>y<vh-10),"Both full desktop prices must fit in first screen: "+JSON.stringify(v));
+     }
+     await peer.send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<500});
+     await peer.send("Page.navigate",{url:HOST+"/start"});
+     await delay(600);
+    }
+    if(route==="/start"&&(width===390||width===320||width===1280)){
       const pricing=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
        const priceCards=[...document.querySelectorAll('.st-start-plans article')];
        const prices=[...document.querySelectorAll('.st-plan-charge')];

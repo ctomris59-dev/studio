@@ -23,19 +23,24 @@ export default function StartPage(){
      <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>
      <span className="st-start-kicker">START STUDIOTASKER · GLOBAL</span>
     </div>
-    <h1>Choose a plan.<br/><em>{registrationOpen?"Create your studio.":"Explore before launch."}</em></h1>
-    <p>Compare monthly or annual billing in USD, then take the guided product tour. When registrations open, studio owners can set up a private workspace with their timezone, logo, members and classes.</p>
-    <div className="st-start-steps" aria-label={registrationOpen?"Getting started":"Preview steps"}>
-     <span><b>1</b> Compare plans</span><i/><span><b>2</b> {registrationOpen?"Create studio":"Explore demo"}</span><i/><span><b>3</b> {registrationOpen?"Start using it":"Join when open"}</span>
-    </div>
+    <h1>Simple pricing. <em>Everything included.</em></h1>
+    <p>One complete studio workspace. Choose flexible monthly billing or save $72 with an annual plan.</p>
    </div>
-   <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · International</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
-
-   {!registrationOpen&&<div className="st-start-availability" role="status"><ShieldCheck size={21}/><div><strong>New studio subscriptions are not open yet.</strong><span>You can review plans and explore the 90-second demo now. No payment or account is required.</span></div></div>}
-   <div className="st-start-plan-summary"><ShieldCheck size={18}/><span>Both plans include the same studio features. Your choice only changes the billing period.</span></div>
+   <nav className="st-start-price-glance" aria-label="Jump to monthly or annual plan">
+    <a href="#monthly-plan"><span>MONTHLY</span><strong>$39.90<small> / month</small></strong></a>
+    <a href="#annual-plan"><span>ANNUAL <b>· SAVE $72</b></span><strong>$406.80<small> / year</small></strong><em>$33.90/month equivalent</em></a>
+   </nav>
+   {!registrationOpen&&<div className="st-start-availability" role="status"><ShieldCheck size={19}/><div><strong>New studio subscriptions are not open yet.</strong><span>Explore our demo before launch. No payment or account required.</span></div></div>}
    <Suspense fallback={<PlanCards selected="monthly" registrationOpen={registrationOpen}/>}>
     <PlanSelector registrationOpen={registrationOpen}/>
    </Suspense>
+   <div className="st-start-postscript">
+    <div className="st-start-plan-summary"><ShieldCheck size={18}/><span>Both plans include the same studio features. Your choice only changes the billing period.</span></div>
+    <div className="st-start-steps" aria-label={registrationOpen?"Getting started":"Preview steps"}>
+     <span><b>1</b> Compare plans</span><i/><span><b>2</b> {registrationOpen?"Create studio":"Explore demo"}</span><i/><span><b>3</b> {registrationOpen?"Start using it":"Join when open"}</span>
+    </div>
+    <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · International</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
+   </div>
 
    <div className="st-start-trust" aria-label="Pricing, data and support information">
     <Link href="/legal/security"><ShieldCheck size={17}/> Security practices</Link>
