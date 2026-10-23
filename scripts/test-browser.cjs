@@ -164,6 +164,35 @@ async function main(){
      assert(c?.size?.width>=16&&c.size.width<=22&&c.size.height>=16&&c.size.height<=22,
       "Mobile trusted-device checkbox must remain compact: "+JSON.stringify(c));
     }
+
+    // Owner-facing first-screen acceptance: keep BOTH hero panels and the
+    // preview's last CTA visible before scrolling, including 768px laptops.
+    if(route==="/"&&width===1280){
+      for(const [viewportWidth,viewportHeight] of [[1728,847],[1440,768],[1280,900]]){
+        await peer.send("Emulation.setDeviceMetricsOverride",{width:viewportWidth,height:viewportHeight,deviceScaleFactor:1,mobile:false});
+        await peer.send("Page.navigate",{url:HOST+"/"});
+        await delay(800);
+        const tested=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
+          const hero=document.querySelector(".ed-hero-consolidated");
+          const canvas=document.querySelector(".ed-hero-consolidated .ed-hero-canvas");
+          const last=document.querySelector(".ed-hero-consolidated .ed-preview-demo-link");
+          const lead=document.querySelector(".ed-hero-consolidated .ed-hero-photo");
+          const box=e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height}};
+          return {viewport:innerHeight,hero:box(hero),canvas:box(canvas),last:box(last),lead:box(lead),rows:document.querySelectorAll(".ed-hero-consolidated .ed-preview-class-row").length};
+        })()`});
+        const dims=tested.result?.value;
+        assert(dims,"First-fold hero geometry missing");
+        console.log("FIRST FOLD "+viewportWidth+"x"+viewportHeight+": "+JSON.stringify(dims));
+        assert(dims.hero.top>=0&&dims.hero.bottom<=dims.viewport-4,
+          "Both hero panels must fit before scroll: "+JSON.stringify(dims));
+        assert(dims.last.bottom<=dims.hero.bottom-4&&dims.canvas.bottom<=dims.hero.bottom+2,
+          "Preview CTA must be visible inside first fold: "+JSON.stringify(dims));
+        assert(dims.rows===3,"Do not hide studio preview class rows for desktop first fold");
+      }
+      await peer.send("Emulation.setDeviceMetricsOverride",{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+      await peer.send("Page.navigate",{url:HOST+"/"});
+      await delay(600);
+    }
     if(route==="/"&&width===1280){
      for(const [label,ratio] of Object.entries(result.firstScreenContrast||{})){
       assert(ratio!==null&&ratio>=4.5,
