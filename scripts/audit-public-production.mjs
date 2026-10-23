@@ -1,3 +1,4 @@
+import tls from "node:tls";
 // Read-only checks of PUBLIC StudioTasker production endpoints.
 // Never supplies credentials, submits forms, modifies services or follows arbitrary redirects.
 const checks = [];
@@ -29,8 +30,30 @@ const http=await probe("httpRedirect","http://www.studiotasker.com/","HEAD");
 const health=await probe("dbHealth",origin+"/api/health");
 const security=await probe("securityTxt",origin+"/.well-known/security.txt");
 const robots=await probe("robots",origin+"/robots.txt");
+async function tlsProbe(host){
+  return await new Promise(resolve=>{
+    let done=false;
+    const finish=x=>{if(done)return;done=true;socket.destroy();resolve(x);};
+    const socket=tls.connect({host,port:443,servername:host,rejectUnauthorized:true,
+      ALPNProtocols:["h2","http/1.1"],timeout:12000},()=>{
+      const cert=socket.getPeerCertificate();
+      const expiry=Date.parse(cert.valid_to||"");
+      finish({name:"tls_"+host,authorized:socket.authorized,protocol:socket.getProtocol(),
+        alpn:socket.alpnProtocol||"(none)",certificateExpiry:cert.valid_to||"(unavailable)",
+        daysUntilExpiry:Number.isFinite(expiry)?Math.floor((expiry-Date.now())/86400000):null});
+    });
+    socket.once("timeout",()=>finish({name:"tls_"+host,error:"timeout"}));
+    socket.once("error",e=>finish({name:"tls_"+host,error:e instanceof Error?e.code||e.name:"network error"}));
+  });
+}
+const wwwTls=await tlsProbe("www.studiotasker.com");
+const apexTls=await tlsProbe("studiotasker.com");
+console.log(JSON.stringify(wwwTls));
+console.log(JSON.stringify(apexTls));
 for(const item of checks){const safe={...item};delete safe.cacheControl;console.log(JSON.stringify(safe));if(item.error)errors.push(item.name+": "+item.error);}
 function requireCondition(ok,message){if(!ok)errors.push(message);}
+requireCondition(wwwTls.authorized===true&&wwwTls.daysUntilExpiry!==null&&wwwTls.daysUntilExpiry>=21,"www TLS certificate and 21-day expiration margin must be valid");
+requireCondition(apexTls.authorized===true&&apexTls.daysUntilExpiry!==null&&apexTls.daysUntilExpiry>=21,"apex TLS certificate and 21-day expiration margin must be valid");
 requireCondition(root.status===200,"www homepage must return 200");
 requireCondition(root.hsts,"www HTTPS must send HSTS");
 requireCondition(root.csp,"www HTTPS must send Content-Security-Policy");
