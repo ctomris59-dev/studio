@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, "..");
 const sourceDirectories = ["app", "components", "lib"];
 const textExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".css", ".mjs", ".cjs", ".html", ".json", ".md", ".txt", ".svg"]);
 const longDash = String.fromCharCode(0x2014);
-const removedCopy = ["Classes, bookings and capacity", "Illustrative preview"];
+const removedCopy = ["Classes, bookings and capacity", "Illustrative preview", "Pricing is in USD, per studio. Applicable taxes and final totals are shown by Paddle before checkout. Studio members pay your studio directly, outside StudioTasker.", "Built for studio owners and staff. Public member booking links and member payment processing are not included."];
 const problems = [];
 let scanned = 0;
 
