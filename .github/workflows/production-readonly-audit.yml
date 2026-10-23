@@ -1,0 +1,21 @@
+name: Read-only Contabo edge audit
+on:
+  pull_request:
+    branches: [feature/studio-operations-upgrades]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-edge:
+    name: Probe live production without modifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: GET/HEAD-only external production checks
+        run: node scripts/audit-public-production.mjs
