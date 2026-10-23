@@ -240,6 +240,23 @@ async function main(){
      if(width<=1200){assert(result.menuVisible&&result.menuLinks>=7,"Tablet/mobile nav missing at "+width+"px");assert(result.closesOnEscape,"Escape must close the main navigation");}
     }
 
+    if(route==="/contact"&&(width===1280||width===390)){
+      const checked=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
+       const form=document.querySelector('.ct-form-card form');
+       const fields=[...form?.querySelectorAll('input[name],select[name],textarea[name]')||[]].map(x=>x.getAttribute('name'));
+       const mode=document.querySelector('.ct-delivery-mode');
+       const main=form?.querySelector('button[type="submit"]');
+       const copy=form?.querySelector('button.ct-copy-message');
+       return {form:!!form,fields,mode:!!mode,button:main?.textContent?.trim(),disabled:main?.disabled,
+        copy:!!copy,horizontalOverflow:document.documentElement.scrollWidth>innerWidth+1};
+      })()`});
+      const c=checked.result?.value;
+      assert(c?.form&&c.fields.includes("name")&&c.fields.includes("email")&&c.fields.includes("message")&&!c.horizontalOverflow,
+       "Contact must show full form without overflow: "+JSON.stringify(c));
+      assert(c.mode&&c.copy&&c.button.includes("OPEN EMAIL APP")&&!c.disabled,
+       "Preview without SMTP must offer email-app fallback instead of hiding form: "+JSON.stringify(c));
+      console.log("CONTACT FALLBACK "+width+"px:",JSON.stringify(c));
+    }
     if(route==="/start"&&(width===390||width===320||width===1280)){
      const viewportChecks=width===1280?[[1280,900],[1440,768],[1756,880]]:[[width,844]];
      for(const [vw,vh] of viewportChecks){
