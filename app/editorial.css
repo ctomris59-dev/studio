@@ -1473,3 +1473,29 @@
 @media(max-width:374px){
  .ed-capability-grid{grid-template-columns:1fr}
 }
+
+
+/* RC6 pricing confidence: keep billing terms close to the amount, not in a long disclaimer. */
+.ed-plan-effective-total{display:inline-flex;align-items:center;min-height:27px;max-width:100%;margin-top:4px;padding:5px 10px;border:1px solid #17203c;font:700 11px/1.4 var(--studio-mono),monospace;letter-spacing:.02em}
+.ed-pricing-assurance{display:flex;align-items:center;gap:12px 23px;flex-wrap:wrap;margin-top:20px;padding:15px 17px;border:1px solid #17203c;background:#fffefa}
+.ed-pricing-assurance>span,.ed-pricing-assurance>a{display:inline-flex;align-items:center;gap:8px;font-size:13px;line-height:1.35}
+.ed-pricing-assurance>span svg{flex-shrink:0;color:#334bdd}
+.ed-pricing-assurance>a{color:#263dc7;text-decoration:underline;text-underline-offset:3px;min-height:42px;font-weight:700}
+.ed-pricing-assurance>a:focus-visible{outline:3px solid #334bdd;outline-offset:3px}
+@media(max-width:700px){
+ .ed-pricing-assurance{padding:12px 14px;gap:5px 16px}
+ .ed-pricing-assurance>span{flex:1 1 100%;min-height:27px;font-size:14px}
+ .ed-pricing-assurance>a{flex:1 1 calc(50% - 8px);font-size:13px;min-height:46px}
+ .ed-plan-card>a{min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+ .ed-plan-card>p{font-size:14px;line-height:1.5}
+ .ed-studio-type-grid p{font-size:14px;line-height:1.47}
+ .ed-studio-type-grid a{min-height:46px}
+ .ed-capability-grid p{font-size:14px;line-height:1.42}
+ .ed-capability-grid article>span{font-size:11px}
+ .ed-trust-evidence a{min-height:44px;font-size:14px}
+}
+@media(max-width:374px){
+ .ed-pricing-assurance>a{flex-basis:100%}
+ .ed-plan-effective-total{font-size:10px}
+ .ed-studio-type-grid p{font-size:13.5px}
+}

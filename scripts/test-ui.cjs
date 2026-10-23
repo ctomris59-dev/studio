@@ -33,6 +33,11 @@ assert(css.includes(".ed-tour-metrics small,.ed-tour-rows small{color:#455065}")
 assert(css.includes("grid-template-columns:repeat(12,minmax(0,1fr))")&&css.includes(".ed-studio-type-grid article:nth-child(n+5){grid-column:span 4"),"Desktop studio types must use balanced 4+3 grid");
 assert(homepage.includes('aria-label="Customer sign in">SIGN IN</Link>'),"Desktop sign-in label must remain clear without wrapping");
 assert(homepage.includes("All features. $39.90 billed monthly.")&&homepage.includes("$406.80 billed yearly."),"Pricing cards must explain billing periods without long notes");
+const pricingCSS=read("app/start/start.css");
+assert(homepage.includes("TOTAL YEARLY BILL · $406.80")&&homepage.includes("ed-pricing-assurance")&&homepage.includes('href="/legal/cancellation"'),"Homepage needs transparent billing total and verifiable trust links near pricing");
+assert(plans.includes("BILLED MONTHLY · $39.90 TOTAL")&&plans.includes("BILLED YEARLY · $406.80 TOTAL")&&plans.includes("/ month equivalent"),"Plans must distinguish annual effective monthly rate from actual yearly charge");
+assert(startPage.includes("st-start-trust")&&startPage.includes("Compare plans")&&startPage.includes('registrationOpen?"Create studio":"Explore demo"'),"Availability-aware steps and linked buyer trust must remain clear");
+assert(pricingCSS.includes(".st-plan-price small{flex:1 1 100%")&&css.includes(".ed-pricing-assurance>a{flex:1 1 calc(50% - 8px)"),"Small screens must show pricing units on their own line and tappable trust links");
 assert(homepage.includes("timed waitlists")&&homepage.includes("one-cycle rollovers")&&homepage.includes("versioned waivers"),"Homepage feature overview must explain new owner-workspace capabilities.");
 const startPage=read("app/start/page.tsx");
 const plans=read("app/start/plan-selector.tsx");

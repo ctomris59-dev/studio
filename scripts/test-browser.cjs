@@ -240,6 +240,24 @@ async function main(){
      if(width<=1200){assert(result.menuVisible&&result.menuLinks>=7,"Tablet/mobile nav missing at "+width+"px");assert(result.closesOnEscape,"Escape must close the main navigation");}
     }
 
+    if(route==="/start"&&(width===390||width===320||width===1280)){
+      const pricing=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
+       const priceCards=[...document.querySelectorAll('.st-start-plans article')];
+       const prices=[...document.querySelectorAll('.st-plan-charge')];
+       const trust=[...document.querySelectorAll('.st-start-trust a')];
+       const annual=priceCards[1]?.querySelector('.st-plan-price small');
+       const last=document.querySelector('.st-start-plans .annual .st-plan-buy');
+       const box=el=>el?.getBoundingClientRect();
+       return {cards:priceCards.length,charge:prices.map(el=>el.textContent.trim()),trust:trust.length,
+        smallBelowPrice:!!annual&&box(annual).top>box(priceCards[1].querySelector('.st-plan-price em')).top,
+        linksBigEnough:trust.every(x=>box(x).height>=44),
+        annualLinkHeight:box(last)?.height||0,selectedAnnual:document.querySelectorAll(".st-start-plans article.selected").length};
+      })()`});
+      const p=pricing.result?.value;
+      assert(p?.cards===2&&p.charge.includes("BILLED YEARLY · $406.80 TOTAL")&&p.charge.includes("BILLED MONTHLY · $39.90 TOTAL"),"Both plans must show real charge totals: "+JSON.stringify(p));
+      assert(p.trust===4&&p.linksBigEnough&&p.annualLinkHeight>=44,"Pricing trust actions need readable 44px+ targets: "+JSON.stringify(p));
+      if(width===390||width===320)assert(p.smallBelowPrice,"Mobile billing period must appear on its own line: "+JSON.stringify(p));
+    }
     if(route==="/start"&&width===1280){
       const check=await peer.send("Runtime.evaluate",{returnByValue:true,expression:`(()=>{
         const note=document.querySelector(".st-start-availability");
