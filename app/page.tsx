@@ -153,7 +153,6 @@ export default function HomePage() {
               <article><span>05 / ENTITLEMENTS</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Track package validity and usage, audited credit adjustments, capped one-cycle rollovers and versioned waiver acceptance.</p></article>
               <article><span>06 / YOUR CONTROL</span><ShieldCheck size={23}/><h3>Team, branding &amp; data</h3><p>Use staff roles, studio branding, timezone and class defaults. Preview CSV imports and export your studio records when needed.</p></article>
             </div>
-            <p className="ed-capability-note">Built for studio owners and staff. Public member booking links and member payment processing are not included.</p>
           </div>
         </section>
 
@@ -192,7 +191,6 @@ export default function HomePage() {
                 <Link href="/start?plan=annual">CHOOSE ANNUAL <ArrowUpRight size={18}/></Link>
               </article>
             </div>
-            <p className="ed-plan-disclaimer">Pricing is in USD, per studio. Applicable taxes and final totals are shown by Paddle before checkout. Studio members pay your studio directly, outside StudioTasker.</p>
           </div>
         </section>
 
