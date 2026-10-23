@@ -5,6 +5,7 @@ import {BarChart3,CalendarDays,CheckCircle2,Download,LayoutDashboard,LogOut,Sett
 import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import {TurnstileChallenge} from "../../components/turnstile-challenge";
 import {StudioOperations,type WorkspacePreferences,type WorkspaceSection} from "./studio-operations";
+import {StaffOperationsPanel} from "./staff-operations-panel";
 import {ClassBasedOperations} from "./class-based-operations";
 import {OnboardingPanel} from "./onboarding-panel";
 import {BillingPanel} from "./billing-panel";
@@ -352,11 +353,11 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
     </div>):<p className="rd-empty">No matching {view==="leads"?"leads":settings.memberTerm.toLowerCase()} found.</p>}</div>
     {contactPages[view==="leads"?"lead":"member"].hasMore&&<button type="button" disabled={contactsLoading} onClick={()=>void loadMoreContacts(view==="leads"?"lead":"member")}>{contactsLoading?"Loading…":"Load more contacts"}</button>}
     <details className="rd-ops-details"><summary>+ Add {view==="leads"?"lead":singularTerm(settings.memberTerm).toLowerCase()}</summary><form onSubmit={addPerson} className="rd-form rd-add-contact"><label>Name<input required minLength={2} maxLength={80} value={person.name} onChange={e=>setPerson({...person,name:e.target.value,kind:view==="leads"?"lead":"member"})}/></label><div className="rd-ops-pair"><label>Email<input type="email" value={person.email} onChange={e=>setPerson({...person,email:e.target.value})}/></label><label>Phone<input type="tel" value={person.phone} onChange={e=>setPerson({...person,phone:e.target.value})}/></label></div>{view==="members"&&<><label>Operational tags<input maxLength={240} placeholder="trial, reformer, evening" value={person.tags} onChange={e=>setPerson({...person,tags:e.target.value})}/></label><label>Waiver status<select value={person.waiverStatus} onChange={e=>setPerson({...person,waiverStatus:e.target.value})}><option value="not_required">Not required</option><option value="pending">Pending</option><option value="signed">Signed</option><option value="expired">Expired</option></select></label><fieldset className="rd-related-contact"><legend>{settings.focus==="Dance"?"Parent / guardian contact":"Related / emergency contact"} <small>optional</small></legend><div className="rd-ops-pair"><label>Name<input maxLength={100} value={person.relatedContactName} onChange={e=>setPerson({...person,relatedContactName:e.target.value})}/></label><label>Relationship<input maxLength={40} placeholder={settings.focus==="Dance"?"Parent / guardian":"Partner, parent, guardian"} value={person.relatedContactRole} onChange={e=>setPerson({...person,relatedContactRole:e.target.value})}/></label></div><div className="rd-ops-pair"><label>Email<input type="email" maxLength={160} value={person.relatedContactEmail} onChange={e=>setPerson({...person,relatedContactEmail:e.target.value})}/></label><label>Phone<input type="tel" maxLength={30} value={person.relatedContactPhone} onChange={e=>setPerson({...person,relatedContactPhone:e.target.value})}/></label></div></fieldset></>}<label>Notes<textarea rows={3} maxLength={1600} value={person.notes} onChange={e=>setPerson({...person,notes:e.target.value})}/></label><button className="rd-primary" disabled={busy}>Add</button></form></details>
-    {view==="members"&&<StudioOperations role={user.role} section="members" preferences={prefs}/>}
+    {view==="members"&&<><StaffOperationsPanel role={user.role} section="members" timezone={settings.timezone} onChange={()=>void load()}/><StudioOperations role={user.role} section="members" preferences={prefs}/></>}
    </section>:<p className="rd-feedback">Your role does not have access to studio contacts.</p>:null}
 
    {view==="today"&&<StudioOperations role={user.role} section="today" preferences={prefs}/>}
-   {view==="classes"&&<ClassBasedOperations role={user.role} section="classes" preferences={prefs}/>}
+   {view==="classes"&&<><StaffOperationsPanel role={user.role} section="classes" timezone={settings.timezone} onChange={()=>window.dispatchEvent(new Event("studio-operations-changed"))}/><ClassBasedOperations role={user.role} section="classes" preferences={prefs}/></>}
    {view==="followups"&&<StudioOperations role={user.role} section="followups" preferences={prefs}/>}
    {view==="insights"&&<ClassBasedOperations role={user.role} section="insights" preferences={prefs}/>}
 
@@ -385,6 +386,7 @@ export function WorkspaceClient({registrationEnabled}:{registrationEnabled:boole
      <p className="rd-tiny">Only archived contacts can be anonymized. Identity removal is irreversible; accounting references and encrypted backups follow retention rules.</p>
     </div>}
     {user.role==="owner"&&<StudioClosureRequest/>}
+    <StaffOperationsPanel role={user.role} section="settings" timezone={settings.timezone} onChange={()=>void load()}/>
     <ClassBasedOperations role={user.role} section="settings" preferences={prefs}/>
     <StudioOperations role={user.role} section="settings" preferences={prefs}/>
    </section>}

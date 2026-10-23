@@ -141,6 +141,7 @@ async function main(){
    const mobile=await evalJs('({overflow:document.documentElement.scrollWidth>innerWidth+4,landmarks:document.querySelectorAll("main").length})');
    check(!mobile.overflow&&mobile.landmarks===1,plan+" logged-in 390px mobile layout no overflow");
    await peer.send("Emulation.clearDeviceMetricsOverride");
+   if(plan==='annual')await require('./test-staff-browser.cjs')({evalJs,waitText,api,cookie,memberId:member.data.record.id,packageId:packageResult.data.package.id,studioId,admin,peer});
    // Ensure each plan starts with a genuinely unauthenticated browser,
    // not the previous paying studio's session.
    const signedOut=await api("/api/auth/logout",{method:"POST",cookie});

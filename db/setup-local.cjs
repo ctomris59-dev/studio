@@ -28,6 +28,7 @@ async function main(){
   await pool.query("GRANT SELECT, INSERT, UPDATE, DELETE ON studio_brand_assets TO reformdesk_app");
   await pool.query("GRANT SELECT, INSERT ON legal_acceptances TO reformdesk_app");
   await pool.query("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO reformdesk_app");
+  await pool.query("GRANT SELECT, INSERT, UPDATE ON recurring_reservations,recurring_booking_attempts,package_renewals,studio_waiver_documents,member_waiver_records TO reformdesk_app");
   const check=await pool.query("SELECT rolbypassrls,rolsuper FROM pg_roles WHERE rolname='reformdesk_app'");
   if(check.rows[0]?.rolsuper||check.rows[0]?.rolbypassrls)throw new Error("Unsafe application role detected.");
   console.log("Local restricted reformdesk_app role ready. Do NOT reuse credentials in production.");

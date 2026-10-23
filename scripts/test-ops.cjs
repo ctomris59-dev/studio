@@ -42,14 +42,14 @@ assert(!canonical[1].includes("add_header Strict-Transport-Security"),
 console.log("Nginx example HSTS on apex HTTPS redirect and ALPN configuration guards passed.");
 
 
-// Security advisories reviewed 2026-10-17: do not force a potentially
-// breaking Next 16 migration when 15.5.27 already carries the 15.x fixes.
+// Security advisories reviewed 2026-10-22: stay on the patched Next.js 15.x
+// line while applying the 15.5.28 fix for the newly disclosed RCE and DoS.
 // CVE-2025-59472 requires PPR/cacheComponents AND NEXT_PRIVATE_MINIMAL_MODE=1.
 // CVE-2026-27980 is fixed on 15.x since 15.5.14.
 // CVE-2026-94543 is fixed in 15.5.27.
 // CVE-2026-94544 affects only Next 16.3.0 through 16.3.7.
 const nextVersion=manifest.dependencies.next;
-assert.equal(nextVersion,"15.5.27","Change the reviewed Next.js version only as a tested and approved migration.");
+assert.equal(nextVersion,"15.5.28","Next.js must include the reviewed October 22 RCE and DoS security fixes.");
 assert.equal(lock.packages["node_modules/next"].version,nextVersion,
  "The locked Next.js version must match the reviewed patched package.");
 const nextConfig=fs.readFileSync("next.config.mjs","utf8");

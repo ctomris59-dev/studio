@@ -120,6 +120,18 @@
 
 .sad-class-os-strip{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
 .sad-class-os-strip span{border:1px solid #334bdd;background:#eef0ff;color:#2339c4;padding:6px 8px;font:800 12px var(--studio-mono),monospace;letter-spacing:.05em}
+.sad-operations-preview{margin-top:24px;border:1px solid #17203c;background:#fffefa;display:grid;grid-template-columns:.9fr 1.1fr}
+.sad-operations-heading{padding:23px;background:#17203c;color:#fff}
+.sad-operations-heading h3{font:700 29px/1.05 var(--studio-heading),sans-serif;margin:13px 0 9px}
+.sad-operations-heading p{font-size:13px;line-height:1.6;color:#c5cce0;margin:0}
+.sad-operations-list{padding:9px 16px}
+.sad-operations-list article{border-bottom:1px solid #dfe2e9}.sad-operations-list article:last-child{border-bottom:0}
+.sad-operations-list button{width:100%;min-height:52px;border:0;background:transparent;padding:8px 2px;display:flex;align-items:center;justify-content:space-between;text-align:left;color:#17203c;cursor:pointer}
+.sad-operations-list button span{display:flex;align-items:center;gap:12px}.sad-operations-list button small{font:700 10px var(--studio-mono),monospace;color:#334bdd;min-width:105px}.sad-operations-list button b{font-size:14px}
+.sad-operations-list button svg{transition:transform .18s ease}.sad-operations-list .open button svg{transform:rotate(90deg)}
+.sad-operations-detail{padding:0 27px 12px 119px}.sad-operations-detail p{margin:0 0 5px;font-size:13px;font-weight:800}.sad-operations-detail small{font-size:12px;line-height:1.5;color:#657084}
+@media(max-width:900px){.sad-operations-preview{grid-template-columns:1fr}.sad-operations-heading{padding:18px 20px}}
+@media(max-width:560px){.sad-operations-list button span{align-items:flex-start;flex-direction:column;gap:3px}.sad-operations-list button small{min-width:0}.sad-operations-detail{padding:0 25px 12px 0}}
 
 /* Dark sidebar branding: contrast-safe yellow instead of cobalt on navy. */
 .sad-sidebar .sad-sidebar-brand b{color:#e7f982}

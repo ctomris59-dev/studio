@@ -147,3 +147,13 @@ Public legal routes:
 - `/legal/cancellation` — cancellation/refund rules
 
 StudioTasker currently supports an **independent individual operator** model; the application does not require a company name, company number, MERSIS number or VAT registration field. Paid registration is fail-closed until the individual operator’s legal name/address/contact, governing-law/jurisdiction, hosting region/provider, email provider and `LEGAL_AUDIT_HASH_KEY` are configured. The selected production architecture is intended for an EU-hosted server; configure the exact provider/country when the purchased EU server becomes the production host. Registration and plan-specific checkout store versioned legal clickwrap evidence in `legal_acceptances`; raw IP addresses are not stored there, only HMAC evidence.
+
+### Staff operations upgrades (migration 025)
+
+The workspace adds five staff workflows: timed waitlist holds and automatic-promotion cutoff; atomic reservation moves; recurring member reservations with visible blocked dates and explicit retry; bulk instructor/room changes and cancellation; package renewal with capped single-cycle credit carryover plus versioned external waiver records. Owner/manager controls policies, bulk changes, renewal and document versions. Receptionists can move reservations, manage holds, create/retry recurring reservations and record external acceptance. Instructors cannot use these operations.
+
+These features remain staff-only. No member accounts, public signup, member payment or member email is introduced. Contact is tracked using existing follow-up tasks. Holds expire by time and are advanced when staff process the list or booking operations run, not by a background messaging service. Recurrence covers existing same-weekday/time occurrences in a class series for at most 12 weeks; it does not create an indefinite membership contract. Stopping retries preserves existing bookings.
+
+Renewal requires a confirmed numeric pack and no future confirmed bookings. The preview shows carried, expired and new credits. Previously carried credits cannot carry again; carried credits are consumed first. Historical credits cannot be refunded into a later renewal cycle. Waiver records attest to externally obtained acceptance of a particular immutable document version; studios retain their original signed evidence.
+
+Migration 025 is additive, uses FORCE RLS and composite tenant foreign keys, and carries existing runtime grants forward. Apply migrations before running the updated application. Export includes the new records; anonymization redacts waiver evidence references. The real HTTP regression suite runs `scripts/test-staff-operations.cjs` against the restricted PostgreSQL runtime role as part of `npm run test:api`.

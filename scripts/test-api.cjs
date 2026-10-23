@@ -634,6 +634,7 @@ async function main(){
   assert.equal(afterLogoDelete.status,200);assert.equal(afterLogoDelete.data.studio.hasLogo,false);
 
   // Owner can revoke staff login immediately without deleting historical staff assignments.
+  await require("./test-staff-operations.cjs")({call,admin,a,b,staffCookie:accepted.cookie,instructorCookie:coachLogin.cookie});
   const staffAccess=await call("/api/studio/staff-access",{cookie:a.cookie});
   assert.equal(staffAccess.status,200);
   const invitedStaff=staffAccess.data.staff.find(s=>s.email===invitedEmail);
