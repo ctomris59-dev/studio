@@ -100,6 +100,10 @@
 .sad-tour-actions button{min-height:40px;padding:8px 13px;border:1px solid #334bdd;background:white;color:#334bdd;font-size:12px;font-weight:900;cursor:pointer;display:flex;align-items:center;gap:6px}
 .sad-tour-actions button:last-child{background:#334bdd;color:white}
 .sad-tour-actions button:disabled{opacity:.4;cursor:default}
+.sad-tour-actions{flex-wrap:wrap;gap:9px}
+.sad-tour-actions .sad-tour-try{margin-right:auto;border-color:#17203c;background:#e7f982;color:#17203c;min-height:44px}
+.sad-tour-actions .sad-tour-try:hover{background:#d5f66a}
+@media(max-width:440px){.sad-tour-actions .sad-tour-try{flex:1 1 100%;justify-content:center}}
 @media(max-width:760px){.sad-tour-start{margin-left:0}.sad-tour-card{right:16px;bottom:16px;box-shadow:6px 6px 0 #17203c}.sad-tour-card h2{font-size:27px}}
 
 

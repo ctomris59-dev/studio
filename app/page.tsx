@@ -104,8 +104,8 @@ export default function HomePage() {
             <div className="ed-hero-copy ed-hero-photo">
               <Image className="ed-hero-image"
                 src="https://images.pexels.com/photos/2294400/pexels-photo-2294400.jpeg"
-                alt="" width={1200} height={1200} priority fetchPriority="high"
-                sizes="(max-width: 850px) 100vw, 700px"
+                alt="" width={1200} height={1200} quality={65} priority fetchPriority="high"
+                sizes="(max-width: 950px) 100vw, 50vw"
               />
               <div className="ed-hero-inner">
                 <span className="ed-hero-eyebrow">STUDIOTASKER / INDEPENDENT STUDIO SOFTWARE</span>
@@ -205,6 +205,12 @@ export default function HomePage() {
               <article><CreditCard size={24}/><h3>Keep your payments.</h3><p>Your existing member payment arrangements remain with your studio.</p></article>
               <article><Users size={24}/><h3>Made for small teams.</h3><p>Clear role-based workflows for owners and staff, without a complex rollout.</p></article>
               <article><ShieldCheck size={24}/><h3>Your studio. Your data.</h3><p>Configure your workspace, import with a preview and export records when needed.</p></article>
+            </div>
+            <div className="ed-trust-evidence" aria-label="Check how StudioTasker handles trust and support">
+              <span>CHECK THE DETAILS</span>
+              <Link href="/legal/security">Read our security practices <ArrowUpRight size={15}/></Link>
+              <Link href="/legal/dpa">Review the data processing terms <ArrowUpRight size={15}/></Link>
+              <Link href="/contact">Ask a product question <ArrowUpRight size={15}/></Link>
             </div>
             <div className="ed-setup-compact" id="onboarding">
               <div>

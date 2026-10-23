@@ -1447,3 +1447,34 @@
  .ed-hero-consolidated .ed-preview-class-row{min-height:44px;padding:4px 1px}
  .ed-hero-consolidated .ed-preview-demo-link{min-height:38px;margin-top:8px}
 }
+
+/* RC5 user-journey polish: verifiable trust links, compact mobile feature scan. */
+.ed-trust-evidence{display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;margin:-18px 0 32px;padding:16px 2px 18px;border-top:1px solid #626b84;border-bottom:1px solid #626b84}
+.ed-trust-evidence>span{font:700 11px/1.3 var(--studio-mono),monospace;color:#e7f982;letter-spacing:.06em}
+.ed-trust-evidence a{font-size:13px;color:#fff;text-decoration:underline;text-underline-offset:4px;display:inline-flex;align-items:center;gap:5px;min-height:30px}
+.ed-trust-evidence a:hover,.ed-trust-evidence a:focus-visible{color:#e7f982}
+.st-start-availability{display:flex;align-items:flex-start;gap:14px;padding:15px 17px;margin:14px 0;border:2px solid #17203c;background:#e7f982;color:#17203c}
+.st-start-availability>svg{flex:0 0 auto}
+.st-start-availability div{display:grid;gap:4px}
+.st-start-availability strong{font-size:15px}
+.st-start-availability span{font-size:13px;line-height:1.5}
+@media(min-width:375px) and (max-width:700px){
+ .ed-capability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ed-capability-grid article,
+ .ed-capability-grid article:nth-child(2n),
+ .ed-capability-grid article:nth-child(3n){min-height:0;border-right:1px solid #c9c6be;border-bottom:1px solid #c9c6be;padding:13px 12px}
+ .ed-capability-grid article:nth-child(2n){border-right:0}
+ .ed-capability-grid article:nth-last-child(-n+2){border-bottom:0}
+ .ed-capability-grid article>span{font-size:10px;letter-spacing:.02em}
+ .ed-capability-grid article>svg{margin:9px 0 4px}
+ .ed-capability-grid h3{font-size:clamp(19px,5vw,23px);line-height:1.07}
+ .ed-capability-grid p{font-size:13px;line-height:1.4;margin-top:8px}
+}
+@media(max-width:700px){
+ .ed-trust-evidence{gap:9px;margin:-10px 0 22px;padding:12px 0}
+ .ed-trust-evidence>span{flex:1 1 100%}
+ .ed-trust-evidence a{flex:1 1 100%;min-height:34px}
+}
+@media(max-width:374px){
+ .ed-capability-grid{grid-template-columns:1fr}
+}
