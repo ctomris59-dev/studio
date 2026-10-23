@@ -1,6 +1,6 @@
 "use client";
 import {useRef,useState,type KeyboardEvent} from "react";
-import {ArrowRight,CalendarDays,CheckCircle2,Clock3,Users,Repeat2,ShieldCheck} from "lucide-react";
+import {ArrowLeft,ArrowRight,CalendarDays,CheckCircle2,Clock3,Users,Repeat2,ShieldCheck} from "lucide-react";
 
 const tabs=[
  {id:"today",label:"Today",icon:Clock3,title:"Know what needs attention.",text:"Trials, renewals, inactive members, package gaps and open seats surface with the reason they appeared.",metrics:[["PRIORITIES","05"],["HIGH","02"],["OPEN SEATS","06"]],rows:[["Trial needs a next step","Mia attended yesterday"],["Renewal opportunity","Oliver has 1 credit left"],["Member may be drifting","Emma has not visited in 24 days"]]},
@@ -13,6 +13,14 @@ const tabs=[
 export default function ProductTourTabs(){
  const [active,setActive]=useState("today");
  const listRef=useRef<HTMLDivElement>(null);
+ const activeIndex=tabs.findIndex(item=>item.id===active);
+ function activate(index:number,focus=false){
+  const bounded=Math.min(tabs.length-1,Math.max(0,index));
+  setActive(tabs[bounded].id);
+  const target=listRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[bounded];
+  target?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+  if(focus)target?.focus();
+ }
  function onKeyboard(event:KeyboardEvent<HTMLDivElement>){
   const index=tabs.findIndex(tab=>tab.id===active);
   let next=index;
@@ -22,17 +30,22 @@ export default function ProductTourTabs(){
   else if(event.key==="End")next=tabs.length-1;
   else return;
   event.preventDefault();
-  setActive(tabs[next].id);
-  const target=listRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next];
-  target?.focus();
+  activate(next,true);
  }
  const tab=tabs.find(x=>x.id===active)||tabs[0];
  const Icon=tab.icon;
  return <div className="ed-tour-tabs">
+  <div className="ed-tour-discovery">
+   <span aria-live="polite">AREA {activeIndex+1} OF {tabs.length} · SWIPE OR USE ARROWS</span>
+   <div className="ed-tour-discovery-controls">
+    <button type="button" aria-label="Previous product area" disabled={activeIndex===0} onClick={()=>activate(activeIndex-1,true)}><ArrowLeft size={18}/></button>
+    <button type="button" aria-label="Next product area" disabled={activeIndex===tabs.length-1} onClick={()=>activate(activeIndex+1,true)}><ArrowRight size={18}/></button>
+   </div>
+  </div>
   <div className="ed-tour-tablist" role="tablist" ref={listRef} onKeyDown={onKeyboard} aria-label="StudioTasker product areas">
    {tabs.map(item=>{const I=item.icon;return <button key={item.id} id={"tour-tab-"+item.id} type="button" role="tab" aria-selected={active===item.id}
      aria-controls="tour-panel" tabIndex={active===item.id?0:-1}
-     className={active===item.id?"active":""} onClick={()=>setActive(item.id)}><I size={17}/>{item.label}</button>})}
+     className={active===item.id?"active":""} onClick={()=>activate(tabs.findIndex(x=>x.id===item.id))}><I size={17}/>{item.label}</button>})}
   </div>
   <div className="ed-tour-panel" id="tour-panel" role="tabpanel" aria-labelledby={"tour-tab-"+active} tabIndex={0}>
    <div className="ed-tour-copy"><span className="ed-tour-icon"><Icon size={22}/></span><h3>{tab.title}</h3><p>{tab.text}</p><a href="/app-demo?tour=1">EXPLORE THE INTERACTIVE DEMO <ArrowRight size={16}/></a></div>

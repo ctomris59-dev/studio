@@ -30,13 +30,13 @@ const timetable = [
 ];
 
 const studioTypes = [
-  {name:"PILATES / REFORMER",short:"PILATES",copy:"Reformer classes, packages, credits and attendance.",href:"/pilates-studio-software",Icon:Activity},
-  {name:"YOGA",short:"YOGA",copy:"Classes, workshops, member records and scheduling.",href:"/yoga-studio-software",Icon:HeartPulse},
-  {name:"BARRE",short:"BARRE",copy:"Class capacity, waitlists and package usage.",href:"/barre-studio-software",Icon:Waves},
-  {name:"DANCE",short:"DANCE",copy:"Lessons, levels, student records and bookings.",href:"/dance-studio-software",Icon:Users},
-  {name:"INDOOR CYCLING",short:"CYCLING",copy:"Bike spots, waitlists, check-in and timetables.",href:"/indoor-cycling-software",Icon:Activity},
-  {name:"FITNESS & GYM",short:"FITNESS",copy:"Group classes, personal training and members.",href:"/fitness-gym-software",Icon:Dumbbell},
-  {name:"BOUTIQUE FITNESS",short:"BOUTIQUE",copy:"Leads, classes, credits and follow-up workflows.",href:"/boutique-fitness-software",Icon:Waves}
+  {name:"PILATES / REFORMER",short:"PILATES",copy:"Reformer classes, credits and check-ins.",href:"/pilates-studio-software",Icon:Activity},
+  {name:"YOGA",short:"YOGA",copy:"Classes, workshops and member records.",href:"/yoga-studio-software",Icon:HeartPulse},
+  {name:"BARRE",short:"BARRE",copy:"Capacity, waitlists and packages.",href:"/barre-studio-software",Icon:Waves},
+  {name:"DANCE",short:"DANCE",copy:"Lessons, levels and bookings.",href:"/dance-studio-software",Icon:Users},
+  {name:"INDOOR CYCLING",short:"CYCLING",copy:"Bike spots, waitlists and check-ins.",href:"/indoor-cycling-software",Icon:Activity},
+  {name:"FITNESS & GYM",short:"FITNESS",copy:"Group classes, training and members.",href:"/fitness-gym-software",Icon:Dumbbell},
+  {name:"BOUTIQUE FITNESS",short:"BOUTIQUE",copy:"Leads, classes, credits and follow-ups.",href:"/boutique-fitness-software",Icon:Waves}
 ];
 
 function Identity({ inverse = false }: { inverse?: boolean }) {
@@ -91,8 +91,8 @@ export default function HomePage() {
       <header className="ed-header">
         <div className="ed-container ed-nav">
           <Identity/>
-          <nav aria-label="Main navigation"><a href="#product-tour">Product tour</a><a href="#features">Features</a><a href="#studio-types">Studio types</a><a href="#pricing">Pricing</a><a href="#why">Why StudioTasker</a><Link href="/contact">Contact</Link></nav>
-          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace">CUSTOMER SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">VIEW PLANS · $39.90 <ArrowUpRight size={16}/></Link></div>
+          <nav aria-label="Main navigation"><a href="#product-tour">Product tour</a><a href="#features">Features</a><a href="#studio-types">Studio types</a><a href="#pricing">Pricing</a><a href="#why">Why us</a><Link href="/contact">Contact</Link></nav>
+          <div className="ed-nav-actions"><Link className="ed-customer-login" href="/workspace" aria-label="Customer sign in">SIGN IN</Link><Link className="ed-nav-demo" href="/app-demo">TRY DEMO</Link><Link className="ed-nav-cta" href="/start">VIEW PLANS · $39.90 <ArrowUpRight size={16}/></Link></div>
           <MarketingMobileMenu/>
         </div>
       </header>
@@ -133,7 +133,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-section-heading ed-section-heading-split">
               <div><span className="ed-overline">01 / TAKE A LOOK INSIDE</span><h2 id="product-tour-title">Your studio.<br/><em>In full view.</em></h2></div>
-              <p>Explore five everyday areas: Today, Members, Classes, Follow-ups and Operations. Switch between the sample views to see how your team stays organized.</p>
+              <p>Explore Today, Members, Classes, Follow-ups and Operations. Switch views to see your studio at work.</p>
             </div>
             <ProductTourTabs/>
           </div>
@@ -146,12 +146,12 @@ export default function HomePage() {
               <p>Plan classes, stay on top of members and handle the details without switching between disconnected tools.</p>
             </div>
             <div className="ed-capability-grid">
-              <article><span>01 / DAILY CONTROL</span><Clock3 size={23}/><h3>Today &amp; follow-ups</h3><p>See bookings, capacity, priorities and explainable signals for trials, renewals and inactivity. Turn them into staff tasks with clear next steps.</p></article>
-              <article><span>02 / RELATIONSHIPS</span><Users size={23}/><h3>Members &amp; CRM</h3><p>Keep enquiries, lead stages, trial progress, searchable profiles, notes, contacts, attendance history and waiver status together.</p></article>
-              <article><span>03 / THE TIMETABLE</span><CalendarDays size={23}/><h3>Classes &amp; schedules</h3><p>Build one-off or recurring classes with instructors, substitutes, rooms, capacity, formats and numbered equipment spots.</p></article>
-              <article><span>04 / THE EXCEPTIONS</span><Activity size={23}/><h3>Bookings &amp; waitlists</h3><p>Manage check-ins, cancellations, no-shows, timed waitlist offers, safe reservation moves, recurring bookings and bulk class changes.</p></article>
-              <article><span>05 / ENTITLEMENTS</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Track package validity and usage, audited credit adjustments, capped one-cycle rollovers and versioned waiver acceptance.</p></article>
-              <article><span>06 / YOUR CONTROL</span><ShieldCheck size={23}/><h3>Team, branding &amp; data</h3><p>Use staff roles, studio branding, timezone and class defaults. Preview CSV imports and export your studio records when needed.</p></article>
+              <article><span>01 / DAILY CONTROL</span><Clock3 size={23}/><h3>Today &amp; follow-ups</h3><p>See capacity, trial and renewal signals, then turn priorities into clear staff tasks.</p></article>
+              <article><span>02 / RELATIONSHIPS</span><Users size={23}/><h3>Members &amp; CRM</h3><p>Keep enquiries, member profiles, notes, attendance history and waiver status together.</p></article>
+              <article><span>03 / THE TIMETABLE</span><CalendarDays size={23}/><h3>Classes &amp; schedules</h3><p>Schedule one-off or recurring classes with coaches, rooms, capacity and equipment spots.</p></article>
+              <article><span>04 / THE EXCEPTIONS</span><Activity size={23}/><h3>Bookings &amp; waitlists</h3><p>Manage check-ins, no-shows, timed waitlists, reservation moves and bulk class changes.</p></article>
+              <article><span>05 / ENTITLEMENTS</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Track package use, credit changes, one-cycle rollovers and versioned waivers.</p></article>
+              <article><span>06 / YOUR CONTROL</span><ShieldCheck size={23}/><h3>Team, branding &amp; data</h3><p>Set staff roles, branding and timezone. Preview imports and export your studio data.</p></article>
             </div>
           </div>
         </section>
@@ -163,7 +163,7 @@ export default function HomePage() {
               <p>From Pilates and yoga to fitness and dance, choose your studio type to see how StudioTasker fits your classes.</p>
             </div>
             <div className="ed-studio-type-grid">
-              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+name.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
+              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+short.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
             </div>
           </div>
         </section>
@@ -180,14 +180,14 @@ export default function HomePage() {
                 <span className="ed-plan-label">MONTHLY / FLEXIBLE</span>
                 <h3>Pay month to month.</h3>
                 <div className="ed-plan-amount"><strong>$39.90</strong><span>/ month</span></div>
-                <p>All StudioTasker features, with flexible monthly billing.</p>
+                <p>All features. $39.90 billed monthly.</p>
                 <Link href="/start?plan=monthly">CHOOSE MONTHLY <ArrowUpRight size={18}/></Link>
               </article>
               <article className="ed-plan-card ed-plan-card-featured">
                 <span className="ed-plan-label">ANNUAL / SAVE ABOUT 15%</span>
                 <h3>Keep more in your studio.</h3>
                 <div className="ed-plan-amount"><strong>$33.90</strong><span>/ month equivalent</span></div>
-                <p>$406.80 billed once per year. Save $72 versus twelve monthly payments.</p>
+                <p>$406.80 billed yearly. Save $72 compared with monthly billing.</p>
                 <Link href="/start?plan=annual">CHOOSE ANNUAL <ArrowUpRight size={18}/></Link>
               </article>
             </div>

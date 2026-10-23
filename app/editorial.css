@@ -1310,3 +1310,83 @@
  .ed-hero-consolidated .ed-preview-body{padding-bottom:20px}
  .ed-faq-list summary{min-height:44px;align-items:center}
 }
+
+/* RC3 visual polish: balanced studio cards and a quicker mobile journey. */
+@media(min-width:1201px){
+ .ed-nav>nav{gap:clamp(9px,1vw,15px);flex:1;min-width:0;justify-content:center}
+ .ed-nav>nav a{white-space:nowrap;font-size:12px}
+ .ed-customer-login,.ed-nav-demo,.ed-nav-cta{white-space:nowrap}
+ .ed-nav-actions{gap:9px;flex-shrink:0}
+ .ed-nav-cta{padding-inline:11px;gap:8px}
+}
+@media(min-width:951px){
+ .ed-studio-type-grid{grid-template-columns:repeat(12,minmax(0,1fr))}
+ .ed-studio-type-grid article:nth-child(n){grid-column:span 3;min-height:205px;padding:20px;border-top:0;border-right:1px solid #c9c6be}
+ .ed-studio-type-grid article:nth-child(4){border-right:0}
+ .ed-studio-type-grid article:nth-child(n+5){grid-column:span 4;border-top:1px solid #c9c6be}
+ .ed-studio-type-grid article:last-child{border-right:0}
+ .ed-studio-type-grid h3{font-size:clamp(22px,2vw,26px)}
+ .ed-studio-type-grid p{font-size:14px;line-height:1.46;margin:9px 0 14px}
+ .ed-studio-type-grid a{font-size:12px;min-height:32px}
+ .ed-studio-type-grid article>span{margin-bottom:13px}
+}
+.ed-tour-discovery{display:none}
+@media(max-width:700px){
+ .ed-tour-discovery{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#17203c;color:#f4f5ff;padding:9px 13px 10px}
+ .ed-tour-discovery>span{font:700 11px/1.3 var(--studio-mono),monospace;letter-spacing:.015em}
+ .ed-tour-discovery-controls{display:flex;gap:7px;flex-shrink:0}
+ .ed-tour-discovery-controls button{width:44px;height:44px;display:grid;place-items:center;border:1px solid #b3bddc;background:var(--ed-lime);color:#17203c;cursor:pointer}
+ .ed-tour-discovery-controls button:disabled{opacity:.45;cursor:not-allowed;background:#e9ebf4}
+ .ed-tour-discovery-controls button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+ .ed-tour-tablist{scrollbar-width:thin;scroll-padding-left:13px;overscroll-behavior-x:contain}
+ .ed-tour-tablist button{flex-basis:135px;min-height:48px}
+ .ed-product-tour,.ed-capabilities,.ed-studio-types,.ed-pricing-refined,.ed-faq,.ed-why-setup{padding:31px 0 36px}
+ .ed-section-heading{margin-bottom:19px}
+ .ed-section-heading h2{font-size:clamp(40px,9.4vw,54px)}
+ .ed-section-heading>p{font-size:14px;line-height:1.5}
+ .ed-hero-consolidated .ed-hero-photo{min-height:435px}
+ .ed-hero-consolidated .ed-hero-canvas{padding:22px 19px!important}
+ .ed-hero-consolidated .ed-preview-intro{margin-bottom:14px}
+ .ed-hero-consolidated .ed-preview-intro h2{font-size:36px}
+ .ed-hero-consolidated .ed-preview-intro p{margin-top:7px}
+ .ed-tour-panel{min-height:0}
+ .ed-tour-copy{padding:20px 18px}
+ .ed-tour-copy h3{font-size:31px;margin:11px 0 8px}
+ .ed-tour-copy a{margin-top:16px}
+ .ed-tour-ui{margin:0 12px 14px}
+ .ed-capability-grid article{padding:15px 17px}
+ .ed-capability-grid article>svg{margin:8px 0 6px}
+ .ed-capability-grid h3{font-size:24px}
+ .ed-capability-grid p{font-size:14px;line-height:1.43;margin-top:6px}
+ .ed-studio-type-grid article{min-height:160px;padding:14px 13px}
+ .ed-studio-type-grid article>span{margin-bottom:9px;width:34px;height:34px}
+ .ed-studio-type-grid h3{font-size:20px}
+ .ed-studio-type-grid p{font-size:13px;line-height:1.4;margin:8px 0}
+ .ed-studio-type-grid a{font-size:12px;min-height:38px}
+ .ed-plan-card{padding:21px 19px;gap:10px}
+ .ed-plan-card h3{font-size:29px}
+ .ed-plan-amount strong{font-size:55px}
+ .ed-value-grid article{padding:17px 20px}
+ .ed-value-grid h3{font-size:25px}
+ .ed-setup-compact{gap:18px;padding-top:22px}
+ .ed-setup-compact li{padding:13px 17px}
+ .ed-why-setup .ed-value-grid{margin-bottom:22px}
+ .ed-faq-list details{padding:11px 0}
+ .ed-contact-refined{padding:35px 0 39px}
+}
+@media(max-width:440px){
+ .ed-hero-consolidated .ed-hero-photo{min-height:435px}
+ .ed-hero-consolidated .ed-hero-inner{padding:24px 20px}
+ .ed-hero-primary-actions{margin:23px 0 12px;gap:9px}
+ .ed-hero-primary-actions a{min-height:48px}
+ .ed-hero-consolidated .ed-preview-intro h2{font-size:36px}
+ .ed-studio-type-grid article{min-height:162px;padding:12px 11px}
+ .ed-studio-type-grid h3{font-size:18px}
+ .ed-studio-type-grid p{font-size:12.5px}
+}
+
+/* Verified Lighthouse readability and accessible-label corrections. */
+.ed-tour-ui-head small,.ed-tour-ui-head>span,
+.ed-tour-metrics small,.ed-tour-rows small{color:#455065}
+.ed-contact-cta .ed-overline,.ed-contact-cta h2 em{color:#17203c}
+@media(min-width:1201px){.ed-nav>nav a{font-size:13px}}
