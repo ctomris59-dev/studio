@@ -47,10 +47,24 @@ module.exports = async function ({
   await field("Version", "1");
   await field("Document text", "Externally signed studio waiver for browser regression.");
   await click("Save document version");
-  await saved();
-  let data = (await api("/api/studio/operations", { cookie })).data;
-  assert.equal(data.documents[0].title, "Browser waiver");
-  const doc = data.documents[0].id;
+  // A previous operation can still show "Saved." while this request is in flight.
+  // Wait for the actual persisted document rather than a stale status message.
+  let data, savedDocument;
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const response = await api("/api/studio/operations", { cookie });
+    if (response.status === 200) {
+      savedDocument = response.data.documents?.find(
+        (d) => d.title === "Browser waiver" && d.version === "1",
+      );
+      if (savedDocument) {
+        data = response.data;
+        break;
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  assert(savedDocument, "Saved waiver document must be persisted before proceeding");
+  const doc = savedDocument.id;
   const confirm = await api("/api/studio/members/" + memberId + "/package", {
     method: "POST",
     cookie,
