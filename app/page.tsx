@@ -163,7 +163,7 @@ export default function HomePage() {
               <p>From Pilates and yoga to fitness and dance, choose your studio type to see how StudioTasker fits your classes.</p>
             </div>
             <div className="ed-studio-type-grid">
-              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+name.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
+              {studioTypes.map(({name,short,copy,href,Icon})=><article key={name}><span><Icon size={25}/></span><h3>{name}</h3><p>{copy}</p><Link href={href} aria-label={"Explore "+short.toLowerCase()+" studio software"}>EXPLORE {short} <ArrowRight size={15}/></Link></article>)}
             </div>
           </div>
         </section>

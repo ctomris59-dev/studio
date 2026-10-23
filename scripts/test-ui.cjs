@@ -26,6 +26,10 @@ assert(pricing.includes("canManageExisting"),"Expired subscribers must be able t
 assert(homepage.includes("StudioTasker")&&homepage.includes("/app-demo"),"Public website must expose product and working demo");
 const tourTabs=read("components/product-tour-tabs.tsx");
 assert(tourTabs.includes("Previous product area")&&tourTabs.includes("Next product area")&&tourTabs.includes("AREA {activeIndex+1} OF {tabs.length}"),"Mobile product tour needs accessible explicit navigation");
+const marketingMenu=read("components/marketing-mobile-menu.tsx");
+assert(marketingMenu.includes('aria-label="Open Menu"'),"Menu accessible name must contain its visible label");
+assert(homepage.includes('aria-label={"Explore "+short.toLowerCase()+" studio software"}'),"Studio CTA accessible names must include their visible short labels");
+assert(css.includes(".ed-tour-metrics small,.ed-tour-rows small{color:#455065}")&&css.includes(".ed-contact-cta .ed-overline,.ed-contact-cta h2 em{color:#17203c}"),"Verified contrast fixes must remain applied");
 assert(css.includes("grid-template-columns:repeat(12,minmax(0,1fr))")&&css.includes(".ed-studio-type-grid article:nth-child(n+5){grid-column:span 4"),"Desktop studio types must use balanced 4+3 grid");
 assert(homepage.includes('aria-label="Customer sign in">SIGN IN</Link>'),"Desktop sign-in label must remain clear without wrapping");
 assert(homepage.includes("All features. $39.90 billed monthly.")&&homepage.includes("$406.80 billed yearly."),"Pricing cards must explain billing periods without long notes");

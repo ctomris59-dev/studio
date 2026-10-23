@@ -1384,3 +1384,9 @@
  .ed-studio-type-grid h3{font-size:18px}
  .ed-studio-type-grid p{font-size:12.5px}
 }
+
+/* Verified Lighthouse readability and accessible-label corrections. */
+.ed-tour-ui-head small,.ed-tour-ui-head>span,
+.ed-tour-metrics small,.ed-tour-rows small{color:#455065}
+.ed-contact-cta .ed-overline,.ed-contact-cta h2 em{color:#17203c}
+@media(min-width:1201px){.ed-nav>nav a{font-size:13px}}

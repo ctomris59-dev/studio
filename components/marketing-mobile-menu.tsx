@@ -12,7 +12,7 @@ export function MarketingMobileMenu(){
   if((event.target as HTMLElement).closest("a")&&menu.current)menu.current.open=false;
  }
  return <details ref={menu} className="ed-mobile-menu" onKeyDown={onKeyDown} onClick={onClick}>
-  <summary aria-label="Open main navigation">Menu</summary>
+  <summary aria-label="Open Menu">Menu</summary>
   <nav aria-label="Mobile and tablet navigation">
    <a href="#product-tour">Product tour</a><a href="#features">Features</a><a href="#studio-types">Studio types</a>
    <a href="#pricing">Pricing</a><a href="#why">Why StudioTasker</a>
