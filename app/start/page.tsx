@@ -4,11 +4,13 @@ import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 import "./start.css";
 import {Suspense} from "react";
 import {PlanCards,PlanSelector} from "./plan-selector";
+import {commercialRegistrationReady} from "../../lib/server/release-config";
 
 export const metadata={title:"StudioTasker Pricing | Monthly & Annual Plans",description:"StudioTasker costs $39.90/month per studio or $406.80/year. Compare monthly and annual billing for the full studio management workspace.",alternates:{canonical:"/start"},robots:{index:true,follow:true}};
 
 // Rendered dynamically by root layout to guarantee fresh CSP script nonces.
 export default function StartPage(){
+ const registrationOpen=Boolean(process.env.DATABASE_URL)&&process.env.AUTH_ALLOW_REGISTRATION==="true"&&commercialRegistrationReady();
  return <main className="st-start"><a className="studio-skip-link" href="#main-content">Skip to main content</a>
   <header className="st-start-top">
    <Link href="/" className="st-start-brand"><StudioTaskerMark/><span>studio<b>tasker.</b></span></Link>
@@ -21,15 +23,18 @@ export default function StartPage(){
      <Link href="/" className="st-start-back"><ArrowLeft size={17}/> Back to StudioTasker</Link>
      <span className="st-start-kicker">START STUDIOTASKER · GLOBAL</span>
     </div>
-    <h1>Choose a plan.<br/><em>Create your studio.</em></h1>
-    <p>There is no complicated sales process. Pick monthly or annual billing in USD, create your private studio workspace, then set your own timezone, logo, members and classes.</p>
+    <h1>Choose a plan.<br/><em>{registrationOpen?"Create your studio.":"Explore before launch."}</em></h1>
+    <p>Compare monthly or annual billing in USD, then take the guided product tour. When registrations open, studio owners can set up a private workspace with their timezone, logo, members and classes.</p>
     <div className="st-start-steps">
      <span><b>1</b> Choose plan</span><i/><span><b>2</b> Create studio</span><i/><span><b>3</b> Start using it</span>
     </div>
    </div>
    <div className="st-start-global"><Globe2 size={19}/><span>USA · Canada · UK · Europe · International</span><small>English-first · studio timezone & 12/24-hour clock supported</small></div>
 
-   <Suspense fallback={<PlanCards selected="monthly"/>}><PlanSelector/></Suspense>
+   {!registrationOpen&&<div className="st-start-availability" role="status"><ShieldCheck size={21}/><div><strong>New studio subscriptions are not open yet.</strong><span>You can review plans and explore the 90-second demo now. No payment or account is required.</span></div></div>}
+   <Suspense fallback={<PlanCards selected="monthly" registrationOpen={registrationOpen}/>}>
+    <PlanSelector registrationOpen={registrationOpen}/>
+   </Suspense>
 
    <div className="st-start-legal"><ShieldCheck size={18}/><span>Before creating a paid studio, review our <Link href="/legal/terms">Terms</Link>, <Link href="/legal/dpa">DPA</Link> and <Link href="/legal/privacy">Privacy Policy</Link>. Acceptance is recorded when you create or update your subscription.</span></div>
    <div className="st-start-help">

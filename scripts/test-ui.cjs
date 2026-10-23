@@ -34,6 +34,13 @@ assert(css.includes("grid-template-columns:repeat(12,minmax(0,1fr))")&&css.inclu
 assert(homepage.includes('aria-label="Customer sign in">SIGN IN</Link>'),"Desktop sign-in label must remain clear without wrapping");
 assert(homepage.includes("All features. $39.90 billed monthly.")&&homepage.includes("$406.80 billed yearly."),"Pricing cards must explain billing periods without long notes");
 assert(homepage.includes("timed waitlists")&&homepage.includes("one-cycle rollovers")&&homepage.includes("versioned waivers"),"Homepage feature overview must explain new owner-workspace capabilities.");
+const startPage=read("app/start/page.tsx");
+const plans=read("app/start/plan-selector.tsx");
+const tourCSS=read("app/app-demo/app-demo.css");
+assert(demo.includes("function tryTourStep()")&&demo.includes("Try this in the demo")&&tourCSS.includes(".sad-tour-try"),"Existing guided tour must invite a real fictional-data task");
+assert(startPage.includes("commercialRegistrationReady()")&&startPage.includes("st-start-availability")&&plans.includes('registrationOpen?"/workspace?mode=register&plan=monthly":"/app-demo?tour=1"')&&plans.includes('registrationOpen?"/workspace?mode=register&plan=annual":"/app-demo?tour=1"'),"Closed paid registration must not present a working checkout CTA while preserving plan selection when opened");
+assert(homepage.includes("Read our security practices")&&homepage.includes("Review the data processing terms")&&homepage.includes("Ask a product question"),"Trust content must link only to verifiable legal and contact pages");
+assert(homepage.includes("quality={65} priority fetchPriority")&&css.includes(".ed-capability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}"),"Optimize first-fold photo and make features scannable on modern mobile widths");
 assert(homepage.includes('id="features"')&&homepage.includes("Today &amp; follow-ups")&&homepage.includes("Bookings &amp; waitlists")&&homepage.includes("Team, branding &amp; data")&&homepage.includes("Preview imports"),"Homepage must present the main software areas as six readable feature groups.");
 assert.equal((homepage.match(/<h1\b/g)||[]).length,1,"Homepage must expose a single main H1.");
 assert(!homepage.includes('ed-impact-band')&&homepage.includes("ed-hero-consolidated"),"Homepage must not repeat two oversized introduction banners.");

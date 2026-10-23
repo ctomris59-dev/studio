@@ -148,7 +148,16 @@ export default function AppDemo(){
 
  function startTour(){if(!beginDemoSession())return;tourStarter.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setSignedIn(true);setTourElapsed(0);setTourActive(true);setView("today");setAdding(null);setMessage("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}}
  function jumpTour(direction:-1|1){const target=Math.max(0,Math.min(tourSteps.length-1,tourStepIndex+direction));setTourElapsed(target*TOUR_STEP_SECONDS)}
- function finishTour(){setTourActive(false);setView("today");setMessage("90-second guided tour complete. The sandbox is now yours to explore.")}
+ function finishTour(){setTourActive(false);setView("today");setMessage("Guided tour complete. Choose any section to practise with fictional records.")}
+ function tryTourStep(){
+  const target=tourStep.view;
+  setTourActive(false);setView(target);
+  const form: AddView=target==="leads"||target==="members"||target==="classes"||target==="followups"?target:null;
+  setAdding(form);
+  setMessage(form
+   ?"Hands-on demo: try adding a fictional "+(target==="classes"?"class":target==="followups"?"follow-up":target==="members"?"member":"lead")+". Nothing here charges a customer or changes a real studio."
+   :"Hands-on demo: explore the highlighted area with Willow Studio's fictional data.");
+ }
  function login(e:FormEvent){e.preventDefault();setMessage("");if(!authenticateDemo(email,password)){setMessage("Demo email or password is incorrect.");return}
   if(!beginDemoSession())return;
   setSignedIn(true);setView(settings.defaultView);setPassword("");try{sessionStorage.setItem("studiotasker-owner-demo","1")}catch{}
@@ -244,7 +253,7 @@ export default function AppDemo(){
     <div className="sad-tour-progress" aria-hidden="true"><i style={{width:Math.min(100,(tourElapsed/TOUR_SECONDS)*100)+"%"}}/></div>
     <div className="sad-tour-meta"><span>STEP {tourStepIndex+1} / {tourSteps.length}</span><span>{tourElapsed}s / {TOUR_SECONDS}s</span></div>
     <h2>{tourStep.title}</h2><p>{tourStep.text}</p>
-    <div className="sad-tour-actions"><button type="button" disabled={tourStepIndex===0} onClick={()=>jumpTour(-1)}>Back</button><button type="button" onClick={()=>tourStepIndex===tourSteps.length-1?finishTour():jumpTour(1)}>{tourStepIndex===tourSteps.length-1?"Finish":"Next"} <ArrowRight size={16}/></button></div>
+    <div className="sad-tour-actions"><button type="button" className="sad-tour-try" onClick={tryTourStep}>Try this in the demo <ArrowRight size={16}/></button><button type="button" disabled={tourStepIndex===0} onClick={()=>jumpTour(-1)}>Back</button><button type="button" onClick={()=>tourStepIndex===tourSteps.length-1?finishTour():jumpTour(1)}>{tourStepIndex===tourSteps.length-1?"Finish":"Next"} <ArrowRight size={16}/></button></div>
    </aside>}
    {message&&signedIn&&<p className="sad-app-message" role="status">{message}</p>}
 
