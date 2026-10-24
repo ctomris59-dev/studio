@@ -9,8 +9,12 @@ export const LEGAL_VERSIONS={
  turkiyePrivacy:"2026-10-06"
 } as const;
 
+export const STUDIO_DATA_NOTICE_TITLE="Your Studio. Your Data.";
+export const STUDIO_DATA_NOTICE_TEXT=
+ "You decide what customer information to add to StudioTasker and remain responsible for using it in accordance with applicable privacy laws. We securely host and process your data to provide the service, as explained in our Data Processing Agreement.";
+
 export const LEGAL_ACCEPTANCE_TEXT=
- "I am authorised to act for this studio. I agree to the Terms of Service, Cancellation & Refund Policy and Data Processing Agreement.";
+ "I am authorised to act for this studio. I understand the data responsibilities above and agree to the Terms of Service, Data Processing Agreement and Cancellation & Refund Policy.";
 
 export type LegalPlan="monthly"|"annual";
 export const LEGAL_PLAN_PRICE_CENTS:Record<LegalPlan,number>={monthly:3990,annual:40680};
