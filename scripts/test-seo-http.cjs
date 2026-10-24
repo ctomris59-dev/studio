@@ -47,6 +47,15 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  assert(home.text.includes('"Organization"')&&home.text.includes('"Service"')&&home.text.includes("application/ld+json"),"Home entity JSON-LD missing.");
  assert(home.text.includes('href="/yoga-studio-software"'),"Server HTML vertical links missing.");
  assert(home.text.includes('href="/legal/privacy"'),"Home footer must expose a directly discoverable Privacy Policy.");
+ const legalHub=await get("/legal");
+ assert.equal(legalHub.status,200,"Legal index must remain available.");
+ assert(legalHub.text.includes("Privacy Policy")&&!legalHub.text.includes("KVKK Privacy Notice"),"Global legal index must not prominently display a country-specific privacy card.");
+ const privacy=await get("/legal/privacy");
+ assert.equal(privacy.status,200,"Global Privacy Policy must remain public.");
+ assert(privacy.text.includes("Regional privacy information")&&privacy.text.includes('href="/legal/turkiye-privacy"'),"The global policy must link directly to applicable regional notices.");
+ const regional=await get("/legal/turkiye-privacy");
+ assert.equal(regional.status,200,"Existing regional notice must remain available to people who need it.");
+ assert(regional.text.includes("KVKK Article 11 rights"),"Regional notice must retain its statutory rights information.");
  assert(home.text.includes('href="/legal/security"'),"Home footer must expose the security notice.");
  const securityTxt=await get("/.well-known/security.txt");
  assert.equal(securityTxt.status,200,"RFC 9116 security.txt missing");
