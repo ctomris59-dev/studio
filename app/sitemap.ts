@@ -4,6 +4,8 @@ export default function sitemap():MetadataRoute.Sitemap{
  const paths=[
   "",
   "/pilates-studio-software",
+  "/pilates-class-pack-software",
+  "/studio-waitlist-management-software",
   "/yoga-studio-software",
   "/barre-studio-software",
   "/dance-studio-software",

@@ -1,0 +1,24 @@
+/* Focused, mobile-friendly informational landing pages share the established StudioTasker marketing design. */
+.fe-disclosure{margin:14px 0 0;font-size:12px;line-height:1.6;color:#5e6677}
+.fe-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;list-style:none;padding:0;margin:0}
+.fe-steps li{display:flex;align-items:flex-start;gap:16px;padding:25px;background:#fffefa;border:1px solid #c8ccd4;min-width:0}
+.fe-step-number{color:#334bdd;font:800 22px var(--studio-mono),monospace;flex:0 0 auto}
+.fe-steps h3{font:700 28px/1.1 var(--studio-heading),sans-serif;margin:0 0 9px}
+.fe-steps p{font-size:15px;color:#5e6677;line-height:1.7;margin:0}
+.fe-table-wrap{max-width:100%;overflow-x:auto}
+.fe-table-wrap .mk-compare{min-width:570px}
+.fe-table-wrap th[scope=row]{font-size:14px;text-align:left}
+.fe-boundaries{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fe-boundaries p{padding:19px 21px;display:flex;align-items:flex-start;gap:13px;background:#f4f0e7;border:1px solid #c8ccd4;font-size:15px;line-height:1.55;margin:0}
+.fe-boundaries svg{color:#334bdd;flex:0 0 auto}
+.fe-legal-links{margin:25px 0 0;font-size:14px;color:#5e6677;line-height:1.6}
+.fe-legal-links a{text-decoration:underline;text-underline-offset:3px}
+.fe-faq-intro{max-width:280px;line-height:1.7;color:#5e6677}
+.fe-related{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fe-related>a{min-height:100px;display:flex;align-items:center;justify-content:space-between;gap:17px;background:#f4f0e7;border:1px solid #c8ccd4;padding:20px;font-weight:800;text-decoration:none;line-height:1.35}
+.fe-related>a:hover,.fe-related>a:focus-visible{background:#e7f982;outline-offset:3px}
+.fe-related svg{flex:0 0 auto}
+.feature-page .mk-hero h1{font-size:clamp(62px,6.3vw,99px)}
+.feature-page .mk-hero-art .mk-board{transform:none}
+@media(max-width:900px){.fe-related{grid-template-columns:1fr}}
+@media(max-width:650px){.fe-steps,.fe-boundaries{grid-template-columns:1fr}.feature-page .mk-hero h1{font-size:clamp(56px,11vw,78px)}.fe-table-wrap .mk-compare{display:table}.fe-steps li{padding:19px}.fe-related>a{min-height:74px}}

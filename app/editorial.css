@@ -1432,6 +1432,12 @@
  .ed-hero-consolidated .ed-preview-class-row{min-height:49px;padding:5px 1px}
  .ed-hero-consolidated .ed-preview-demo-link{min-height:41px;padding:8px 12px;margin-top:10px}
 }
+/* Compact contextual links to genuinely distinct class-operation workflows. */
+.ed-feature-guides{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:22px}
+.ed-feature-guides>span{font:700 11px var(--studio-mono),monospace;letter-spacing:.045em;color:#545e75}
+.ed-feature-guides>a{display:inline-flex;gap:8px;align-items:center;font-size:14px;font-weight:700;color:#25399c;text-decoration:underline;text-underline-offset:3px}
+.ed-feature-guides>a:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:600px){.ed-feature-guides{gap:12px 18px}}
 @media (min-width:951px) and (max-height:780px){
  .ed-nav{height:76px}
  .ed-hero-consolidated>.ed-hero-grid{
