@@ -16,7 +16,7 @@ import { legalOperator } from "../lib/server/legal-config";
 
 export const metadata:Metadata={
  title:"StudioTasker | Studio Management Software for Independent Studios",
- description:"Manage recurring classes, waitlists, bookings, members, credits, attendance, staff and follow-up with StudioTasker. Built for independent class-based studios worldwide.",
+ description:"Studio management software for Pilates, yoga and fitness studios. Manage classes, bookings, members, waitlists, credits and attendance in one workspace.",
  alternates:{canonical:"/"},
  openGraph:{type:"website",url:"/",siteName:"StudioTasker",title:"StudioTasker | Studio Management Software",description:"Focused studio management software for independent class-based studios.",images:["/opengraph-image"]},
  twitter:{card:"summary_large_image",title:"StudioTasker | Studio Management Software",description:"Focused studio management software for independent class-based studios.",images:["/opengraph-image"]}
@@ -133,7 +133,7 @@ export default function HomePage() {
           <div className="ed-container">
             <div className="ed-section-heading ed-section-heading-split">
               <div><span className="ed-overline">01 / TAKE A LOOK INSIDE</span><h2 id="product-tour-title">Your studio.<br/><em>In full view.</em></h2></div>
-              <p>Explore Today, Members, Classes, Follow-ups and Operations. Switch views to see your studio at work.</p>
+              <p>StudioTasker is studio management software for independent Pilates, yoga, fitness and other class-based studios. Manage schedules, member records, bookings, waitlists, package credits and attendance in one workspace. Explore Today, Members, Classes, Follow-ups and Operations in our interactive product tour.</p>
             </div>
             <ProductTourTabs/>
           </div>
@@ -244,6 +244,8 @@ export default function HomePage() {
               <details><summary>Does StudioTasker collect member payments or contact members?</summary><p>No. StudioTasker is studio-facing software. Member payment collection and member communications stay with the studio. StudioTasker only bills the studio for its own software subscription.</p></details>
               <details><summary>How much does StudioTasker cost?</summary><p>StudioTasker is $39.90/month per studio. With annual billing, the price is $33.90/month, billed as $406.80 for the year, about 15% less than paying monthly for 12 months. Your studio&apos;s own memberships, class packs and customer payments are completely separate.</p></details>
               <details><summary>Do I need to enter my own members to try it?</summary><p>No. Choose Explore the Demo to try fictional members, classes, bookings, reports and follow-up tasks. Please do not enter real personal information.</p></details>
+              <details><summary>What can I do in the interactive demo?</summary><p>Take the 90-second guided tour, then practise with fictional studio data: add a sample member, schedule a class, review package credits or create a follow-up. No account or real customer data is required.</p></details>
+              <details><summary>How does StudioTasker handle my members’ information?</summary><p>Your studio decides which customer information to enter and is responsible for using it lawfully. StudioTasker hosts and processes those records to provide the service. Read our <Link href="/legal/privacy">Privacy Policy</Link>, <Link href="/legal/dpa">Data Processing Agreement</Link> and <Link href="/legal/security">security practices</Link> for details.</p></details>
             </div>
           </div>
         </section>
