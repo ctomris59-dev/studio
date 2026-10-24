@@ -33,6 +33,11 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  assert(home.text.includes('id="main-heading"')&&home.text.includes("Less admin."),"Hero benefit headline must be crawlable.");
  assert(home.text.includes('$39.90')&&home.text.includes('$406.80'),"Both plan prices must be crawlable.");
  assert(home.text.includes('id="features"')&&home.text.includes('Bookings &amp; waitlists'),"Key owner features must be crawlable.");
+ assert(home.text.includes("StudioTasker is studio management software for independent Pilates"),"The product overview must explain the software clearly for visitors and search engines.");
+ assert(home.text.includes("What can I do in the interactive demo?")&&home.text.includes("90-second guided tour"),"Demo tasks must be explained in crawlable FAQ content.");
+ assert(home.text.includes("How does StudioTasker handle my members")&&home.text.includes('href="/legal/dpa"'),"Data responsibility FAQ must link to the real DPA.");
+ const homeDescription=(home.text.match(/<meta\s+name="description"\s+content="([^"]+)"/)||[])[1]||"";
+ assert(homeDescription.length>=110&&homeDescription.length<160,"Home meta description should be concise and descriptive.");
 
  // Production Next.js must not expose HMR/dev-overlay endpoints or runtimes.
  for(const signature of ["/_next/webpack-hmr","__nextjs_original-stack-frame","react-refresh","webpackHotUpdate"]){
