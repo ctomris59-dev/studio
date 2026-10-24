@@ -4,8 +4,7 @@ import {StudioTaskerMark} from "../../components/studio-tasker-mark";
 export const metadata={title:"Legal & Trust | StudioTasker",description:"StudioTasker legal, privacy, data-processing, security and subscription documents.",alternates:{canonical:"/legal"},robots:{index:true,follow:true}};
 const docs=[
  ["Terms of Service","The contract governing StudioTasker subscriptions, acceptable use, liability and account rules.","/legal/terms"],
- ["Privacy Policy","How StudioTasker uses account, billing, security and service data.","/legal/privacy"],
- ["KVKK Privacy Notice","","/legal/turkiye-privacy"],
+ ["Privacy Policy","How StudioTasker uses account, billing, security and service data, including regional privacy information.","/legal/privacy"],
  ["Data Processing Agreement","Controller–processor terms for studio member data processed through StudioTasker.","/legal/dpa"],
  ["Cookie Policy","The cookies and browser storage used by StudioTasker.","/legal/cookies"],
  ["Subprocessors & Independent Controllers","Production processors plus Paddle's separate Merchant-of-Record role.","/legal/subprocessors"],
