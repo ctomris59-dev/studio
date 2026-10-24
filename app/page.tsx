@@ -153,6 +153,7 @@ export default function HomePage() {
               <article><span>05 / ENTITLEMENTS</span><CheckCircle2 size={23}/><h3>Packages, credits &amp; waivers</h3><p>Track package use, credit changes, one-cycle rollovers and versioned waivers.</p></article>
               <article><span>06 / YOUR CONTROL</span><ShieldCheck size={23}/><h3>Team, branding &amp; data</h3><p>Set staff roles, branding and timezone. Preview imports and export your studio data.</p></article>
             </div>
+            <nav className="ed-feature-guides" aria-label="Explore class and package management details"><span>DEEPER INTO THE WORKFLOW</span><Link href="/pilates-class-pack-software">Pilates class packs &amp; credits <ArrowUpRight size={16}/></Link><Link href="/studio-waitlist-management-software">Class waitlist management <ArrowUpRight size={16}/></Link></nav>
           </div>
         </section>
 
