@@ -63,6 +63,7 @@ async function main(){
    const email="accept-"+plan+"-"+nonce+"@example.test",password="CI-Test-"+randomBytes(16).toString("hex")+"!",studioName="Acceptance "+plan+" "+nonce;
    await navigate("/workspace?mode=register&plan="+plan);
    check(await exists("#auth-tab-register"),plan+" registration tab opens");
+   check((await text(".rd-data-notice")).includes("Your Studio. Your Data.")&&(await text(".rd-data-notice")).includes("remain responsible for using it in accordance with applicable privacy laws"),plan+" buyer notice visible before creating an account");
    check((await evalJs("document.querySelector('#auth-tab-register')?.getAttribute('aria-selected')"))==="true",plan+" correct signup tab is active");
    check((await evalJs('Array.from(document.querySelectorAll("select")).map(x=>x.value)')).includes(plan),plan+" preselected plan survives navigation");
    await peer.send("Emulation.setDeviceMetricsOverride",{width:320,height:720,deviceScaleFactor:1,mobile:true});
@@ -83,6 +84,8 @@ async function main(){
    const found=await admin.query("SELECT s.id AS studio_id,(SELECT payload->>'url' FROM mail_outbox WHERE recipient_email=$1 AND template='verify_email' ORDER BY created_at DESC LIMIT 1) AS link FROM studios s JOIN studio_users su ON su.studio_id=s.id JOIN app_users u ON u.id=su.user_id WHERE u.email=$1",[email]);
    check(found.rowCount===1&&!!found.rows[0].link,plan+" verification email queued");
    const studioId=found.rows[0].studio_id,verify=new URL(found.rows[0].link);
+   const acceptance=await admin.query("SELECT terms_version,acceptance_text_hash FROM legal_acceptances WHERE studio_id=$1 AND plan=$2 ORDER BY accepted_at DESC LIMIT 1",[studioId,plan]);
+   check(acceptance.rowCount===1&&acceptance.rows[0].terms_version==="2026-10-24.1"&&/^[a-f0-9]{64}$/.test(acceptance.rows[0].acceptance_text_hash),plan+" versioned buyer responsibility notice acceptance stored");
    accounts.push({email,studioId});
    check(verify.searchParams.get("plan")===plan,plan+" verification plan matches purchase intent");
    await navigate(verify.pathname+verify.search+verify.hash);
@@ -94,6 +97,7 @@ async function main(){
    await fill('input[type="email"]',email);await fill('input[type="password"]',password);
    await evalJs("document.querySelector('#auth-form').requestSubmit();true");
    await waitText(".rd-auth-heading","One last step");
+   check((await text(".rd-billing-panel .rd-data-notice")).includes("Your Studio. Your Data."),plan+" buyer notice stays visible before Paddle payment");
    check(!(await exists(".rd-live-shell")),plan+" unpaid workspace UI is gated");
    const cookies=await peer.send("Network.getCookies",{urls:[HOST+"/workspace"]});
    const session=cookies.cookies.find(c=>c.name==="__Host-studiotasker_session");
