@@ -96,6 +96,25 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
 
 
  const about=await get("/about"); assert.equal(about.status,200); assert(canonical(about.text,"https://www.studiotasker.com/about"),"About canonical missing.");
+ // New feature-topic pages must be genuine, independently crawlable
+ // product explanations; keep the sample-data and product-boundary notices.
+ for(const [path,phrase] of [
+  ["/pilates-class-pack-software","Pilates class pack and credit tracking software"],
+  ["/studio-waitlist-management-software","Class waitlist management software"]
+ ]){
+  const page=await get(path);
+  assert.equal(page.status,200,"Topic landing unavailable: "+path);
+  assert(canonical(page.text,"https://www.studiotasker.com"+path),"Missing canonical: "+path);
+  assert(page.text.includes(phrase),"Missing product-specific explanation: "+path);
+  assert(page.text.includes("ILLUSTRATIVE FLOW")&&page.text.includes("SAMPLE DATA"),"Example workflows must be explicitly fictional: "+path);
+  assert(page.text.includes('href="/app-demo?tour=1"')&&page.text.includes('href="/start"'),"Topic page must link to demo and plan availability: "+path);
+  assert(page.text.includes("BreadcrumbList")&&page.text.includes("<h1"),"Topic page needs descriptive heading and breadcrumb: "+path);
+  assert(!/<meta[^>]+name="robots"[^>]+noindex/i.test(page.text),"Topic page must remain indexable: "+path);
+  assert((page.headers.get("cache-control")||"").includes("no-store"),"Nonce-marked topic HTML must not be cached: "+path);
+ }
+ assert(home.text.includes('href="/pilates-class-pack-software"')&&home.text.includes('href="/studio-waitlist-management-software"'),
+  "New feature pages must be linked directly from indexable homepage content.");
+
  const yoga=await get("/yoga-studio-software");
  assert.equal(yoga.status,200);
  assert(canonical(yoga.text,"https://www.studiotasker.com/yoga-studio-software"),"Yoga canonical missing.");
@@ -107,7 +126,7 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const today=await get("/today"); assert.equal(today.status,308); assert((today.headers.get("location")||"").includes("/app-demo?tour=1"));
  const demo=await get("/demo"); assert.equal(demo.status,308); assert((demo.headers.get("location")||"").includes("/app-demo"));
  const missing=await get("/this-url-does-not-exist-seo-test"); assert.equal(missing.status,404);
- const sitemap=await get("/sitemap.xml"); assert.equal(sitemap.status,200); assert(sitemap.text.includes("/yoga-studio-software")); assert(!sitemap.text.includes("/app-demo")&&!sitemap.text.includes("/workspace")&&!sitemap.text.includes("/checkout"));
+ const sitemap=await get("/sitemap.xml"); assert.equal(sitemap.status,200); assert(sitemap.text.includes("/pilates-class-pack-software")&&sitemap.text.includes("/studio-waitlist-management-software"),"Sitemap must surface new keyword-specific landing pages."); assert(sitemap.text.includes("/yoga-studio-software")); assert(!sitemap.text.includes("/app-demo")&&!sitemap.text.includes("/workspace")&&!sitemap.text.includes("/checkout"));
  const robots=await get("/robots.txt"); assert.equal(robots.status,200); assert(["OAI-SearchBot","ChatGPT-User","GPTBot","PerplexityBot"].every(x=>robots.text.includes(x))); assert(!robots.text.includes("Disallow: /_next"));
  const llms=await get("/llms.txt"); assert.equal(llms.status,200); assert(llms.text.includes("# StudioTasker")&&llms.text.includes("USD 39.90/month"));
  console.log("SEO HTTP regression checks passed.");
