@@ -27,6 +27,7 @@ export type StudioLandingConfig={
  broaderFits:string[];
  faqLabel:string;
  faqs:[string,string][];
+ decisionGuide?:{title:string;summary:string;rows:{task:string;studioNeed:string;studioTasker:string}[];note:string};
 };
 
 const icons={calendar:CalendarDays,users:Users,clock:Clock3,activity:Activity,heart:HeartPulse,bike:Bike,dumbbell:Dumbbell,waves:Waves};
@@ -48,6 +49,8 @@ export function StudioTypeLanding({config}:{config:StudioLandingConfig}){
   <section className="mk-section white"><div className="mk-shell"><div className="mk-section-head"><div><span className="mk-kicker">THE DAILY WORK</span><h2>{config.dailyLine}<br/><em>{config.dailyEm}</em></h2></div><p>{config.dailyCopy}</p></div><div className="mk-grid">
    {config.cards.map(card=>{const Icon=icons[card.icon];return <article className="mk-card" key={card.title}><Icon size={27}/><h3>{card.title}</h3><p>{card.copy}</p></article>})}
   </div></div></section>
+
+  {config.decisionGuide&&<section className="mk-section" aria-label="Product capabilities and boundaries"><div className="mk-shell"><div className="mk-section-head"><div><span className="mk-kicker">STUDIO WORKFLOWS</span><h2>{config.decisionGuide.title}</h2></div><p>{config.decisionGuide.summary}</p></div><div style={{maxWidth:"100%",overflowX:"auto"}}><table className="mk-compare"><thead><tr><th scope="col">Daily task</th><th scope="col">What the studio needs</th><th scope="col">How StudioTasker helps</th></tr></thead><tbody>{config.decisionGuide.rows.map(row=><tr key={row.task}><th scope="row">{row.task}</th><td>{row.studioNeed}</td><td>{row.studioTasker}</td></tr>)}</tbody></table></div><p className="mk-note">{config.decisionGuide.note}</p></div></section>}
 
   <section className="mk-section"><div className="mk-shell"><div className="mk-section-head"><div><span className="mk-kicker">A GOOD FIT?</span><h2>{config.fitLine}<br/><em>{config.fitEm}</em></h2></div><p>{config.fitCopy}</p></div><div className="mk-fit">
    <article className="is-yes"><h3>StudioTasker is a strong fit if…</h3><ul>{config.strongFits.map(x=><li key={x}><CircleCheckBig size={18}/><span>{x}</span></li>)}</ul></article>
