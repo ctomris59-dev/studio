@@ -37,7 +37,7 @@ const config:StudioLandingConfig={
   ["Is this ballet studio software as well as dance studio software?","Yes, for day-to-day ballet school operations such as weekly class schedules, levels, instructors, student records and attendance. It does not handle ballet recital planning, costumes or competition entries."],
   ["Can dance teachers plan classes or choreography in StudioTasker?","Teachers can manage class schedules, assigned instructors and attendance. StudioTasker does not currently offer a curriculum builder, choreography editor or dedicated dance lesson-plan authoring."],
   ["Can I replace my student spreadsheet or basic dance studio database?","StudioTasker centralises student records, tags, notes, related contacts, attendance and studio-managed credits. It is not a full school information system or family tuition-billing platform."],
-  ["Is there a demo I can explore before signing up?","Yes. The interactive demo uses fictional studio data and does not require payment or a real student list. Paid production onboarding is not yet open."],
+  ["Is there a demo I can explore before signing up?","Yes. The interactive demo uses fictional studio data and does not require payment or a real student list. Check the current subscription availability on the plans page."],
   ["How much does it cost?","$39.90 USD/month per studio or $406.80 USD/year."]
  ]
 };
