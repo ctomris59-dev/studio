@@ -118,7 +118,7 @@ function canonical(html,url){const tags=html.match(/<link\b[^>]*>/gi)||[];return
  const dance=await get("/dance-studio-software");
  assert.equal(dance.status,200,"Dance studio landing must be available.");
  assert(canonical(dance.text,"https://www.studiotasker.com/dance-studio-software"),"Dance canonical missing.");
- assert(dance.text.includes("Dance studio software for independent schools and teachers"),"Dance page must explain the actual studio product and audience.");
+ assert(dance.text.includes("dance studio software for independent schools and teachers"),"Dance page must explain the actual studio product and audience.");
  assert(dance.text.includes("Is this ballet studio software")&&dance.text.includes("Can I replace my student spreadsheet"),"Dance page must answer relevant buyer questions.");
  assert(dance.text.includes("STUDIO WORKFLOWS")&&dance.text.includes("Teacher coordination")&&dance.text.includes("curriculum builder"),"Dance page must show real class use cases and unsupported features.");
  assert(dance.text.includes("FAQPage")&&dance.text.includes("BreadcrumbList"),"Dance metadata and FAQ must remain valid.");
